@@ -1,0 +1,30 @@
+# Build output
+bin/
+obj/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Rider / VS / VSCode
+.idea/
+.vs/
+.vscode/
+*.user
+*.suo
+
+# NuGet
+*.nupkg
+.nuget/
+
+# iOS / Xcode
+*.xcworkspace
+*.xcuserdata
+DerivedData/
+
+# Android
+*.apk
+*.idsig
+
+# Logs
+*.log
