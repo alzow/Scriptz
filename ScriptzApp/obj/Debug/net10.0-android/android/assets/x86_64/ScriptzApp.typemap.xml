@@ -1,0 +1,10 @@
+<api type="debug" assembly-name="ScriptzApp" mvid="4d50806939944db88413f30fa9bd2bce">
+  <java-to-managed>
+    <entry java-name="crc642fbfd82b7942be35/MainActivity" managed-name="ScriptzApp.MainActivity, ScriptzApp" managed-type-token-id="33554548" />
+    <entry java-name="crc642fbfd82b7942be35/MainApplication" managed-name="ScriptzApp.MainApplication, ScriptzApp" managed-type-token-id="33554549" />
+  </java-to-managed>
+  <managed-to-java>
+    <entry java-name="crc642fbfd82b7942be35/MainActivity" managed-name="ScriptzApp.MainActivity, ScriptzApp" managed-type-token-id="33554548" />
+    <entry java-name="crc642fbfd82b7942be35/MainApplication" managed-name="ScriptzApp.MainApplication, ScriptzApp" managed-type-token-id="33554549" />
+  </managed-to-java>
+</api>

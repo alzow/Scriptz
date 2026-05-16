@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Scriptz Design Tokens -->
+    <Color x:Key="Cream">#FAF6F1</Color>
+    <Color x:Key="CreamDark">#F2EBE0</Color>
+    <Color x:Key="CreamBorder">#E8DDD0</Color>
+    <Color x:Key="Orange">#E8621A</Color>
+    <Color x:Key="OrangeLight">#F4874A</Color>
+    <Color x:Key="OrangePale">#FDF0E8</Color>
+    <Color x:Key="Brown">#3D2314</Color>
+    <Color x:Key="BrownMid">#7A4A2E</Color>
+    <Color x:Key="BrownLight">#B07850</Color>
+    <Color x:Key="Green">#2D6A4F</Color>
+    <Color x:Key="GreenPale">#EAF4EE</Color>
+    <Color x:Key="Teal">#1A7A6E</Color>
+    <Color x:Key="TealPale">#E8F5F3</Color>
+    <Color x:Key="Red">#C0392B</Color>
+    <Color x:Key="RedPale">#FDECEA</Color>
+    <Color x:Key="Gold">#C8860A</Color>
+    <Color x:Key="GoldPale">#FDF6E3</Color>
+    <Color x:Key="White">#FFFFFF</Color>
+    <Color x:Key="TextDark">#2A1A0E</Color>
+    <Color x:Key="TextMid">#6B4C35</Color>
+    <Color x:Key="TextLight">#A0826A</Color>
+
+    <!-- Legacy aliases kept for framework compat -->
+    <Color x:Key="Primary">#E8621A</Color>
+    <Color x:Key="PrimaryDark">#B07850</Color>
+    <Color x:Key="PrimaryDarkText">#FAF6F1</Color>
+    <Color x:Key="Secondary">#F2EBE0</Color>
+    <Color x:Key="SecondaryDarkText">#7A4A2E</Color>
+    <Color x:Key="Tertiary">#3D2314</Color>
+    <Color x:Key="Black">#2A1A0E</Color>
+    <Color x:Key="OffBlack">#3D2314</Color>
+    <Color x:Key="MidnightBlue">#3D2314</Color>
+    <Color x:Key="Magenta">#E8621A</Color>
+
+    <Color x:Key="Gray50">#FAF6F1</Color>
+    <Color x:Key="Gray100">#F2EBE0</Color>
+    <Color x:Key="Gray200">#E8DDD0</Color>
+    <Color x:Key="Gray300">#D4C4B0</Color>
+    <Color x:Key="Gray400">#B07850</Color>
+    <Color x:Key="Gray500">#A0826A</Color>
+    <Color x:Key="Gray600">#7A4A2E</Color>
+    <Color x:Key="Gray700">#6B4C35</Color>
+    <Color x:Key="Gray900">#2A1A0E</Color>
+    <Color x:Key="Gray950">#1A0E07</Color>
+
+    <Color x:Key="Success">#2D6A4F</Color>
+    <Color x:Key="Warning">#C8860A</Color>
+    <Color x:Key="Error">#C0392B</Color>
+
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Orange}"/>
+    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource CreamDark}"/>
+    <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Brown}"/>
+    <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}"/>
+    <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource TextDark}"/>
+
+    <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{StaticResource Orange}" Offset="0"/>
+        <GradientStop Color="{StaticResource BrownMid}" Offset="1"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="BrownGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{StaticResource Brown}" Offset="0"/>
+        <GradientStop Color="{StaticResource BrownMid}" Offset="1"/>
+    </LinearGradientBrush>
+
+</ResourceDictionary>

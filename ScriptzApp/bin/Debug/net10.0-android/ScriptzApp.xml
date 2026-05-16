@@ -1,0 +1,686 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ScriptzApp</name>
+    </assembly>
+    <members>
+        <member name="T:ScriptzApp.Features.Auth.LoginPageViewModel">
+            <inheritdoc/>
+            <inheritdoc/>
+        </member>
+        <member name="F:ScriptzApp.Features.Auth.LoginPageViewModel.loginCommand">
+            <summary>The backing field for <see cref="P:ScriptzApp.Features.Auth.LoginPageViewModel.LoginCommand"/>.</summary>
+        </member>
+        <member name="P:ScriptzApp.Features.Auth.LoginPageViewModel.LoginCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:ScriptzApp.Features.Auth.LoginPageViewModel.LoginAsync"/>.</summary>
+        </member>
+        <member name="F:ScriptzApp.Features.Auth.LoginPageViewModel.navigateToRegisterCommand">
+            <summary>The backing field for <see cref="P:ScriptzApp.Features.Auth.LoginPageViewModel.NavigateToRegisterCommand"/>.</summary>
+        </member>
+        <member name="P:ScriptzApp.Features.Auth.LoginPageViewModel.NavigateToRegisterCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:ScriptzApp.Features.Auth.LoginPageViewModel.NavigateToRegisterAsync"/>.</summary>
+        </member>
+        <member name="T:ScriptzApp.Features.Auth.RegisterPageViewModel">
+            <inheritdoc/>
+            <inheritdoc/>
+        </member>
+        <member name="F:ScriptzApp.Features.Auth.RegisterPageViewModel.registerCommand">
+            <summary>The backing field for <see cref="P:ScriptzApp.Features.Auth.RegisterPageViewModel.RegisterCommand"/>.</summary>
+        </member>
+        <member name="P:ScriptzApp.Features.Auth.RegisterPageViewModel.RegisterCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:ScriptzApp.Features.Auth.RegisterPageViewModel.RegisterAsync"/>.</summary>
+        </member>
+        <member name="F:ScriptzApp.Features.Auth.RegisterPageViewModel.navigateToLoginCommand">
+            <summary>The backing field for <see cref="P:ScriptzApp.Features.Auth.RegisterPageViewModel.NavigateToLoginCommand"/>.</summary>
+        </member>
+        <member name="P:ScriptzApp.Features.Auth.RegisterPageViewModel.NavigateToLoginCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:ScriptzApp.Features.Auth.RegisterPageViewModel.NavigateToLoginAsync"/>.</summary>
+        </member>
+        <member name="T:ScriptzApp.Features.Dashboard.DashboardPageViewModel">
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+        </member>
+        <member name="P:ScriptzApp.Features.Dashboard.DashboardPageViewModel.WelcomeMessage">
+            <inheritdoc cref="F:ScriptzApp.Features.Dashboard.DashboardPageViewModel._welcomeMessage"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Dashboard.DashboardPageViewModel.BenefitRemainingText">
+            <inheritdoc cref="F:ScriptzApp.Features.Dashboard.DashboardPageViewModel._benefitRemainingText"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Dashboard.DashboardPageViewModel.BenefitUsedFraction">
+            <inheritdoc cref="F:ScriptzApp.Features.Dashboard.DashboardPageViewModel._benefitUsedFraction"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Dashboard.DashboardPageViewModel.BenefitSummaryText">
+            <inheritdoc cref="F:ScriptzApp.Features.Dashboard.DashboardPageViewModel._benefitSummaryText"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Dashboard.DashboardPageViewModel.HasUrgentMedication">
+            <inheritdoc cref="F:ScriptzApp.Features.Dashboard.DashboardPageViewModel._hasUrgentMedication"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Dashboard.DashboardPageViewModel.UrgentMedicationName">
+            <inheritdoc cref="F:ScriptzApp.Features.Dashboard.DashboardPageViewModel._urgentMedicationName"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Dashboard.DashboardPageViewModel.UrgentMedicationSubText">
+            <inheritdoc cref="F:ScriptzApp.Features.Dashboard.DashboardPageViewModel._urgentMedicationSubText"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Dashboard.DashboardPageViewModel.HasNoMedications">
+            <inheritdoc cref="F:ScriptzApp.Features.Dashboard.DashboardPageViewModel._hasNoMedications"/>
+        </member>
+        <member name="F:ScriptzApp.Features.Dashboard.DashboardPageViewModel.navigateToMedicationsCommand">
+            <summary>The backing field for <see cref="P:ScriptzApp.Features.Dashboard.DashboardPageViewModel.NavigateToMedicationsCommand"/>.</summary>
+        </member>
+        <member name="P:ScriptzApp.Features.Dashboard.DashboardPageViewModel.NavigateToMedicationsCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:ScriptzApp.Features.Dashboard.DashboardPageViewModel.NavigateToMedicationsAsync"/>.</summary>
+        </member>
+        <member name="F:ScriptzApp.Features.Dashboard.DashboardPageViewModel.navigateToPrescriptionsCommand">
+            <summary>The backing field for <see cref="P:ScriptzApp.Features.Dashboard.DashboardPageViewModel.NavigateToPrescriptionsCommand"/>.</summary>
+        </member>
+        <member name="P:ScriptzApp.Features.Dashboard.DashboardPageViewModel.NavigateToPrescriptionsCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:ScriptzApp.Features.Dashboard.DashboardPageViewModel.NavigateToPrescriptionsAsync"/>.</summary>
+        </member>
+        <member name="F:ScriptzApp.Features.Dashboard.DashboardPageViewModel.navigateToRemindersCommand">
+            <summary>The backing field for <see cref="P:ScriptzApp.Features.Dashboard.DashboardPageViewModel.NavigateToRemindersCommand"/>.</summary>
+        </member>
+        <member name="P:ScriptzApp.Features.Dashboard.DashboardPageViewModel.NavigateToRemindersCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:ScriptzApp.Features.Dashboard.DashboardPageViewModel.NavigateToRemindersAsync"/>.</summary>
+        </member>
+        <member name="F:ScriptzApp.Features.Dashboard.DashboardPageViewModel.navigateToProfileCommand">
+            <summary>The backing field for <see cref="P:ScriptzApp.Features.Dashboard.DashboardPageViewModel.NavigateToProfileCommand"/>.</summary>
+        </member>
+        <member name="P:ScriptzApp.Features.Dashboard.DashboardPageViewModel.NavigateToProfileCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:ScriptzApp.Features.Dashboard.DashboardPageViewModel.NavigateToProfileAsync"/>.</summary>
+        </member>
+        <member name="F:ScriptzApp.Features.Dashboard.DashboardPageViewModel.logoutCommand">
+            <summary>The backing field for <see cref="P:ScriptzApp.Features.Dashboard.DashboardPageViewModel.LogoutCommand"/>.</summary>
+        </member>
+        <member name="P:ScriptzApp.Features.Dashboard.DashboardPageViewModel.LogoutCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:ScriptzApp.Features.Dashboard.DashboardPageViewModel.LogoutAsync"/>.</summary>
+        </member>
+        <member name="T:ScriptzApp.Features.Medications.MedicationDetailPageViewModel">
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+        </member>
+        <member name="F:ScriptzApp.Features.Medications.MedicationDetailPageViewModel.setRefillDaysCommand">
+            <summary>The backing field for <see cref="P:ScriptzApp.Features.Medications.MedicationDetailPageViewModel.SetRefillDaysCommand"/>.</summary>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationDetailPageViewModel.SetRefillDaysCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IRelayCommand`1"/> instance wrapping <see cref="M:ScriptzApp.Features.Medications.MedicationDetailPageViewModel.SetRefillDays(System.String)"/>.</summary>
+        </member>
+        <member name="F:ScriptzApp.Features.Medications.MedicationDetailPageViewModel.saveCommand">
+            <summary>The backing field for <see cref="P:ScriptzApp.Features.Medications.MedicationDetailPageViewModel.SaveCommand"/>.</summary>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationDetailPageViewModel.SaveCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:ScriptzApp.Features.Medications.MedicationDetailPageViewModel.SaveAsync"/>.</summary>
+        </member>
+        <member name="F:ScriptzApp.Features.Medications.MedicationDetailPageViewModel.deleteMedicationCommand">
+            <summary>The backing field for <see cref="P:ScriptzApp.Features.Medications.MedicationDetailPageViewModel.DeleteMedicationCommand"/>.</summary>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationDetailPageViewModel.DeleteMedicationCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:ScriptzApp.Features.Medications.MedicationDetailPageViewModel.DeleteMedicationAsync"/>.</summary>
+        </member>
+        <member name="F:ScriptzApp.Features.Medications.MedicationDetailPageViewModel.cancelCommand">
+            <summary>The backing field for <see cref="P:ScriptzApp.Features.Medications.MedicationDetailPageViewModel.CancelCommand"/>.</summary>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationDetailPageViewModel.CancelCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:ScriptzApp.Features.Medications.MedicationDetailPageViewModel.CancelAsync"/>.</summary>
+        </member>
+        <member name="T:ScriptzApp.Features.Medications.MedicationsListPageViewModel">
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.IsActiveTab">
+            <inheritdoc cref="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel._isActiveTab"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.IsSubmitTab">
+            <inheritdoc cref="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel._isSubmitTab"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.IsHistoryTab">
+            <inheritdoc cref="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel._isHistoryTab"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.ActiveTabBg">
+            <inheritdoc cref="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel._activeTabBg"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.ActiveTabTextColor">
+            <inheritdoc cref="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel._activeTabTextColor"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.ActiveTabFontAttr">
+            <inheritdoc cref="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel._activeTabFontAttr"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.SubmitTabBg">
+            <inheritdoc cref="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel._submitTabBg"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.SubmitTabTextColor">
+            <inheritdoc cref="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel._submitTabTextColor"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.SubmitTabFontAttr">
+            <inheritdoc cref="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel._submitTabFontAttr"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.HistoryTabBg">
+            <inheritdoc cref="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel._historyTabBg"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.HistoryTabTextColor">
+            <inheritdoc cref="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel._historyTabTextColor"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.HistoryTabFontAttr">
+            <inheritdoc cref="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel._historyTabFontAttr"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.HasNoActiveScripts">
+            <inheritdoc cref="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel._hasNoActiveScripts"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.HasNoHistory">
+            <inheritdoc cref="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel._hasNoHistory"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.IsRefreshing">
+            <inheritdoc cref="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel._isRefreshing"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.PatientName">
+            <inheritdoc cref="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel._patientName"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.DoctorName">
+            <inheritdoc cref="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel._doctorName"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.MedicationNotes">
+            <inheritdoc cref="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel._medicationNotes"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.PharmacyNotes">
+            <inheritdoc cref="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel._pharmacyNotes"/>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.DeliveryAddress">
+            <inheritdoc cref="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel._deliveryAddress"/>
+        </member>
+        <member name="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel.selectTabCommand">
+            <summary>The backing field for <see cref="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.SelectTabCommand"/>.</summary>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.SelectTabCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IRelayCommand`1"/> instance wrapping <see cref="M:ScriptzApp.Features.Medications.MedicationsListPageViewModel.SelectTab(System.String)"/>.</summary>
+        </member>
+        <member name="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel.loadMedicationsCommand">
+            <summary>The backing field for <see cref="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.LoadMedicationsCommand"/>.</summary>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.LoadMedicationsCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:ScriptzApp.Features.Medications.MedicationsListPageViewModel.LoadMedicationsAsync"/>.</summary>
+        </member>
+        <member name="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel.refreshCommand">
+            <summary>The backing field for <see cref="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.RefreshCommand"/>.</summary>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.RefreshCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:ScriptzApp.Features.Medications.MedicationsListPageViewModel.RefreshAsync"/>.</summary>
+        </member>
+        <member name="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel.addMedicationCommand">
+            <summary>The backing field for <see cref="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.AddMedicationCommand"/>.</summary>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.AddMedicationCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:ScriptzApp.Features.Medications.MedicationsListPageViewModel.AddMedicationAsync"/>.</summary>
+        </member>
+        <member name="F:ScriptzApp.Features.Medications.MedicationsListPageViewModel.viewMedicationCommand">
+            <summary>The backing field for <see cref="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.ViewMedicationCommand"/>.</summary>
+        </member>
+        <member name="P:ScriptzApp.Features.Medications.MedicationsListPageViewModel.ViewMedicationCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand`1"/> instance wrapping <see cref="M:ScriptzApp.Features.Medications.MedicationsListPageViewModel.ViewMedicationAsync(ScriptzApp.Features.Medications.MedicationDisplayModel)"/>.</summary>
+        </member>
+        <member name="T:ScriptzApp.Services.Stubs.StubApiService">
+            <summary>
+            Wraps StubScriptzApi behind IApiService so ViewModels resolve identically
+            regardless of whether the real Refit client or the stub is registered.
+            </summary>
+        </member>
+        <member name="T:ScriptzApp.Services.Stubs.StubAuthService">
+            <summary>
+            Stub auth service. Accepts any non-empty credentials and persists a fake
+            token to SecureStorage so IsAuthenticatedAsync() works correctly.
+            </summary>
+        </member>
+        <member name="T:ScriptzApp.Services.Stubs.StubScriptzApi">
+            <summary>
+            In-memory stub that mirrors the prototype data so the UI can be fully tested
+            without a running backend. Registered instead of the real Refit client in DEBUG builds.
+            </summary>
+        </member>
+        <member name="T:ScriptzApp.Resource">
+            <summary>
+            Android Resource Designer class.
+            Exposes the Android Resource designer assembly into the project Namespace.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Maui.Controls.ColorAnimationExtensions_Button.TextColorTo(Microsoft.Maui.Controls.Button,Microsoft.Maui.Graphics.Color,System.UInt32,System.UInt32,Microsoft.Maui.Easing,System.Threading.CancellationToken)">
+            <summary>
+            Animates the TextColor of an <see cref = "T:Microsoft.Maui.ITextStyle"/> to the given color
+            </summary>
+            <param name = "element"></param>
+            <param name = "color">The target color to animate the <see cref = "P:Microsoft.Maui.ITextStyle.TextColor"/> to</param>
+            <param name = "rate">The time, in milliseconds, between the frames of the animation</param>
+            <param name = "length">The duration, in milliseconds, of the animation</param>
+            <param name = "easing">The easing function to be used in the animation</param>
+            <param name = "token"><see cref = "T:System.Threading.CancellationToken"/></param>
+            <returns>Value indicating if the animation completed successfully or not</returns>
+        </member>
+        <member name="M:Microsoft.Maui.Controls.ColorAnimationExtensions_DatePicker.TextColorTo(Microsoft.Maui.Controls.DatePicker,Microsoft.Maui.Graphics.Color,System.UInt32,System.UInt32,Microsoft.Maui.Easing,System.Threading.CancellationToken)">
+            <summary>
+            Animates the TextColor of an <see cref = "T:Microsoft.Maui.ITextStyle"/> to the given color
+            </summary>
+            <param name = "element"></param>
+            <param name = "color">The target color to animate the <see cref = "P:Microsoft.Maui.ITextStyle.TextColor"/> to</param>
+            <param name = "rate">The time, in milliseconds, between the frames of the animation</param>
+            <param name = "length">The duration, in milliseconds, of the animation</param>
+            <param name = "easing">The easing function to be used in the animation</param>
+            <param name = "token"><see cref = "T:System.Threading.CancellationToken"/></param>
+            <returns>Value indicating if the animation completed successfully or not</returns>
+        </member>
+        <member name="M:Microsoft.Maui.Controls.ColorAnimationExtensions_Editor.TextColorTo(Microsoft.Maui.Controls.Editor,Microsoft.Maui.Graphics.Color,System.UInt32,System.UInt32,Microsoft.Maui.Easing,System.Threading.CancellationToken)">
+            <summary>
+            Animates the TextColor of an <see cref = "T:Microsoft.Maui.ITextStyle"/> to the given color
+            </summary>
+            <param name = "element"></param>
+            <param name = "color">The target color to animate the <see cref = "P:Microsoft.Maui.ITextStyle.TextColor"/> to</param>
+            <param name = "rate">The time, in milliseconds, between the frames of the animation</param>
+            <param name = "length">The duration, in milliseconds, of the animation</param>
+            <param name = "easing">The easing function to be used in the animation</param>
+            <param name = "token"><see cref = "T:System.Threading.CancellationToken"/></param>
+            <returns>Value indicating if the animation completed successfully or not</returns>
+        </member>
+        <member name="M:Microsoft.Maui.Controls.ColorAnimationExtensions_Entry.TextColorTo(Microsoft.Maui.Controls.Entry,Microsoft.Maui.Graphics.Color,System.UInt32,System.UInt32,Microsoft.Maui.Easing,System.Threading.CancellationToken)">
+            <summary>
+            Animates the TextColor of an <see cref = "T:Microsoft.Maui.ITextStyle"/> to the given color
+            </summary>
+            <param name = "element"></param>
+            <param name = "color">The target color to animate the <see cref = "P:Microsoft.Maui.ITextStyle.TextColor"/> to</param>
+            <param name = "rate">The time, in milliseconds, between the frames of the animation</param>
+            <param name = "length">The duration, in milliseconds, of the animation</param>
+            <param name = "easing">The easing function to be used in the animation</param>
+            <param name = "token"><see cref = "T:System.Threading.CancellationToken"/></param>
+            <returns>Value indicating if the animation completed successfully or not</returns>
+        </member>
+        <member name="M:Microsoft.Maui.Controls.ColorAnimationExtensions_InputView.TextColorTo(Microsoft.Maui.Controls.InputView,Microsoft.Maui.Graphics.Color,System.UInt32,System.UInt32,Microsoft.Maui.Easing,System.Threading.CancellationToken)">
+            <summary>
+            Animates the TextColor of an <see cref = "T:Microsoft.Maui.ITextStyle"/> to the given color
+            </summary>
+            <param name = "element"></param>
+            <param name = "color">The target color to animate the <see cref = "P:Microsoft.Maui.ITextStyle.TextColor"/> to</param>
+            <param name = "rate">The time, in milliseconds, between the frames of the animation</param>
+            <param name = "length">The duration, in milliseconds, of the animation</param>
+            <param name = "easing">The easing function to be used in the animation</param>
+            <param name = "token"><see cref = "T:System.Threading.CancellationToken"/></param>
+            <returns>Value indicating if the animation completed successfully or not</returns>
+        </member>
+        <member name="M:Microsoft.Maui.Controls.ColorAnimationExtensions_Label.TextColorTo(Microsoft.Maui.Controls.Label,Microsoft.Maui.Graphics.Color,System.UInt32,System.UInt32,Microsoft.Maui.Easing,System.Threading.CancellationToken)">
+            <summary>
+            Animates the TextColor of an <see cref = "T:Microsoft.Maui.ITextStyle"/> to the given color
+            </summary>
+            <param name = "element"></param>
+            <param name = "color">The target color to animate the <see cref = "P:Microsoft.Maui.ITextStyle.TextColor"/> to</param>
+            <param name = "rate">The time, in milliseconds, between the frames of the animation</param>
+            <param name = "length">The duration, in milliseconds, of the animation</param>
+            <param name = "easing">The easing function to be used in the animation</param>
+            <param name = "token"><see cref = "T:System.Threading.CancellationToken"/></param>
+            <returns>Value indicating if the animation completed successfully or not</returns>
+        </member>
+        <member name="M:Microsoft.Maui.Controls.ColorAnimationExtensions_Picker.TextColorTo(Microsoft.Maui.Controls.Picker,Microsoft.Maui.Graphics.Color,System.UInt32,System.UInt32,Microsoft.Maui.Easing,System.Threading.CancellationToken)">
+            <summary>
+            Animates the TextColor of an <see cref = "T:Microsoft.Maui.ITextStyle"/> to the given color
+            </summary>
+            <param name = "element"></param>
+            <param name = "color">The target color to animate the <see cref = "P:Microsoft.Maui.ITextStyle.TextColor"/> to</param>
+            <param name = "rate">The time, in milliseconds, between the frames of the animation</param>
+            <param name = "length">The duration, in milliseconds, of the animation</param>
+            <param name = "easing">The easing function to be used in the animation</param>
+            <param name = "token"><see cref = "T:System.Threading.CancellationToken"/></param>
+            <returns>Value indicating if the animation completed successfully or not</returns>
+        </member>
+        <member name="M:Microsoft.Maui.Controls.ColorAnimationExtensions_RadioButton.TextColorTo(Microsoft.Maui.Controls.RadioButton,Microsoft.Maui.Graphics.Color,System.UInt32,System.UInt32,Microsoft.Maui.Easing,System.Threading.CancellationToken)">
+            <summary>
+            Animates the TextColor of an <see cref = "T:Microsoft.Maui.ITextStyle"/> to the given color
+            </summary>
+            <param name = "element"></param>
+            <param name = "color">The target color to animate the <see cref = "P:Microsoft.Maui.ITextStyle.TextColor"/> to</param>
+            <param name = "rate">The time, in milliseconds, between the frames of the animation</param>
+            <param name = "length">The duration, in milliseconds, of the animation</param>
+            <param name = "easing">The easing function to be used in the animation</param>
+            <param name = "token"><see cref = "T:System.Threading.CancellationToken"/></param>
+            <returns>Value indicating if the animation completed successfully or not</returns>
+        </member>
+        <member name="M:Microsoft.Maui.Controls.ColorAnimationExtensions_SearchBar.TextColorTo(Microsoft.Maui.Controls.SearchBar,Microsoft.Maui.Graphics.Color,System.UInt32,System.UInt32,Microsoft.Maui.Easing,System.Threading.CancellationToken)">
+            <summary>
+            Animates the TextColor of an <see cref = "T:Microsoft.Maui.ITextStyle"/> to the given color
+            </summary>
+            <param name = "element"></param>
+            <param name = "color">The target color to animate the <see cref = "P:Microsoft.Maui.ITextStyle.TextColor"/> to</param>
+            <param name = "rate">The time, in milliseconds, between the frames of the animation</param>
+            <param name = "length">The duration, in milliseconds, of the animation</param>
+            <param name = "easing">The easing function to be used in the animation</param>
+            <param name = "token"><see cref = "T:System.Threading.CancellationToken"/></param>
+            <returns>Value indicating if the animation completed successfully or not</returns>
+        </member>
+        <member name="M:Microsoft.Maui.Controls.ColorAnimationExtensions_TimePicker.TextColorTo(Microsoft.Maui.Controls.TimePicker,Microsoft.Maui.Graphics.Color,System.UInt32,System.UInt32,Microsoft.Maui.Easing,System.Threading.CancellationToken)">
+            <summary>
+            Animates the TextColor of an <see cref = "T:Microsoft.Maui.ITextStyle"/> to the given color
+            </summary>
+            <param name = "element"></param>
+            <param name = "color">The target color to animate the <see cref = "P:Microsoft.Maui.ITextStyle.TextColor"/> to</param>
+            <param name = "rate">The time, in milliseconds, between the frames of the animation</param>
+            <param name = "length">The duration, in milliseconds, of the animation</param>
+            <param name = "easing">The easing function to be used in the animation</param>
+            <param name = "token"><see cref = "T:System.Threading.CancellationToken"/></param>
+            <returns>Value indicating if the animation completed successfully or not</returns>
+        </member>
+        <member name="T:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs">
+            <summary>
+            A helper type providing cached, reusable <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instances
+            for all properties generated with <see cref="T:CommunityToolkit.Mvvm.ComponentModel.ObservablePropertyAttribute"/>.
+            </summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.WelcomeMessage">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "WelcomeMessage" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.BenefitRemainingText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "BenefitRemainingText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.BenefitUsedFraction">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "BenefitUsedFraction" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.BenefitSummaryText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "BenefitSummaryText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.HasUrgentMedication">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "HasUrgentMedication" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.UrgentMedicationName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "UrgentMedicationName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.UrgentMedicationSubText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "UrgentMedicationSubText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.HasNoMedications">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "HasNoMedications" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsActiveTab">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsActiveTab" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsSubmitTab">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsSubmitTab" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsHistoryTab">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsHistoryTab" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.ActiveTabBg">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "ActiveTabBg" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.ActiveTabTextColor">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "ActiveTabTextColor" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.ActiveTabFontAttr">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "ActiveTabFontAttr" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SubmitTabBg">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SubmitTabBg" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SubmitTabTextColor">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SubmitTabTextColor" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SubmitTabFontAttr">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SubmitTabFontAttr" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.HistoryTabBg">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "HistoryTabBg" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.HistoryTabTextColor">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "HistoryTabTextColor" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.HistoryTabFontAttr">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "HistoryTabFontAttr" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.HasNoActiveScripts">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "HasNoActiveScripts" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.HasNoHistory">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "HasNoHistory" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsRefreshing">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsRefreshing" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.PatientName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "PatientName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.DoctorName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "DoctorName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.MedicationNotes">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "MedicationNotes" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.PharmacyNotes">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "PharmacyNotes" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.DeliveryAddress">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "DeliveryAddress" generated properties.</summary>
+        </member>
+        <member name="T:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs">
+            <summary>
+            A helper type providing cached, reusable <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instances
+            for all properties generated with <see cref="T:CommunityToolkit.Mvvm.ComponentModel.ObservablePropertyAttribute"/>.
+            </summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.WelcomeMessage">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "WelcomeMessage" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.BenefitRemainingText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "BenefitRemainingText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.BenefitUsedFraction">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "BenefitUsedFraction" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.BenefitSummaryText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "BenefitSummaryText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.HasUrgentMedication">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "HasUrgentMedication" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.UrgentMedicationName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "UrgentMedicationName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.UrgentMedicationSubText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "UrgentMedicationSubText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.HasNoMedications">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "HasNoMedications" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsActiveTab">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsActiveTab" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsSubmitTab">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsSubmitTab" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsHistoryTab">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsHistoryTab" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.ActiveTabBg">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "ActiveTabBg" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.ActiveTabTextColor">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "ActiveTabTextColor" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.ActiveTabFontAttr">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "ActiveTabFontAttr" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SubmitTabBg">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SubmitTabBg" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SubmitTabTextColor">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SubmitTabTextColor" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SubmitTabFontAttr">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SubmitTabFontAttr" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.HistoryTabBg">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "HistoryTabBg" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.HistoryTabTextColor">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "HistoryTabTextColor" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.HistoryTabFontAttr">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "HistoryTabFontAttr" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.HasNoActiveScripts">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "HasNoActiveScripts" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.HasNoHistory">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "HasNoHistory" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsRefreshing">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsRefreshing" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.PatientName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "PatientName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.DoctorName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "DoctorName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.MedicationNotes">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "MedicationNotes" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.PharmacyNotes">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "PharmacyNotes" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.DeliveryAddress">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "DeliveryAddress" generated properties.</summary>
+        </member>
+        <member name="T:Refit.Implementation.Generated">
+            <inheritdoc />
+        </member>
+        <member name="T:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi">
+            <inheritdoc />
+        </member>
+        <member name="P:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.Client">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.#ctor(System.Net.Http.HttpClient,Refit.IRequestBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.LoginAsync(ScriptzApp.Models.Api.Requests.LoginRequest)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.RegisterAsync(ScriptzApp.Models.Api.Requests.RegisterRequest)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.RefreshTokenAsync(ScriptzApp.Models.Api.Requests.RefreshTokenRequest)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.GetMedicationsAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.GetMedicationByIdAsync(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.CreateMedicationAsync(ScriptzApp.Models.Api.Requests.CreateMedicationRequest)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.UpdateMedicationAsync(System.String,ScriptzApp.Models.Api.Requests.UpdateMedicationRequest)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.DeleteMedicationAsync(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.GetPrescriptionsAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.GetPrescriptionByIdAsync(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.CreatePrescriptionAsync(ScriptzApp.Models.Api.Requests.CreatePrescriptionRequest)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.UpdatePrescriptionAsync(System.String,ScriptzApp.Models.Api.Requests.UpdatePrescriptionRequest)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.DeletePrescriptionAsync(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.GetRemindersAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.GetRemindersByMedicationAsync(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.CreateReminderAsync(ScriptzApp.Models.Api.Requests.CreateReminderRequest)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.UpdateReminderAsync(System.String,ScriptzApp.Models.Api.Requests.UpdateReminderRequest)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.DeleteReminderAsync(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.GetProfileAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.UpdateProfileAsync(ScriptzApp.Models.Api.Requests.UpdateProfileRequest)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.ScriptzApp#Services#Api#IScriptzApi#LoginAsync(ScriptzApp.Models.Api.Requests.LoginRequest)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.ScriptzApp#Services#Api#IScriptzApi#RegisterAsync(ScriptzApp.Models.Api.Requests.RegisterRequest)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.ScriptzApp#Services#Api#IScriptzApi#RefreshTokenAsync(ScriptzApp.Models.Api.Requests.RefreshTokenRequest)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.ScriptzApp#Services#Api#IScriptzApi#GetMedicationsAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.ScriptzApp#Services#Api#IScriptzApi#GetMedicationByIdAsync(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.ScriptzApp#Services#Api#IScriptzApi#CreateMedicationAsync(ScriptzApp.Models.Api.Requests.CreateMedicationRequest)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.ScriptzApp#Services#Api#IScriptzApi#UpdateMedicationAsync(System.String,ScriptzApp.Models.Api.Requests.UpdateMedicationRequest)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.ScriptzApp#Services#Api#IScriptzApi#DeleteMedicationAsync(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.ScriptzApp#Services#Api#IScriptzApi#GetPrescriptionsAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.ScriptzApp#Services#Api#IScriptzApi#GetPrescriptionByIdAsync(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.ScriptzApp#Services#Api#IScriptzApi#CreatePrescriptionAsync(ScriptzApp.Models.Api.Requests.CreatePrescriptionRequest)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.ScriptzApp#Services#Api#IScriptzApi#UpdatePrescriptionAsync(System.String,ScriptzApp.Models.Api.Requests.UpdatePrescriptionRequest)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.ScriptzApp#Services#Api#IScriptzApi#DeletePrescriptionAsync(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.ScriptzApp#Services#Api#IScriptzApi#GetRemindersAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.ScriptzApp#Services#Api#IScriptzApi#GetRemindersByMedicationAsync(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.ScriptzApp#Services#Api#IScriptzApi#CreateReminderAsync(ScriptzApp.Models.Api.Requests.CreateReminderRequest)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.ScriptzApp#Services#Api#IScriptzApi#UpdateReminderAsync(System.String,ScriptzApp.Models.Api.Requests.UpdateReminderRequest)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.ScriptzApp#Services#Api#IScriptzApi#DeleteReminderAsync(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.ScriptzApp#Services#Api#IScriptzApi#GetProfileAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:Refit.Implementation.Generated.ScriptzAppServicesApiIScriptzApi.ScriptzApp#Services#Api#IScriptzApi#UpdateProfileAsync(ScriptzApp.Models.Api.Requests.UpdateProfileRequest)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>
