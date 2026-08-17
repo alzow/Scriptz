@@ -2,17 +2,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ScriptzApp.Constants;
 using ScriptzApp.Framework.Base;
-using ScriptzApp.Models.Api.Responses;
 using ScriptzApp.Services.Storage;
-using ScriptzApp.Services.Api;
 using System.Collections.ObjectModel;
 
 namespace ScriptzApp.Features.Medications;
 
 public partial class MedicationsListPageViewModel : BaseViewModel
 {
-    private readonly IApiService _apiService;
-
     // ── Tab state ──────────────────────────────────────────────────────────────
     private string _selectedTab = "active";
 
@@ -56,11 +52,9 @@ public partial class MedicationsListPageViewModel : BaseViewModel
 
     public MedicationsListPageViewModel(
         INavigationService navigationService,
-        ISecureStorageService secureStorageService,
-        IApiService apiService)
+        ISecureStorageService secureStorageService)
         : base(navigationService, secureStorageService)
     {
-        _apiService = apiService;
         Title = "My Scripts";
     }
 
@@ -95,64 +89,28 @@ public partial class MedicationsListPageViewModel : BaseViewModel
         HistoryTabFontAttr = _selectedTab == "history" ? FontAttributes.Bold : FontAttributes.None;
     }
 
+    // Placeholder data until the Queue/pharmacy backend is wired up.
     [RelayCommand]
-    private async Task LoadMedicationsAsync()
+    private Task LoadMedicationsAsync()
     {
-        await ExecuteAsync(async () =>
+        return ExecuteAsync(() =>
         {
-            try
-            {
-                var medications = await _apiService.Api.GetMedicationsAsync();
+            ActiveScripts.Clear();
+            DeliveredScripts.Clear();
+            Medications.Clear();
 
-                ActiveScripts.Clear();
-                DeliveredScripts.Clear();
-                Medications.Clear();
+            ActiveScripts.Add(ScriptDisplayModel.Demo("Metformin 500mg", "60 tabs · RX-2401", "Ready"));
+            ActiveScripts.Add(ScriptDisplayModel.Demo("Lisinopril 10mg", "30 tabs · RX-2398", "Processing"));
+            DeliveredScripts.Add(ScriptDisplayModel.Demo("Atorvastatin 20mg", "30 tabs · RX-2390", "Delivered"));
 
-                if (medications != null)
-                {
-                    foreach (var med in medications.OrderBy(m => m.Name))
-                    {
-                        var daysLeft = 30 - (DateTime.Now - med.StartDate).Days % 30;
-                        var status = daysLeft <= 3 ? "Ready" : "Processing";
+            ActiveCount = ActiveScripts.Count;
+            ChronicCount = ActiveScripts.Count;
+            RefillsDueCount = ActiveScripts.Count(s => s.IsReady);
 
-                        var script = new ScriptDisplayModel
-                        {
-                            Id = med.Id,
-                            Name = med.Name,
-                            QuantityAndRef = $"{med.Dosage} · RX-{med.Id}",
-                            RefillsText = "3 refills remaining",
-                            Status = med.IsActive ? status : "Delivered",
-                            IsReady = med.IsActive && daysLeft <= 3,
-                            IsProcessing = med.IsActive && daysLeft > 3,
-                        };
-                        script.ApplyStatusColors();
+            HasNoActiveScripts = !ActiveScripts.Any();
+            HasNoHistory = !DeliveredScripts.Any();
 
-                        if (med.IsActive)
-                            ActiveScripts.Add(script);
-                        else
-                            DeliveredScripts.Add(script);
-
-                        Medications.Add(new MedicationDisplayModel(med));
-                    }
-
-                    ActiveCount = medications.Count(m => m.IsActive);
-                    ChronicCount = medications.Count(m => m.IsActive);
-                    RefillsDueCount = ActiveScripts.Count(s => s.IsReady);
-                }
-
-                HasNoActiveScripts = !ActiveScripts.Any();
-                HasNoHistory = !DeliveredScripts.Any();
-            }
-            catch (Exception ex)
-            {
-                // Demo fallback
-                ActiveScripts.Add(ScriptDisplayModel.Demo("Metformin 500mg", "60 tabs · RX-2401", "Ready"));
-                ActiveScripts.Add(ScriptDisplayModel.Demo("Lisinopril 10mg", "30 tabs · RX-2398", "Processing"));
-                DeliveredScripts.Add(ScriptDisplayModel.Demo("Atorvastatin 20mg", "30 tabs · RX-2390", "Delivered"));
-                HasNoActiveScripts = false;
-                HasNoHistory = false;
-                System.Diagnostics.Debug.WriteLine($"Scripts load error: {ex.Message}");
-            }
+            return Task.CompletedTask;
         });
     }
 
@@ -266,23 +224,13 @@ public class ScriptDisplayModel
     }
 }
 
-public class MedicationDisplayModel : MedicationResponse
+public class MedicationDisplayModel
 {
-    public MedicationDisplayModel(MedicationResponse response)
-    {
-        Id = response.Id;
-        Name = response.Name;
-        GenericName = response.GenericName;
-        Dosage = response.Dosage;
-        Form = response.Form;
-        Frequency = response.Frequency;
-        Instructions = response.Instructions;
-        StartDate = response.StartDate;
-        EndDate = response.EndDate;
-        IsActive = response.IsActive;
-        CreatedAt = response.CreatedAt;
-        UpdatedAt = response.UpdatedAt;
-    }
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Dosage { get; set; } = string.Empty;
+    public DateTime StartDate { get; set; }
+    public bool IsActive { get; set; }
 
     public string SubText => $"{Dosage} · Laxmi Pharmacy";
     public string Status => IsActive ? "Ready" : "Delivered";

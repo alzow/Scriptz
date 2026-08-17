@@ -3,9 +3,11 @@ using MPowerKit.Navigation;
 using MPowerKit.Navigation.Utilities;
 using ScriptzApp.Constants;
 using ScriptzApp.Services.Api;
+using ScriptzApp.Services.Api.Queue;
 using ScriptzApp.Services.Auth;
 using ScriptzApp.Services.Storage;
 using ScriptzApp.Services.Popup;
+using ScriptzApp.Services.Realtime;
 using CommunityToolkit.Mvvm.Messaging;
 #if USE_STUBS
 using ScriptzApp.Services.Stubs;
@@ -57,11 +59,14 @@ internal static class NavigationStartup
 
     private static void RegisterApiServices(IServiceCollection services)
     {
-#if USE_STUBS
-        services.AddSingleton<IAuthService, StubAuthService>();
-        services.AddSingleton<IApiService, StubApiService>();
-#else
         services.AddSingleton<IAuthService, AuthService>();
+
+#if USE_STUBS
+        services.AddSingleton<IQueueService, StubQueueService>();
+        services.AddSingleton<IQueueRealtimeService, StubQueueRealtimeService>();
+#else
+        services.AddSingleton<IQueueService, QueueService>();
+        services.AddSingleton<IQueueRealtimeService, QueueRealtimeService>();
         services.ConfigureRefitApi();
 #endif
     }

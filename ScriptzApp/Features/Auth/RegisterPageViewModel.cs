@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.Input;
 using ScriptzApp.Constants;
 using ScriptzApp.Framework.Base;
-using ScriptzApp.Models.Api.Requests;
 using ScriptzApp.Services.Auth;
 using ScriptzApp.Services.Storage;
 using ScriptzApp.Services.Popup;
@@ -54,29 +53,13 @@ public partial class RegisterPageViewModel : BaseViewModel
             return;
         }
 
+        // TODO (Step 5): replace with Supabase phone-OTP sign-up. For now this just
+        // stores a placeholder session so downstream screens have a token to send.
         await ExecuteAsync(async () =>
         {
-            var request = new RegisterRequest
-            {
-                FirstName = FirstName.Trim(),
-                LastName = LastName.Trim(),
-                PhoneNumber = PhoneNumber.Trim(),
-                Email = Email.Trim(),
-                Password = Password,
-                ConfirmPassword = ConfirmPassword
-            };
-
-            var result = await _authService.RegisterAsync(request);
-
-            if (result != null)
-            {
-                await _popupService.ShowAlertAsync("Success", "Account created successfully!");
-                await NavigationService.NavigateAsync(NavigationPaths.Dashboard);
-            }
-            else
-            {
-                await _popupService.ShowAlertAsync("Registration Failed", "Unable to create account. Please try again.");
-            }
+            await _authService.SetSessionAsync("placeholder-token", null);
+            await _popupService.ShowAlertAsync("Success", "Account created successfully!");
+            await NavigationService.NavigateAsync(NavigationPaths.Dashboard);
         });
     }
 

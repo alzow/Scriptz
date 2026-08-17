@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:ScriptzApp.Features.Queue"
+             xmlns:responses="clr-namespace:ScriptzApp.Services.Api.Queue.Models"
+             x:Name="Root"
+             x:Class="ScriptzApp.Features.Queue.BarberQueuePage"
+             x:DataType="vm:BarberQueuePageViewModel"
+             Title="Queue"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource Cream}">
+
+    <Grid>
+        <ScrollView Orientation="Horizontal" Padding="16">
+            <CollectionView ItemsSource="{Binding Columns}"
+                             ItemsLayout="HorizontalList">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:OperatorColumn">
+                        <Border StrokeShape="RoundRectangle 16"
+                                BackgroundColor="{StaticResource White}"
+                                Stroke="{StaticResource CreamBorder}"
+                                StrokeThickness="1.5"
+                                Margin="8" Padding="16" WidthRequest="300">
+                            <VerticalStackLayout Spacing="12">
+
+                                <Label Text="{Binding Operator.DisplayName}"
+                                       FontSize="20" FontAttributes="Bold"
+                                       TextColor="{StaticResource TextDark}"/>
+                                <Label Text="{Binding Waiting.Count, StringFormat='{0} waiting'}"
+                                       FontSize="13" TextColor="{StaticResource Orange}"/>
+
+                                <Button Text="+ Add walk-in"
+                                        HeightRequest="56" FontSize="17" FontAttributes="Bold"
+                                        CornerRadius="14"
+                                        BackgroundColor="{StaticResource Orange}"
+                                        TextColor="{StaticResource White}"
+                                        Command="{Binding BindingContext.AddWalkInCommand, Source={x:Reference Root}}"
+                                        CommandParameter="{Binding Operator}"/>
+
+                                <CollectionView ItemsSource="{Binding Waiting}">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="responses:QueueEntryResponse">
+                                            <Border StrokeShape="RoundRectangle 12"
+                                                    BackgroundColor="{StaticResource Cream}"
+                                                    Padding="12" Margin="0,4">
+                                                <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="6">
+                                                    <Label Grid.Column="0"
+                                                           Text="{Binding CustomerName}"
+                                                           VerticalOptions="Center" FontSize="16"
+                                                           TextColor="{StaticResource TextDark}"/>
+                                                    <Button Grid.Column="1" Text="Serve"
+                                                            HeightRequest="44" FontSize="14"
+                                                            BackgroundColor="{StaticResource Green}"
+                                                            TextColor="{StaticResource White}"
+                                                            Command="{Binding BindingContext.ServeCommand, Source={x:Reference Root}}"
+                                                            CommandParameter="{Binding .}"/>
+                                                    <Button Grid.Column="2" Text="Done"
+                                                            HeightRequest="44" FontSize="14"
+                                                            BackgroundColor="{StaticResource Brown}"
+                                                            TextColor="{StaticResource White}"
+                                                            Command="{Binding BindingContext.DoneCommand, Source={x:Reference Root}}"
+                                                            CommandParameter="{Binding .}"/>
+                                                    <Button Grid.Column="3" Text="✕"
+                                                            HeightRequest="44" FontSize="14"
+                                                            BackgroundColor="{StaticResource Red}"
+                                                            TextColor="{StaticResource White}"
+                                                            Command="{Binding BindingContext.NoShowCommand, Source={x:Reference Root}}"
+                                                            CommandParameter="{Binding .}"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </ScrollView>
+
+        <!-- Loading overlay -->
+        <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#80000000">
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
+                               Color="{StaticResource Orange}"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Center"
+                               Scale="1.5"/>
+        </Grid>
+    </Grid>
+
+</ContentPage>

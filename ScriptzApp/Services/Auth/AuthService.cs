@@ -1,88 +1,34 @@
-using ScriptzApp.Models.Api.Requests;
-using ScriptzApp.Models.Api.Responses;
 using ScriptzApp.Services.Storage;
-using ScriptzApp.Services.Api;
 
 namespace ScriptzApp.Services.Auth;
 
+// Token store only, for now. Step 5 adds the actual Supabase OTP sign-in that calls SetSessionAsync.
 public class AuthService : IAuthService
 {
-    private readonly IScriptzApi _api;
     private readonly ISecureStorageService _secureStorage;
-    private const string TokenKey = "auth_token";
-    private const string RefreshTokenKey = "refresh_token";
+    private const string TokenKey = "sb_access_token";
+    private const string RefreshTokenKey = "sb_refresh_token";
 
-    public AuthService(IScriptzApi api, ISecureStorageService secureStorage)
+    public AuthService(ISecureStorageService secureStorage)
     {
-        _api = api;
         _secureStorage = secureStorage;
     }
 
-    public async Task<AuthResponse?> LoginAsync(LoginRequest request)
+    public Task<string?> GetAccessTokenAsync() => _secureStorage.GetAsync(TokenKey);
+
+    public async Task SetSessionAsync(string accessToken, string? refreshToken)
     {
-        try
-        {
-            var response = await _api.LoginAsync(request);
-
-            if (response != null && !string.IsNullOrEmpty(response.Token))
-            {
-                await _secureStorage.SetAsync(TokenKey, response.Token);
-
-                if (!string.IsNullOrEmpty(response.RefreshToken))
-                {
-                    await _secureStorage.SetAsync(RefreshTokenKey, response.RefreshToken);
-                }
-            }
-
-            return response;
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Login error: {ex.Message}");
-            return null;
-        }
+        await _secureStorage.SetAsync(TokenKey, accessToken);
+        if (!string.IsNullOrEmpty(refreshToken))
+            await _secureStorage.SetAsync(RefreshTokenKey, refreshToken);
     }
 
-    public async Task<AuthResponse?> RegisterAsync(RegisterRequest request)
-    {
-        try
-        {
-            var response = await _api.RegisterAsync(request);
-
-            if (response != null && !string.IsNullOrEmpty(response.Token))
-            {
-                await _secureStorage.SetAsync(TokenKey, response.Token);
-
-                if (!string.IsNullOrEmpty(response.RefreshToken))
-                {
-                    await _secureStorage.SetAsync(RefreshTokenKey, response.RefreshToken);
-                }
-            }
-
-            return response;
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Register error: {ex.Message}");
-            return null;
-        }
-    }
-
-    public async Task<bool> LogoutAsync()
+    public async Task ClearSessionAsync()
     {
         await _secureStorage.RemoveAsync(TokenKey);
         await _secureStorage.RemoveAsync(RefreshTokenKey);
-        return true;
-    }
-
-    public Task<string?> GetTokenAsync()
-    {
-        return _secureStorage.GetAsync(TokenKey);
     }
 
     public async Task<bool> IsAuthenticatedAsync()
-    {
-        var token = await GetTokenAsync();
-        return !string.IsNullOrEmpty(token);
-    }
+        => !string.IsNullOrEmpty(await GetAccessTokenAsync());
 }

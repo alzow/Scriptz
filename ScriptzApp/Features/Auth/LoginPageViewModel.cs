@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.Input;
 using ScriptzApp.Constants;
 using ScriptzApp.Framework.Base;
-using ScriptzApp.Models.Api.Requests;
 using ScriptzApp.Services.Auth;
 using ScriptzApp.Services.Storage;
 using ScriptzApp.Services.Popup;
@@ -28,6 +27,8 @@ public partial class LoginPageViewModel : BaseViewModel
         Title = "Login";
     }
 
+    // TODO (Step 5): replace with Supabase phone-OTP sign-in. For now this just
+    // stores a placeholder session so downstream screens have a token to send.
     [RelayCommand]
     private async Task LoginAsync()
     {
@@ -39,22 +40,8 @@ public partial class LoginPageViewModel : BaseViewModel
 
         await ExecuteAsync(async () =>
         {
-            var request = new LoginRequest
-            {
-                Email = Email.Trim(),
-                Password = Password
-            };
-
-            var result = await _authService.LoginAsync(request);
-
-            if (result != null)
-            {
-                await NavigationService.NavigateAsync(NavigationPaths.Dashboard);
-            }
-            else
-            {
-                await _popupService.ShowAlertAsync("Login Failed", "Invalid email or password");
-            }
+            await _authService.SetSessionAsync("placeholder-token", null);
+            await NavigationService.NavigateAsync(NavigationPaths.Dashboard);
         });
     }
 

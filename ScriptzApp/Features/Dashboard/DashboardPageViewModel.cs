@@ -5,7 +5,6 @@ using ScriptzApp.Framework.Base;
 using ScriptzApp.Services.Auth;
 using ScriptzApp.Services.Storage;
 using ScriptzApp.Services.Popup;
-using ScriptzApp.Services.Api;
 using System.Collections.ObjectModel;
 
 namespace ScriptzApp.Features.Dashboard;
@@ -14,7 +13,6 @@ public partial class DashboardPageViewModel : BaseViewModel
 {
     private readonly IAuthService _authService;
     private readonly IScriptzPopupService _popupService;
-    private readonly IApiService _apiService;
 
     // Benefit tracker (placeholder values until API wired up)
     private const int BenefitTotal = 3500;
@@ -36,94 +34,44 @@ public partial class DashboardPageViewModel : BaseViewModel
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
         IAuthService authService,
-        IScriptzPopupService popupService,
-        IApiService apiService)
+        IScriptzPopupService popupService)
         : base(navigationService, secureStorageService)
     {
         _authService = authService;
         _popupService = popupService;
-        _apiService = apiService;
         Title = "Home";
     }
 
-    public override async Task OnLoadedAsync(INavigationParameters parameters)
+    public override Task OnLoadedAsync(INavigationParameters parameters)
     {
-        await base.OnLoadedAsync(parameters);
-        await LoadDashboardDataAsync();
+        LoadDashboardData();
+        return Task.CompletedTask;
     }
 
-    private async Task LoadDashboardDataAsync()
+    // Placeholder cards until the Queue/pharmacy backend is wired up.
+    private void LoadDashboardData()
     {
-        await ExecuteAsync(async () =>
+        ActiveMedications.Clear();
+        ActiveMedications.Add(new ActiveScriptItem
         {
-            try
-            {
-                var medications = await _apiService.Api.GetMedicationsAsync();
-
-                ActiveMedications.Clear();
-
-                var active = medications?.Where(m => m.IsActive).ToList() ?? new();
-
-                foreach (var med in active)
-                {
-                    var daysLeft = 30 - (DateTime.Now - med.StartDate).Days % 30;
-                    ActiveMedications.Add(new ActiveScriptItem
-                    {
-                        Name = med.Name,
-                        SubText = $"{med.Dosage} · Laxmi Pharmacy",
-                        Status = daysLeft <= 3 ? "Ready" : "Processing",
-                        IsReady = daysLeft <= 3,
-                        StatusColor = daysLeft <= 3 ? "#2D6A4F" : "#E8621A",
-                        StatusBgColor = daysLeft <= 3 ? "#1A2D6A4F" : "#1AE8621A",
-                    });
-                }
-
-                HasNoMedications = !ActiveMedications.Any();
-
-                // Check for urgent (< 5 days)
-                var urgent = active.FirstOrDefault(m =>
-                {
-                    var d = 30 - (DateTime.Now - m.StartDate).Days % 30;
-                    return d <= 5;
-                });
-
-                if (urgent != null)
-                {
-                    var d = 30 - (DateTime.Now - urgent.StartDate).Days % 30;
-                    HasUrgentMedication = true;
-                    UrgentMedicationName = $"{urgent.Name} running low";
-                    UrgentMedicationSubText = $"{d} days remaining · Auto-refill active";
-                }
-                else
-                {
-                    HasUrgentMedication = false;
-                }
-            }
-            catch (Exception ex)
-            {
-                // Offline/demo fallback — show placeholder cards
-                ActiveMedications.Add(new ActiveScriptItem
-                {
-                    Name = "Metformin 500mg",
-                    SubText = "60 tabs · Laxmi Pharmacy",
-                    Status = "Ready",
-                    IsReady = true,
-                    StatusColor = "#2D6A4F",
-                    StatusBgColor = "#1A2D6A4F",
-                });
-                ActiveMedications.Add(new ActiveScriptItem
-                {
-                    Name = "Lisinopril 10mg",
-                    SubText = "30 tabs · Laxmi Pharmacy",
-                    Status = "Processing",
-                    IsReady = false,
-                    StatusColor = "#E8621A",
-                    StatusBgColor = "#1AE8621A",
-                });
-                HasNoMedications = false;
-                System.Diagnostics.Debug.WriteLine($"Dashboard load error: {ex.Message}");
-            }
+            Name = "Metformin 500mg",
+            SubText = "60 tabs · Laxmi Pharmacy",
+            Status = "Ready",
+            IsReady = true,
+            StatusColor = "#2D6A4F",
+            StatusBgColor = "#1A2D6A4F",
         });
+        ActiveMedications.Add(new ActiveScriptItem
+        {
+            Name = "Lisinopril 10mg",
+            SubText = "30 tabs · Laxmi Pharmacy",
+            Status = "Processing",
+            IsReady = false,
+            StatusColor = "#E8621A",
+            StatusBgColor = "#1AE8621A",
+        });
+        HasNoMedications = false;
+        HasUrgentMedication = false;
     }
 
     [RelayCommand]
@@ -159,7 +107,7 @@ public partial class DashboardPageViewModel : BaseViewModel
 
         if (confirm)
         {
-            await _authService.LogoutAsync();
+            await _authService.ClearSessionAsync();
             await NavigationService.NavigateAsync(NavigationPaths.Login);
         }
     }

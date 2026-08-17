@@ -16,4 +16,7 @@ public static class NavigationPaths
     // ── Feature pages (relative — pushed onto stack) ──────────────────────────
     public const string MedicationsListPage  = "MedicationsListPage";
     public const string MedicationDetailPage = "MedicationDetailPage";
+
+    // ── Queue (barber counter-tablet) ─────────────────────────────────────────
+    public const string BarberQueuePage      = "BarberQueuePage";
 }
