@@ -3,7 +3,7 @@ namespace ScriptzApp.Constants;
 public static class NavigationPaths
 {
     // ── App start ──────────────────────────────────────────────────────────────
-    public const string AppStart             = "NavigationPage/LoginPage";
+    public const string AppStart             = "/NavigationPage/LoginPage";
 
     // ── Auth ───────────────────────────────────────────────────────────────────
     public const string LoginPage            = "LoginPage";

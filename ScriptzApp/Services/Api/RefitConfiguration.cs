@@ -1,5 +1,6 @@
 using Refit;
 using ScriptzApp.Constants;
+using ScriptzApp.Services.Api.Auth;
 using ScriptzApp.Services.Api.Queue;
 
 namespace ScriptzApp.Services.Api;
@@ -10,8 +11,12 @@ public static class RefitConfiguration
     {
         services.AddTransient<SupabaseAuthHeaderHandler>();
 
-        services.AddRefitClient<IQueueApi>()
+       services.AddRefitClient<IQueueApi>()
             .ConfigureHttpClient(c => c.BaseAddress = new Uri(SupabaseConfig.RestUrl))
+            .AddHttpMessageHandler<SupabaseAuthHeaderHandler>(); 
+
+        services.AddRefitClient<IAuthApi>()
+            .ConfigureHttpClient(c => c.BaseAddress = new Uri(SupabaseConfig.AuthUrl))
             .AddHttpMessageHandler<SupabaseAuthHeaderHandler>();
 
         return services;

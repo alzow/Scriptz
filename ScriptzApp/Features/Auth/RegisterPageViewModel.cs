@@ -53,13 +53,20 @@ public partial class RegisterPageViewModel : BaseViewModel
             return;
         }
 
-        // TODO (Step 5): replace with Supabase phone-OTP sign-up. For now this just
-        // stores a placeholder session so downstream screens have a token to send.
+        // TODO (Step 5b): swap for Supabase phone-OTP sign-up. Token pipeline stays the same.
         await ExecuteAsync(async () =>
         {
-            await _authService.SetSessionAsync("placeholder-token", null);
-            await _popupService.ShowAlertAsync("Success", "Account created successfully!");
-            await NavigationService.NavigateAsync(NavigationPaths.Dashboard);
+            var ok = await _authService.SignUpAsync(Email.Trim(), Password);
+
+            if (ok)
+            {
+                await _popupService.ShowAlertAsync("Success", "Account created successfully!");
+                await NavigationService.NavigateAsync($"/{NavigationPaths.BarberQueuePage}");
+            }
+            else
+            {
+                await _popupService.ShowAlertAsync("Registration Failed", "Unable to create account. Please try again.");
+            }
         });
     }
 

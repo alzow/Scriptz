@@ -60,6 +60,7 @@ internal static class NavigationStartup
     private static void RegisterApiServices(IServiceCollection services)
     {
         services.AddSingleton<IAuthService, AuthService>();
+        services.ConfigureRefitApi();
 
 #if USE_STUBS
         services.AddSingleton<IQueueService, StubQueueService>();
@@ -67,7 +68,6 @@ internal static class NavigationStartup
 #else
         services.AddSingleton<IQueueService, QueueService>();
         services.AddSingleton<IQueueRealtimeService, QueueRealtimeService>();
-        services.ConfigureRefitApi();
 #endif
     }
 }

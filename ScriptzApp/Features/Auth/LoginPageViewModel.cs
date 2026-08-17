@@ -27,8 +27,7 @@ public partial class LoginPageViewModel : BaseViewModel
         Title = "Login";
     }
 
-    // TODO (Step 5): replace with Supabase phone-OTP sign-in. For now this just
-    // stores a placeholder session so downstream screens have a token to send.
+    // TODO (Step 5b): swap for Supabase phone-OTP sign-in. Token pipeline stays the same.
     [RelayCommand]
     private async Task LoginAsync()
     {
@@ -40,8 +39,16 @@ public partial class LoginPageViewModel : BaseViewModel
 
         await ExecuteAsync(async () =>
         {
-            await _authService.SetSessionAsync("placeholder-token", null);
-            await NavigationService.NavigateAsync(NavigationPaths.Dashboard);
+            var ok = await _authService.SignInAsync(Email.Trim(), Password);
+
+            if (ok)
+            {
+                await NavigationService.NavigateAsync($"/{NavigationPaths.BarberQueuePage}");
+            }
+            else
+            {
+                await _popupService.ShowAlertAsync("Login Failed", "Invalid email or password");
+            }
         });
     }
 
