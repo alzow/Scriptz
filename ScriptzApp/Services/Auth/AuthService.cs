@@ -1,3 +1,4 @@
+using ScriptzApp.Constants;
 using ScriptzApp.Services.Api.Auth;
 using ScriptzApp.Services.Api.Auth.Models;
 using ScriptzApp.Services.Storage;
@@ -8,9 +9,6 @@ public class AuthService : IAuthService
 {
     private readonly ISecureStorageService _secureStorage;
     private readonly IAuthApi _authApi;
-    private const string TokenKey = "sb_access_token";
-    private const string RefreshTokenKey = "sb_refresh_token";
-    private const string UserIdKey = "sb_user_id";
 
     public AuthService(ISecureStorageService secureStorage, IAuthApi authApi)
     {
@@ -18,9 +16,9 @@ public class AuthService : IAuthService
         _authApi = authApi;
     }
 
-    public Task<string?> GetAccessTokenAsync() => _secureStorage.GetAsync(TokenKey);
+    public Task<string?> GetAccessTokenAsync() => _secureStorage.GetAsync(SupabaseConfig.AccessTokenKey);
 
-    public Task<string?> GetUserIdAsync() => _secureStorage.GetAsync(UserIdKey);
+    public Task<string?> GetUserIdAsync() => _secureStorage.GetAsync(SupabaseConfig.UserIdKey);
 
     public async Task<bool> SignInAsync(string email, string password)
     {
@@ -30,7 +28,7 @@ public class AuthService : IAuthService
             await SetSessionAsync(response.AccessToken, response.RefreshToken);
 
             if (response.User is not null)
-                await _secureStorage.SetAsync(UserIdKey, response.User.Id.ToString());
+                await _secureStorage.SetAsync(SupabaseConfig.UserIdKey, response.User.Id.ToString());
 
             return true;
         }
@@ -52,7 +50,7 @@ public class AuthService : IAuthService
                 await SetSessionAsync(response.AccessToken, response.RefreshToken);
 
                 if (response.User is not null)
-                    await _secureStorage.SetAsync(UserIdKey, response.User.Id.ToString());
+                    await _secureStorage.SetAsync(SupabaseConfig.UserIdKey, response.User.Id.ToString());
             }
 
             return true;
@@ -66,16 +64,16 @@ public class AuthService : IAuthService
 
     public async Task SetSessionAsync(string accessToken, string? refreshToken)
     {
-        await _secureStorage.SetAsync(TokenKey, accessToken);
+        await _secureStorage.SetAsync(SupabaseConfig.AccessTokenKey, accessToken);
         if (!string.IsNullOrEmpty(refreshToken))
-            await _secureStorage.SetAsync(RefreshTokenKey, refreshToken);
+            await _secureStorage.SetAsync(SupabaseConfig.RefreshTokenKey, refreshToken);
     }
 
     public async Task ClearSessionAsync()
     {
-        await _secureStorage.RemoveAsync(TokenKey);
-        await _secureStorage.RemoveAsync(RefreshTokenKey);
-        await _secureStorage.RemoveAsync(UserIdKey);
+        await _secureStorage.RemoveAsync(SupabaseConfig.AccessTokenKey);
+        await _secureStorage.RemoveAsync(SupabaseConfig.RefreshTokenKey);
+        await _secureStorage.RemoveAsync(SupabaseConfig.UserIdKey);
     }
 
     public async Task<bool> IsAuthenticatedAsync()
