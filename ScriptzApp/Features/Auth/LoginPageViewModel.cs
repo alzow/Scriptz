@@ -1,5 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
-using MPowerKit.Navigation;
+using ScriptzApp.Constants;
 using ScriptzApp.Framework.Base;
 using ScriptzApp.Models.Api.Requests;
 using ScriptzApp.Services.Auth;
@@ -49,7 +49,7 @@ public partial class LoginPageViewModel : BaseViewModel
 
             if (result != null)
             {
-                await NavigationService.NavigateAsync("/NavigationPage/DashboardPage");
+                await NavigationService.NavigateAsync(NavigationPaths.Dashboard);
             }
             else
             {
@@ -61,6 +61,6 @@ public partial class LoginPageViewModel : BaseViewModel
     [RelayCommand]
     private async Task NavigateToRegisterAsync()
     {
-        await NavigationService.NavigateAsync("RegisterPage");
+        await NavigationService.NavigateAsync(NavigationPaths.RegisterPage);
     }
 }

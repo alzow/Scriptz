@@ -1,10 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MPowerKit.Navigation;
+using ScriptzApp.Constants;
 using ScriptzApp.Framework.Base;
 using ScriptzApp.Models.Api.Responses;
 using ScriptzApp.Services.Storage;
-using ScriptzApp.Services.Popup;
 using ScriptzApp.Services.Api;
 using System.Collections.ObjectModel;
 
@@ -13,7 +12,6 @@ namespace ScriptzApp.Features.Medications;
 public partial class MedicationsListPageViewModel : BaseViewModel
 {
     private readonly IApiService _apiService;
-    private readonly IScriptzPopupService _popupService;
 
     // ── Tab state ──────────────────────────────────────────────────────────────
     private string _selectedTab = "active";
@@ -59,12 +57,10 @@ public partial class MedicationsListPageViewModel : BaseViewModel
     public MedicationsListPageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
-        IApiService apiService,
-        IScriptzPopupService popupService)
+        IApiService apiService)
         : base(navigationService, secureStorageService)
     {
         _apiService = apiService;
-        _popupService = popupService;
         Title = "My Scripts";
     }
 
@@ -172,13 +168,13 @@ public partial class MedicationsListPageViewModel : BaseViewModel
     private async Task AddMedicationAsync()
     {
         // From Submit tab — navigate to detail / show success
-        await NavigationService.NavigateAsync("MedicationDetailPage");
+        await NavigationService.NavigateAsync(NavigationPaths.MedicationDetailPage);
     }
 
     [RelayCommand]
     private async Task ViewMedicationAsync(MedicationDisplayModel medication)
     {
-        await NavigationService.NavigateAsync($"MedicationDetailPage?MedicationId={medication.Id}");
+        await NavigationService.NavigateAsync($"{NavigationPaths.MedicationDetailPage}?{ScriptzNavigationParameters.MedicationId}={medication.Id}");
     }
 }
 

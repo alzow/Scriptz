@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:ScriptzApp.Features.Shop"
+             x:Class="ScriptzApp.Features.Shop.ShopPage"
+             x:DataType="vm:ShopPageViewModel"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource Cream}"
+             Title="Shop"
+             IconImageSource="shop_tab.png">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="0">
+
+            <!-- Brown header -->
+            <Grid BackgroundColor="{StaticResource Brown}"
+                  Padding="20,52,20,24">
+                <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                        <Label Text="OTC Shop"
+                               FontSize="24" FontAttributes="Bold"
+                               TextColor="{StaticResource Cream}"/>
+                        <Label Text="Over-the-counter · Delivered by Laxmi"
+                               FontSize="13" TextColor="{StaticResource BrownLight}"/>
+                    </VerticalStackLayout>
+                    <Border Grid.Column="1"
+                            BackgroundColor="{StaticResource Orange}"
+                            WidthRequest="44" HeightRequest="44"
+                            StrokeThickness="0"
+                            IsVisible="{Binding HasCartItems}">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="13"/>
+                        </Border.StrokeShape>
+                        <Label Text="🛒" FontSize="20"
+                               HorizontalOptions="Center" VerticalOptions="Center"/>
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <!-- Category pills -->
+            <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never"
+                        Padding="16,16,16,8">
+                <HorizontalStackLayout Spacing="8"
+                                       BindableLayout.ItemsSource="{Binding Categories}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="x:String">
+                            <Border BackgroundColor="{Binding ., Converter={StaticResource ActiveCategoryConverter}, ConverterParameter={Binding Source={RelativeSource AncestorType={x:Type vm:ShopPageViewModel}}, Path=SelectedCategory}}"
+                                    StrokeThickness="0"
+                                    Padding="16,9">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="20"/>
+                                </Border.StrokeShape>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ShopPageViewModel}}, Path=SelectCategoryCommand}"
+                                        CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
+                                <Label Text="{Binding .}" FontSize="13" FontAttributes="Bold"
+                                       TextColor="{Binding ., Converter={StaticResource ActiveCategoryTextConverter}, ConverterParameter={Binding Source={RelativeSource AncestorType={x:Type vm:ShopPageViewModel}}, Path=SelectedCategory}}"/>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </HorizontalStackLayout>
+            </ScrollView>
+
+            <!-- Product grid -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" RowSpacing="12"
+                  Padding="16,0,16,24"
+                  BindableLayout.ItemsSource="{Binding FilteredProducts}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="vm:OtcProduct">
+                        <Border BackgroundColor="{StaticResource White}"
+                                Stroke="{StaticResource CreamBorder}"
+                                StrokeThickness="1"
+                                Padding="14">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="20"/>
+                            </Border.StrokeShape>
+                            <VerticalStackLayout Spacing="0">
+                                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+                                    <Border Grid.Column="0"
+                                            BackgroundColor="{StaticResource CreamDark}"
+                                            WidthRequest="44" HeightRequest="44"
+                                            StrokeThickness="0">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="12"/>
+                                        </Border.StrokeShape>
+                                        <Label Text="{Binding Icon}" FontSize="24"
+                                               HorizontalOptions="Center" VerticalOptions="Center"/>
+                                    </Border>
+                                    <Border Grid.Column="1"
+                                            BackgroundColor="{Binding BadgeBg}"
+                                            StrokeThickness="0"
+                                            Padding="7,3"
+                                            IsVisible="{Binding HasBadge}">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="20"/>
+                                        </Border.StrokeShape>
+                                        <Label Text="{Binding Badge}" FontSize="10" FontAttributes="Bold"
+                                               TextColor="{Binding BadgeColor}"/>
+                                    </Border>
+                                </Grid>
+                                <Label Text="{Binding Name}" FontAttributes="Bold" FontSize="13"
+                                       TextColor="{StaticResource TextDark}" LineBreakMode="WordWrap"
+                                       Margin="0,0,0,2"/>
+                                <Label Text="{Binding Qty}" FontSize="12"
+                                       TextColor="{StaticResource TextLight}" Margin="0,0,0,10"/>
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Grid.Column="0"
+                                           Text="{Binding PriceText}" FontAttributes="Bold"
+                                           FontSize="15" TextColor="{StaticResource Orange}"
+                                           VerticalOptions="Center"/>
+                                    <Border Grid.Column="1"
+                                            BackgroundColor="{Binding CartButtonBg}"
+                                            WidthRequest="34" HeightRequest="34"
+                                            StrokeThickness="0">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="10"/>
+                                        </Border.StrokeShape>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ShopPageViewModel}}, Path=AddToCartCommand}"
+                                                CommandParameter="{Binding .}"/>
+                                        </Border.GestureRecognizers>
+                                        <Label Text="{Binding CartQty}" FontSize="15" FontAttributes="Bold"
+                                               TextColor="{Binding CartButtonTextColor}"
+                                               HorizontalOptions="Center" VerticalOptions="Center"/>
+                                    </Border>
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </Grid>
+
+            <!-- View cart button -->
+            <Button Text="{Binding ViewCartText}"
+                    IsVisible="{Binding HasCartItems}"
+                    Command="{Binding ViewCartCommand}"
+                    BackgroundColor="{StaticResource Orange}"
+                    TextColor="{StaticResource White}"
+                    FontAttributes="Bold"
+                    FontSize="16"
+                    CornerRadius="16"
+                    HeightRequest="54"
+                    Margin="16,0,16,24"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

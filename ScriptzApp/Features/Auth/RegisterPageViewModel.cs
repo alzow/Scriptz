@@ -1,5 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
-using MPowerKit.Navigation;
+using ScriptzApp.Constants;
 using ScriptzApp.Framework.Base;
 using ScriptzApp.Models.Api.Requests;
 using ScriptzApp.Services.Auth;
@@ -71,7 +71,7 @@ public partial class RegisterPageViewModel : BaseViewModel
             if (result != null)
             {
                 await _popupService.ShowAlertAsync("Success", "Account created successfully!");
-                await NavigationService.NavigateAsync("/NavigationPage/DashboardPage");
+                await NavigationService.NavigateAsync(NavigationPaths.Dashboard);
             }
             else
             {

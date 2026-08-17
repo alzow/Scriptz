@@ -1,39 +1,68 @@
 using System.Reflection;
+using MPowerKit.Navigation;
+using MPowerKit.Navigation.Utilities;
+using ScriptzApp.Constants;
+using ScriptzApp.Services.Api;
+using ScriptzApp.Services.Auth;
+using ScriptzApp.Services.Storage;
+using ScriptzApp.Services.Popup;
+using CommunityToolkit.Mvvm.Messaging;
+#if USE_STUBS
+using ScriptzApp.Services.Stubs;
+#endif
 
 namespace ScriptzApp;
 
-public static class NavigationStartup
+internal static class NavigationStartup
 {
-    public static IServiceCollection RegisterPagesAndViewModels(this IServiceCollection services)
+    public static void Configure(MPowerKitMvvmBuilder builder)
     {
-        var assembly = Assembly.GetExecutingAssembly();
+        builder.ConfigureServices(RegisterServices)
+               .OnAppStart(NavigationPaths.AppStart);
+    }
 
-        var pageTypes = assembly.GetTypes()
-            .Where(t => t.IsSubclassOf(typeof(Page)) && !t.IsAbstract);
+    private static void RegisterServices(IServiceCollection services)
+    {
+        RegisterPages(services);
+        RegisterHelperServices(services);
+        RegisterApiServices(services);
+    }
+
+    private static void RegisterPages(IServiceCollection services)
+    {
+        var assembly = typeof(App).GetTypeInfo().Assembly;
+
+        var pageTypes = assembly
+            .DefinedTypes
+            .Where(t => t.IsSubclassOf(typeof(Page)) && !t.IsAbstract)
+            .ToList();
 
         foreach (var pageType in pageTypes)
         {
-            services.AddTransient(pageType);
+            // Try exact match first (PageViewModel), then strip "Page" suffix (ViewModel)
+            var viewModelType =
+                assembly.GetType($"{pageType.FullName}ViewModel") ??
+                assembly.GetType($"{pageType.FullName!.Replace("Page", "")}ViewModel");
 
-            var viewModelName = $"{pageType.FullName}ViewModel";
-            var viewModelType = assembly.GetType(viewModelName);
-
-            if (viewModelType != null)
-            {
-                services.AddTransient(viewModelType);
-            }
-            else
-            {
-                viewModelName = $"{pageType.FullName!.Replace("Page", "")}ViewModel";
-                viewModelType = assembly.GetType(viewModelName);
-
-                if (viewModelType != null)
-                {
-                    services.AddTransient(viewModelType);
-                }
-            }
+            services.RegisterForNavigation(pageType.AsType(), viewModelType, pageType.Name);
         }
+    }
 
-        return services;
+    private static void RegisterHelperServices(IServiceCollection services)
+    {
+        services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
+        services.AddSingleton<ISecureStorageService, SecureStorageService>();
+        services.AddSingleton<IScriptzPopupService, ScriptzPopupService>();
+    }
+
+    private static void RegisterApiServices(IServiceCollection services)
+    {
+#if USE_STUBS
+        services.AddSingleton<IAuthService, StubAuthService>();
+        services.AddSingleton<IApiService, StubApiService>();
+#else
+        services.AddSingleton<IAuthService, AuthService>();
+        services.ConfigureRefitApi();
+#endif
     }
 }

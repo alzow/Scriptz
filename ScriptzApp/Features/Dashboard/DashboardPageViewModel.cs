@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MPowerKit.Navigation;
+using ScriptzApp.Constants;
 using ScriptzApp.Framework.Base;
 using ScriptzApp.Services.Auth;
 using ScriptzApp.Services.Storage;
@@ -129,25 +129,25 @@ public partial class DashboardPageViewModel : BaseViewModel
     [RelayCommand]
     private async Task NavigateToMedicationsAsync()
     {
-        await NavigationService.NavigateAsync("MedicationsListPage");
+        await NavigationService.NavigateAsync(NavigationPaths.MedicationsListPage);
     }
 
     [RelayCommand]
     private async Task NavigateToPrescriptionsAsync()
     {
-        await NavigationService.NavigateAsync("MedicationsListPage");
+        await NavigationService.NavigateAsync(NavigationPaths.MedicationsListPage);
     }
 
     [RelayCommand]
     private async Task NavigateToRemindersAsync()
     {
-        await NavigationService.NavigateAsync("MedicationsListPage");
+        await NavigationService.NavigateAsync(NavigationPaths.MedicationsListPage);
     }
 
     [RelayCommand]
     private async Task NavigateToProfileAsync()
     {
-        await NavigationService.NavigateAsync("MedicationsListPage");
+        await NavigationService.NavigateAsync(NavigationPaths.MedicationsListPage);
     }
 
     [RelayCommand]
@@ -160,7 +160,7 @@ public partial class DashboardPageViewModel : BaseViewModel
         if (confirm)
         {
             await _authService.LogoutAsync();
-            await NavigationService.NavigateAsync("/NavigationPage/LoginPage");
+            await NavigationService.NavigateAsync(NavigationPaths.Login);
         }
     }
 }
