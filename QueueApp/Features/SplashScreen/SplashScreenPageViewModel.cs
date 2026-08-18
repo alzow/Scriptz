@@ -1,5 +1,6 @@
 using QueueApp.Constants;
 using QueueApp.Framework.Base;
+using QueueApp.Framework.Navigation;
 using QueueApp.Services.Api.Business;
 using QueueApp.Services.Auth;
 using QueueApp.Services.Storage;
@@ -32,14 +33,14 @@ public class SplashScreenPageViewModel : BaseViewModel
 
             var isValid = await _authService.EnsureValidSessionAsync();
 
-            if (isValid)
+            if (!isValid)
             {
                 await _navigationService.NavigateAsync($"/{NavigationPaths.LoginPage}");
                 return;
             }
 
-            var ownsBusiness = await TryGetOwnedBusinessAsync();
-            var uri = BuildMainTabbedUri(includeManageTab: ownsBusiness);
+            var ownsBusiness = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
+            var uri = MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: ownsBusiness);
             await _navigationService.NavigateAsync(uri);
         }
         catch (Exception ex)
@@ -51,31 +52,4 @@ public class SplashScreenPageViewModel : BaseViewModel
         }
     }
 
-    private async Task<bool> TryGetOwnedBusinessAsync()
-    {
-        try
-        {
-            var businessId = await _businessService.GetOwnedBusinessIdAsync();
-            return businessId != Guid.Empty;
-        }
-        catch
-        {
-            return false; // no owned business, or the lookup failed — either way, no Manage tab
-        }
-    }
-
-    private static string BuildMainTabbedUri(bool includeManageTab)
-    {
-        var uri = $"/{NavigationPaths.MainTabbedPage}" +
-                  $"?{KnownNavigationParameters.CreateTab}=TabNavigationPage|{NavigationPaths.CategoryPickerPage}" +
-                  $"&{KnownNavigationParameters.CreateTab}=TabNavigationPage|{NavigationPaths.HistoryPage}" +
-                  $"&{KnownNavigationParameters.CreateTab}=TabNavigationPage|{NavigationPaths.ProfilePage}";
-
-        if (includeManageTab)
-            uri += $"&{KnownNavigationParameters.CreateTab}=TabNavigationPage|{NavigationPaths.OperatorQueuePage}";
-
-        uri += $"&{KnownNavigationParameters.SelectTab}={NavigationPaths.CategoryPickerPage}";
-
-        return uri;
-    }
 }

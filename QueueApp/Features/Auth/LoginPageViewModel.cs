@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.Input;
 using QueueApp.Constants;
 using QueueApp.Framework.Base;
+using QueueApp.Framework.Navigation;
+using QueueApp.Services.Api.Business;
 using QueueApp.Services.Auth;
 using QueueApp.Services.Storage;
 using QueueApp.Services.Popup;
@@ -12,6 +14,7 @@ public partial class LoginPageViewModel : BaseViewModel
 {
     private readonly IAuthService _authService;
     private readonly IQueuePopupService _popupService;
+    private readonly IBusinessService _businessService;
 
     public string Email { get; set; } = "alzow.sayed01@gmail.com";
     public string Password { get; set; } = "S@yed786";
@@ -26,11 +29,13 @@ public partial class LoginPageViewModel : BaseViewModel
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
         IAuthService authService,
-        IQueuePopupService popupService)
+        IQueuePopupService popupService,
+        IBusinessService businessService)
         : base(navigationService, secureStorageService)
     {
         _authService = authService;
         _popupService = popupService;
+        _businessService = businessService;
         FormStateManager.ValidationStateChanged += isValid => IsFormValid = isValid;
     }
 
@@ -51,7 +56,9 @@ public partial class LoginPageViewModel : BaseViewModel
 
             if (ok)
             {
-                await NavigationService.NavigateAsync(NavigationPaths.OperatorQueuePage);
+                var ownsBusiness = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
+                var uri = MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: ownsBusiness);
+                await NavigationService.NavigateAsync(uri);
             }
             else
             {
