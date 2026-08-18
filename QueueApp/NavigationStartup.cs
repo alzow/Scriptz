@@ -3,6 +3,8 @@ using MPowerKit.Navigation;
 using MPowerKit.Navigation.Utilities;
 using QueueApp.Constants;
 using QueueApp.Services.Api;
+using QueueApp.Services.Api.Business;
+using QueueApp.Services.Api.Operator;
 using QueueApp.Services.Api.Queue;
 using QueueApp.Services.Auth;
 using QueueApp.Services.Storage;
@@ -64,9 +66,13 @@ internal static class NavigationStartup
 
 #if USE_STUBS
         services.AddSingleton<IQueueService, StubQueueService>();
+        services.AddSingleton<IBusinessService, StubBusinessService>();
+        services.AddSingleton<IOperatorService, StubOperatorService>();
         services.AddSingleton<IQueueRealtimeService, StubQueueRealtimeService>();
 #else
         services.AddSingleton<IQueueService, QueueService>();
+        services.AddSingleton<IBusinessService, BusinessService>();
+        services.AddSingleton<IOperatorService, OperatorService>();
         services.AddSingleton<IQueueRealtimeService, QueueRealtimeService>();
 #endif
     }

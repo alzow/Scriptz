@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using QueueApp.Services.Api.Operator.Models;
 using QueueApp.Services.Api.Queue.Models;
 
 namespace QueueApp.Features.OperatorQueue;

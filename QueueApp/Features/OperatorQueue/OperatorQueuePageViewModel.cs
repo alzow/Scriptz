@@ -3,6 +3,9 @@ using System.Threading;
 using CommunityToolkit.Mvvm.Input;
 using MPowerKit.Navigation;
 using QueueApp.Framework.Base;
+using QueueApp.Services.Api.Business;
+using QueueApp.Services.Api.Operator;
+using QueueApp.Services.Api.Operator.Models;
 using QueueApp.Services.Api.Queue;
 using QueueApp.Services.Api.Queue.Models;
 using QueueApp.Services.Auth;
@@ -15,6 +18,8 @@ namespace QueueApp.Features.OperatorQueue;
 public partial class OperatorQueuePageViewModel : BaseViewModel
 {
     private readonly IQueueService _queueService;
+    private readonly IBusinessService _businessService;
+    private readonly IOperatorService _operatorService;
     private readonly IQueueRealtimeService _realtimeService;
     private readonly IQueuePopupService _popupService;
     private readonly SemaphoreSlim _loadLock = new(1, 1);
@@ -30,11 +35,15 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
         IQueueService queueService,
+        IBusinessService businessService,
+        IOperatorService operatorService,
         IQueueRealtimeService realtimeService,
         IQueuePopupService popupService)
         : base(navigationService, secureStorageService)
     {
         _queueService = queueService;
+        _businessService = businessService;
+        _operatorService = operatorService;
         _realtimeService = realtimeService;
         _popupService = popupService;
     }
@@ -47,9 +56,9 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
 
             _businessId = parameters is not null && parameters.TryGetValue("businessId", out var idObj)
                 ? (Guid)idObj
-                : await _queueService.GetOwnedBusinessIdAsync();
+                : await _businessService.GetOwnedBusinessIdAsync();
 
-            var business = await _queueService.GetBusinessAsync(_businessId);
+            var business = await _businessService.GetBusinessAsync(_businessId);
             BusinessName = business?.Name ?? "Queue";
 
             await LoadQueueAsync();
@@ -78,7 +87,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         {
             IsLoading = true;
 
-            var operators = await _queueService.GetOperatorsAsync(_businessId);
+            var operators = await _operatorService.GetOperatorsAsync(_businessId);
             var waiting = await _queueService.GetWaitingAsync(_businessId);
 
             var rebuilt = new List<OperatorColumn>();
@@ -119,11 +128,11 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
 
     private void StartHeartbeat()
     {
-        _ = _queueService.HeartbeatAsync(_businessId);
+        _ = _businessService.HeartbeatAsync(_businessId);
 
         _heartbeatTimer = Application.Current!.Dispatcher.CreateTimer();
         _heartbeatTimer.Interval = TimeSpan.FromMinutes(2);
-        _heartbeatTimer.Tick += async (_, _) => await _queueService.HeartbeatAsync(_businessId);
+        _heartbeatTimer.Tick += async (_, _) => await _businessService.HeartbeatAsync(_businessId);
         _heartbeatTimer.Start();
     }
 

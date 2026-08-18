@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace QueueApp.Services.Api.Queue.Models;
+namespace QueueApp.Services.Api.Operator.Models;
 
 public class OperatorResponse
 {

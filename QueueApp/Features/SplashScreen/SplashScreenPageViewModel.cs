@@ -1,6 +1,6 @@
 using QueueApp.Constants;
 using QueueApp.Framework.Base;
-using QueueApp.Services.Api.Queue;
+using QueueApp.Services.Api.Business;
 using QueueApp.Services.Auth;
 using QueueApp.Services.Storage;
 
@@ -10,18 +10,18 @@ public class SplashScreenPageViewModel : BaseViewModel
 {
     private readonly INavigationService _navigationService;
     private readonly IAuthService _authService;
-    private readonly IQueueService _queueService;
+    private readonly IBusinessService _businessService;
 
     public SplashScreenPageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
         IAuthService authService,
-        IQueueService queueService)
+        IBusinessService businessService)
         : base(navigationService, secureStorageService)
     {
         _navigationService = navigationService;
         _authService = authService;
-        _queueService = queueService;
+        _businessService = businessService;
     }
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
@@ -55,7 +55,7 @@ public class SplashScreenPageViewModel : BaseViewModel
     {
         try
         {
-            var businessId = await _queueService.GetOwnedBusinessIdAsync();
+            var businessId = await _businessService.GetOwnedBusinessIdAsync();
             return businessId != Guid.Empty;
         }
         catch

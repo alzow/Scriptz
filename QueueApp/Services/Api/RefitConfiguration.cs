@@ -1,6 +1,8 @@
 using Refit;
 using QueueApp.Constants;
 using QueueApp.Services.Api.Auth;
+using QueueApp.Services.Api.Business;
+using QueueApp.Services.Api.Operator;
 using QueueApp.Services.Api.Queue;
 
 namespace QueueApp.Services.Api;
@@ -13,6 +15,16 @@ public static class RefitConfiguration
         services.AddTransient<HttpLoggingHandler>();
 
        services.AddRefitClient<IQueueApi>()
+            .ConfigureHttpClient(c => c.BaseAddress = new Uri(SupabaseConfig.RestUrl))
+            .AddHttpMessageHandler<SupabaseAuthHeaderHandler>()
+            .AddHttpMessageHandler<HttpLoggingHandler>();
+
+        services.AddRefitClient<IBusinessApi>()
+            .ConfigureHttpClient(c => c.BaseAddress = new Uri(SupabaseConfig.RestUrl))
+            .AddHttpMessageHandler<SupabaseAuthHeaderHandler>()
+            .AddHttpMessageHandler<HttpLoggingHandler>();
+
+        services.AddRefitClient<IOperatorApi>()
             .ConfigureHttpClient(c => c.BaseAddress = new Uri(SupabaseConfig.RestUrl))
             .AddHttpMessageHandler<SupabaseAuthHeaderHandler>()
             .AddHttpMessageHandler<HttpLoggingHandler>();

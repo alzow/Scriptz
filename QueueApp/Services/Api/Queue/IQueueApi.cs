@@ -19,30 +19,9 @@ public interface IQueueApi
     Task MarkNoShowAsync([Body] EntryIdRequest request);
 
     // Reads (PostgREST filter syntax, e.g. "eq.<guid>")
-    [Get("/operators")]
-    Task<List<OperatorResponse>> GetOperatorsAsync(
-        [AliasAs("business_id")] string businessIdEq,
-        [AliasAs("order")] string order = "sort_order.asc");
-
     [Get("/queue_entries")]
     Task<List<QueueEntryResponse>> GetWaitingAsync(
         [AliasAs("business_id")] string businessIdEq,
         [AliasAs("status")] string statusEq = "eq.waiting",
         [AliasAs("order")] string order = "joined_at.asc");
-
-    [Get("/businesses")]
-    Task<List<BusinessIdResponse>> GetOwnedBusinessesAsync(
-        [AliasAs("owner_id")] string ownerIdEq,
-        [AliasAs("select")] string select = "id");
-
-    [Get("/businesses")]
-    Task<List<BusinessResponse>> GetBusinessesAsync(
-        [AliasAs("id")] string idEq,
-        [AliasAs("select")] string select = "id,name");
-
-    // Presence heartbeat
-    [Patch("/businesses")]
-    Task HeartbeatAsync(
-        [AliasAs("id")] string idEq,
-        [Body] Dictionary<string, object> patch);
 }
