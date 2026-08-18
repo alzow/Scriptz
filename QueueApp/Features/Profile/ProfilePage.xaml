@@ -5,7 +5,7 @@
              xmlns:vm="clr-namespace:QueueApp.Features.Profile"
              x:DataType="vm:ProfilePageViewModel"
              Title="Profile"
-             BackgroundColor="{StaticResource Cream}">
+             Style="{StaticResource NavigationPageStyle}">
     <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8">
         <Label Text="Profile" Style="{StaticResource lbl20_Bold_TextDark}" HorizontalOptions="Center"/>
         <Label Text="Account details, T&amp;Cs, and becoming an operator will live here." TextColor="Gray" HorizontalOptions="Center"/>
