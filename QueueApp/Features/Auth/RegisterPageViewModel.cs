@@ -19,6 +19,7 @@ public partial class RegisterPageViewModel : BaseViewModel
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
     public string ConfirmPassword { get; set; } = string.Empty;
+    public bool IsSigningUp { get; set; }
 
     public RegisterPageViewModel(
         INavigationService navigationService,
@@ -62,18 +63,25 @@ public partial class RegisterPageViewModel : BaseViewModel
 
         // TODO (Step 5b): swap for Supabase phone-OTP sign-up. Token pipeline stays the same.
 
-        var ok = await _authService.SignUpAsync(Email.Trim(), Password);
-
-        if (ok)
+        IsSigningUp = true;
+        try
         {
-            await _popupService.ShowAlertAsync("Success", "Account created successfully!");
-            await NavigationService.NavigateAsync($"/{NavigationPaths.OperatorQueuePage}");
-        }
-        else
-        {
-            await _popupService.ShowAlertAsync("Registration Failed", "Unable to create account. Please try again.");
-        }
+            var ok = await _authService.SignUpAsync(Email.Trim(), Password);
 
+            if (ok)
+            {
+                await _popupService.ShowAlertAsync("Success", "Account created successfully!");
+                await NavigationService.NavigateAsync($"/{NavigationPaths.OperatorQueuePage}");
+            }
+            else
+            {
+                await _popupService.ShowAlertAsync("Registration Failed", "Unable to create account. Please try again.");
+            }
+        }
+        finally
+        {
+            IsSigningUp = false;
+        }
     }
 
     [RelayCommand]

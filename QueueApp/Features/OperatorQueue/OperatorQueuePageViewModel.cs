@@ -130,59 +130,86 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     [RelayCommand]
     private async Task AddWalkInAsync(OperatorResponse op)
     {
+        var column = Columns.FirstOrDefault(c => c.Operator == op);
+        if (column is not null)
+            column.IsAddingWalkIn = true;
         try
         {
             await _queueService.AddWalkInAsync(_businessId, op.Id == Guid.Empty ? null : op.Id, "Walk-in");
-            await LoadQueueAsync();
+            // await LoadQueueAsync();
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
+        }
+        finally
+        {
+            if (column is not null)
+                column.IsAddingWalkIn = false;
         }
     }
 
     [RelayCommand]
     private async Task ServeAsync(QueueEntryResponse entry)
     {
+        entry.IsServing = true;
         try
         {
             await _queueService.StartServingAsync(entry.Id);
-            await LoadQueueAsync();
+            // await LoadQueueAsync();
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
+        }
+        finally
+        {
+            entry.IsServing = false;
         }
     }
 
     [RelayCommand]
     private async Task DoneAsync(QueueEntryResponse entry)
     {
+        entry.IsCompleting = true;
         try
         {
             await _queueService.CompleteAsync(entry.Id);
-            await LoadQueueAsync();
+            // await LoadQueueAsync();
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
+        }
+        finally
+        {
+            entry.IsCompleting = false;
         }
     }
 
     [RelayCommand]
     private async Task NoShowAsync(QueueEntryResponse entry)
     {
+        entry.IsMarkingNoShow = true;
         try
         {
             var confirmed = await _popupService.ShowConfirmAsync("No-show", $"Mark {entry.CustomerName} as a no-show?");
-            if (!confirmed) return;
+            if (!confirmed)
+            {
+                entry.IsMarkingNoShow = false;
+                return;
+            }
 
             await _queueService.NoShowAsync(entry.Id);
-            await LoadQueueAsync();
+            // await LoadQueueAsync();
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
+        }
+        finally
+        {
+            entry.IsMarkingNoShow = false;
         }
     }
 }

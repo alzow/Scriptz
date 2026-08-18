@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.Auth"
+             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
              x:Class="QueueApp.Features.Auth.RegisterPage"
              x:DataType="vm:RegisterPageViewModel"
              Shell.NavBarIsVisible="False"
@@ -144,15 +145,21 @@
                     </VerticalStackLayout>
 
                     <!-- Create Account button -->
-                    <Button Text="Create Account →"
+                    <controls:AlzowLoadingButton Text="Create Account →"
                             Command="{Binding RegisterCommand}"
-                            BackgroundColor="{StaticResource Brown}"
-                            TextColor="{StaticResource White}"
-                            FontAttributes="Bold"
-                            FontSize="16"
-                            CornerRadius="14"
+                            IsLoading="{Binding IsSigningUp}"
                             HeightRequest="54"
-                            Margin="0,8,0,0"/>
+                            Margin="0,8,0,0">
+                        <controls:AlzowLoadingButton.ButtonStyle>
+                            <Style TargetType="Button">
+                                <Setter Property="BackgroundColor" Value="{StaticResource Brown}"/>
+                                <Setter Property="TextColor" Value="{StaticResource White}"/>
+                                <Setter Property="FontAttributes" Value="Bold"/>
+                                <Setter Property="FontSize" Value="16"/>
+                                <Setter Property="CornerRadius" Value="14"/>
+                            </Style>
+                        </controls:AlzowLoadingButton.ButtonStyle>
+                    </controls:AlzowLoadingButton>
 
                     <Label Text="Pay on delivery · No upfront cost"
                            TextColor="{StaticResource TextLight}"
@@ -178,15 +185,6 @@
                 </VerticalStackLayout>
             </VerticalStackLayout>
         </ScrollView>
-
-        <!-- Loading Overlay -->
-        <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#80000000">
-            <ActivityIndicator IsRunning="{Binding IsBusy}"
-                               Color="{StaticResource Orange}"
-                               VerticalOptions="Center"
-                               HorizontalOptions="Center"
-                               Scale="1.5"/>
-        </Grid>
     </Grid>
 
 </ContentPage>

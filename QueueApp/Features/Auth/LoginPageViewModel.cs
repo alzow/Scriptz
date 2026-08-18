@@ -14,6 +14,7 @@ public partial class LoginPageViewModel : BaseViewModel
 
     public string Email { get; set; } = "alzow.sayed01@gmail.com";
     public string Password { get; set; } = "S@yed786";
+    public bool IsSigningIn { get; set; }
 
     public LoginPageViewModel(
         INavigationService navigationService,
@@ -36,16 +37,23 @@ public partial class LoginPageViewModel : BaseViewModel
             return;
         }
 
-
-        var ok = await _authService.SignInAsync(Email.Trim(), Password);
-
-        if (ok)
+        IsSigningIn = true;
+        try
         {
-            await NavigationService.NavigateAsync(NavigationPaths.OperatorQueuePage);
+            var ok = await _authService.SignInAsync(Email.Trim(), Password);
+
+            if (ok)
+            {
+                await NavigationService.NavigateAsync(NavigationPaths.OperatorQueuePage);
+            }
+            else
+            {
+                await _popupService.ShowAlertAsync("Login Failed", "Invalid email or password");
+            }
         }
-        else
+        finally
         {
-            await _popupService.ShowAlertAsync("Login Failed", "Invalid email or password");
+            IsSigningIn = false;
         }
     }
 

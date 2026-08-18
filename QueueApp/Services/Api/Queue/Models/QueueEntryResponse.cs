@@ -12,4 +12,8 @@ public class QueueEntryResponse
     [JsonPropertyName("customer_name")] public string? CustomerName { get; set; }
     [JsonPropertyName("status")] public string Status { get; set; } = "waiting";
     [JsonPropertyName("joined_at")] public DateTime JoinedAt { get; set; }
+
+    [JsonIgnore] public bool IsServing { get; set; }
+    [JsonIgnore] public bool IsCompleting { get; set; }
+    [JsonIgnore] public bool IsMarkingNoShow { get; set; }
 }

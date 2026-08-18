@@ -3,7 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.OperatorQueue"
              xmlns:responses="clr-namespace:QueueApp.Services.Api.Queue.Models"
+             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
              x:Name="Root"
+             NavigationPage.HasNavigationBar="False"
              x:Class="QueueApp.Features.OperatorQueue.OperatorQueuePage"
              x:DataType="vm:OperatorQueuePageViewModel"
              Title="{Binding BusinessName}"
@@ -37,14 +39,22 @@
                                        Text="{Binding Waiting.Count, StringFormat='{0} waiting'}"
                                        FontSize="13" TextColor="{StaticResource Orange}"/>
 
-                                <Button Grid.Row="2"
+                                <controls:AlzowLoadingButton Grid.Row="2"
                                         Text="+ Add walk-in"
-                                        HeightRequest="56" FontSize="17" FontAttributes="Bold"
-                                        CornerRadius="14"
-                                        BackgroundColor="{StaticResource Orange}"
-                                        TextColor="{StaticResource White}"
+                                        Margin="0" HeightRequest="56"
                                         Command="{Binding BindingContext.AddWalkInCommand, Source={x:Reference Root}}"
-                                        CommandParameter="{Binding Operator}"/>
+                                        CommandParameter="{Binding Operator}"
+                                        IsLoading="{Binding IsAddingWalkIn}">
+                                    <controls:AlzowLoadingButton.ButtonStyle>
+                                        <Style TargetType="Button">
+                                            <Setter Property="FontSize" Value="17"/>
+                                            <Setter Property="FontAttributes" Value="Bold"/>
+                                            <Setter Property="CornerRadius" Value="14"/>
+                                            <Setter Property="BackgroundColor" Value="{StaticResource Orange}"/>
+                                            <Setter Property="TextColor" Value="{StaticResource White}"/>
+                                        </Style>
+                                    </controls:AlzowLoadingButton.ButtonStyle>
+                                </controls:AlzowLoadingButton>
 
                                 <CollectionView Grid.Row="3" ItemsSource="{Binding Waiting}">
                                     <CollectionView.ItemTemplate>
@@ -57,24 +67,45 @@
                                                            Text="{Binding CustomerName}"
                                                            VerticalOptions="Center" FontSize="16"
                                                            TextColor="{StaticResource TextDark}"/>
-                                                    <Button Grid.Column="1" Text="Serve"
-                                                            HeightRequest="44" FontSize="14"
-                                                            BackgroundColor="{StaticResource Green}"
-                                                            TextColor="{StaticResource White}"
+                                                    <controls:AlzowLoadingButton Grid.Column="1" Text="Serve"
+                                                            Margin="0" HeightRequest="44"
                                                             Command="{Binding BindingContext.ServeCommand, Source={x:Reference Root}}"
-                                                            CommandParameter="{Binding .}"/>
-                                                    <Button Grid.Column="2" Text="Done"
-                                                            HeightRequest="44" FontSize="14"
-                                                            BackgroundColor="{StaticResource Brown}"
-                                                            TextColor="{StaticResource White}"
+                                                            CommandParameter="{Binding .}"
+                                                            IsLoading="{Binding IsServing}">
+                                                        <controls:AlzowLoadingButton.ButtonStyle>
+                                                            <Style TargetType="Button">
+                                                                <Setter Property="FontSize" Value="14"/>
+                                                                <Setter Property="BackgroundColor" Value="{StaticResource Green}"/>
+                                                                <Setter Property="TextColor" Value="{StaticResource White}"/>
+                                                            </Style>
+                                                        </controls:AlzowLoadingButton.ButtonStyle>
+                                                    </controls:AlzowLoadingButton>
+                                                    <controls:AlzowLoadingButton Grid.Column="2" Text="Done"
+                                                            Margin="0" HeightRequest="44"
                                                             Command="{Binding BindingContext.DoneCommand, Source={x:Reference Root}}"
-                                                            CommandParameter="{Binding .}"/>
-                                                    <Button Grid.Column="3" Text="✕"
-                                                            HeightRequest="44" FontSize="14"
-                                                            BackgroundColor="{StaticResource Red}"
-                                                            TextColor="{StaticResource White}"
+                                                            CommandParameter="{Binding .}"
+                                                            IsLoading="{Binding IsCompleting}">
+                                                        <controls:AlzowLoadingButton.ButtonStyle>
+                                                            <Style TargetType="Button">
+                                                                <Setter Property="FontSize" Value="14"/>
+                                                                <Setter Property="BackgroundColor" Value="{StaticResource Brown}"/>
+                                                                <Setter Property="TextColor" Value="{StaticResource White}"/>
+                                                            </Style>
+                                                        </controls:AlzowLoadingButton.ButtonStyle>
+                                                    </controls:AlzowLoadingButton>
+                                                    <controls:AlzowLoadingButton Grid.Column="3" Text="✕"
+                                                            Margin="0" HeightRequest="44"
                                                             Command="{Binding BindingContext.NoShowCommand, Source={x:Reference Root}}"
-                                                            CommandParameter="{Binding .}"/>
+                                                            CommandParameter="{Binding .}"
+                                                            IsLoading="{Binding IsMarkingNoShow}">
+                                                        <controls:AlzowLoadingButton.ButtonStyle>
+                                                            <Style TargetType="Button">
+                                                                <Setter Property="FontSize" Value="14"/>
+                                                                <Setter Property="BackgroundColor" Value="{StaticResource Red}"/>
+                                                                <Setter Property="TextColor" Value="{StaticResource White}"/>
+                                                            </Style>
+                                                        </controls:AlzowLoadingButton.ButtonStyle>
+                                                    </controls:AlzowLoadingButton>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>
@@ -88,13 +119,14 @@
             </CollectionView>
         </ScrollView>
 
-        <Grid Grid.Row="0" Grid.RowSpan="2" IsVisible="{Binding IsLoading}" BackgroundColor="#80000000">
+        <!-- TODO USE SKELETONS INSTEAD -->
+        <!-- <Grid Grid.Row="0" Grid.RowSpan="2" IsVisible="{Binding IsLoading}" BackgroundColor="#80000000">
             <ActivityIndicator IsRunning="{Binding IsLoading}"
                                Color="{StaticResource Orange}"
                                VerticalOptions="Center"
                                HorizontalOptions="Center"
                                Scale="1.5"/>
-        </Grid>
+        </Grid> -->
 
         <Border Grid.Row="0" Grid.RowSpan="2"
                 IsVisible="{Binding IsEmpty}"
