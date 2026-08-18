@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="QueueApp.Features.Profile.ProfilePage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:QueueApp.Features.Profile"
+             x:DataType="vm:ProfilePageViewModel"
+             Title="Profile"
+             BackgroundColor="{StaticResource Cream}">
+    <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8">
+        <Label Text="Profile" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource TextDark}" HorizontalOptions="Center"/>
+        <Label Text="Account details, T&amp;Cs, and becoming an operator will live here." TextColor="Gray" HorizontalOptions="Center"/>
+    </VerticalStackLayout>
+</ContentPage>

@@ -24,4 +24,6 @@ public static class NavigationPaths
     // ── Main tabbed shell ──────────────────────────────────────────────────────
     public const string MainTabbedPage       = "MainTabbedPage";
     public const string CategoryPickerPage   = "CategoryPickerPage";
+    public const string HistoryPage          = "HistoryPage";
+    public const string ProfilePage          = "ProfilePage";
 }

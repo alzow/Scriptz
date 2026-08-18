@@ -67,7 +67,9 @@ public class SplashScreenPageViewModel : BaseViewModel
     private static string BuildMainTabbedUri(bool includeManageTab)
     {
         var uri = $"/{NavigationPaths.MainTabbedPage}" +
-                  $"?{KnownNavigationParameters.CreateTab}=TabNavigationPage|{NavigationPaths.CategoryPickerPage}";
+                  $"?{KnownNavigationParameters.CreateTab}=TabNavigationPage|{NavigationPaths.CategoryPickerPage}" +
+                  $"&{KnownNavigationParameters.CreateTab}=TabNavigationPage|{NavigationPaths.HistoryPage}" +
+                  $"&{KnownNavigationParameters.CreateTab}=TabNavigationPage|{NavigationPaths.ProfilePage}";
 
         if (includeManageTab)
             uri += $"&{KnownNavigationParameters.CreateTab}=TabNavigationPage|{NavigationPaths.OperatorQueuePage}";
