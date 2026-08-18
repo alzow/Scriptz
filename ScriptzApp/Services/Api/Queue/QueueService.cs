@@ -1,9 +1,10 @@
+using ScriptzApp.Framework.Base;
 using ScriptzApp.Services.Api.Queue.Models;
 
 namespace ScriptzApp.Services.Api.Queue;
 
 // Hides PostgREST filter syntax (e.g. "eq.<guid>") from callers.
-public class QueueService : IQueueService
+public class QueueService : BaseService, IQueueService
 {
     private readonly IQueueApi _api;
 
@@ -13,29 +14,29 @@ public class QueueService : IQueueService
     }
 
     public Task<List<OperatorResponse>> GetOperatorsAsync(Guid businessId) =>
-        _api.GetOperatorsAsync($"eq.{businessId}");
+        ExecuteApiCallAsync(_api.GetOperatorsAsync($"eq.{businessId}"));
 
     public Task<List<QueueEntryResponse>> GetWaitingAsync(Guid businessId) =>
-        _api.GetWaitingAsync($"eq.{businessId}");
+        ExecuteApiCallAsync(_api.GetWaitingAsync($"eq.{businessId}"));
 
     public Task AddWalkInAsync(Guid businessId, Guid? operatorId, string name) =>
-        _api.JoinQueueAsync(new JoinQueueRequest
+        ExecuteApiCallAsync(_api.JoinQueueAsync(new JoinQueueRequest
         {
             BusinessId = businessId,
             OperatorId = operatorId,
             CustomerName = name,
-        });
+        }));
 
     public Task StartServingAsync(Guid entryId) =>
-        _api.StartServingAsync(new EntryIdRequest { EntryId = entryId });
+        ExecuteApiCallAsync(_api.StartServingAsync(new EntryIdRequest { EntryId = entryId }));
 
     public Task CompleteAsync(Guid entryId) =>
-        _api.CompleteEntryAsync(new EntryIdRequest { EntryId = entryId });
+        ExecuteApiCallAsync(_api.CompleteEntryAsync(new EntryIdRequest { EntryId = entryId }));
 
     public Task NoShowAsync(Guid entryId) =>
-        _api.MarkNoShowAsync(new EntryIdRequest { EntryId = entryId });
+        ExecuteApiCallAsync(_api.MarkNoShowAsync(new EntryIdRequest { EntryId = entryId }));
 
     public Task HeartbeatAsync(Guid businessId) =>
-        _api.HeartbeatAsync($"eq.{businessId}",
-            new Dictionary<string, object> { ["last_seen_at"] = DateTime.UtcNow });
+        ExecuteApiCallAsync(_api.HeartbeatAsync($"eq.{businessId}",
+            new Dictionary<string, object> { ["last_seen_at"] = DateTime.UtcNow }));
 }

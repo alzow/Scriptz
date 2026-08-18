@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-		<DefineConstants>$(DefineConstants);USE_STUBS</DefineConstants>
+		<DefineConstants>$(DefineConstants);</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup>
