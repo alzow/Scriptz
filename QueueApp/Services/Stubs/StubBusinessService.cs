@@ -12,7 +12,33 @@ public class StubBusinessService : IBusinessService
     public Task<Guid> GetOwnedBusinessIdAsync() => Task.FromResult(_defaultBusinessId);
 
     public Task<BusinessResponse?> GetBusinessAsync(Guid businessId)
-        => Task.FromResult<BusinessResponse?>(new BusinessResponse { Id = businessId, Name = "My Test Barber" });
+        => Task.FromResult<BusinessResponse?>(new BusinessResponse
+        {
+            Id = businessId,
+            Name = "My Test Barber",
+            Category = "barber",
+            Mode = "queue",
+            Suburb = "Lenasia",
+            Address = "123 Test Street",
+            IsActive = true,
+            LastSeenAt = DateTime.UtcNow,
+        });
+
+    public Task<List<BusinessResponse>> GetBusinessesAsync(string category, string suburb = "Lenasia")
+        => Task.FromResult(new List<BusinessResponse>
+        {
+            new()
+            {
+                Id = _defaultBusinessId,
+                Name = "My Test Barber",
+                Category = category,
+                Mode = "queue",
+                Suburb = suburb,
+                Address = "123 Test Street",
+                IsActive = true,
+                LastSeenAt = DateTime.UtcNow,
+            },
+        });
 
     public Task HeartbeatAsync(Guid businessId) => Task.CompletedTask;
 }

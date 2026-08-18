@@ -32,4 +32,7 @@ public class QueueService : BaseService, IQueueService
 
     public Task NoShowAsync(Guid entryId) =>
         ExecuteApiCallAsync(_api.MarkNoShowAsync(new EntryIdRequest { EntryId = entryId }));
+
+    public Task<List<QueueSummaryRow>> GetQueueSummaryAsync(Guid businessId) =>
+        ExecuteApiCallAsync(_api.GetQueueSummaryAsync(new BusinessIdRequest { BusinessId = businessId }));
 }

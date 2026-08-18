@@ -24,4 +24,7 @@ public interface IQueueApi
         [AliasAs("business_id")] string businessIdEq,
         [AliasAs("status")] string statusEq = "eq.waiting",
         [AliasAs("order")] string order = "joined_at.asc");
+
+    [Post("/rpc/business_queue_summary")]
+    Task<List<QueueSummaryRow>> GetQueueSummaryAsync([Body] BusinessIdRequest request);
 }

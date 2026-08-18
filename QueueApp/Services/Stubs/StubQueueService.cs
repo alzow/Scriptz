@@ -46,4 +46,20 @@ public class StubQueueService : IQueueService
         if (entry != null) entry.Status = "no_show";
         return Task.CompletedTask;
     }
+
+    public Task<List<QueueSummaryRow>> GetQueueSummaryAsync(Guid businessId)
+    {
+        var rows = _entries
+            .Where(e => e.BusinessId == businessId && e.Status == "waiting")
+            .GroupBy(e => e.OperatorId)
+            .Select(g => new QueueSummaryRow
+            {
+                OperatorId = g.Key,
+                OperatorName = g.Key.HasValue ? "Operator" : "Any available",
+                WaitingCount = g.Count(),
+                NewJoinWaitMinutes = g.Count() * 10,
+            })
+            .ToList();
+        return Task.FromResult(rows);
+    }
 }

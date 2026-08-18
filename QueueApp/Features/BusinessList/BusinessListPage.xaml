@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:QueueApp.Features.BusinessList"
+             xmlns:responses="clr-namespace:QueueApp.Services.Api.Business.Models"
+             x:Name="Root"
+             x:Class="QueueApp.Features.BusinessList.BusinessListPage"
+             x:DataType="vm:BusinessListPageViewModel"
+             Title="{Binding Title}"
+             Style="{StaticResource NavigationPageStyle}">
+
+    <Grid>
+        <CollectionView ItemsSource="{Binding Businesses}"
+                         IsVisible="{Binding IsEmpty, Converter={StaticResource InvertedBoolConverter}}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="responses:BusinessResponse">
+                    <Border Style="{StaticResource brd16_White}"
+                            Padding="16" Margin="12,6"
+                            Opacity="{Binding IsAvailableNow, Converter={StaticResource BoolToOpacityConverter}}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding BindingContext.OpenBusinessCommand, Source={x:Reference Root}}"
+                                CommandParameter="{Binding .}"/>
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{Binding Name}" Style="{StaticResource lbl18_Bold_TextDark}"/>
+                            <Label Text="{Binding Address}" Style="{StaticResource lbl13_Regular_TextLight}"/>
+                            <Label Text="Currently closed" Style="{StaticResource lbl13_Regular_TextLight}"
+                                   IsVisible="{Binding IsAvailableNow, Converter={StaticResource InvertedBoolConverter}}"/>
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Label Text="No businesses here yet."
+               Style="{StaticResource lbl18_Bold_TextDark}"
+               IsVisible="{Binding IsEmpty}"
+               HorizontalOptions="Center" VerticalOptions="Center"/>
+
+        <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                            HorizontalOptions="Center" VerticalOptions="Center"/>
+    </Grid>
+
+</ContentPage>

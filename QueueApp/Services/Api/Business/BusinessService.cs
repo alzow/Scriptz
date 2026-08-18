@@ -36,6 +36,9 @@ public class BusinessService : BaseService, IBusinessService
         return businesses.FirstOrDefault();
     }
 
+    public Task<List<BusinessResponse>> GetBusinessesAsync(string category, string suburb = "Lenasia") =>
+        ExecuteApiCallAsync(_api.GetBusinessesByCategoryAsync($"eq.{category}", $"eq.{suburb}"));
+
     public Task HeartbeatAsync(Guid businessId) =>
         ExecuteApiCallAsync(_api.HeartbeatAsync($"eq.{businessId}",
             new Dictionary<string, object> { ["last_seen_at"] = DateTime.UtcNow }));

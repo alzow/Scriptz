@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:QueueApp.Features.BusinessDetail"
+             xmlns:responses="clr-namespace:QueueApp.Services.Api.Queue.Models"
+             x:Class="QueueApp.Features.BusinessDetail.BusinessDetailPage"
+             x:DataType="vm:BusinessDetailPageViewModel"
+             Title="{Binding Business.Name}"
+             Style="{StaticResource NavigationPageStyle}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <Label Text="{Binding Business.Name}" Style="{StaticResource lbl24_Bold_TextDark}"/>
+            <Label Text="{Binding Business.Address}" Style="{StaticResource lbl13_Regular_TextLight}"/>
+
+            <VerticalStackLayout Spacing="10" IsVisible="{Binding IsQueueMode}">
+                <Label Text="Live queue" Style="{StaticResource lbl18_Bold_TextDark}"/>
+                <VerticalStackLayout Spacing="0"
+                                      BindableLayout.ItemsSource="{Binding QueueSummary}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="responses:QueueSummaryRow">
+                            <Grid ColumnDefinitions="*,Auto" Padding="0,6">
+                                <Label Grid.Column="0"
+                                       Text="{Binding OperatorName}"
+                                       Style="{StaticResource lbl16_Regular_TextDark}"/>
+                                <Label Grid.Column="1" Style="{StaticResource lbl13_Regular_TextLight}">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding WaitingCount}"/>
+                                            <Span Text=" waiting · ~"/>
+                                            <Span Text="{Binding NewJoinWaitMinutes}"/>
+                                            <Span Text=" min"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="10" IsVisible="{Binding IsBookingMode}">
+                <Label Text="Booking" Style="{StaticResource lbl18_Bold_TextDark}"/>
+                <Label Text="Online booking for this business is coming soon."
+                       Style="{StaticResource lbl13_Regular_TextLight}"/>
+            </VerticalStackLayout>
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

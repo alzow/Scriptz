@@ -14,7 +14,13 @@ public interface IBusinessApi
     [Get("/businesses")]
     Task<List<BusinessResponse>> GetBusinessesAsync(
         [AliasAs("id")] string idEq,
-        [AliasAs("select")] string select = "id,name");
+        [AliasAs("select")] string select = "*");
+
+    [Get("/businesses")]
+    Task<List<BusinessResponse>> GetBusinessesByCategoryAsync(
+        [AliasAs("category")] string categoryEq,
+        [AliasAs("suburb")] string suburbEq,
+        [AliasAs("select")] string select = "*");
 
     // Presence heartbeat
     [Patch("/businesses")]

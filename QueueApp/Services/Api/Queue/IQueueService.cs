@@ -9,4 +9,5 @@ public interface IQueueService
     Task StartServingAsync(Guid entryId);
     Task CompleteAsync(Guid entryId);
     Task NoShowAsync(Guid entryId);
+    Task<List<QueueSummaryRow>> GetQueueSummaryAsync(Guid businessId);
 }
