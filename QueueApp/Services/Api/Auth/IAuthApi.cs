@@ -11,4 +11,7 @@ public interface IAuthApi
 
     [Post("/auth/v1/signup")]
     Task<AuthTokenResponse> SignUpAsync([Body] SignUpRequest request);
+
+    [Post("/auth/v1/token?grant_type=refresh_token")]
+    Task<AuthTokenResponse> RefreshTokenAsync([Body] RefreshTokenRequest request);
 }

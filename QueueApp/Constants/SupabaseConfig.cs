@@ -13,5 +13,6 @@ public static class SupabaseConfig
     // Refit-backed IAuthApi and would otherwise create a circular HttpClientFactory resolution).
     public const string AccessTokenKey = "sb_access_token";
     public const string RefreshTokenKey = "sb_refresh_token";
+    public const string TokenExpiryKey = "sb_token_expiry_utc";
     public const string UserIdKey = "sb_user_id";
 }

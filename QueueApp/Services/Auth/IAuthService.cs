@@ -6,7 +6,8 @@ public interface IAuthService
     Task<string?> GetUserIdAsync();
     Task<bool> SignInAsync(string email, string password);
     Task<bool> SignUpAsync(string email, string password);
-    Task SetSessionAsync(string accessToken, string? refreshToken);
+    Task<bool> EnsureValidSessionAsync();
+    Task SetSessionAsync(string accessToken, string? refreshToken, int expiresInSeconds);
     Task ClearSessionAsync();
     Task<bool> IsAuthenticatedAsync();
 }

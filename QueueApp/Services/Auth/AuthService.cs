@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using QueueApp.Constants;
 using QueueApp.Services.Api.Auth;
 using QueueApp.Services.Api.Auth.Models;
@@ -25,7 +26,7 @@ public class AuthService : IAuthService
         try
         {
             var response = await _authApi.SignInAsync(new SignInRequest { Email = email, Password = password });
-            await SetSessionAsync(response.AccessToken, response.RefreshToken);
+            await SetSessionAsync(response.AccessToken, response.RefreshToken, response.ExpiresIn);
 
             if (response.User is not null)
                 await _secureStorage.SetAsync(SupabaseConfig.UserIdKey, response.User.Id.ToString());
@@ -47,7 +48,7 @@ public class AuthService : IAuthService
 
             if (!string.IsNullOrEmpty(response.AccessToken))
             {
-                await SetSessionAsync(response.AccessToken, response.RefreshToken);
+                await SetSessionAsync(response.AccessToken, response.RefreshToken, response.ExpiresIn);
 
                 if (response.User is not null)
                     await _secureStorage.SetAsync(SupabaseConfig.UserIdKey, response.User.Id.ToString());
@@ -62,20 +63,59 @@ public class AuthService : IAuthService
         }
     }
 
-    public async Task SetSessionAsync(string accessToken, string? refreshToken)
+    public async Task<bool> EnsureValidSessionAsync()
+    {
+        var token = await _secureStorage.GetAsync(SupabaseConfig.AccessTokenKey);
+        var refreshToken = await _secureStorage.GetAsync(SupabaseConfig.RefreshTokenKey);
+        var expiryRaw = await _secureStorage.GetAsync(SupabaseConfig.TokenExpiryKey);
+
+        if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(refreshToken))
+            return false;
+
+        var stillValid = DateTime.TryParse(
+            expiryRaw,
+            null,
+            System.Globalization.DateTimeStyles.RoundtripKind,
+            out var expiryUtc)
+            && expiryUtc > DateTime.UtcNow.AddSeconds(60);
+
+        if (stillValid)
+            return true;
+
+        try
+        {
+            Debug.WriteLine("Access token expired, attempting to refresh...");
+            var response = await _authApi.RefreshTokenAsync(new RefreshTokenRequest { RefreshToken = refreshToken });
+            await SetSessionAsync(response.AccessToken, response.RefreshToken, response.ExpiresIn);
+            Debug.WriteLine("Refreshed Token successfully.");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Token refresh failed: {ex.Message}");
+            await ClearSessionAsync();
+            return false;
+        }
+    }
+
+    public async Task SetSessionAsync(string accessToken, string? refreshToken, int expiresInSeconds)
     {
         await _secureStorage.SetAsync(SupabaseConfig.AccessTokenKey, accessToken);
         if (!string.IsNullOrEmpty(refreshToken))
             await _secureStorage.SetAsync(SupabaseConfig.RefreshTokenKey, refreshToken);
+
+        var expiryUtc = DateTime.UtcNow.AddSeconds(expiresInSeconds);
+        await _secureStorage.SetAsync(SupabaseConfig.TokenExpiryKey, expiryUtc.ToString("O"));
     }
 
     public async Task ClearSessionAsync()
     {
         await _secureStorage.RemoveAsync(SupabaseConfig.AccessTokenKey);
         await _secureStorage.RemoveAsync(SupabaseConfig.RefreshTokenKey);
+        await _secureStorage.RemoveAsync(SupabaseConfig.TokenExpiryKey);
         await _secureStorage.RemoveAsync(SupabaseConfig.UserIdKey);
     }
 
-    public async Task<bool> IsAuthenticatedAsync()
-        => !string.IsNullOrEmpty(await GetAccessTokenAsync());
+    public Task<bool> IsAuthenticatedAsync()
+        => EnsureValidSessionAsync();
 }
