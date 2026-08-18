@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:QueueApp.Features.CategoryPicker"
+             x:Class="QueueApp.Features.CategoryPicker.CategoryPickerPage"
+             x:DataType="vm:CategoryPickerPageViewModel"
+             Title="Browse"
+             BackgroundColor="{StaticResource Cream}">
+
+    <Label Text="Browse — coming in Step 5"
+           FontSize="18"
+           FontAttributes="Bold"
+           TextColor="{StaticResource TextDark}"
+           VerticalOptions="Center"
+           HorizontalOptions="Center"/>
+
+</ContentPage>

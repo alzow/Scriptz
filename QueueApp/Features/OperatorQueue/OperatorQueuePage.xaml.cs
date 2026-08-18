@@ -1,4 +1,4 @@
-namespace QueueApp.Features.Queue;
+namespace QueueApp.Features.OperatorQueue;
 
 public partial class OperatorQueuePage : ContentPage
 {

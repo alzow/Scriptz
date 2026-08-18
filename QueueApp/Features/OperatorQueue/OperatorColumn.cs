@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using QueueApp.Services.Api.Queue.Models;
 
-namespace QueueApp.Features.Queue;
+namespace QueueApp.Features.OperatorQueue;
 
 public class OperatorColumn
 {

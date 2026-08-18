@@ -20,4 +20,8 @@ public static class NavigationPaths
 
     // ── Queue (operator counter-tablet) ──────────────────────────────────────
     public const string OperatorQueuePage    = "OperatorQueuePage";
+
+    // ── Main tabbed shell ──────────────────────────────────────────────────────
+    public const string MainTabbedPage       = "MainTabbedPage";
+    public const string CategoryPickerPage   = "CategoryPickerPage";
 }

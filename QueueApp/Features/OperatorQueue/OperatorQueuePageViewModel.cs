@@ -10,7 +10,7 @@ using QueueApp.Services.Popup;
 using QueueApp.Services.Realtime;
 using QueueApp.Services.Storage;
 
-namespace QueueApp.Features.Queue;
+namespace QueueApp.Features.OperatorQueue;
 
 public partial class OperatorQueuePageViewModel : BaseViewModel
 {
