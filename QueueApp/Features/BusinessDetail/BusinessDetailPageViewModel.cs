@@ -6,6 +6,7 @@ using MPowerKit.Navigation;
 using QueueApp.Framework.Base;
 using QueueApp.Services.Api.Business;
 using QueueApp.Services.Api.Business.Models;
+using QueueApp.Services.Api.Profile;
 using QueueApp.Services.Api.Queue;
 using QueueApp.Services.Api.Queue.Models;
 using QueueApp.Services.Auth;
@@ -18,6 +19,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
 {
     private readonly IBusinessService _businessService;
     private readonly IQueueService _queueService;
+    private readonly IProfileService _profileService;
     private readonly IAuthService _authService;
     private readonly IQueueRealtimeService _realtimeService;
     private readonly SemaphoreSlim _loadLock = new(1, 1);
@@ -28,12 +30,14 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         ISecureStorageService secureStorageService,
         IBusinessService businessService,
         IQueueService queueService,
+        IProfileService profileService,
         IAuthService authService,
         IQueueRealtimeService realtimeService)
         : base(navigationService, secureStorageService)
     {
         _businessService = businessService;
         _queueService = queueService;
+        _profileService = profileService;
         _authService = authService;
         _realtimeService = realtimeService;
     }
@@ -140,7 +144,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             if (string.IsNullOrEmpty(userId))
                 throw new InvalidOperationException("No signed-in user id — should never happen post-splash-gate.");
 
-            await _queueService.JoinQueueAsync(_businessId, row.OperatorId, Guid.Parse(userId));
+            var customerName = await _profileService.GetMyDisplayNameAsync(Guid.Parse(userId));
+            await _queueService.JoinQueueAsync(_businessId, row.OperatorId, Guid.Parse(userId), customerName);
             await RefreshQueueAsync();
             await RefreshMyStatusAsync();
         }

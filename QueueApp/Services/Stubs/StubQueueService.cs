@@ -74,7 +74,7 @@ public class StubQueueService : IQueueService
         return Task.FromResult(rows);
     }
 
-    public Task<QueueEntryResponse> JoinQueueAsync(Guid businessId, Guid? operatorId, Guid customerId)
+    public Task<QueueEntryResponse> JoinQueueAsync(Guid businessId, Guid? operatorId, Guid customerId, string? customerName)
     {
         var entry = new QueueEntryResponse
         {
@@ -82,6 +82,7 @@ public class StubQueueService : IQueueService
             BusinessId = businessId,
             OperatorId = operatorId,
             CustomerId = customerId,
+            CustomerName = customerName,
             Status = "waiting",
             JoinedAt = DateTime.UtcNow,
         };

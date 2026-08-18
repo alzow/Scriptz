@@ -36,12 +36,13 @@ public class QueueService : BaseService, IQueueService
     public Task<List<QueueSummaryRow>> GetQueueSummaryAsync(Guid businessId) =>
         ExecuteApiCallAsync(_api.GetQueueSummaryAsync(new BusinessIdRequest { BusinessId = businessId }));
 
-    public Task<QueueEntryResponse> JoinQueueAsync(Guid businessId, Guid? operatorId, Guid customerId) =>
+    public Task<QueueEntryResponse> JoinQueueAsync(Guid businessId, Guid? operatorId, Guid customerId, string? customerName) =>
         ExecuteApiCallAsync(_api.JoinQueueAsync(new JoinQueueRequest
         {
             BusinessId = businessId,
             OperatorId = operatorId,
             CustomerId = customerId,
+            CustomerName = customerName,
         }));
 
     public Task<QueueEntryResponse> CancelEntryAsync(Guid entryId) =>
