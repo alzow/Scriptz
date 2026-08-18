@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Supabase.Realtime;
 using Supabase.Realtime.PostgresChanges;
 using ScriptzApp.Constants;
@@ -35,11 +36,17 @@ public class QueueRealtimeService : IQueueRealtimeService
         }
 
         await _client.ConnectAsync();
+        Debug.WriteLine("[Realtime] connected");
 
         _channel = _client.Channel("realtime", "public", "queue_entries", "business_id", businessId.ToString(), null!);
-        _channel.AddPostgresChangeHandler(PostgresChangesOptions.ListenType.All, async (_, _) => await onChange());
+        _channel.AddPostgresChangeHandler(PostgresChangesOptions.ListenType.All, async (_, _) =>
+        {
+            Debug.WriteLine($"[Realtime] event received {DateTime.Now:HH:mm:ss}");
+            await onChange();
+        });
 
         await _channel.Subscribe();
+        Debug.WriteLine($"[Realtime] subscribed to business {businessId}");
     }
 
     public Task UnsubscribeAsync()

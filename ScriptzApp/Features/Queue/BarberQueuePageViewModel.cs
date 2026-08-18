@@ -42,6 +42,10 @@ public partial class BarberQueuePageViewModel : BaseViewModel
         {
             await base.OnLoadedAsync(parameters);
             await LoadQueueAsync();
+
+            await _realtimeService.SubscribeAsync(_businessId,
+            async () => await MainThread.InvokeOnMainThreadAsync(LoadQueueAsync));
+            StartHeartbeat();
         }
         catch (Exception ex)
         {
@@ -51,9 +55,7 @@ public partial class BarberQueuePageViewModel : BaseViewModel
 
     public override async Task OnAppearingAsync()
     {
-        await _realtimeService.SubscribeAsync(_businessId,
-            async () => await MainThread.InvokeOnMainThreadAsync(LoadQueueAsync));
-        StartHeartbeat();
+        
     }
 
     public override async Task OnDisappearingAsync()
