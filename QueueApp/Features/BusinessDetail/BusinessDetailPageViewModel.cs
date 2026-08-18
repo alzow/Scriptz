@@ -89,8 +89,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             await _realtimeService.SubscribeAsync(_businessId,
                 async () => await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    await RefreshQueueAsync();
                     await RefreshMyStatusAsync();
+                    await RefreshQueueAsync();
                 }));
         }
         catch (Exception ex)
