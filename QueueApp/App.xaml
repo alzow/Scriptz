@@ -11,6 +11,8 @@
                 <ResourceDictionary Source="Resources/Styles/LabelStyle.xaml"/>
                 <ResourceDictionary Source="Resources/Styles/ButtonStyle.xaml"/>
                 <ResourceDictionary Source="Resources/Styles/BorderStyle.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/FrameStyle.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/EntryStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Navigation bar styling -->

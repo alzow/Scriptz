@@ -32,7 +32,7 @@ public class SplashScreenPageViewModel : BaseViewModel
 
             var isValid = await _authService.EnsureValidSessionAsync();
 
-            if (!isValid)
+            if (isValid)
             {
                 await _navigationService.NavigateAsync($"/{NavigationPaths.LoginPage}");
                 return;

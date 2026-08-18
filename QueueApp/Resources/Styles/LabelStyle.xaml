@@ -9,6 +9,12 @@
         Only add a new key here when an existing one doesn't already cover the combination.
     -->
 
+    <!-- AlzowEntry floating-label placeholder -->
+    <Style x:Key="PlaceHolderLabelStyle" TargetType="Label">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="TextColor" Value="{StaticResource TextLight}"/>
+    </Style>
+
     <!-- 11 -->
     <Style x:Key="lbl11_Bold_TextMid" TargetType="Label" BasedOn="{StaticResource SectionTitle}"/>
     <Style x:Key="lbl11_Bold_White" TargetType="Label">

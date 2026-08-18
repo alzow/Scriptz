@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using CommunityToolkit.Maui;
 using MPowerKit.Navigation;
 using MPowerKit.Popups;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 
 namespace QueueApp;
 
@@ -16,6 +17,7 @@ public static class MauiProgram
             .UseMauiCommunityToolkit()
             .UseMPowerKitNavigation(NavigationStartup.Configure)
             .UseMPowerKitPopups()
+            .UseSkiaSharp()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

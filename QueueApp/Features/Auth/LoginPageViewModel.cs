@@ -4,6 +4,7 @@ using QueueApp.Framework.Base;
 using QueueApp.Services.Auth;
 using QueueApp.Services.Storage;
 using QueueApp.Services.Popup;
+using QueueApp.Shared.Templates.AlzowEntry.Validators;
 
 namespace QueueApp.Features.Auth;
 
@@ -15,6 +16,11 @@ public partial class LoginPageViewModel : BaseViewModel
     public string Email { get; set; } = "alzow.sayed01@gmail.com";
     public string Password { get; set; } = "S@yed786";
     public bool IsSigningIn { get; set; }
+    public bool IsFormValid { get; set; }
+
+    public ISharedStateManager FormStateManager { get; } = new SharedStateManager();
+    public IValidator EmailValidator { get; } = new RequiredValidator("Enter your email.");
+    public IValidator PasswordValidator { get; } = new RequiredValidator("Enter your password.");
 
     public LoginPageViewModel(
         INavigationService navigationService,
@@ -25,6 +31,7 @@ public partial class LoginPageViewModel : BaseViewModel
     {
         _authService = authService;
         _popupService = popupService;
+        FormStateManager.ValidationStateChanged += isValid => IsFormValid = isValid;
     }
 
     // TODO (Step 5b): swap for Supabase phone-OTP sign-in. Token pipeline stays the same.
