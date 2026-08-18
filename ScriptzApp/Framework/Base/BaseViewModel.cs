@@ -68,26 +68,6 @@ public abstract class BaseViewModel : ObservableObject,
     }
     #endregion
 
-    protected async Task ExecuteAsync(Func<Task> operation, string? loadingMessage = null)
-    {
-        if (IsBusy)
-            return;
-
-        try
-        {
-            IsBusy = true;
-            await operation();
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
     protected virtual Task HandleExceptionAsync(Exception exception)
     {
         System.Diagnostics.Debug.WriteLine($"Error: {exception.Message}");
