@@ -88,26 +88,28 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
             IsLoading = true;
 
             var operators = await _operatorService.GetOperatorsAsync(_businessId);
-            var waiting = await _queueService.GetWaitingAsync(_businessId);
+            var active = await _queueService.GetActiveEntriesAsync(_businessId);
 
             var rebuilt = new List<OperatorColumn>();
 
             foreach (var op in operators.OrderBy(o => o.SortOrder))
             {
                 var column = new OperatorColumn { Operator = op };
-                foreach (var entry in waiting.Where(e => e.OperatorId == op.Id))
+                column.Serving = active.FirstOrDefault(e => e.OperatorId == op.Id && e.Status == "serving");
+                foreach (var entry in active.Where(e => e.OperatorId == op.Id && e.Status == "waiting"))
                     column.Waiting.Add(entry);
                 rebuilt.Add(column);
             }
 
-            var unassigned = waiting.Where(e => e.OperatorId is null).ToList();
+            var unassigned = active.Where(e => e.OperatorId is null).ToList();
             if (unassigned.Count > 0)
             {
                 var column = new OperatorColumn
                 {
                     Operator = new OperatorResponse { DisplayName = "Any available" },
                 };
-                foreach (var entry in unassigned)
+                column.Serving = unassigned.FirstOrDefault(e => e.Status == "serving");
+                foreach (var entry in unassigned.Where(e => e.Status == "waiting"))
                     column.Waiting.Add(entry);
                 rebuilt.Add(column);
             }

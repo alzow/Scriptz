@@ -9,8 +9,11 @@ public class StubQueueService : IQueueService
 {
     private readonly List<QueueEntryResponse> _entries = new();
 
-    public Task<List<QueueEntryResponse>> GetWaitingAsync(Guid businessId)
-        => Task.FromResult(_entries.Where(e => e.Status == "waiting").OrderBy(e => e.JoinedAt).ToList());
+    public Task<List<QueueEntryResponse>> GetActiveEntriesAsync(Guid businessId)
+        => Task.FromResult(_entries
+            .Where(e => e.BusinessId == businessId && (e.Status == "waiting" || e.Status == "serving"))
+            .OrderBy(e => e.JoinedAt)
+            .ToList());
 
     public Task AddWalkInAsync(Guid businessId, Guid? operatorId, string name)
     {
@@ -29,7 +32,15 @@ public class StubQueueService : IQueueService
     public Task StartServingAsync(Guid entryId)
     {
         var entry = _entries.FirstOrDefault(e => e.Id == entryId);
-        if (entry != null) entry.Status = "serving";
+        if (entry is null || entry.Status != "waiting")
+            throw new InvalidOperationException("entry not in waiting state");
+
+        var alreadyServing = _entries.Any(e =>
+            e.BusinessId == entry.BusinessId && e.OperatorId == entry.OperatorId && e.Status == "serving");
+        if (alreadyServing)
+            throw new InvalidOperationException("this operator is already serving another customer");
+
+        entry.Status = "serving";
         return Task.CompletedTask;
     }
 
@@ -62,4 +73,57 @@ public class StubQueueService : IQueueService
             .ToList();
         return Task.FromResult(rows);
     }
+
+    public Task<QueueEntryResponse> JoinQueueAsync(Guid businessId, Guid? operatorId, Guid customerId)
+    {
+        var entry = new QueueEntryResponse
+        {
+            Id = Guid.NewGuid(),
+            BusinessId = businessId,
+            OperatorId = operatorId,
+            CustomerId = customerId,
+            Status = "waiting",
+            JoinedAt = DateTime.UtcNow,
+        };
+        _entries.Add(entry);
+        return Task.FromResult(entry);
+    }
+
+    public Task<QueueEntryResponse> CancelEntryAsync(Guid entryId)
+    {
+        var entry = _entries.FirstOrDefault(e => e.Id == entryId);
+        if (entry != null) entry.Status = "cancelled";
+        return Task.FromResult(entry ?? new QueueEntryResponse { Id = entryId, Status = "cancelled" });
+    }
+
+    public Task<MyQueueStatusResponse?> GetMyQueueStatusAsync(Guid businessId)
+    {
+        var waiting = _entries
+            .Where(e => e.BusinessId == businessId && (e.Status == "waiting" || e.Status == "serving"))
+            .OrderBy(e => e.JoinedAt)
+            .ToList();
+
+        var mine = waiting.LastOrDefault();
+        if (mine is null)
+            return Task.FromResult<MyQueueStatusResponse?>(null);
+
+        var position = waiting
+            .Where(e => e.OperatorId == mine.OperatorId)
+            .OrderBy(e => e.JoinedAt)
+            .ToList()
+            .IndexOf(mine) + 1;
+
+        return Task.FromResult<MyQueueStatusResponse?>(new MyQueueStatusResponse
+        {
+            EntryId = mine.Id,
+            OperatorId = mine.OperatorId,
+            OperatorName = mine.OperatorId.HasValue ? "Operator" : "Any available",
+            Position = position,
+            Status = mine.Status,
+            JoinedAt = mine.JoinedAt,
+        });
+    }
+
+    public Task<decimal?> GetEntryWaitMinutesAsync(Guid entryId)
+        => Task.FromResult<decimal?>(10);
 }

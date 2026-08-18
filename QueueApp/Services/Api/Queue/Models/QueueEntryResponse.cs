@@ -1,8 +1,9 @@
 using System.Text.Json.Serialization;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace QueueApp.Services.Api.Queue.Models;
 
-public class QueueEntryResponse
+public partial class QueueEntryResponse : ObservableObject
 {
     [JsonPropertyName("id")] public Guid Id { get; set; }
     [JsonPropertyName("business_id")] public Guid BusinessId { get; set; }
@@ -13,7 +14,7 @@ public class QueueEntryResponse
     [JsonPropertyName("status")] public string Status { get; set; } = "waiting";
     [JsonPropertyName("joined_at")] public DateTime JoinedAt { get; set; }
 
-    [JsonIgnore] public bool IsServing { get; set; }
-    [JsonIgnore] public bool IsCompleting { get; set; }
-    [JsonIgnore] public bool IsMarkingNoShow { get; set; }
+    [JsonIgnore] [ObservableProperty] private bool _isServing;
+    [JsonIgnore] [ObservableProperty] private bool _isCompleting;
+    [JsonIgnore] [ObservableProperty] private bool _isMarkingNoShow;
 }

@@ -7,7 +7,10 @@ public interface IQueueApi
 {
     // Engine RPC calls
     [Post("/rpc/join_queue")]
-    Task JoinQueueAsync([Body] JoinQueueRequest request);
+    Task<QueueEntryResponse> JoinQueueAsync([Body] JoinQueueRequest request);
+
+    [Post("/rpc/cancel_entry")]
+    Task<QueueEntryResponse> CancelEntryAsync([Body] EntryIdRequest request);
 
     [Post("/rpc/start_serving")]
     Task StartServingAsync([Body] EntryIdRequest request);
@@ -18,11 +21,17 @@ public interface IQueueApi
     [Post("/rpc/mark_no_show")]
     Task MarkNoShowAsync([Body] EntryIdRequest request);
 
+    [Post("/rpc/my_queue_status")]
+    Task<List<MyQueueStatusResponse>> GetMyQueueStatusAsync([Body] BusinessIdRequest request);
+
+    [Post("/rpc/queue_entry_wait_minutes")]
+    Task<decimal?> GetEntryWaitMinutesAsync([Body] QueueEntryIdRequest request);
+
     // Reads (PostgREST filter syntax, e.g. "eq.<guid>")
     [Get("/queue_entries")]
-    Task<List<QueueEntryResponse>> GetWaitingAsync(
+    Task<List<QueueEntryResponse>> GetActiveEntriesAsync(
         [AliasAs("business_id")] string businessIdEq,
-        [AliasAs("status")] string statusEq = "eq.waiting",
+        [AliasAs("status")] string statusEq = "in.(waiting,serving)",
         [AliasAs("order")] string order = "joined_at.asc");
 
     [Post("/rpc/business_queue_summary")]

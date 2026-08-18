@@ -24,7 +24,7 @@
                         <Border Style="{StaticResource brd16_White}"
                                 Margin="8" Padding="16" WidthRequest="300"
                                 HeightRequest="600">
-                            <Grid RowDefinitions="Auto,Auto,Auto,*" RowSpacing="12">
+                            <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="12">
 
                                 <Label Grid.Row="0"
                                        Text="{Binding Operator.DisplayName}"
@@ -41,7 +41,32 @@
                                         IsLoading="{Binding IsAddingWalkIn}"
                                         ButtonStyle="{StaticResource btn17_Bold_Orange}"/>
 
-                                <CollectionView Grid.Row="3" ItemsSource="{Binding Waiting}">
+                                <!-- NOW SERVING -->
+                                <Border Grid.Row="3"
+                                        Style="{StaticResource brd12_Cream}"
+                                        Padding="12"
+                                        IsVisible="{Binding Serving, Converter={StaticResource IsNotNullConverter}}">
+                                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
+                                        <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                            <Label Text="Now serving" Style="{StaticResource lbl13_Bold_Orange}"/>
+                                            <Label Text="{Binding Serving.CustomerName}" Style="{StaticResource lbl16_Regular_TextDark}"/>
+                                        </VerticalStackLayout>
+                                        <controls:AlzowLoadingButton Grid.Column="1" Text="Done"
+                                                Margin="0" HeightRequest="44"
+                                                Command="{Binding BindingContext.DoneCommand, Source={x:Reference Root}}"
+                                                CommandParameter="{Binding Serving}"
+                                                IsLoading="{Binding Serving.IsCompleting}"
+                                                ButtonStyle="{StaticResource btn14_Regular_Brown}"/>
+                                        <controls:AlzowLoadingButton Grid.Column="2" Text="✕"
+                                                Margin="0" HeightRequest="44"
+                                                Command="{Binding BindingContext.NoShowCommand, Source={x:Reference Root}}"
+                                                CommandParameter="{Binding Serving}"
+                                                IsLoading="{Binding Serving.IsMarkingNoShow}"
+                                                ButtonStyle="{StaticResource btn14_Regular_Red}"/>
+                                    </Grid>
+                                </Border>
+
+                                <CollectionView Grid.Row="4" ItemsSource="{Binding Waiting}">
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="responses:QueueEntryResponse">
                                             <Border Style="{StaticResource brd12_Cream}"

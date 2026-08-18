@@ -28,6 +28,8 @@
             <converters:EqualsToColorConverter x:Key="EqualsToColorConverter"/>
             <converters:BoolToOpacityConverter x:Key="BoolToOpacityConverter"/>
             <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
+            <converters:IsNotNullConverter x:Key="IsNotNullConverter"/>
+            <converters:IsNullConverter x:Key="IsNullConverter"/>
 
         </ResourceDictionary>
     </Application.Resources>

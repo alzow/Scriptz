@@ -13,8 +13,8 @@ public class QueueService : BaseService, IQueueService
         _api = api;
     }
 
-    public Task<List<QueueEntryResponse>> GetWaitingAsync(Guid businessId) =>
-        ExecuteApiCallAsync(_api.GetWaitingAsync($"eq.{businessId}"));
+    public Task<List<QueueEntryResponse>> GetActiveEntriesAsync(Guid businessId) =>
+        ExecuteApiCallAsync(_api.GetActiveEntriesAsync($"eq.{businessId}"));
 
     public Task AddWalkInAsync(Guid businessId, Guid? operatorId, string name) =>
         ExecuteApiCallAsync(_api.JoinQueueAsync(new JoinQueueRequest
@@ -35,4 +35,24 @@ public class QueueService : BaseService, IQueueService
 
     public Task<List<QueueSummaryRow>> GetQueueSummaryAsync(Guid businessId) =>
         ExecuteApiCallAsync(_api.GetQueueSummaryAsync(new BusinessIdRequest { BusinessId = businessId }));
+
+    public Task<QueueEntryResponse> JoinQueueAsync(Guid businessId, Guid? operatorId, Guid customerId) =>
+        ExecuteApiCallAsync(_api.JoinQueueAsync(new JoinQueueRequest
+        {
+            BusinessId = businessId,
+            OperatorId = operatorId,
+            CustomerId = customerId,
+        }));
+
+    public Task<QueueEntryResponse> CancelEntryAsync(Guid entryId) =>
+        ExecuteApiCallAsync(_api.CancelEntryAsync(new EntryIdRequest { EntryId = entryId }));
+
+    public async Task<MyQueueStatusResponse?> GetMyQueueStatusAsync(Guid businessId)
+    {
+        var results = await ExecuteApiCallAsync(_api.GetMyQueueStatusAsync(new BusinessIdRequest { BusinessId = businessId }));
+        return results.FirstOrDefault();
+    }
+
+    public Task<decimal?> GetEntryWaitMinutesAsync(Guid entryId) =>
+        ExecuteApiCallAsync(_api.GetEntryWaitMinutesAsync(new QueueEntryIdRequest { EntryId = entryId }));
 }
