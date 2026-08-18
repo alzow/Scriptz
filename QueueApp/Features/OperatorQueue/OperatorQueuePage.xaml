@@ -5,6 +5,7 @@
              xmlns:responses="clr-namespace:QueueApp.Services.Api.Queue.Models"
              xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
              x:Name="Root"
+             Title="Manage"
              x:Class="QueueApp.Features.OperatorQueue.OperatorQueuePage"
              x:DataType="vm:OperatorQueuePageViewModel"
              Style="{StaticResource NavigationPageStyle}">
