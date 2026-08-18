@@ -1,6 +1,6 @@
-namespace ScriptzApp.Constants;
+namespace QueueApp.Constants;
 
-public static class ScriptzNavigationParameters
+public static class QueueNavigationParameters
 {
     public const string MedicationId = "MedicationId";
 }

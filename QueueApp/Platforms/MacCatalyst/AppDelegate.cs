@@ -1,6 +1,6 @@
 ﻿using Foundation;
 
-namespace ScriptzApp;
+namespace QueueApp;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate

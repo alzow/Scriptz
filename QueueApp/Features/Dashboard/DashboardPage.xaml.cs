@@ -1,4 +1,4 @@
-namespace ScriptzApp.Features.Dashboard;
+namespace QueueApp.Features.Dashboard;
 
 public partial class DashboardPage : ContentPage
 {

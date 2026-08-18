@@ -3,7 +3,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using Microsoft.Extensions.Logging;
 
-namespace ScriptzApp.Services.Api;
+namespace QueueApp.Services.Api;
 
 // Logs method, URI, status code, duration, and body (for text-based content types) for every
 // request that passes through the Refit handler pipeline. Useful for debugging API calls.

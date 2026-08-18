@@ -1,19 +1,19 @@
 using System.Reflection;
 using MPowerKit.Navigation;
 using MPowerKit.Navigation.Utilities;
-using ScriptzApp.Constants;
-using ScriptzApp.Services.Api;
-using ScriptzApp.Services.Api.Queue;
-using ScriptzApp.Services.Auth;
-using ScriptzApp.Services.Storage;
-using ScriptzApp.Services.Popup;
-using ScriptzApp.Services.Realtime;
+using QueueApp.Constants;
+using QueueApp.Services.Api;
+using QueueApp.Services.Api.Queue;
+using QueueApp.Services.Auth;
+using QueueApp.Services.Storage;
+using QueueApp.Services.Popup;
+using QueueApp.Services.Realtime;
 using CommunityToolkit.Mvvm.Messaging;
 #if USE_STUBS
-using ScriptzApp.Services.Stubs;
+using QueueApp.Services.Stubs;
 #endif
 
-namespace ScriptzApp;
+namespace QueueApp;
 
 internal static class NavigationStartup
 {
@@ -54,7 +54,7 @@ internal static class NavigationStartup
     {
         services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
         services.AddSingleton<ISecureStorageService, SecureStorageService>();
-        services.AddSingleton<IScriptzPopupService, ScriptzPopupService>();
+        services.AddSingleton<IQueuePopupService, QueuePopupService>();
     }
 
     private static void RegisterApiServices(IServiceCollection services)

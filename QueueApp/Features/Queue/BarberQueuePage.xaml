@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:vm="clr-namespace:ScriptzApp.Features.Queue"
-             xmlns:responses="clr-namespace:ScriptzApp.Services.Api.Queue.Models"
+             xmlns:vm="clr-namespace:QueueApp.Features.Queue"
+             xmlns:responses="clr-namespace:QueueApp.Services.Api.Queue.Models"
              x:Name="Root"
-             x:Class="ScriptzApp.Features.Queue.BarberQueuePage"
+             x:Class="QueueApp.Features.Queue.BarberQueuePage"
              x:DataType="vm:BarberQueuePageViewModel"
              Title="Queue"
              Shell.NavBarIsVisible="False"

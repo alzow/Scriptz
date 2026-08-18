@@ -1,6 +1,6 @@
-namespace ScriptzApp.Services.Popup;
+namespace QueueApp.Services.Popup;
 
-public interface IScriptzPopupService
+public interface IQueuePopupService
 {
     Task ShowAlertAsync(string title, string message, string button = "OK");
     Task<bool> ShowConfirmAsync(string title, string message, string accept = "Yes", string cancel = "No");

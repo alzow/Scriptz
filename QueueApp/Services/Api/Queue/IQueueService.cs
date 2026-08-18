@@ -1,6 +1,6 @@
-using ScriptzApp.Services.Api.Queue.Models;
+using QueueApp.Services.Api.Queue.Models;
 
-namespace ScriptzApp.Services.Api.Queue;
+namespace QueueApp.Services.Api.Queue;
 
 public interface IQueueService
 {

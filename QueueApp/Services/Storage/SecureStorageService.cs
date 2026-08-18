@@ -1,4 +1,4 @@
-namespace ScriptzApp.Services.Storage;
+namespace QueueApp.Services.Storage;
 
 public class SecureStorageService : ISecureStorageService
 {

@@ -1,8 +1,8 @@
-namespace ScriptzApp.Framework.Extensions;
+namespace QueueApp.Framework.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddScriptzServices(this IServiceCollection services)
+    public static IServiceCollection AddQueueServices(this IServiceCollection services)
     {
         return services;
     }

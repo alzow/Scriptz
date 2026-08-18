@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Refit;
 
-namespace ScriptzApp.Framework.Base;
+namespace QueueApp.Framework.Base;
 
 // Wraps Refit calls so every service gets consistent failure logging without repeating
 // try/catch boilerplate. Rethrows so BaseViewModel.ExecuteAsync/HandleExceptionAsync can

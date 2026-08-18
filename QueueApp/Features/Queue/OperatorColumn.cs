@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
-using ScriptzApp.Services.Api.Queue.Models;
+using QueueApp.Services.Api.Queue.Models;
 
-namespace ScriptzApp.Features.Queue;
+namespace QueueApp.Features.Queue;
 
 public class OperatorColumn
 {

@@ -1,4 +1,4 @@
-namespace ScriptzApp.Features.Main;
+namespace QueueApp.Features.Main;
 
 public partial class MainTabbedPage : TabbedPage
 {

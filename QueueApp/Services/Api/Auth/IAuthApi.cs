@@ -1,7 +1,7 @@
 using Refit;
-using ScriptzApp.Services.Api.Auth.Models;
+using QueueApp.Services.Api.Auth.Models;
 
-namespace ScriptzApp.Services.Api.Auth;
+namespace QueueApp.Services.Api.Auth;
 
 // Supabase Auth (GoTrue) lives at /auth/v1 off the project root.
 public interface IAuthApi

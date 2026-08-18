@@ -3,7 +3,7 @@ using CommunityToolkit.Maui;
 using MPowerKit.Navigation;
 using MPowerKit.Popups;
 
-namespace ScriptzApp;
+namespace QueueApp;
 
 public static class MauiProgram
 {

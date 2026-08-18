@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using Supabase.Realtime;
 using Supabase.Realtime.PostgresChanges;
-using ScriptzApp.Constants;
-using ScriptzApp.Services.Auth;
+using QueueApp.Constants;
+using QueueApp.Services.Auth;
 
-namespace ScriptzApp.Services.Realtime;
+namespace QueueApp.Services.Realtime;
 
 // The one piece of the Queue feature that isn't Refit — Realtime is a WebSocket
 // subscription, not request/response. Filtered to a single business_id so a

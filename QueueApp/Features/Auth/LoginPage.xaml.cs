@@ -1,4 +1,4 @@
-namespace ScriptzApp.Features.Auth;
+namespace QueueApp.Features.Auth;
 
 public partial class LoginPage : ContentPage
 {

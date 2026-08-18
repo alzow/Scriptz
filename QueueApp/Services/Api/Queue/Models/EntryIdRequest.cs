@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace ScriptzApp.Services.Api.Queue.Models;
+namespace QueueApp.Services.Api.Queue.Models;
 
 public class EntryIdRequest
 {

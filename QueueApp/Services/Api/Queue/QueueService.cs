@@ -1,7 +1,7 @@
-using ScriptzApp.Framework.Base;
-using ScriptzApp.Services.Api.Queue.Models;
+using QueueApp.Framework.Base;
+using QueueApp.Services.Api.Queue.Models;
 
-namespace ScriptzApp.Services.Api.Queue;
+namespace QueueApp.Services.Api.Queue;
 
 // Hides PostgREST filter syntax (e.g. "eq.<guid>") from callers.
 public class QueueService : BaseService, IQueueService

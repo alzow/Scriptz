@@ -1,4 +1,4 @@
-namespace ScriptzApp.Constants;
+namespace QueueApp.Constants;
 
 public static class NavigationPaths
 {

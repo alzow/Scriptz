@@ -1,21 +1,21 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using MPowerKit.Navigation;
-using ScriptzApp.Framework.Base;
-using ScriptzApp.Services.Api.Queue;
-using ScriptzApp.Services.Api.Queue.Models;
-using ScriptzApp.Services.Auth;
-using ScriptzApp.Services.Popup;
-using ScriptzApp.Services.Realtime;
-using ScriptzApp.Services.Storage;
+using QueueApp.Framework.Base;
+using QueueApp.Services.Api.Queue;
+using QueueApp.Services.Api.Queue.Models;
+using QueueApp.Services.Auth;
+using QueueApp.Services.Popup;
+using QueueApp.Services.Realtime;
+using QueueApp.Services.Storage;
 
-namespace ScriptzApp.Features.Queue;
+namespace QueueApp.Features.Queue;
 
 public partial class BarberQueuePageViewModel : BaseViewModel
 {
     private readonly IQueueService _queueService;
     private readonly IQueueRealtimeService _realtimeService;
-    private readonly IScriptzPopupService _popupService;
+    private readonly IQueuePopupService _popupService;
     private IDispatcherTimer? _heartbeatTimer;
 
     // TEMP: hard-coded until auth/business selection is wired up. Set to your seeded test business id.
@@ -28,7 +28,7 @@ public partial class BarberQueuePageViewModel : BaseViewModel
         ISecureStorageService secureStorageService,
         IQueueService queueService,
         IQueueRealtimeService realtimeService,
-        IScriptzPopupService popupService)
+        IQueuePopupService popupService)
         : base(navigationService, secureStorageService)
     {
         _queueService = queueService;

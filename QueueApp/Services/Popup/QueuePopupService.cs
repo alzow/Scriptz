@@ -1,12 +1,12 @@
 using MPowerKit.Popups.Interfaces;
 
-namespace ScriptzApp.Services.Popup;
+namespace QueueApp.Services.Popup;
 
-public class ScriptzPopupService : IScriptzPopupService
+public class QueuePopupService : IQueuePopupService
 {
     private readonly IPopupService _popupService;
 
-    public ScriptzPopupService(IPopupService popupService)
+    public QueuePopupService(IPopupService popupService)
     {
         _popupService = popupService;
     }

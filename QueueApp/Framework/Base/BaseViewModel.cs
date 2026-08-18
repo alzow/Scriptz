@@ -1,9 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using MPowerKit.Navigation;
 using MPowerKit.Navigation.Interfaces;
-using ScriptzApp.Services.Storage;
+using QueueApp.Services.Storage;
 
-namespace ScriptzApp.Framework.Base;
+namespace QueueApp.Framework.Base;
 
 public abstract class BaseViewModel : ObservableObject,
     INavigationAware,

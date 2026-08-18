@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace ScriptzApp.Services.Api.Queue.Models;
+namespace QueueApp.Services.Api.Queue.Models;
 
 // Property names map to the join_queue SQL function's parameter names.
 public class JoinQueueRequest

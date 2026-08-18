@@ -1,8 +1,8 @@
 using System.Net.Http.Headers;
-using ScriptzApp.Constants;
-using ScriptzApp.Services.Storage;
+using QueueApp.Constants;
+using QueueApp.Services.Storage;
 
-namespace ScriptzApp.Services.Api;
+namespace QueueApp.Services.Api;
 
 // Adds the Supabase apikey to every request, and the user's bearer token when signed in.
 // Before real auth is wired up, the anon key alone is used, which works because

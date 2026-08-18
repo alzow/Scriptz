@@ -1,4 +1,4 @@
-namespace ScriptzApp.Services.Auth;
+namespace QueueApp.Services.Auth;
 
 public interface IAuthService
 {

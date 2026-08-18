@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace ScriptzApp.Services.Api.Auth.Models;
+namespace QueueApp.Services.Api.Auth.Models;
 
 public class AuthTokenResponse
 {

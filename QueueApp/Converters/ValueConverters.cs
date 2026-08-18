@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace ScriptzApp.Converters;
+namespace QueueApp.Converters;
 
 public class IsNotNullOrEmptyConverter : IValueConverter
 {

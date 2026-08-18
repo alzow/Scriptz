@@ -1,6 +1,6 @@
-using ScriptzApp.Services.Realtime;
+using QueueApp.Services.Realtime;
 
-namespace ScriptzApp.Services.Stubs;
+namespace QueueApp.Services.Stubs;
 
 // No-op: DEBUG builds work against StubQueueService's in-memory data, so there's
 // no live backend to subscribe to.

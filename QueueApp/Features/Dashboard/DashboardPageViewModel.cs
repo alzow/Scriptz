@@ -1,18 +1,18 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using ScriptzApp.Constants;
-using ScriptzApp.Framework.Base;
-using ScriptzApp.Services.Auth;
-using ScriptzApp.Services.Storage;
-using ScriptzApp.Services.Popup;
+using QueueApp.Constants;
+using QueueApp.Framework.Base;
+using QueueApp.Services.Auth;
+using QueueApp.Services.Storage;
+using QueueApp.Services.Popup;
 using System.Collections.ObjectModel;
 
-namespace ScriptzApp.Features.Dashboard;
+namespace QueueApp.Features.Dashboard;
 
 public partial class DashboardPageViewModel : BaseViewModel
 {
     private readonly IAuthService _authService;
-    private readonly IScriptzPopupService _popupService;
+    private readonly IQueuePopupService _popupService;
 
     // Benefit tracker (placeholder values until API wired up)
     private const int BenefitTotal = 3500;
@@ -34,7 +34,7 @@ public partial class DashboardPageViewModel : BaseViewModel
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
         IAuthService authService,
-        IScriptzPopupService popupService)
+        IQueuePopupService popupService)
         : base(navigationService, secureStorageService)
     {
         _authService = authService;

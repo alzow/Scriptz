@@ -1,17 +1,17 @@
 using CommunityToolkit.Mvvm.Input;
-using ScriptzApp.Constants;
-using ScriptzApp.Framework.Base;
-using ScriptzApp.Services.Auth;
-using ScriptzApp.Services.Storage;
-using ScriptzApp.Services.Popup;
+using QueueApp.Constants;
+using QueueApp.Framework.Base;
+using QueueApp.Services.Auth;
+using QueueApp.Services.Storage;
+using QueueApp.Services.Popup;
 using System.Diagnostics;
 
-namespace ScriptzApp.Features.Auth;
+namespace QueueApp.Features.Auth;
 
 public partial class RegisterPageViewModel : BaseViewModel
 {
     private readonly IAuthService _authService;
-    private readonly IScriptzPopupService _popupService;
+    private readonly IQueuePopupService _popupService;
 
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
@@ -24,7 +24,7 @@ public partial class RegisterPageViewModel : BaseViewModel
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
         IAuthService authService,
-        IScriptzPopupService popupService)
+        IQueuePopupService popupService)
         : base(navigationService, secureStorageService)
     {
         _authService = authService;

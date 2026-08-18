@@ -1,9 +1,9 @@
 using Refit;
-using ScriptzApp.Constants;
-using ScriptzApp.Services.Api.Auth;
-using ScriptzApp.Services.Api.Queue;
+using QueueApp.Constants;
+using QueueApp.Services.Api.Auth;
+using QueueApp.Services.Api.Queue;
 
-namespace ScriptzApp.Services.Api;
+namespace QueueApp.Services.Api;
 
 public static class RefitConfiguration
 {

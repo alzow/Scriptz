@@ -1,7 +1,7 @@
-using ScriptzApp.Services.Api.Queue;
-using ScriptzApp.Services.Api.Queue.Models;
+using QueueApp.Services.Api.Queue;
+using QueueApp.Services.Api.Queue.Models;
 
-namespace ScriptzApp.Services.Stubs;
+namespace QueueApp.Services.Stubs;
 
 // In-memory stub so the Queue screen can be fully tested without a Supabase project.
 // Registered instead of the real QueueService in DEBUG builds.

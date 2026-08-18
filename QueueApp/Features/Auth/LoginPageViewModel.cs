@@ -1,16 +1,16 @@
 using CommunityToolkit.Mvvm.Input;
-using ScriptzApp.Constants;
-using ScriptzApp.Framework.Base;
-using ScriptzApp.Services.Auth;
-using ScriptzApp.Services.Storage;
-using ScriptzApp.Services.Popup;
+using QueueApp.Constants;
+using QueueApp.Framework.Base;
+using QueueApp.Services.Auth;
+using QueueApp.Services.Storage;
+using QueueApp.Services.Popup;
 
-namespace ScriptzApp.Features.Auth;
+namespace QueueApp.Features.Auth;
 
 public partial class LoginPageViewModel : BaseViewModel
 {
     private readonly IAuthService _authService;
-    private readonly IScriptzPopupService _popupService;
+    private readonly IQueuePopupService _popupService;
 
     public string Email { get; set; } = "alzow.sayed01@gmail.com";
     public string Password { get; set; } = "S@yed786";
@@ -19,7 +19,7 @@ public partial class LoginPageViewModel : BaseViewModel
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
         IAuthService authService,
-        IScriptzPopupService popupService)
+        IQueuePopupService popupService)
         : base(navigationService, secureStorageService)
     {
         _authService = authService;

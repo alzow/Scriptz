@@ -1,4 +1,4 @@
-namespace ScriptzApp.Features.Queue;
+namespace QueueApp.Features.Queue;
 
 public partial class BarberQueuePage : ContentPage
 {

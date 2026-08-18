@@ -1,4 +1,4 @@
-namespace ScriptzApp.Services.Realtime;
+namespace QueueApp.Services.Realtime;
 
 public interface IQueueRealtimeService
 {

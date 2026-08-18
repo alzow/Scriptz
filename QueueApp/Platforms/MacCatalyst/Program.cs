@@ -1,7 +1,7 @@
 ﻿using ObjCRuntime;
 using UIKit;
 
-namespace ScriptzApp;
+namespace QueueApp;
 
 public class Program
 {

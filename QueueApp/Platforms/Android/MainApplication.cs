@@ -1,7 +1,7 @@
 ﻿using Android.App;
 using Android.Runtime;
 
-namespace ScriptzApp;
+namespace QueueApp;
 
 [Application]
 public class MainApplication : MauiApplication

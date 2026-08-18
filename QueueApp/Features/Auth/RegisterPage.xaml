@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:vm="clr-namespace:ScriptzApp.Features.Auth"
-             x:Class="ScriptzApp.Features.Auth.RegisterPage"
+             xmlns:vm="clr-namespace:QueueApp.Features.Auth"
+             x:Class="QueueApp.Features.Auth.RegisterPage"
              x:DataType="vm:RegisterPageViewModel"
              Shell.NavBarIsVisible="False"
              BackgroundColor="{StaticResource Cream}">
@@ -28,7 +28,7 @@
                             <Label Text="Create account"
                                    FontSize="22" FontAttributes="Bold"
                                    TextColor="{StaticResource Cream}"/>
-                            <Label Text="Join Scriptz today"
+                            <Label Text="Join Queue today"
                                    FontSize="13" TextColor="{StaticResource BrownLight}"/>
                         </VerticalStackLayout>
                     </HorizontalStackLayout>
