@@ -19,7 +19,7 @@ public partial class BarberQueuePageViewModel : BaseViewModel
     private IDispatcherTimer? _heartbeatTimer;
 
     // TEMP: hard-coded until auth/business selection is wired up. Set to your seeded test business id.
-    private readonly Guid _businessId = Guid.Empty;
+    private readonly Guid _businessId = new Guid("0637f5ef-c7fa-46dc-b4e5-b814f2d7d3bf");
 
     public ObservableCollection<OperatorColumn> Columns { get; } = new();
 
@@ -34,18 +34,25 @@ public partial class BarberQueuePageViewModel : BaseViewModel
         _queueService = queueService;
         _realtimeService = realtimeService;
         _popupService = popupService;
-        Title = "Queue";
     }
 
-    public override Task OnLoadedAsync(INavigationParameters parameters)
+    public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
-        return ExecuteAsync(LoadQueueAsync);
+        try
+        {
+            await base.OnLoadedAsync(parameters);
+            await LoadQueueAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
 
     public override async Task OnAppearingAsync()
     {
         await _realtimeService.SubscribeAsync(_businessId,
-            () => MainThread.InvokeOnMainThreadAsync(() => ExecuteAsync(LoadQueueAsync)));
+            async () => await MainThread.InvokeOnMainThreadAsync(LoadQueueAsync));
         StartHeartbeat();
     }
 
@@ -97,31 +104,26 @@ public partial class BarberQueuePageViewModel : BaseViewModel
     [RelayCommand]
     private async Task AddWalkInAsync(OperatorResponse op)
     {
-        await ExecuteAsync(async () =>
-        {
             await _queueService.AddWalkInAsync(_businessId, op.Id == Guid.Empty ? null : op.Id, "Walk-in");
             await LoadQueueAsync();
-        });
     }
 
     [RelayCommand]
     private async Task ServeAsync(QueueEntryResponse entry)
     {
-        await ExecuteAsync(async () =>
-        {
+
             await _queueService.StartServingAsync(entry.Id);
             await LoadQueueAsync();
-        });
+
     }
 
     [RelayCommand]
     private async Task DoneAsync(QueueEntryResponse entry)
     {
-        await ExecuteAsync(async () =>
-        {
+
             await _queueService.CompleteAsync(entry.Id);
             await LoadQueueAsync();
-        });
+
     }
 
     [RelayCommand]
@@ -130,10 +132,8 @@ public partial class BarberQueuePageViewModel : BaseViewModel
         var confirmed = await _popupService.ShowConfirmAsync("No-show", $"Mark {entry.CustomerName} as a no-show?");
         if (!confirmed) return;
 
-        await ExecuteAsync(async () =>
-        {
+
             await _queueService.NoShowAsync(entry.Id);
             await LoadQueueAsync();
-        });
     }
 }

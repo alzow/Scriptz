@@ -12,8 +12,8 @@ public partial class LoginPageViewModel : BaseViewModel
     private readonly IAuthService _authService;
     private readonly IScriptzPopupService _popupService;
 
-    public string Email { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
+    public string Email { get; set; } = "alzow.sayed01@gmail.com";
+    public string Password { get; set; } = "S@yed786";
 
     public LoginPageViewModel(
         INavigationService navigationService,
@@ -24,7 +24,6 @@ public partial class LoginPageViewModel : BaseViewModel
     {
         _authService = authService;
         _popupService = popupService;
-        Title = "Login";
     }
 
     // TODO (Step 5b): swap for Supabase phone-OTP sign-in. Token pipeline stays the same.
@@ -37,19 +36,17 @@ public partial class LoginPageViewModel : BaseViewModel
             return;
         }
 
-        await ExecuteAsync(async () =>
-        {
-            var ok = await _authService.SignInAsync(Email.Trim(), Password);
 
-            if (ok)
-            {
-                await NavigationService.NavigateAsync($"/{NavigationPaths.BarberQueuePage}");
-            }
-            else
-            {
-                await _popupService.ShowAlertAsync("Login Failed", "Invalid email or password");
-            }
-        });
+        var ok = await _authService.SignInAsync(Email.Trim(), Password);
+
+        if (ok)
+        {
+            await NavigationService.NavigateAsync(NavigationPaths.BarberQueuePage);
+        }
+        else
+        {
+            await _popupService.ShowAlertAsync("Login Failed", "Invalid email or password");
+        }
     }
 
     [RelayCommand]

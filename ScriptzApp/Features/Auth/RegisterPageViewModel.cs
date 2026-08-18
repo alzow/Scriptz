@@ -4,6 +4,7 @@ using ScriptzApp.Framework.Base;
 using ScriptzApp.Services.Auth;
 using ScriptzApp.Services.Storage;
 using ScriptzApp.Services.Popup;
+using System.Diagnostics;
 
 namespace ScriptzApp.Features.Auth;
 
@@ -28,8 +29,14 @@ public partial class RegisterPageViewModel : BaseViewModel
     {
         _authService = authService;
         _popupService = popupService;
-        Title = "Register";
     }
+
+    public override async Task OnLoadedAsync(INavigationParameters? parameters)
+    {
+        Debug.WriteLine("REGISTER LOADED");
+        await base.OnLoadedAsync(parameters);
+    }
+
 
     [RelayCommand]
     private async Task RegisterAsync()
@@ -54,20 +61,19 @@ public partial class RegisterPageViewModel : BaseViewModel
         }
 
         // TODO (Step 5b): swap for Supabase phone-OTP sign-up. Token pipeline stays the same.
-        await ExecuteAsync(async () =>
-        {
-            var ok = await _authService.SignUpAsync(Email.Trim(), Password);
 
-            if (ok)
-            {
-                await _popupService.ShowAlertAsync("Success", "Account created successfully!");
-                await NavigationService.NavigateAsync($"/{NavigationPaths.BarberQueuePage}");
-            }
-            else
-            {
-                await _popupService.ShowAlertAsync("Registration Failed", "Unable to create account. Please try again.");
-            }
-        });
+        var ok = await _authService.SignUpAsync(Email.Trim(), Password);
+
+        if (ok)
+        {
+            await _popupService.ShowAlertAsync("Success", "Account created successfully!");
+            await NavigationService.NavigateAsync($"/{NavigationPaths.BarberQueuePage}");
+        }
+        else
+        {
+            await _popupService.ShowAlertAsync("Registration Failed", "Unable to create account. Please try again.");
+        }
+
     }
 
     [RelayCommand]

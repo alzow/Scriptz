@@ -39,12 +39,11 @@ public partial class DashboardPageViewModel : BaseViewModel
     {
         _authService = authService;
         _popupService = popupService;
-        Title = "Home";
     }
 
     public override Task OnLoadedAsync(INavigationParameters parameters)
     {
-        LoadDashboardData();
+        // LoadDashboardData();
         return Task.CompletedTask;
     }
 

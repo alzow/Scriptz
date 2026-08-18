@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using MPowerKit.Navigation;
+using MPowerKit.Navigation.Interfaces;
 using ScriptzApp.Services.Storage;
 
 namespace ScriptzApp.Framework.Base;

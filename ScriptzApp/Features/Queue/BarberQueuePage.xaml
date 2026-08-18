@@ -79,7 +79,6 @@
             </CollectionView>
         </ScrollView>
 
-        <!-- Loading overlay -->
         <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#80000000">
             <ActivityIndicator IsRunning="{Binding IsBusy}"
                                Color="{StaticResource Orange}"
