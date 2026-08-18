@@ -30,6 +30,11 @@ public interface IQueueApi
         [AliasAs("status")] string statusEq = "eq.waiting",
         [AliasAs("order")] string order = "joined_at.asc");
 
+    [Get("/businesses")]
+    Task<List<BusinessIdResponse>> GetOwnedBusinessesAsync(
+        [AliasAs("owner_id")] string ownerIdEq,
+        [AliasAs("select")] string select = "id");
+
     // Presence heartbeat
     [Patch("/businesses")]
     Task HeartbeatAsync(

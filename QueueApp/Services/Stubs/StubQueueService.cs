@@ -7,6 +7,8 @@ namespace QueueApp.Services.Stubs;
 // Registered instead of the real QueueService in DEBUG builds.
 public class StubQueueService : IQueueService
 {
+    private readonly Guid _defaultBusinessId = new("0637f5ef-c7fa-46dc-b4e5-b814f2d7d3bf");
+
     private readonly List<OperatorResponse> _operators = new()
     {
         new() { Id = Guid.NewGuid(), DisplayName = "Chair 1", SortOrder = 0, IsAvailable = true },
@@ -14,6 +16,8 @@ public class StubQueueService : IQueueService
     };
 
     private readonly List<QueueEntryResponse> _entries = new();
+
+    public Task<Guid> GetOwnedBusinessIdAsync() => Task.FromResult(_defaultBusinessId);
 
     public Task<List<OperatorResponse>> GetOperatorsAsync(Guid businessId)
         => Task.FromResult(_operators.OrderBy(o => o.SortOrder).ToList());

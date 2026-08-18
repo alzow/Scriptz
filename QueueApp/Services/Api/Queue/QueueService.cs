@@ -1,5 +1,6 @@
 using QueueApp.Framework.Base;
 using QueueApp.Services.Api.Queue.Models;
+using QueueApp.Services.Auth;
 
 namespace QueueApp.Services.Api.Queue;
 
@@ -7,10 +8,26 @@ namespace QueueApp.Services.Api.Queue;
 public class QueueService : BaseService, IQueueService
 {
     private readonly IQueueApi _api;
+    private readonly IAuthService _authService;
 
-    public QueueService(IQueueApi api)
+    public QueueService(IQueueApi api, IAuthService authService)
     {
         _api = api;
+        _authService = authService;
+    }
+
+    public async Task<Guid> GetOwnedBusinessIdAsync()
+    {
+        var userId = await _authService.GetUserIdAsync();
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new InvalidOperationException("No authenticated user is available for queue ownership lookup.");
+
+        var businesses = await ExecuteApiCallAsync(_api.GetOwnedBusinessesAsync($"eq.{userId}", "id"));
+        var business = businesses.FirstOrDefault();
+        if (business is null)
+            throw new InvalidOperationException("No business is associated with the current user.");
+
+        return business.Id;
     }
 
     public Task<List<OperatorResponse>> GetOperatorsAsync(Guid businessId) =>

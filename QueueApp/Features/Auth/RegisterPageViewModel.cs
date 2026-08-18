@@ -67,7 +67,7 @@ public partial class RegisterPageViewModel : BaseViewModel
         if (ok)
         {
             await _popupService.ShowAlertAsync("Success", "Account created successfully!");
-            await NavigationService.NavigateAsync($"/{NavigationPaths.BarberQueuePage}");
+            await NavigationService.NavigateAsync($"/{NavigationPaths.OperatorQueuePage}");
         }
         else
         {

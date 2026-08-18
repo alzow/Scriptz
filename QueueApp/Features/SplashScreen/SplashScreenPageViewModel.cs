@@ -28,7 +28,7 @@ public class SplashScreenPageViewModel : BaseViewModel
             await base.OnLoadedAsync(parameters);
 
             var isValid = await _authService.EnsureValidSessionAsync();
-            var destination = isValid ? NavigationPaths.BarberQueuePage : NavigationPaths.LoginPage;
+            var destination = isValid ? NavigationPaths.OperatorQueuePage : NavigationPaths.LoginPage;
 
             await _navigationService.NavigateAsync($"/NavigationPage/{destination}");
         }

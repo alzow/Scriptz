@@ -4,8 +4,8 @@
              xmlns:vm="clr-namespace:QueueApp.Features.Queue"
              xmlns:responses="clr-namespace:QueueApp.Services.Api.Queue.Models"
              x:Name="Root"
-             x:Class="QueueApp.Features.Queue.BarberQueuePage"
-             x:DataType="vm:BarberQueuePageViewModel"
+             x:Class="QueueApp.Features.Queue.OperatorQueuePage"
+             x:DataType="vm:OperatorQueuePageViewModel"
              Title="Queue"
              Shell.NavBarIsVisible="False"
              BackgroundColor="{StaticResource Cream}">
@@ -79,13 +79,25 @@
             </CollectionView>
         </ScrollView>
 
-        <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#80000000">
-            <ActivityIndicator IsRunning="{Binding IsBusy}"
+        <Grid IsVisible="{Binding IsLoading}" BackgroundColor="#80000000">
+            <ActivityIndicator IsRunning="{Binding IsLoading}"
                                Color="{StaticResource Orange}"
                                VerticalOptions="Center"
                                HorizontalOptions="Center"
                                Scale="1.5"/>
         </Grid>
+
+        <Border IsVisible="{Binding IsEmpty}"
+                StrokeThickness="0"
+                BackgroundColor="Transparent"
+                Padding="24"
+                VerticalOptions="Center"
+                HorizontalOptions="Center">
+            <Label Text="No customers waiting"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource TextDark}"/>
+        </Border>
     </Grid>
 
 </ContentPage>

@@ -41,7 +41,7 @@ public partial class LoginPageViewModel : BaseViewModel
 
         if (ok)
         {
-            await NavigationService.NavigateAsync(NavigationPaths.BarberQueuePage);
+            await NavigationService.NavigateAsync(NavigationPaths.OperatorQueuePage);
         }
         else
         {

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Threading;
 using CommunityToolkit.Mvvm.Input;
 using MPowerKit.Navigation;
 using QueueApp.Framework.Base;
@@ -11,19 +12,20 @@ using QueueApp.Services.Storage;
 
 namespace QueueApp.Features.Queue;
 
-public partial class BarberQueuePageViewModel : BaseViewModel
+public partial class OperatorQueuePageViewModel : BaseViewModel
 {
     private readonly IQueueService _queueService;
     private readonly IQueueRealtimeService _realtimeService;
     private readonly IQueuePopupService _popupService;
+    private readonly SemaphoreSlim _loadLock = new(1, 1);
     private IDispatcherTimer? _heartbeatTimer;
-
-    // TEMP: hard-coded until auth/business selection is wired up. Set to your seeded test business id.
-    private readonly Guid _businessId = new Guid("0637f5ef-c7fa-46dc-b4e5-b814f2d7d3bf");
+    private Guid _businessId;
 
     public ObservableCollection<OperatorColumn> Columns { get; } = new();
+    public bool IsLoading { get; set; }
+    public bool IsEmpty => Columns.Count == 0 && !IsLoading;
 
-    public BarberQueuePageViewModel(
+    public OperatorQueuePageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
         IQueueService queueService,
@@ -41,21 +43,21 @@ public partial class BarberQueuePageViewModel : BaseViewModel
         try
         {
             await base.OnLoadedAsync(parameters);
+
+            _businessId = parameters is not null && parameters.TryGetValue("businessId", out var idObj)
+                ? (Guid)idObj
+                : await _queueService.GetOwnedBusinessIdAsync();
+
             await LoadQueueAsync();
 
             await _realtimeService.SubscribeAsync(_businessId,
-            async () => await MainThread.InvokeOnMainThreadAsync(LoadQueueAsync));
+                async () => await MainThread.InvokeOnMainThreadAsync(LoadQueueAsync));
             StartHeartbeat();
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
         }
-    }
-
-    public override async Task OnAppearingAsync()
-    {
-        
     }
 
     public override async Task OnDisappearingAsync()
@@ -67,29 +69,47 @@ public partial class BarberQueuePageViewModel : BaseViewModel
 
     private async Task LoadQueueAsync()
     {
-        var operators = await _queueService.GetOperatorsAsync(_businessId);
-        var waiting = await _queueService.GetWaitingAsync(_businessId);
-
-        Columns.Clear();
-
-        foreach (var op in operators.OrderBy(o => o.SortOrder))
+        await _loadLock.WaitAsync();
+        try
         {
-            var column = new OperatorColumn { Operator = op };
-            foreach (var entry in waiting.Where(e => e.OperatorId == op.Id))
-                column.Waiting.Add(entry);
-            Columns.Add(column);
-        }
+            IsLoading = true;
 
-        var unassigned = waiting.Where(e => e.OperatorId is null).ToList();
-        if (unassigned.Count > 0)
-        {
-            var column = new OperatorColumn
+            var operators = await _queueService.GetOperatorsAsync(_businessId);
+            var waiting = await _queueService.GetWaitingAsync(_businessId);
+
+            var rebuilt = new List<OperatorColumn>();
+
+            foreach (var op in operators.OrderBy(o => o.SortOrder))
             {
-                Operator = new OperatorResponse { DisplayName = "Any barber" },
-            };
-            foreach (var entry in unassigned)
-                column.Waiting.Add(entry);
-            Columns.Add(column);
+                var column = new OperatorColumn { Operator = op };
+                foreach (var entry in waiting.Where(e => e.OperatorId == op.Id))
+                    column.Waiting.Add(entry);
+                rebuilt.Add(column);
+            }
+
+            var unassigned = waiting.Where(e => e.OperatorId is null).ToList();
+            if (unassigned.Count > 0)
+            {
+                var column = new OperatorColumn
+                {
+                    Operator = new OperatorResponse { DisplayName = "Any available" },
+                };
+                foreach (var entry in unassigned)
+                    column.Waiting.Add(entry);
+                rebuilt.Add(column);
+            }
+
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                Columns.Clear();
+                foreach (var column in rebuilt)
+                    Columns.Add(column);
+            });
+        }
+        finally
+        {
+            IsLoading = false;
+            _loadLock.Release();
         }
     }
 
@@ -106,36 +126,59 @@ public partial class BarberQueuePageViewModel : BaseViewModel
     [RelayCommand]
     private async Task AddWalkInAsync(OperatorResponse op)
     {
+        try
+        {
             await _queueService.AddWalkInAsync(_businessId, op.Id == Guid.Empty ? null : op.Id, "Walk-in");
             await LoadQueueAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
 
     [RelayCommand]
     private async Task ServeAsync(QueueEntryResponse entry)
     {
-
+        try
+        {
             await _queueService.StartServingAsync(entry.Id);
             await LoadQueueAsync();
-
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
 
     [RelayCommand]
     private async Task DoneAsync(QueueEntryResponse entry)
     {
-
+        try
+        {
             await _queueService.CompleteAsync(entry.Id);
             await LoadQueueAsync();
-
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
 
     [RelayCommand]
     private async Task NoShowAsync(QueueEntryResponse entry)
     {
-        var confirmed = await _popupService.ShowConfirmAsync("No-show", $"Mark {entry.CustomerName} as a no-show?");
-        if (!confirmed) return;
-
+        try
+        {
+            var confirmed = await _popupService.ShowConfirmAsync("No-show", $"Mark {entry.CustomerName} as a no-show?");
+            if (!confirmed) return;
 
             await _queueService.NoShowAsync(entry.Id);
             await LoadQueueAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
 }

@@ -18,6 +18,6 @@ public static class NavigationPaths
     public const string MedicationsListPage  = "MedicationsListPage";
     public const string MedicationDetailPage = "MedicationDetailPage";
 
-    // ── Queue (barber counter-tablet) ─────────────────────────────────────────
-    public const string BarberQueuePage      = "BarberQueuePage";
+    // ── Queue (operator counter-tablet) ──────────────────────────────────────
+    public const string OperatorQueuePage    = "OperatorQueuePage";
 }
