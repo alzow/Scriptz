@@ -5,8 +5,7 @@
              xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
              x:Class="QueueApp.Features.Auth.RegisterPage"
              x:DataType="vm:RegisterPageViewModel"
-             Shell.NavBarIsVisible="False"
-             BackgroundColor="{StaticResource Cream}">
+             Style="{StaticResource NavigationPageStyle}">
 
     <Grid>
         <ScrollView>
@@ -16,21 +15,16 @@
                 <Grid BackgroundColor="{StaticResource Brown}"
                       Padding="24,52,24,36">
                     <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
-                        <Border BackgroundColor="{StaticResource Orange}"
-                                WidthRequest="44" HeightRequest="44"
-                                StrokeThickness="0">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="14"/>
-                            </Border.StrokeShape>
+                        <Border Style="{StaticResource brd14_Orange}"
+                                WidthRequest="44" HeightRequest="44">
                             <Label Text="💊" FontSize="22"
                                    HorizontalOptions="Center" VerticalOptions="Center"/>
                         </Border>
                         <VerticalStackLayout Spacing="0" VerticalOptions="Center">
                             <Label Text="Create account"
-                                   FontSize="22" FontAttributes="Bold"
-                                   TextColor="{StaticResource Cream}"/>
+                                   Style="{StaticResource lbl22_Bold_Cream}"/>
                             <Label Text="Join Queue today"
-                                   FontSize="13" TextColor="{StaticResource BrownLight}"/>
+                                   Style="{StaticResource lbl13_Regular_BrownLight}"/>
                         </VerticalStackLayout>
                     </HorizontalStackLayout>
                 </Grid>
@@ -41,12 +35,7 @@
                     <!-- First Name -->
                     <VerticalStackLayout Spacing="7">
                         <Label Text="FIRST NAME" Style="{StaticResource SectionTitle}"/>
-                        <Border BackgroundColor="{StaticResource White}"
-                                Stroke="{StaticResource CreamBorder}"
-                                StrokeThickness="1.5" Padding="16,0">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="14"/>
-                            </Border.StrokeShape>
+                        <Border Style="{StaticResource brd14_White}" Padding="16,0">
                             <Entry Placeholder="Ahmed"
                                    Text="{Binding FirstName}"
                                    HeightRequest="52"
@@ -58,12 +47,7 @@
                     <!-- Last Name -->
                     <VerticalStackLayout Spacing="7">
                         <Label Text="LAST NAME" Style="{StaticResource SectionTitle}"/>
-                        <Border BackgroundColor="{StaticResource White}"
-                                Stroke="{StaticResource CreamBorder}"
-                                StrokeThickness="1.5" Padding="16,0">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="14"/>
-                            </Border.StrokeShape>
+                        <Border Style="{StaticResource brd14_White}" Padding="16,0">
                             <Entry Placeholder="Cassim"
                                    Text="{Binding LastName}"
                                    HeightRequest="52"
@@ -75,12 +59,7 @@
                     <!-- Phone Number -->
                     <VerticalStackLayout Spacing="7">
                         <Label Text="PHONE NUMBER" Style="{StaticResource SectionTitle}"/>
-                        <Border BackgroundColor="{StaticResource White}"
-                                Stroke="{StaticResource CreamBorder}"
-                                StrokeThickness="1.5" Padding="16,0">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="14"/>
-                            </Border.StrokeShape>
+                        <Border Style="{StaticResource brd14_White}" Padding="16,0">
                             <Entry Placeholder="072 000 0000"
                                    Text="{Binding PhoneNumber}"
                                    Keyboard="Telephone"
@@ -93,12 +72,7 @@
                     <!-- Email -->
                     <VerticalStackLayout Spacing="7">
                         <Label Text="EMAIL" Style="{StaticResource SectionTitle}"/>
-                        <Border BackgroundColor="{StaticResource White}"
-                                Stroke="{StaticResource CreamBorder}"
-                                StrokeThickness="1.5" Padding="16,0">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="14"/>
-                            </Border.StrokeShape>
+                        <Border Style="{StaticResource brd14_White}" Padding="16,0">
                             <Entry Placeholder="you@email.com"
                                    Text="{Binding Email}"
                                    Keyboard="Email"
@@ -111,12 +85,7 @@
                     <!-- Password -->
                     <VerticalStackLayout Spacing="7">
                         <Label Text="PASSWORD" Style="{StaticResource SectionTitle}"/>
-                        <Border BackgroundColor="{StaticResource White}"
-                                Stroke="{StaticResource CreamBorder}"
-                                StrokeThickness="1.5" Padding="16,0">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="14"/>
-                            </Border.StrokeShape>
+                        <Border Style="{StaticResource brd14_White}" Padding="16,0">
                             <Entry Placeholder="••••••••"
                                    Text="{Binding Password}"
                                    IsPassword="True"
@@ -129,12 +98,7 @@
                     <!-- Confirm Password -->
                     <VerticalStackLayout Spacing="7">
                         <Label Text="CONFIRM PASSWORD" Style="{StaticResource SectionTitle}"/>
-                        <Border BackgroundColor="{StaticResource White}"
-                                Stroke="{StaticResource CreamBorder}"
-                                StrokeThickness="1.5" Padding="16,0">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="14"/>
-                            </Border.StrokeShape>
+                        <Border Style="{StaticResource brd14_White}" Padding="16,0">
                             <Entry Placeholder="••••••••"
                                    Text="{Binding ConfirmPassword}"
                                    IsPassword="True"
@@ -162,8 +126,7 @@
                     </controls:AlzowLoadingButton>
 
                     <Label Text="Pay on delivery · No upfront cost"
-                           TextColor="{StaticResource TextLight}"
-                           FontSize="12"
+                           Style="{StaticResource lbl12_Regular_TextLight}"
                            HorizontalOptions="Center"/>
 
                     <!-- Divider -->
@@ -172,10 +135,9 @@
                     <!-- Login link -->
                     <HorizontalStackLayout HorizontalOptions="Center" Spacing="4">
                         <Label Text="Already have an account?"
-                               TextColor="{StaticResource TextMid}" FontSize="13"/>
+                               Style="{StaticResource lbl13_Regular_TextMid}"/>
                         <Label Text="Sign In"
-                               TextColor="{StaticResource Orange}"
-                               FontAttributes="Bold" FontSize="13">
+                               Style="{StaticResource lbl13_Bold_Orange}">
                             <Label.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding NavigateToLoginCommand}"/>
                             </Label.GestureRecognizers>

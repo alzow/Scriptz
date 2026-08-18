@@ -5,17 +5,14 @@
              xmlns:responses="clr-namespace:QueueApp.Services.Api.Queue.Models"
              xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
              x:Name="Root"
-             NavigationPage.HasNavigationBar="False"
              x:Class="QueueApp.Features.OperatorQueue.OperatorQueuePage"
              x:DataType="vm:OperatorQueuePageViewModel"
-             Title="{Binding BusinessName}"
-             BackgroundColor="{StaticResource Cream}">
+             Style="{StaticResource NavigationPageStyle}">
 
     <Grid RowDefinitions="Auto,*">
         <Label Grid.Row="0"
                Text="{Binding BusinessName}"
-               FontSize="24" FontAttributes="Bold"
-               TextColor="{StaticResource TextDark}"
+               Style="{StaticResource lbl24_Bold_TextDark}"
                Margin="16,16,16,0"/>
 
         <ScrollView Grid.Row="1" Orientation="Horizontal" Padding="16">
@@ -23,89 +20,54 @@
                              ItemsLayout="HorizontalList">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="vm:OperatorColumn">
-                        <Border StrokeShape="RoundRectangle 16"
-                                BackgroundColor="{StaticResource White}"
-                                Stroke="{StaticResource CreamBorder}"
-                                StrokeThickness="1.5"
+                        <Border Style="{StaticResource brd16_White}"
                                 Margin="8" Padding="16" WidthRequest="300"
                                 HeightRequest="600">
                             <Grid RowDefinitions="Auto,Auto,Auto,*" RowSpacing="12">
 
                                 <Label Grid.Row="0"
                                        Text="{Binding Operator.DisplayName}"
-                                       FontSize="20" FontAttributes="Bold"
-                                       TextColor="{StaticResource TextDark}"/>
+                                       Style="{StaticResource lbl20_Bold_TextDark}"/>
                                 <Label Grid.Row="1"
                                        Text="{Binding Waiting.Count, StringFormat='{0} waiting'}"
-                                       FontSize="13" TextColor="{StaticResource Orange}"/>
+                                       Style="{StaticResource lbl13_Bold_Orange}"/>
 
                                 <controls:AlzowLoadingButton Grid.Row="2"
                                         Text="+ Add walk-in"
                                         Margin="0" HeightRequest="56"
                                         Command="{Binding BindingContext.AddWalkInCommand, Source={x:Reference Root}}"
                                         CommandParameter="{Binding Operator}"
-                                        IsLoading="{Binding IsAddingWalkIn}">
-                                    <controls:AlzowLoadingButton.ButtonStyle>
-                                        <Style TargetType="Button">
-                                            <Setter Property="FontSize" Value="17"/>
-                                            <Setter Property="FontAttributes" Value="Bold"/>
-                                            <Setter Property="CornerRadius" Value="14"/>
-                                            <Setter Property="BackgroundColor" Value="{StaticResource Orange}"/>
-                                            <Setter Property="TextColor" Value="{StaticResource White}"/>
-                                        </Style>
-                                    </controls:AlzowLoadingButton.ButtonStyle>
-                                </controls:AlzowLoadingButton>
+                                        IsLoading="{Binding IsAddingWalkIn}"
+                                        ButtonStyle="{StaticResource btn17_Bold_Orange}"/>
 
                                 <CollectionView Grid.Row="3" ItemsSource="{Binding Waiting}">
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="responses:QueueEntryResponse">
-                                            <Border StrokeShape="RoundRectangle 12"
-                                                    BackgroundColor="{StaticResource Cream}"
+                                            <Border Style="{StaticResource brd12_Cream}"
                                                     Padding="12" Margin="0,4">
                                                 <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="6">
                                                     <Label Grid.Column="0"
                                                            Text="{Binding CustomerName}"
-                                                           VerticalOptions="Center" FontSize="16"
-                                                           TextColor="{StaticResource TextDark}"/>
+                                                           VerticalOptions="Center"
+                                                           Style="{StaticResource lbl16_Regular_TextDark}"/>
                                                     <controls:AlzowLoadingButton Grid.Column="1" Text="Serve"
                                                             Margin="0" HeightRequest="44"
                                                             Command="{Binding BindingContext.ServeCommand, Source={x:Reference Root}}"
                                                             CommandParameter="{Binding .}"
-                                                            IsLoading="{Binding IsServing}">
-                                                        <controls:AlzowLoadingButton.ButtonStyle>
-                                                            <Style TargetType="Button">
-                                                                <Setter Property="FontSize" Value="14"/>
-                                                                <Setter Property="BackgroundColor" Value="{StaticResource Green}"/>
-                                                                <Setter Property="TextColor" Value="{StaticResource White}"/>
-                                                            </Style>
-                                                        </controls:AlzowLoadingButton.ButtonStyle>
-                                                    </controls:AlzowLoadingButton>
+                                                            IsLoading="{Binding IsServing}"
+                                                            ButtonStyle="{StaticResource btn14_Regular_Green}"/>
                                                     <controls:AlzowLoadingButton Grid.Column="2" Text="Done"
                                                             Margin="0" HeightRequest="44"
                                                             Command="{Binding BindingContext.DoneCommand, Source={x:Reference Root}}"
                                                             CommandParameter="{Binding .}"
-                                                            IsLoading="{Binding IsCompleting}">
-                                                        <controls:AlzowLoadingButton.ButtonStyle>
-                                                            <Style TargetType="Button">
-                                                                <Setter Property="FontSize" Value="14"/>
-                                                                <Setter Property="BackgroundColor" Value="{StaticResource Brown}"/>
-                                                                <Setter Property="TextColor" Value="{StaticResource White}"/>
-                                                            </Style>
-                                                        </controls:AlzowLoadingButton.ButtonStyle>
-                                                    </controls:AlzowLoadingButton>
+                                                            IsLoading="{Binding IsCompleting}"
+                                                            ButtonStyle="{StaticResource btn14_Regular_Brown}"/>
                                                     <controls:AlzowLoadingButton Grid.Column="3" Text="✕"
                                                             Margin="0" HeightRequest="44"
                                                             Command="{Binding BindingContext.NoShowCommand, Source={x:Reference Root}}"
                                                             CommandParameter="{Binding .}"
-                                                            IsLoading="{Binding IsMarkingNoShow}">
-                                                        <controls:AlzowLoadingButton.ButtonStyle>
-                                                            <Style TargetType="Button">
-                                                                <Setter Property="FontSize" Value="14"/>
-                                                                <Setter Property="BackgroundColor" Value="{StaticResource Red}"/>
-                                                                <Setter Property="TextColor" Value="{StaticResource White}"/>
-                                                            </Style>
-                                                        </controls:AlzowLoadingButton.ButtonStyle>
-                                                    </controls:AlzowLoadingButton>
+                                                            IsLoading="{Binding IsMarkingNoShow}"
+                                                            ButtonStyle="{StaticResource btn14_Regular_Red}"/>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>
@@ -136,9 +98,7 @@
                 VerticalOptions="Center"
                 HorizontalOptions="Center">
             <Label Text="No customers waiting"
-                   FontSize="18"
-                   FontAttributes="Bold"
-                   TextColor="{StaticResource TextDark}"/>
+                   Style="{StaticResource lbl18_Bold_TextDark}"/>
         </Border>
     </Grid>
 

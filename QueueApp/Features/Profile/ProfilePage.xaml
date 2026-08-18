@@ -7,7 +7,7 @@
              Title="Profile"
              BackgroundColor="{StaticResource Cream}">
     <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8">
-        <Label Text="Profile" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource TextDark}" HorizontalOptions="Center"/>
+        <Label Text="Profile" Style="{StaticResource lbl20_Bold_TextDark}" HorizontalOptions="Center"/>
         <Label Text="Account details, T&amp;Cs, and becoming an operator will live here." TextColor="Gray" HorizontalOptions="Center"/>
     </VerticalStackLayout>
 </ContentPage>

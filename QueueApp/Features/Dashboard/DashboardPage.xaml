@@ -4,8 +4,7 @@
              xmlns:vm="clr-namespace:QueueApp.Features.Dashboard"
              x:Class="QueueApp.Features.Dashboard.DashboardPage"
              x:DataType="vm:DashboardPageViewModel"
-             Shell.NavBarIsVisible="False"
-             BackgroundColor="{StaticResource Cream}">
+            Style="{StaticResource NavigationPageStyle}">
 
     <ScrollView>
         <VerticalStackLayout Spacing="0">
@@ -25,8 +24,7 @@
                                FontSize="12" TextColor="{StaticResource BrownLight}"
                                CharacterSpacing="2"/>
                         <Label Text="{Binding WelcomeMessage}"
-                               FontSize="22" FontAttributes="Bold"
-                               TextColor="{StaticResource Cream}"/>
+                               Style="{StaticResource lbl22_Bold_Cream}"/>
                     </VerticalStackLayout>
                     <Border Grid.Column="1"
                             BackgroundColor="{StaticResource Orange}"
@@ -79,7 +77,7 @@
                         <RoundRectangle CornerRadius="16"/>
                     </Border.StrokeShape>
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                        <Label Grid.Column="0" Text="⚠️" FontSize="26" VerticalOptions="Center"/>
+                        <Label Grid.Column="0" Text="⚠️" Style="{StaticResource lbl26_Regular_Emoji}" VerticalOptions="Center"/>
                         <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
                             <Label Text="{Binding UrgentMedicationName}"
                                    FontAttributes="Bold" FontSize="14"
@@ -90,11 +88,7 @@
                         <Button Grid.Column="2"
                                 Text="View"
                                 Command="{Binding NavigateToMedicationsCommand}"
-                                BackgroundColor="{StaticResource Orange}"
-                                TextColor="{StaticResource White}"
-                                FontSize="12"
-                                FontAttributes="Bold"
-                                CornerRadius="10"
+                                Style="{StaticResource btn12_Bold_Orange}"
                                 Padding="12,8"
                                 HeightRequest="36"/>
                     </Grid>
@@ -122,11 +116,9 @@
                             <TapGestureRecognizer Command="{Binding NavigateToMedicationsCommand}"/>
                         </Border.GestureRecognizers>
                         <VerticalStackLayout Spacing="4">
-                            <Label Text="💊" FontSize="28"/>
-                            <Label Text="Order Script" FontAttributes="Bold" FontSize="14"
-                                   TextColor="{StaticResource TextDark}" Margin="0,6,0,0"/>
-                            <Label Text="Upload prescription" FontSize="12"
-                                   TextColor="{StaticResource TextLight}"/>
+                            <Label Text="💊" Style="{StaticResource lbl28_Regular_Emoji}"/>
+                            <Label Text="Order Script" Style="{StaticResource lbl14_Bold_TextDark}" Margin="0,6,0,0"/>
+                            <Label Text="Upload prescription" Style="{StaticResource lbl12_Regular_TextLight}"/>
                         </VerticalStackLayout>
                     </Border>
 
@@ -142,11 +134,9 @@
                             <TapGestureRecognizer Command="{Binding NavigateToMedicationsCommand}"/>
                         </Border.GestureRecognizers>
                         <VerticalStackLayout Spacing="4">
-                            <Label Text="🔄" FontSize="28"/>
-                            <Label Text="Chronic Meds" FontAttributes="Bold" FontSize="14"
-                                   TextColor="{StaticResource TextDark}" Margin="0,6,0,0"/>
-                            <Label Text="Manage auto-refills" FontSize="12"
-                                   TextColor="{StaticResource TextLight}"/>
+                            <Label Text="🔄" Style="{StaticResource lbl28_Regular_Emoji}"/>
+                            <Label Text="Chronic Meds" Style="{StaticResource lbl14_Bold_TextDark}" Margin="0,6,0,0"/>
+                            <Label Text="Manage auto-refills" Style="{StaticResource lbl12_Regular_TextLight}"/>
                         </VerticalStackLayout>
                     </Border>
 
@@ -159,11 +149,9 @@
                             <RoundRectangle CornerRadius="18"/>
                         </Border.StrokeShape>
                         <VerticalStackLayout Spacing="4">
-                            <Label Text="🛍️" FontSize="28"/>
-                            <Label Text="Shop OTC" FontAttributes="Bold" FontSize="14"
-                                   TextColor="{StaticResource TextDark}" Margin="0,6,0,0"/>
-                            <Label Text="Delivery to your door" FontSize="12"
-                                   TextColor="{StaticResource TextLight}"/>
+                            <Label Text="🛍️" Style="{StaticResource lbl28_Regular_Emoji}"/>
+                            <Label Text="Shop OTC" Style="{StaticResource lbl14_Bold_TextDark}" Margin="0,6,0,0"/>
+                            <Label Text="Delivery to your door" Style="{StaticResource lbl12_Regular_TextLight}"/>
                         </VerticalStackLayout>
                     </Border>
 
@@ -176,11 +164,9 @@
                             <RoundRectangle CornerRadius="18"/>
                         </Border.StrokeShape>
                         <VerticalStackLayout Spacing="4">
-                            <Label Text="🏥" FontSize="28"/>
-                            <Label Text="Benefits" FontAttributes="Bold" FontSize="14"
-                                   TextColor="{StaticResource TextDark}" Margin="0,6,0,0"/>
-                            <Label Text="Track medical aid" FontSize="12"
-                                   TextColor="{StaticResource TextLight}"/>
+                            <Label Text="🏥" Style="{StaticResource lbl28_Regular_Emoji}"/>
+                            <Label Text="Benefits" Style="{StaticResource lbl14_Bold_TextDark}" Margin="0,6,0,0"/>
+                            <Label Text="Track medical aid" Style="{StaticResource lbl12_Regular_TextLight}"/>
                         </VerticalStackLayout>
                     </Border>
                 </Grid>
@@ -190,8 +176,7 @@
                     <Label Grid.Column="0" Text="ACTIVE SCRIPTS"
                            Style="{StaticResource SectionTitle}"/>
                     <Label Grid.Column="1" Text="View all"
-                           FontSize="13" FontAttributes="Bold"
-                           TextColor="{StaticResource Orange}">
+                           Style="{StaticResource lbl13_Bold_Orange}">
                         <Label.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding NavigateToMedicationsCommand}"/>
                         </Label.GestureRecognizers>
@@ -203,21 +188,15 @@
                                      BindableLayout.ItemsSource="{Binding ActiveMedications}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate>
-                            <Border BackgroundColor="{StaticResource White}"
-                                    Stroke="{StaticResource CreamBorder}"
-                                    StrokeThickness="1"
+                            <Border Style="{StaticResource brd20_White}"
                                     Padding="16">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="20"/>
-                                </Border.StrokeShape>
                                 <VerticalStackLayout Spacing="0">
                                     <Grid ColumnDefinitions="*,Auto">
                                         <VerticalStackLayout Grid.Column="0" Spacing="4">
                                             <Label Text="{Binding Name}"
-                                                   FontAttributes="Bold" FontSize="15"
-                                                   TextColor="{StaticResource TextDark}"/>
+                                                   Style="{StaticResource lbl15_Bold_TextDark}"/>
                                             <Label Text="{Binding SubText}"
-                                                   FontSize="13" TextColor="{StaticResource TextLight}"/>
+                                                   Style="{StaticResource lbl13_Regular_TextLight}"/>
                                         </VerticalStackLayout>
                                         <Border Grid.Column="1"
                                                 BackgroundColor="{Binding StatusBgColor}"
@@ -233,11 +212,7 @@
                                     </Grid>
                                     <Button Text="🛵 Request Delivery"
                                             IsVisible="{Binding IsReady}"
-                                            BackgroundColor="{StaticResource Green}"
-                                            TextColor="{StaticResource White}"
-                                            FontAttributes="Bold"
-                                            FontSize="13"
-                                            CornerRadius="12"
+                                            Style="{StaticResource btn13_Bold_Green}"
                                             HeightRequest="44"
                                             Margin="0,12,0,0"/>
                                 </VerticalStackLayout>
@@ -248,33 +223,23 @@
 
                 <!-- Empty state when no scripts -->
                 <Border IsVisible="{Binding HasNoMedications}"
-                        BackgroundColor="{StaticResource White}"
-                        Stroke="{StaticResource CreamBorder}"
-                        StrokeThickness="1"
+                        Style="{StaticResource brd20_White}"
                         Padding="24">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="20"/>
-                    </Border.StrokeShape>
                     <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
-                        <Label Text="💊" FontSize="40" HorizontalOptions="Center"/>
+                        <Label Text="💊" Style="{StaticResource lbl40_Regular_Emoji}" HorizontalOptions="Center"/>
                         <Label Text="No active scripts"
-                               FontAttributes="Bold" FontSize="15"
-                               TextColor="{StaticResource TextDark}"
+                               Style="{StaticResource lbl15_Bold_TextDark}"
                                HorizontalOptions="Center"/>
                         <Label Text="Submit a prescription to get started"
-                               FontSize="13" TextColor="{StaticResource TextLight}"
+                               Style="{StaticResource lbl13_Regular_TextLight}"
                                HorizontalOptions="Center"/>
                     </VerticalStackLayout>
                 </Border>
 
                 <!-- Pharmacy partner card -->
-                <Border BackgroundColor="{StaticResource Brown}"
-                        StrokeThickness="0"
+                <Border Style="{StaticResource brd20_Brown}"
                         Margin="0,16,0,0"
                         Padding="16">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="20"/>
-                    </Border.StrokeShape>
                     <VerticalStackLayout Spacing="0">
                         <HorizontalStackLayout Spacing="14">
                             <Border BackgroundColor="{StaticResource Orange}"
@@ -283,7 +248,7 @@
                                 <Border.StrokeShape>
                                     <RoundRectangle CornerRadius="16"/>
                                 </Border.StrokeShape>
-                                <Label Text="💊" FontSize="26"
+                                <Label Text="💊" Style="{StaticResource lbl26_Regular_Emoji}"
                                        HorizontalOptions="Center" VerticalOptions="Center"/>
                             </Border>
                             <VerticalStackLayout Spacing="4" VerticalOptions="Center" HorizontalOptions="FillAndExpand">
@@ -301,7 +266,7 @@
                                     </Border>
                                 </HorizontalStackLayout>
                                 <Label Text="Ext 1 · Open now · Pay on delivery"
-                                       FontSize="13" TextColor="{StaticResource BrownLight}"/>
+                                       Style="{StaticResource lbl13_Regular_BrownLight}"/>
                             </VerticalStackLayout>
                         </HorizontalStackLayout>
 

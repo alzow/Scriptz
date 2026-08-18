@@ -38,6 +38,7 @@
     <Color x:Key="MidnightBlue">#3D2314</Color>
     <Color x:Key="Magenta">#E8621A</Color>
 
+    <Color x:Key="Gray25">#FDFBF9</Color>
     <Color x:Key="Gray50">#FAF6F1</Color>
     <Color x:Key="Gray100">#F2EBE0</Color>
     <Color x:Key="Gray200">#E8DDD0</Color>

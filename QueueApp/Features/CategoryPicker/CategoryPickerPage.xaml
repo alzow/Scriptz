@@ -5,12 +5,10 @@
              x:Class="QueueApp.Features.CategoryPicker.CategoryPickerPage"
              x:DataType="vm:CategoryPickerPageViewModel"
              Title="Browse"
-             BackgroundColor="{StaticResource Cream}">
+             Style="{StaticResource NavigationPageStyle}">
 
     <Label Text="Browse — coming in Step 5"
-           FontSize="18"
-           FontAttributes="Bold"
-           TextColor="{StaticResource TextDark}"
+           Style="{StaticResource lbl18_Bold_TextDark}"
            VerticalOptions="Center"
            HorizontalOptions="Center"/>
 
