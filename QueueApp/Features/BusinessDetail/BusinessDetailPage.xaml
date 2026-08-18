@@ -3,12 +3,18 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.BusinessDetail"
              xmlns:responses="clr-namespace:QueueApp.Services.Api.Queue.Models"
+             xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
              x:Class="QueueApp.Features.BusinessDetail.BusinessDetailPage"
              x:DataType="vm:BusinessDetailPageViewModel"
              Title="{Binding Business.Name}"
              Style="{StaticResource NavigationPageStyle}">
 
-    <ScrollView>
+    <Grid RowDefinitions="Auto,*">
+        <templates:AlzowSubPageHeader Grid.Row="0"
+                                       Title="{Binding Business.Name}"
+                                       BackCommand="{Binding GoBackCommand}"/>
+
+        <ScrollView Grid.Row="1">
         <VerticalStackLayout Padding="20" Spacing="16">
 
             <Label Text="{Binding Business.Name}" Style="{StaticResource lbl24_Bold_TextDark}"/>
@@ -49,6 +55,7 @@
             <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"/>
 
         </VerticalStackLayout>
-    </ScrollView>
+        </ScrollView>
+    </Grid>
 
 </ContentPage>

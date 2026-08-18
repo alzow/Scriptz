@@ -3,14 +3,20 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.BusinessList"
              xmlns:responses="clr-namespace:QueueApp.Services.Api.Business.Models"
+             xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
              x:Name="Root"
              x:Class="QueueApp.Features.BusinessList.BusinessListPage"
              x:DataType="vm:BusinessListPageViewModel"
              Title="{Binding Title}"
              Style="{StaticResource NavigationPageStyle}">
 
-    <Grid>
-        <CollectionView ItemsSource="{Binding Businesses}"
+    <Grid RowDefinitions="Auto,*">
+        <templates:AlzowSubPageHeader Grid.Row="0"
+                                       Title="{Binding Title}"
+                                       BackCommand="{Binding GoBackCommand}"/>
+
+        <CollectionView Grid.Row="1"
+                         ItemsSource="{Binding Businesses}"
                          IsVisible="{Binding IsEmpty, Converter={StaticResource InvertedBoolConverter}}">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="responses:BusinessResponse">
@@ -33,12 +39,14 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <Label Text="No businesses here yet."
+        <Label Grid.Row="1"
+               Text="No businesses here yet."
                Style="{StaticResource lbl18_Bold_TextDark}"
                IsVisible="{Binding IsEmpty}"
                HorizontalOptions="Center" VerticalOptions="Center"/>
 
-        <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+        <ActivityIndicator Grid.Row="1"
+                            IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
                             HorizontalOptions="Center" VerticalOptions="Center"/>
     </Grid>
 

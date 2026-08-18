@@ -4,6 +4,7 @@ using MPowerKit;
 using MPowerKit.Navigation;
 using QueueApp.Constants;
 using QueueApp.Framework.Base;
+using QueueApp.Framework.Navigation;
 using QueueApp.Services.Api.Business;
 using QueueApp.Services.Api.Business.Models;
 using QueueApp.Services.Storage;
@@ -65,6 +66,21 @@ public partial class BusinessListPageViewModel : BaseViewModel
         finally
         {
             IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task GoBackAsync()
+    {
+        try
+        {
+            var ownsBusiness = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
+            var uri = MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: ownsBusiness);
+            await NavigationService.NavigateAsync(uri);
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
         }
     }
 

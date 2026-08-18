@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Threading;
+using CommunityToolkit.Mvvm.Input;
 using MPowerKit;
 using MPowerKit.Navigation;
 using QueueApp.Framework.Base;
@@ -38,6 +39,19 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     public bool IsQueueMode => Business?.Mode == "queue";
     public bool IsBookingMode => Business?.Mode == "booking";
     public bool IsLoading { get; set; }
+
+    [RelayCommand]
+    private async Task GoBackAsync()
+    {
+        try
+        {
+            await NavigationService.GoBackAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
