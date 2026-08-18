@@ -35,6 +35,11 @@ public interface IQueueApi
         [AliasAs("owner_id")] string ownerIdEq,
         [AliasAs("select")] string select = "id");
 
+    [Get("/businesses")]
+    Task<List<BusinessResponse>> GetBusinessesAsync(
+        [AliasAs("id")] string idEq,
+        [AliasAs("select")] string select = "id,name");
+
     // Presence heartbeat
     [Patch("/businesses")]
     Task HeartbeatAsync(

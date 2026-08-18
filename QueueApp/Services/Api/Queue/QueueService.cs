@@ -30,6 +30,12 @@ public class QueueService : BaseService, IQueueService
         return business.Id;
     }
 
+    public async Task<BusinessResponse?> GetBusinessAsync(Guid businessId)
+    {
+        var businesses = await ExecuteApiCallAsync(_api.GetBusinessesAsync($"eq.{businessId}"));
+        return businesses.FirstOrDefault();
+    }
+
     public Task<List<OperatorResponse>> GetOperatorsAsync(Guid businessId) =>
         ExecuteApiCallAsync(_api.GetOperatorsAsync($"eq.{businessId}"));
 

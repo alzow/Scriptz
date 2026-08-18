@@ -6,12 +6,17 @@
              x:Name="Root"
              x:Class="QueueApp.Features.OperatorQueue.OperatorQueuePage"
              x:DataType="vm:OperatorQueuePageViewModel"
-             Title="Queue"
-             Shell.NavBarIsVisible="False"
+             Title="{Binding BusinessName}"
              BackgroundColor="{StaticResource Cream}">
 
-    <Grid>
-        <ScrollView Orientation="Horizontal" Padding="16">
+    <Grid RowDefinitions="Auto,*">
+        <Label Grid.Row="0"
+               Text="{Binding BusinessName}"
+               FontSize="24" FontAttributes="Bold"
+               TextColor="{StaticResource TextDark}"
+               Margin="16,16,16,0"/>
+
+        <ScrollView Grid.Row="1" Orientation="Horizontal" Padding="16">
             <CollectionView ItemsSource="{Binding Columns}"
                              ItemsLayout="HorizontalList">
                 <CollectionView.ItemTemplate>
@@ -20,16 +25,20 @@
                                 BackgroundColor="{StaticResource White}"
                                 Stroke="{StaticResource CreamBorder}"
                                 StrokeThickness="1.5"
-                                Margin="8" Padding="16" WidthRequest="300">
-                            <VerticalStackLayout Spacing="12">
+                                Margin="8" Padding="16" WidthRequest="300"
+                                HeightRequest="600">
+                            <Grid RowDefinitions="Auto,Auto,Auto,*" RowSpacing="12">
 
-                                <Label Text="{Binding Operator.DisplayName}"
+                                <Label Grid.Row="0"
+                                       Text="{Binding Operator.DisplayName}"
                                        FontSize="20" FontAttributes="Bold"
                                        TextColor="{StaticResource TextDark}"/>
-                                <Label Text="{Binding Waiting.Count, StringFormat='{0} waiting'}"
+                                <Label Grid.Row="1"
+                                       Text="{Binding Waiting.Count, StringFormat='{0} waiting'}"
                                        FontSize="13" TextColor="{StaticResource Orange}"/>
 
-                                <Button Text="+ Add walk-in"
+                                <Button Grid.Row="2"
+                                        Text="+ Add walk-in"
                                         HeightRequest="56" FontSize="17" FontAttributes="Bold"
                                         CornerRadius="14"
                                         BackgroundColor="{StaticResource Orange}"
@@ -37,7 +46,7 @@
                                         Command="{Binding BindingContext.AddWalkInCommand, Source={x:Reference Root}}"
                                         CommandParameter="{Binding Operator}"/>
 
-                                <CollectionView ItemsSource="{Binding Waiting}">
+                                <CollectionView Grid.Row="3" ItemsSource="{Binding Waiting}">
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="responses:QueueEntryResponse">
                                             <Border StrokeShape="RoundRectangle 12"
@@ -72,14 +81,14 @@
                                     </CollectionView.ItemTemplate>
                                 </CollectionView>
 
-                            </VerticalStackLayout>
+                            </Grid>
                         </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </ScrollView>
 
-        <Grid IsVisible="{Binding IsLoading}" BackgroundColor="#80000000">
+        <Grid Grid.Row="0" Grid.RowSpan="2" IsVisible="{Binding IsLoading}" BackgroundColor="#80000000">
             <ActivityIndicator IsRunning="{Binding IsLoading}"
                                Color="{StaticResource Orange}"
                                VerticalOptions="Center"
@@ -87,7 +96,8 @@
                                Scale="1.5"/>
         </Grid>
 
-        <Border IsVisible="{Binding IsEmpty}"
+        <Border Grid.Row="0" Grid.RowSpan="2"
+                IsVisible="{Binding IsEmpty}"
                 StrokeThickness="0"
                 BackgroundColor="Transparent"
                 Padding="24"

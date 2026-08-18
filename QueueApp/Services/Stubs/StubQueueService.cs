@@ -11,13 +11,16 @@ public class StubQueueService : IQueueService
 
     private readonly List<OperatorResponse> _operators = new()
     {
-        new() { Id = Guid.NewGuid(), DisplayName = "Chair 1", SortOrder = 0, IsAvailable = true },
-        new() { Id = Guid.NewGuid(), DisplayName = "Chair 2", SortOrder = 1, IsAvailable = true },
+        new() { Id = Guid.NewGuid(), DisplayName = "Ahmed", SortOrder = 0, IsAvailable = true },
+        new() { Id = Guid.NewGuid(), DisplayName = "Yusuf", SortOrder = 1, IsAvailable = true },
     };
 
     private readonly List<QueueEntryResponse> _entries = new();
 
     public Task<Guid> GetOwnedBusinessIdAsync() => Task.FromResult(_defaultBusinessId);
+
+    public Task<BusinessResponse?> GetBusinessAsync(Guid businessId)
+        => Task.FromResult<BusinessResponse?>(new BusinessResponse { Id = businessId, Name = "My Test Barber" });
 
     public Task<List<OperatorResponse>> GetOperatorsAsync(Guid businessId)
         => Task.FromResult(_operators.OrderBy(o => o.SortOrder).ToList());

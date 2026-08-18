@@ -22,6 +22,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     private Guid _businessId;
 
     public ObservableCollection<OperatorColumn> Columns { get; } = new();
+    public string BusinessName { get; set; } = "Queue";
     public bool IsLoading { get; set; }
     public bool IsEmpty => Columns.Count == 0 && !IsLoading;
 
@@ -47,6 +48,9 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
             _businessId = parameters is not null && parameters.TryGetValue("businessId", out var idObj)
                 ? (Guid)idObj
                 : await _queueService.GetOwnedBusinessIdAsync();
+
+            var business = await _queueService.GetBusinessAsync(_businessId);
+            BusinessName = business?.Name ?? "Queue";
 
             await LoadQueueAsync();
 

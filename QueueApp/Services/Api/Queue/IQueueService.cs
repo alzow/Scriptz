@@ -5,6 +5,7 @@ namespace QueueApp.Services.Api.Queue;
 public interface IQueueService
 {
     Task<Guid> GetOwnedBusinessIdAsync();
+    Task<BusinessResponse?> GetBusinessAsync(Guid businessId);
     Task<List<OperatorResponse>> GetOperatorsAsync(Guid businessId);
     Task<List<QueueEntryResponse>> GetWaitingAsync(Guid businessId);
     Task AddWalkInAsync(Guid businessId, Guid? operatorId, string name);
