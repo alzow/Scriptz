@@ -30,12 +30,34 @@ public class HistoryPageViewModel : BaseViewModel
     public bool IsLoading { get; set; }
     public bool IsEmpty => Visits.Count == 0 && !IsLoading;
 
+    private bool _isLoaded;
+    private readonly SemaphoreSlim _refreshLock = new(1, 1);
+
+    public override async Task OnAppearingAsync()
+    {
+        await base.OnAppearingAsync();
+
+        // OnLoadedAsync already fetches on first navigation; avoid a duplicate race on initial appear.
+        if (!_isLoaded)
+            return;
+
+        await RefreshVisitsAsync();
+    }
+
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
+        await base.OnLoadedAsync(parameters);
+        _isLoaded = true;
+        await RefreshVisitsAsync();
+    }
+
+    private async Task RefreshVisitsAsync()
+    {
+        if (!await _refreshLock.WaitAsync(0))
+            return;
+
         try
         {
-            await base.OnLoadedAsync(parameters);
-
             IsLoading = true;
 
             var userId = await _authService.GetUserIdAsync();
@@ -56,6 +78,7 @@ public class HistoryPageViewModel : BaseViewModel
         finally
         {
             IsLoading = false;
+            _refreshLock.Release();
         }
     }
 }
