@@ -62,10 +62,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
             BusinessName = business?.Name ?? "Queue";
 
             await LoadQueueAsync();
-
-            await _realtimeService.SubscribeAsync(_businessId,
-                async () => await MainThread.InvokeOnMainThreadAsync(LoadQueueAsync));
-            StartHeartbeat();
         }
         catch (Exception ex)
         {
@@ -73,8 +69,17 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
     }
 
+    public override async Task OnAppearingAsync()
+    {
+        await base.OnAppearingAsync();
+        await _realtimeService.SubscribeAsync(_businessId,
+                async () => await MainThread.InvokeOnMainThreadAsync(LoadQueueAsync));
+        StartHeartbeat();
+    }
+
     public override async Task OnDisappearingAsync()
     {
+        await base.OnDisappearingAsync();
         _heartbeatTimer?.Stop();
         _heartbeatTimer = null;
         await _realtimeService.UnsubscribeAsync();

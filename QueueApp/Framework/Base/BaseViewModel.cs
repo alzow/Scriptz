@@ -8,6 +8,7 @@ namespace QueueApp.Framework.Base;
 public abstract class BaseViewModel : ObservableObject,
     INavigationAware,
     IInitializeAware,
+    IInitializeAsyncAware,
     ILoadedAsyncAware,
     IPageLifecycleAware
 {
@@ -41,6 +42,13 @@ public abstract class BaseViewModel : ObservableObject,
     }
     #endregion
 
+    #region IInitializeAsyncAware
+    public virtual Task InitializeAsync(INavigationParameters parameters)
+    {
+        return Task.CompletedTask;
+    }
+    #endregion
+
     #region ILoadedAsyncAware
     public virtual Task OnLoadedAsync(INavigationParameters parameters)
     {
@@ -49,22 +57,33 @@ public abstract class BaseViewModel : ObservableObject,
     #endregion
 
     #region IPageLifecycleAware
-    public virtual void OnAppearing()
+    public void OnAppearing()
     {
+        _ = SafeFireAndForgetAsync(OnAppearingAsync);
     }
 
-    public virtual void OnDisappearing()
+    public void OnDisappearing()
     {
+        _ = SafeFireAndForgetAsync(OnDisappearingAsync);
     }
 
-    public virtual Task OnAppearingAsync()
-    {
-        return Task.CompletedTask;
-    }
+    // MPowerKit's PageLifecycleAwareBehavior calls OnAppearing/OnDisappearing synchronously off the
+    // native Page.Appearing/Disappearing events, so async work here can never be awaited by the caller.
+    // These give derived VMs an awaitable-looking hook with exceptions routed through HandleExceptionAsync
+    // instead of each VM hand-rolling its own fire-and-forget.
+    public virtual Task OnAppearingAsync() => Task.CompletedTask;
+    public virtual Task OnDisappearingAsync() => Task.CompletedTask;
 
-    public virtual Task OnDisappearingAsync()
+    private async Task SafeFireAndForgetAsync(Func<Task> work)
     {
-        return Task.CompletedTask;
+        try
+        {
+            await work();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
     #endregion
 

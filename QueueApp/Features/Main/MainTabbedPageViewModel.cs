@@ -17,7 +17,6 @@ public partial class MainTabbedPageViewModel : BaseViewModel, IRecipient<Navigat
         : base(navigationService, secureStorageService)
     {
         _messenger = messenger;
-        _messenger.Register<NavigateAwayFromTabsMessage>(this);
     }
 
     public void Receive(NavigateAwayFromTabsMessage message)
@@ -35,9 +34,15 @@ public partial class MainTabbedPageViewModel : BaseViewModel, IRecipient<Navigat
         });
     }
 
-    public override void OnDisappearing()
+    public override async Task OnAppearingAsync()
     {
-        base.OnDisappearing();
+        await base.OnAppearingAsync();
+        _messenger.Register<NavigateAwayFromTabsMessage>(this);
+    }
+
+    public override async Task OnDisappearingAsync()
+    {
+        await base.OnDisappearingAsync();
         _messenger.Unregister<NavigateAwayFromTabsMessage>(this);
     }
 }

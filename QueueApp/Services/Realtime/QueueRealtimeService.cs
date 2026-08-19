@@ -55,6 +55,7 @@ public class QueueRealtimeService : IQueueRealtimeService
         _client?.Disconnect();
         _channel = null;
         _client = null;
+        Debug.WriteLine($"[Realtime] unsubscribed from business");
         return Task.CompletedTask;
     }
 }

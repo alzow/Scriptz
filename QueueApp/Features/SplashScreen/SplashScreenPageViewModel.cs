@@ -25,12 +25,16 @@ public class SplashScreenPageViewModel : BaseViewModel
         _businessService = businessService;
     }
 
-    public override async Task OnLoadedAsync(INavigationParameters? parameters)
+    public override async Task OnAppearingAsync()
+    {
+        await base.OnAppearingAsync();
+        await SplashOrchestration();
+    }
+
+    public async Task SplashOrchestration()
     {
         try
         {
-            await base.OnLoadedAsync(parameters);
-
             var isValid = await _authService.EnsureValidSessionAsync();
 
             if (!isValid)
@@ -46,8 +50,6 @@ public class SplashScreenPageViewModel : BaseViewModel
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
-            // On an unexpected failure, fail safe to the login gate rather than guessing at a
-            // signed-in shell we can't actually verify.
             await _navigationService.NavigateAsync($"/{NavigationPaths.LoginPage}");
         }
     }

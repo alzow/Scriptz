@@ -85,13 +85,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 await RefreshMyStatusAsync();
             }
             IsLoading = false;
-
-            await _realtimeService.SubscribeAsync(_businessId,
-                async () => await MainThread.InvokeOnMainThreadAsync(async () =>
-                {
-                    await RefreshMyStatusAsync();
-                    await RefreshQueueAsync();
-                }));
         }
         catch (Exception ex)
         {
@@ -99,8 +92,20 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         }
     }
 
+    public override async Task OnAppearingAsync()
+    {
+        await base.OnAppearingAsync();
+        await _realtimeService.SubscribeAsync(_businessId,
+                async () => await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    await RefreshMyStatusAsync();
+                    await RefreshQueueAsync();
+                }));
+    }
+
     public override async Task OnDisappearingAsync()
     {
+        await base.OnDisappearingAsync();
         await _realtimeService.UnsubscribeAsync();
     }
 
