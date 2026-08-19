@@ -127,4 +127,7 @@ public class StubQueueService : IQueueService
 
     public Task<decimal?> GetEntryWaitMinutesAsync(Guid entryId)
         => Task.FromResult<decimal?>(10);
+
+    public Task<List<VisitResponse>> GetMyVisitsAsync(Guid customerId)
+        => Task.FromResult(new List<VisitResponse>());
 }

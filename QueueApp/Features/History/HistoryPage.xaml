@@ -3,11 +3,41 @@
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.History"
+             xmlns:models="clr-namespace:QueueApp.Services.Api.Queue.Models"
              x:DataType="vm:HistoryPageViewModel"
              Title="History"
              Style="{StaticResource NavigationPageStyle}">
-    <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8">
-        <Label Text="History" Style="{StaticResource lbl20_Bold_TextDark}" HorizontalOptions="Center"/>
-        <Label Text="Your past visits will show up here." TextColor="Gray" HorizontalOptions="Center"/>
-    </VerticalStackLayout>
+    <Grid>
+        <CollectionView ItemsSource="{Binding Visits}"
+                         IsVisible="{Binding IsEmpty, Converter={StaticResource InvertedBoolConverter}}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:VisitResponse">
+                    <Border Padding="14" Margin="12,6">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{Binding BusinessName}" Style="{StaticResource lbl16_Regular_TextDark}" FontAttributes="Bold"/>
+                            <Label FontSize="13" TextColor="Gray">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{Binding OperatorName}"/>
+                                        <Span Text=" · "/>
+                                        <Span Text="{Binding VisitedAt, StringFormat='{0:dd MMM yyyy, HH:mm}'}"/>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Label Text="{Binding ServiceLabel}" FontSize="13" TextColor="Gray"
+                                   IsVisible="{Binding ServiceLabel, Converter={StaticResource IsNotNullOrEmptyConverter}}"/>
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <VerticalStackLayout IsVisible="{Binding IsEmpty}" HorizontalOptions="Center" VerticalOptions="Center" Spacing="8">
+            <Label Text="No visits yet" Style="{StaticResource lbl20_Bold_TextDark}" HorizontalOptions="Center"/>
+            <Label Text="Once you've been served somewhere, it'll show up here." TextColor="Gray" HorizontalOptions="Center"/>
+        </VerticalStackLayout>
+
+        <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                            HorizontalOptions="Center" VerticalOptions="Center"/>
+    </Grid>
 </ContentPage>

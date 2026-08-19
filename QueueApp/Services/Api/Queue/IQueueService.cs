@@ -14,4 +14,5 @@ public interface IQueueService
     Task<QueueEntryResponse> CancelEntryAsync(Guid entryId);
     Task<MyQueueStatusResponse?> GetMyQueueStatusAsync(Guid businessId);
     Task<decimal?> GetEntryWaitMinutesAsync(Guid entryId);
+    Task<List<VisitResponse>> GetMyVisitsAsync(Guid customerId);
 }
