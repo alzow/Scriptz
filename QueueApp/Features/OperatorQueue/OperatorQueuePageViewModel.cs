@@ -152,7 +152,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         try
         {
             await _queueService.AddWalkInAsync(_businessId, op.Id == Guid.Empty ? null : op.Id, "Walk-in");
-            // await LoadQueueAsync();
         }
         catch (Exception ex)
         {
@@ -172,7 +171,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         try
         {
             await _queueService.StartServingAsync(entry.Id);
-            // await LoadQueueAsync();
         }
         catch (Exception ex)
         {
@@ -191,7 +189,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         try
         {
             await _queueService.CompleteAsync(entry.Id);
-            // await LoadQueueAsync();
         }
         catch (Exception ex)
         {
@@ -217,7 +214,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
             }
 
             await _queueService.NoShowAsync(entry.Id);
-            // await LoadQueueAsync();
         }
         catch (Exception ex)
         {

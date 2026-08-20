@@ -19,7 +19,7 @@
     <Style x:Key="lbl11_Bold_TextMid" TargetType="Label" BasedOn="{StaticResource SectionTitle}"/>
     <Style x:Key="lbl11_Bold_White" TargetType="Label">
         <Setter Property="FontSize" Value="11"/>
-        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
         <Setter Property="TextColor" Value="{StaticResource White}"/>
     </Style>
 
@@ -34,7 +34,7 @@
     </Style>
     <Style x:Key="lbl12_Bold_Orange" TargetType="Label">
         <Setter Property="FontSize" Value="12"/>
-        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
         <Setter Property="TextColor" Value="{StaticResource Orange}"/>
     </Style>
 
@@ -57,7 +57,7 @@
     </Style>
     <Style x:Key="lbl13_Bold_Orange" TargetType="Label">
         <Setter Property="FontSize" Value="13"/>
-        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
         <Setter Property="TextColor" Value="{StaticResource Orange}"/>
     </Style>
 
@@ -65,7 +65,7 @@
     <Style x:Key="lbl14_Regular_TextDark" TargetType="Label" BasedOn="{StaticResource Body}"/>
     <Style x:Key="lbl14_Bold_TextDark" TargetType="Label">
         <Setter Property="FontSize" Value="14"/>
-        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
         <Setter Property="TextColor" Value="{StaticResource TextDark}"/>
     </Style>
     <Style x:Key="lbl14_Regular_TextLight" TargetType="Label">
@@ -76,12 +76,12 @@
     <!-- 15 -->
     <Style x:Key="lbl15_Bold_TextDark" TargetType="Label">
         <Setter Property="FontSize" Value="15"/>
-        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
         <Setter Property="TextColor" Value="{StaticResource TextDark}"/>
     </Style>
     <Style x:Key="lbl15_Bold_Cream" TargetType="Label">
         <Setter Property="FontSize" Value="15"/>
-        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
         <Setter Property="TextColor" Value="{StaticResource Cream}"/>
     </Style>
 
@@ -97,19 +97,19 @@
     <!-- 20 -->
     <Style x:Key="lbl20_Bold_TextDark" TargetType="Label">
         <Setter Property="FontSize" Value="20"/>
-        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
         <Setter Property="TextColor" Value="{StaticResource TextDark}"/>
     </Style>
     <Style x:Key="lbl20_Bold_Cream" TargetType="Label">
         <Setter Property="FontSize" Value="20"/>
-        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
         <Setter Property="TextColor" Value="{StaticResource Cream}"/>
     </Style>
 
     <!-- 22 -->
     <Style x:Key="lbl22_Bold_Cream" TargetType="Label">
         <Setter Property="FontSize" Value="22"/>
-        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
         <Setter Property="TextColor" Value="{StaticResource Cream}"/>
     </Style>
 
