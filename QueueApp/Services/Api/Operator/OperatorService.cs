@@ -27,4 +27,13 @@ public class OperatorService : BaseService, IOperatorService
 
     public Task SetOperatorActiveAsync(Guid id, bool isActive) =>
         ExecuteApiCallAsync(_api.SetOperatorActiveAsync($"eq.{id}", new SetOperatorActiveRequest { IsActive = isActive }));
+
+    public Task<List<OperatorAvailabilityResponse>> GetAvailabilityAsync(Guid operatorId) =>
+        ExecuteApiCallAsync(_api.GetAvailabilityAsync($"eq.{operatorId}"));
+
+    public Task<List<OperatorAvailabilityResponse>> CreateAvailabilityAsync(CreateAvailabilityRequest request) =>
+        ExecuteApiCallAsync(_api.CreateAvailabilityAsync(request));
+
+    public Task DeleteAvailabilityAsync(Guid id) =>
+        ExecuteApiCallAsync(_api.DeleteAvailabilityAsync($"eq.{id}"));
 }

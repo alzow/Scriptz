@@ -27,6 +27,12 @@ public partial class BusinessSettingsPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private async Task OpenHoursAsync()
+    {
+        await NavigationService.NavigateAsync(NavigationPaths.OperatorHoursPage);
+    }
+
+    [RelayCommand]
     private async Task GoBackAsync()
     {
         try

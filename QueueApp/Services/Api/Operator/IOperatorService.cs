@@ -9,4 +9,8 @@ public interface IOperatorService
     Task<List<OperatorResponse>> CreateOperatorAsync(CreateOperatorRequest request);
     Task UpdateOperatorAsync(Guid id, UpdateOperatorRequest request);
     Task SetOperatorActiveAsync(Guid id, bool isActive);
+
+    Task<List<OperatorAvailabilityResponse>> GetAvailabilityAsync(Guid operatorId);
+    Task<List<OperatorAvailabilityResponse>> CreateAvailabilityAsync(CreateAvailabilityRequest request);
+    Task DeleteAvailabilityAsync(Guid id);
 }

@@ -51,4 +51,32 @@ public class StubOperatorService : IOperatorService
         if (op != null) op.IsActive = isActive;
         return Task.CompletedTask;
     }
+
+    private readonly List<OperatorAvailabilityResponse> _availability = new();
+
+    public Task<List<OperatorAvailabilityResponse>> GetAvailabilityAsync(Guid operatorId)
+        => Task.FromResult(_availability
+            .Where(a => a.OperatorId == operatorId)
+            .OrderBy(a => a.DayOfWeek).ThenBy(a => a.StartTime)
+            .ToList());
+
+    public Task<List<OperatorAvailabilityResponse>> CreateAvailabilityAsync(CreateAvailabilityRequest request)
+    {
+        var window = new OperatorAvailabilityResponse
+        {
+            Id = Guid.NewGuid(),
+            OperatorId = request.OperatorId,
+            DayOfWeek = request.DayOfWeek,
+            StartTime = request.StartTime,
+            EndTime = request.EndTime,
+        };
+        _availability.Add(window);
+        return Task.FromResult(new List<OperatorAvailabilityResponse> { window });
+    }
+
+    public Task DeleteAvailabilityAsync(Guid id)
+    {
+        _availability.RemoveAll(a => a.Id == id);
+        return Task.CompletedTask;
+    }
 }

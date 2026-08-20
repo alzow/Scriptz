@@ -7,8 +7,7 @@
              Title="SplashScreenPage">
     <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="16">
         <Label Text="Queue"
-               FontSize="28"
-               FontAttributes="Bold"
+               Style="{StaticResource lbl20_Bold_TextDark}"
                HorizontalOptions="Center" />
         <ActivityIndicator IsRunning="True"
                            Color="{StaticResource Primary}" />

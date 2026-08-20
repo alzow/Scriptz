@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:QueueApp.Features.Settings"
+             xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
+             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
+             xmlns:models="clr-namespace:QueueApp.Services.Api.Operator.Models"
+             x:Name="Root"
+             x:Class="QueueApp.Features.Settings.WeeklyHoursPage"
+             x:DataType="vm:WeeklyHoursPageViewModel"
+             Title="{Binding OperatorName}"
+             Style="{StaticResource NavigationPageStyle}">
+    <Grid RowDefinitions="Auto,*">
+        <templates:AlzowSubPageHeader Grid.Row="0"
+                                       Title="{Binding OperatorName}"
+                                       BackCommand="{Binding GoBackCommand}"/>
+
+        <Grid Grid.Row="1">
+            <ScrollView>
+                <VerticalStackLayout Spacing="4"
+                                      BindableLayout.ItemsSource="{Binding Days}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:DayGroup">
+                            <VerticalStackLayout Padding="16,12" Spacing="8">
+                                <Label Text="{Binding Label}" Style="{StaticResource lbl15_Bold_TextDark}"/>
+
+                                <VerticalStackLayout Spacing="4"
+                                                      BindableLayout.ItemsSource="{Binding Windows}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="models:OperatorAvailabilityResponse">
+                                            <Grid ColumnDefinitions="*,Auto" Padding="0,4">
+                                                <Label Grid.Column="0" Text="{Binding RangeDisplay}"
+                                                       Style="{StaticResource lbl14_Regular_TextDark}"
+                                                       VerticalOptions="Center"/>
+                                                <controls:AlzowLoadingButton Grid.Column="1" Text="Remove"
+                                                        Command="{Binding BindingContext.DeleteWindowCommand, Source={x:Reference Root}}"
+                                                        CommandParameter="{Binding .}"
+                                                        IsLoading="{Binding IsDeleting}"
+                                                        ButtonStyle="{StaticResource btn14_Regular_Brown}"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+
+                                <controls:AlzowLoadingButton Text="+ Add window"
+                                        Command="{Binding BindingContext.AddWindowCommand, Source={x:Reference Root}}"
+                                        CommandParameter="{Binding DayOfWeek}"
+                                        ButtonStyle="{StaticResource btn14_Regular_Brown}"/>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                                HorizontalOptions="Center" VerticalOptions="Center"/>
+        </Grid>
+    </Grid>
+</ContentPage>

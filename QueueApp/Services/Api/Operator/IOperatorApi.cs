@@ -27,4 +27,15 @@ public interface IOperatorApi
 
     [Patch("/operators")]
     Task SetOperatorActiveAsync([AliasAs("id")] string idEq, [Body] SetOperatorActiveRequest request);
+
+    [Get("/operator_availability")]
+    Task<List<OperatorAvailabilityResponse>> GetAvailabilityAsync(
+        [AliasAs("operator_id")] string operatorIdEq,
+        [AliasAs("order")] string order = "day_of_week.asc,start_time.asc");
+
+    [Post("/operator_availability")]
+    Task<List<OperatorAvailabilityResponse>> CreateAvailabilityAsync([Body] CreateAvailabilityRequest request);
+
+    [Delete("/operator_availability")]
+    Task DeleteAvailabilityAsync([AliasAs("id")] string idEq);
 }
