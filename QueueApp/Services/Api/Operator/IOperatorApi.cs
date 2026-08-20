@@ -38,4 +38,15 @@ public interface IOperatorApi
 
     [Delete("/operator_availability")]
     Task DeleteAvailabilityAsync([AliasAs("id")] string idEq);
+
+    [Get("/availability_blocks")]
+    Task<List<AvailabilityBlockResponse>> GetAvailabilityBlocksAsync(
+        [AliasAs("operator_id")] string operatorIdEq,
+        [AliasAs("order")] string order = "starts_at.asc");
+
+    [Post("/availability_blocks")]
+    Task<List<AvailabilityBlockResponse>> CreateAvailabilityBlockAsync([Body] CreateAvailabilityBlockRequest request);
+
+    [Delete("/availability_blocks")]
+    Task DeleteAvailabilityBlockAsync([AliasAs("id")] string idEq);
 }

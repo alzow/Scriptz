@@ -36,4 +36,13 @@ public class OperatorService : BaseService, IOperatorService
 
     public Task DeleteAvailabilityAsync(Guid id) =>
         ExecuteApiCallAsync(_api.DeleteAvailabilityAsync($"eq.{id}"));
+
+    public Task<List<AvailabilityBlockResponse>> GetAvailabilityBlocksAsync(Guid operatorId) =>
+        ExecuteApiCallAsync(_api.GetAvailabilityBlocksAsync($"eq.{operatorId}"));
+
+    public Task<List<AvailabilityBlockResponse>> CreateAvailabilityBlockAsync(CreateAvailabilityBlockRequest request) =>
+        ExecuteApiCallAsync(_api.CreateAvailabilityBlockAsync(request));
+
+    public Task DeleteAvailabilityBlockAsync(Guid id) =>
+        ExecuteApiCallAsync(_api.DeleteAvailabilityBlockAsync($"eq.{id}"));
 }

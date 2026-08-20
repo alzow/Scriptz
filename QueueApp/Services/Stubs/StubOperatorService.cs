@@ -79,4 +79,32 @@ public class StubOperatorService : IOperatorService
         _availability.RemoveAll(a => a.Id == id);
         return Task.CompletedTask;
     }
+
+    private readonly List<AvailabilityBlockResponse> _availabilityBlocks = new();
+
+    public Task<List<AvailabilityBlockResponse>> GetAvailabilityBlocksAsync(Guid operatorId)
+        => Task.FromResult(_availabilityBlocks
+            .Where(b => b.OperatorId == operatorId)
+            .OrderBy(b => b.StartsAt)
+            .ToList());
+
+    public Task<List<AvailabilityBlockResponse>> CreateAvailabilityBlockAsync(CreateAvailabilityBlockRequest request)
+    {
+        var block = new AvailabilityBlockResponse
+        {
+            Id = Guid.NewGuid(),
+            OperatorId = request.OperatorId,
+            StartsAt = request.StartsAt,
+            EndsAt = request.EndsAt,
+            Reason = request.Reason,
+        };
+        _availabilityBlocks.Add(block);
+        return Task.FromResult(new List<AvailabilityBlockResponse> { block });
+    }
+
+    public Task DeleteAvailabilityBlockAsync(Guid id)
+    {
+        _availabilityBlocks.RemoveAll(b => b.Id == id);
+        return Task.CompletedTask;
+    }
 }

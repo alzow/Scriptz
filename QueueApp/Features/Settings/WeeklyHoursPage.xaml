@@ -10,12 +10,17 @@
              x:DataType="vm:WeeklyHoursPageViewModel"
              Title="{Binding OperatorName}"
              Style="{StaticResource NavigationPageStyle}">
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,Auto,*">
         <templates:AlzowSubPageHeader Grid.Row="0"
                                        Title="{Binding OperatorName}"
                                        BackCommand="{Binding GoBackCommand}"/>
 
-        <Grid Grid.Row="1">
+        <controls:AlzowLoadingButton Grid.Row="1" Text="Blocked dates"
+                Margin="16,0,16,8" HeightRequest="48"
+                Command="{Binding GoToBlockedDatesCommand}"
+                ButtonStyle="{StaticResource btn14_Regular_Brown}"/>
+
+        <Grid Grid.Row="2">
             <ScrollView>
                 <VerticalStackLayout Spacing="4"
                                       BindableLayout.ItemsSource="{Binding Days}">

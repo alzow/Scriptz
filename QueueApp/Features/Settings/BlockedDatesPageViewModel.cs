@@ -11,33 +11,25 @@ using QueueApp.Services.Storage;
 
 namespace QueueApp.Features.Settings;
 
-public class DayGroup
+public partial class BlockedDatesPageViewModel : BaseViewModel
 {
-    public int DayOfWeek { get; set; }
-    public string Label { get; set; } = "";
-    public ObservableCollection<OperatorAvailabilityResponse> Windows { get; } = new();
-}
-
-public partial class WeeklyHoursPageViewModel : BaseViewModel
-{
-    private static readonly string[] DayLabels =
-        { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
-
     private readonly IOperatorService _operatorService;
     private Guid _operatorId;
 
-    public WeeklyHoursPageViewModel(
+    public BlockedDatesPageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
         IOperatorService operatorService)
         : base(navigationService, secureStorageService)
     {
         _operatorService = operatorService;
+        Title = "Blocked Dates";
     }
 
-    public ObservableCollection<DayGroup> Days { get; } = new();
+    public ObservableCollection<AvailabilityBlockResponse> Blocks { get; } = new();
     public string OperatorName { get; set; } = "";
     public bool IsLoading { get; set; }
+    public bool IsEmpty => Blocks.Count == 0 && !IsLoading;
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
@@ -47,7 +39,7 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
 
             _operatorId = parameters is not null && parameters.TryGetValue("operatorId", out var idObj)
                 ? (Guid)idObj
-                : throw new InvalidOperationException("WeeklyHoursPage requires an operatorId.");
+                : throw new InvalidOperationException("BlockedDatesPage requires an operatorId.");
 
             OperatorName = parameters!.TryGetValue("operatorName", out var nameObj) ? (string)nameObj : "";
 
@@ -72,16 +64,10 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
         IsLoading = true;
         try
         {
-            var windows = await _operatorService.GetAvailabilityAsync(_operatorId);
-
-            Days.Clear();
-            for (var dow = 0; dow <= 6; dow++)
-            {
-                var group = new DayGroup { DayOfWeek = dow, Label = DayLabels[dow] };
-                foreach (var w in windows.Where(w => w.DayOfWeek == dow))
-                    group.Windows.Add(w);
-                Days.Add(group);
-            }
+            var blocks = await _operatorService.GetAvailabilityBlocksAsync(_operatorId);
+            Blocks.Clear();
+            foreach (var b in blocks)
+                Blocks.Add(b);
         }
         catch (Exception ex)
         {
@@ -94,19 +80,19 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task AddWindowAsync(int dayOfWeek)
+    private async Task AddBlockAsync()
     {
-        await NavigationService.NavigateAsync(NavigationPaths.AddAvailabilityWindowPage,
-            new NavigationParameters { ["operatorId"] = _operatorId, ["dayOfWeek"] = dayOfWeek });
+        await NavigationService.NavigateAsync(NavigationPaths.AddAvailabilityBlockPage,
+            new NavigationParameters { ["operatorId"] = _operatorId });
     }
 
     [RelayCommand]
-    private async Task DeleteWindowAsync(OperatorAvailabilityResponse window)
+    private async Task DeleteBlockAsync(AvailabilityBlockResponse block)
     {
-        window.IsDeleting = true;
+        block.IsDeleting = true;
         try
         {
-            await _operatorService.DeleteAvailabilityAsync(window.Id);
+            await _operatorService.DeleteAvailabilityBlockAsync(block.Id);
             await LoadAsync();
         }
         catch (Exception ex)
@@ -115,15 +101,8 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
         }
         finally
         {
-            window.IsDeleting = false;
+            block.IsDeleting = false;
         }
-    }
-
-    [RelayCommand]
-    private async Task GoToBlockedDatesAsync()
-    {
-        await NavigationService.NavigateAsync(NavigationPaths.BlockedDatesPage,
-            new NavigationParameters { ["operatorId"] = _operatorId, ["operatorName"] = OperatorName });
     }
 
     [RelayCommand]
