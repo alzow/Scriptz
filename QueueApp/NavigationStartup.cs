@@ -7,6 +7,7 @@ using QueueApp.Services.Api.Business;
 using QueueApp.Services.Api.Operator;
 using QueueApp.Services.Api.Profile;
 using QueueApp.Services.Api.Queue;
+using QueueApp.Services.Api.ServiceOfferings;
 using QueueApp.Services.Auth;
 using QueueApp.Services.Storage;
 using QueueApp.Services.Popup;
@@ -71,12 +72,14 @@ internal static class NavigationStartup
         services.AddSingleton<IOperatorService, StubOperatorService>();
         services.AddSingleton<IQueueRealtimeService, StubQueueRealtimeService>();
         services.AddSingleton<IProfileService, StubProfileService>();
+        services.AddSingleton<IServiceOfferingsService, StubServiceOfferingsService>();
 #else
         services.AddSingleton<IQueueService, QueueService>();
         services.AddSingleton<IBusinessService, BusinessService>();
         services.AddSingleton<IOperatorService, OperatorService>();
         services.AddSingleton<IQueueRealtimeService, QueueRealtimeService>();
         services.AddSingleton<IProfileService, ProfileService>();
+        services.AddSingleton<IServiceOfferingsService, ServiceOfferingsService>();
 #endif
     }
 }

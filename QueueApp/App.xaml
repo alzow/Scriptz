@@ -30,6 +30,7 @@
             <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
             <converters:IsNotNullConverter x:Key="IsNotNullConverter"/>
             <converters:IsNullConverter x:Key="IsNullConverter"/>
+            <converters:ActiveToLabelConverter x:Key="ActiveToLabelConverter"/>
 
         </ResourceDictionary>
     </Application.Resources>

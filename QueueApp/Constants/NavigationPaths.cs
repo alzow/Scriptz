@@ -21,6 +21,11 @@ public static class NavigationPaths
     // ── Queue (operator counter-tablet) ──────────────────────────────────────
     public const string OperatorQueuePage    = "OperatorQueuePage";
 
+    // ── Business settings (Services / Staff / Hours) ──────────────────────────
+    public const string BusinessSettingsPage  = "BusinessSettingsPage";
+    public const string ServicesManagementPage = "ServicesManagementPage";
+    public const string AddEditServicePage    = "AddEditServicePage";
+
     // ── Browse (customer-facing) ───────────────────────────────────────────────
     public const string BusinessListPage     = "BusinessListPage";
     public const string BusinessDetailPage   = "BusinessDetailPage";

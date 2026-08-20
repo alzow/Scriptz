@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Threading;
 using CommunityToolkit.Mvvm.Input;
 using MPowerKit.Navigation;
+using QueueApp.Constants;
 using QueueApp.Framework.Base;
 using QueueApp.Services.Api.Business;
 using QueueApp.Services.Api.Operator;
@@ -141,6 +142,12 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         _heartbeatTimer.Interval = TimeSpan.FromMinutes(2);
         _heartbeatTimer.Tick += async (_, _) => await _businessService.HeartbeatAsync(_businessId);
         _heartbeatTimer.Start();
+    }
+
+    [RelayCommand]
+    private async Task OpenSettingsAsync()
+    {
+        await NavigationService.NavigateAsync(NavigationPaths.BusinessSettingsPage);
     }
 
     [RelayCommand]

@@ -11,10 +11,20 @@
              Style="{StaticResource NavigationPageStyle}">
 
     <Grid RowDefinitions="Auto,*">
-        <Label Grid.Row="0"
-               Text="{Binding BusinessName}"
-               Style="{StaticResource lbl24_Bold_TextDark}"
-               Margin="16,16,16,0"/>
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="16,16,16,0">
+            <Label Grid.Column="0"
+                   Text="{Binding BusinessName}"
+                   Style="{StaticResource lbl24_Bold_TextDark}"
+                   VerticalOptions="Center"/>
+            <Label Grid.Column="1"
+                   Text="⚙"
+                   FontSize="24"
+                   VerticalOptions="Center">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenSettingsCommand}"/>
+                </Label.GestureRecognizers>
+            </Label>
+        </Grid>
 
         <ScrollView Grid.Row="1" Orientation="Horizontal" Padding="16">
             <CollectionView ItemsSource="{Binding Columns}"
