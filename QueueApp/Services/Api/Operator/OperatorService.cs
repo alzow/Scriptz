@@ -15,4 +15,16 @@ public class OperatorService : BaseService, IOperatorService
 
     public Task<List<OperatorResponse>> GetOperatorsAsync(Guid businessId) =>
         ExecuteApiCallAsync(_api.GetOperatorsAsync($"eq.{businessId}"));
+
+    public Task<List<OperatorResponse>> GetAllOperatorsForManagementAsync(Guid businessId) =>
+        ExecuteApiCallAsync(_api.GetAllOperatorsForManagementAsync($"eq.{businessId}"));
+
+    public Task<List<OperatorResponse>> CreateOperatorAsync(CreateOperatorRequest request) =>
+        ExecuteApiCallAsync(_api.CreateOperatorAsync(request));
+
+    public Task UpdateOperatorAsync(Guid id, UpdateOperatorRequest request) =>
+        ExecuteApiCallAsync(_api.UpdateOperatorAsync($"eq.{id}", request));
+
+    public Task SetOperatorActiveAsync(Guid id, bool isActive) =>
+        ExecuteApiCallAsync(_api.SetOperatorActiveAsync($"eq.{id}", new SetOperatorActiveRequest { IsActive = isActive }));
 }

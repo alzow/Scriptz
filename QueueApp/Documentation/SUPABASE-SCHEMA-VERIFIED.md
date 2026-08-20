@@ -122,6 +122,7 @@ order by t.typname, e.enumsortorder;
 | **profile_id** | uuid (FK → `profiles.id`, set null) | yes | — |
 | display_name | text | no | — |
 | is_available | bool | no | `true` |
+| **is_active** | bool | no | `true` |
 | sort_order | int4 | no | `0` |
 | created_at | timestamptz | no | `now()` |
 

@@ -21,6 +21,12 @@ public partial class BusinessSettingsPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private async Task OpenStaffAsync()
+    {
+        await NavigationService.NavigateAsync(NavigationPaths.StaffManagementPage);
+    }
+
+    [RelayCommand]
     private async Task GoBackAsync()
     {
         try

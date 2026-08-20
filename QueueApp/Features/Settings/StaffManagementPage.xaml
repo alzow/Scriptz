@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:QueueApp.Features.Settings"
+             xmlns:responses="clr-namespace:QueueApp.Services.Api.Operator.Models"
+             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
+             xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
+             x:Name="Root"
+             x:Class="QueueApp.Features.Settings.StaffManagementPage"
+             x:DataType="vm:StaffManagementPageViewModel"
+             Title="{Binding Title}"
+             Style="{StaticResource NavigationPageStyle}">
+    <Grid RowDefinitions="Auto,Auto,*">
+        <templates:AlzowSubPageHeader Grid.Row="0"
+                                       Title="{Binding Title}"
+                                       BackCommand="{Binding GoBackCommand}"/>
+
+        <controls:AlzowLoadingButton Grid.Row="1" Text="+ Add staff member"
+                Margin="16" HeightRequest="56"
+                Command="{Binding AddOperatorCommand}"
+                IsLoading="{Binding IsAddingOperator}">
+            <controls:AlzowLoadingButton.ButtonStyle>
+                <Style TargetType="Button" BasedOn="{StaticResource btn16_Bold_Orange}">
+                    <Setter Property="Padding" Value="0,16"/>
+                </Style>
+            </controls:AlzowLoadingButton.ButtonStyle>
+        </controls:AlzowLoadingButton>
+
+        <Grid Grid.Row="2">
+            <CollectionView ItemsSource="{Binding Operators}"
+                             IsVisible="{Binding IsEmpty, Converter={StaticResource InvertedBoolConverter}}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="responses:OperatorResponse">
+                        <Border Style="{StaticResource brd16_White}"
+                                Padding="14" Margin="12,6"
+                                Opacity="{Binding IsActive, Converter={StaticResource BoolToOpacityConverter}}">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout Grid.Column="0">
+                                    <VerticalStackLayout.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding BindingContext.EditOperatorCommand, Source={x:Reference Root}}"
+                                            CommandParameter="{Binding .}"/>
+                                    </VerticalStackLayout.GestureRecognizers>
+                                    <Label Text="{Binding DisplayName}" Style="{StaticResource lbl15_Bold_TextDark}"/>
+                                </VerticalStackLayout>
+                                <controls:AlzowLoadingButton Grid.Column="1"
+                                        Text="{Binding IsActive, Converter={StaticResource ActiveToLabelConverter}}"
+                                        Margin="0" HeightRequest="44"
+                                        Command="{Binding BindingContext.ToggleActiveCommand, Source={x:Reference Root}}"
+                                        CommandParameter="{Binding .}"
+                                        IsLoading="{Binding IsToggling}">
+                                    <controls:AlzowLoadingButton.ButtonStyle>
+                                        <Style TargetType="Button" BasedOn="{StaticResource btn14_Regular_Brown}">
+                                            <Setter Property="Padding" Value="12,12"/>
+                                        </Style>
+                                    </controls:AlzowLoadingButton.ButtonStyle>
+                                </controls:AlzowLoadingButton>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            <Label Text="No staff yet — add your first team member above." IsVisible="{Binding IsEmpty}"
+                   Style="{StaticResource lbl18_Bold_TextDark}"
+                   HorizontalOptions="Center" VerticalOptions="Center"/>
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                               Color="{StaticResource Orange}"
+                               HorizontalOptions="Center" VerticalOptions="Center"/>
+        </Grid>
+    </Grid>
+</ContentPage>
