@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Name="Root"
+             x:Class="QueueApp.Features.BusinessDetail.Helpers.BookingConfirmedView">
+
+    <VerticalStackLayout Spacing="10">
+        <Label Text="Booking requested!" Style="{StaticResource lbl18_Bold_TextDark}"/>
+        <Label Text="The business will confirm shortly." Style="{StaticResource lbl14_Regular_TextDark}"/>
+
+        <Border Style="{StaticResource brd16_White}" Padding="14" Margin="0,6">
+            <VerticalStackLayout Spacing="4">
+                <Label Style="{StaticResource lbl15_Bold_TextDark}">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="{Binding ServiceName, Source={x:Reference Root}}"/>
+                            <Span Text=" with "/>
+                            <Span Text="{Binding OperatorName, Source={x:Reference Root}}"/>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label Style="{StaticResource lbl14_Regular_TextDark}">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="{Binding DateDisplay, Source={x:Reference Root}}"/>
+                            <Span Text=" · "/>
+                            <Span Text="{Binding TimeDisplay, Source={x:Reference Root}}"/>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+            </VerticalStackLayout>
+        </Border>
+    </VerticalStackLayout>
+
+</ContentView>

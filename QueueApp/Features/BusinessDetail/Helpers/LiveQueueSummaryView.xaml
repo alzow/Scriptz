@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:responses="clr-namespace:QueueApp.Services.Api.Queue.Models"
+             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
+             x:Name="Root"
+             x:Class="QueueApp.Features.BusinessDetail.Helpers.LiveQueueSummaryView">
+
+    <VerticalStackLayout Spacing="10">
+        <Label Text="Live queue" Style="{StaticResource lbl18_Bold_TextDark}"/>
+        <VerticalStackLayout Spacing="0"
+                              BindableLayout.ItemsSource="{Binding QueueSummary, Source={x:Reference Root}}">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate x:DataType="responses:QueueSummaryRow">
+                    <Grid ColumnDefinitions="*,Auto" Padding="0,6">
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label Text="{Binding OperatorName}"
+                                   Style="{StaticResource lbl16_Regular_TextDark}"/>
+                            <Label Style="{StaticResource lbl14_Regular_TextDark}">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{Binding WaitingCount}"/>
+                                        <Span Text=" waiting · ~"/>
+                                        <Span Text="{Binding NewJoinWaitMinutes}"/>
+                                        <Span Text=" min"/>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                        </VerticalStackLayout>
+                        <controls:AlzowLoadingButton
+                            Grid.Column="1"
+                            Text="Join"
+                            Command="{Binding JoinCommand, Source={x:Reference Root}}"
+                            CommandParameter="{Binding .}"
+                            IsLoading="{Binding IsJoining}"/>
+                    </Grid>
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </VerticalStackLayout>
+    </VerticalStackLayout>
+
+</ContentView>

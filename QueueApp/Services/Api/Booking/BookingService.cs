@@ -1,0 +1,26 @@
+using QueueApp.Framework.Base;
+using QueueApp.Services.Api.Booking.Models;
+
+namespace QueueApp.Services.Api.Booking;
+
+// Hides PostgREST filter syntax (e.g. "eq.<guid>") from callers.
+public class BookingService : BaseService, IBookingService
+{
+    private readonly IBookingApi _api;
+
+    public BookingService(IBookingApi api)
+    {
+        _api = api;
+    }
+
+    public Task<List<SlotResponse>> GetAvailableSlotsAsync(Guid operatorId, Guid serviceId, DateTime date) =>
+        ExecuteApiCallAsync(_api.GetAvailableSlotsAsync(new GetAvailableSlotsRequest
+        {
+            OperatorId = operatorId,
+            ServiceId = serviceId,
+            Date = date.ToString("yyyy-MM-dd"),
+        }));
+
+    public Task<BookingResponse> CreateBookingAsync(CreateBookingRequest request) =>
+        ExecuteApiCallAsync(_api.CreateBookingAsync(request));
+}

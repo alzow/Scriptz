@@ -16,6 +16,9 @@ public class ServiceOfferingsService : BaseService, IServiceOfferingsService
     public Task<List<ServiceResponse>> GetServicesAsync(Guid businessId) =>
         ExecuteApiCallAsync(_api.GetServicesAsync($"eq.{businessId}"));
 
+    public Task<List<ServiceResponse>> GetActiveServicesAsync(Guid businessId) =>
+        ExecuteApiCallAsync(_api.GetActiveServicesAsync($"eq.{businessId}"));
+
     public Task<List<ServiceResponse>> CreateServiceAsync(CreateServiceRequest request) =>
         ExecuteApiCallAsync(_api.CreateServiceAsync(request));
 

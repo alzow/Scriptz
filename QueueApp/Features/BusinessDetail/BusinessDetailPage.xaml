@@ -2,9 +2,10 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.BusinessDetail"
-             xmlns:responses="clr-namespace:QueueApp.Services.Api.Queue.Models"
              xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
              xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
+             xmlns:helpers="clr-namespace:QueueApp.Features.BusinessDetail.Helpers"
+             x:Name="Root"
              x:Class="QueueApp.Features.BusinessDetail.BusinessDetailPage"
              x:DataType="vm:BusinessDetailPageViewModel"
              Title="{Binding Business.Name}"
@@ -19,95 +20,74 @@
         <VerticalStackLayout Padding="20" Spacing="16">
 
             <Label Text="{Binding Business.Name}" Style="{StaticResource lbl24_Bold_TextDark}"/>
-            <Label Text="{Binding Business.Address}" Style="{StaticResource lbl13_Regular_TextLight}"/>
+            <Label Text="{Binding Business.Address}" Style="{StaticResource lbl14_Regular_TextDark}"/>
 
             <VerticalStackLayout Spacing="10" IsVisible="{Binding IsQueueMode}">
 
                 <!-- BROWSING: not in this queue yet -->
-                <VerticalStackLayout Spacing="10"
-                                      IsVisible="{Binding IsInQueue, Converter={StaticResource InvertedBoolConverter}}">
-                    <Label Text="Live queue" Style="{StaticResource lbl18_Bold_TextDark}"/>
-                    <VerticalStackLayout Spacing="0"
-                                          BindableLayout.ItemsSource="{Binding QueueSummary}">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="responses:QueueSummaryRow">
-                                <Grid ColumnDefinitions="*,Auto" Padding="0,6">
-                                    <VerticalStackLayout Grid.Column="0">
-                                        <Label Text="{Binding OperatorName}"
-                                               Style="{StaticResource lbl16_Regular_TextDark}"/>
-                                        <Label Style="{StaticResource lbl13_Regular_TextLight}">
-                                            <Label.FormattedText>
-                                                <FormattedString>
-                                                    <Span Text="{Binding WaitingCount}"/>
-                                                    <Span Text=" waiting · ~"/>
-                                                    <Span Text="{Binding NewJoinWaitMinutes}"/>
-                                                    <Span Text=" min"/>
-                                                </FormattedString>
-                                            </Label.FormattedText>
-                                        </Label>
-                                    </VerticalStackLayout>
-                                    <controls:AlzowLoadingButton
-                                        Grid.Column="1"
-                                        Text="Join"
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.JoinCommand}"
-                                        CommandParameter="{Binding .}"
-                                        IsLoading="{Binding IsJoining}"/>
-                                </Grid>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </VerticalStackLayout>
-                </VerticalStackLayout>
+                <helpers:LiveQueueSummaryView
+                    IsVisible="{Binding IsInQueue, Converter={StaticResource InvertedBoolConverter}}"
+                    QueueSummary="{Binding QueueSummary}"
+                    JoinCommand="{Binding JoinCommand}"/>
 
                 <!-- IN QUEUE: show position, not the summary list -->
-                <VerticalStackLayout Spacing="12" IsVisible="{Binding IsInQueue}">
-
-                    <!-- Being served right now — replaces position/wait entirely, not just hides them -->
-                    <Label Style="{StaticResource lbl18_Bold_TextDark}" IsVisible="{Binding IsBeingServed}">
-                        <Label.FormattedText>
-                            <FormattedString>
-                                <Span Text="You're being served by "/>
-                                <Span Text="{Binding MyStatus.OperatorName}"/>
-                                <Span Text=" now"/>
-                            </FormattedString>
-                        </Label.FormattedText>
-                    </Label>
-
-                    <!-- Still waiting — the position/wait estimate as before -->
-                    <VerticalStackLayout IsVisible="{Binding IsBeingServed, Converter={StaticResource InvertedBoolConverter}}">
-                        <Label Style="{StaticResource lbl18_Bold_TextDark}">
-                            <Label.FormattedText>
-                                <FormattedString>
-                                    <Span Text="You're #"/>
-                                    <Span Text="{Binding MyStatus.Position}"/>
-                                    <Span Text=" for "/>
-                                    <Span Text="{Binding MyStatus.OperatorName}"/>
-                                </FormattedString>
-                            </Label.FormattedText>
-                        </Label>
-                        <Label Style="{StaticResource lbl13_Regular_TextLight}">
-                            <Label.FormattedText>
-                                <FormattedString>
-                                    <Span Text="~"/>
-                                    <Span Text="{Binding MyWaitMinutes}"/>
-                                    <Span Text=" min estimated wait"/>
-                                </FormattedString>
-                            </Label.FormattedText>
-                        </Label>
-                    </VerticalStackLayout>
-
-                    <controls:AlzowLoadingButton
-                        Text="Leave queue"
-                        Command="{Binding LeaveCommand}"
-                        IsLoading="{Binding IsLeaving}"
-                        IsVisible="{Binding IsBeingServed, Converter={StaticResource InvertedBoolConverter}}"/>
-                </VerticalStackLayout>
+                <helpers:MyQueueStatusView
+                    IsVisible="{Binding IsInQueue}"
+                    MyStatus="{Binding MyStatus}"
+                    MyWaitMinutes="{Binding MyWaitMinutes}"
+                    IsBeingServed="{Binding IsBeingServed}"
+                    LeaveCommand="{Binding LeaveCommand}"
+                    IsLeaving="{Binding IsLeaving}"/>
 
             </VerticalStackLayout>
 
-            <VerticalStackLayout Spacing="10" IsVisible="{Binding IsBookingMode}">
-                <Label Text="Booking" Style="{StaticResource lbl18_Bold_TextDark}"/>
-                <Label Text="Online booking for this business is coming soon."
-                       Style="{StaticResource lbl13_Regular_TextLight}"/>
+            <!-- BOOKING MODE — inline operator → service → date → slot flow, same page as queue mode -->
+            <VerticalStackLayout Spacing="20" IsVisible="{Binding IsBookingMode}">
+
+                <!-- Confirmed state replaces the whole flow once booked -->
+                <helpers:BookingConfirmedView
+                    IsVisible="{Binding BookingConfirmed}"
+                    OperatorName="{Binding ConfirmedOperatorName}"
+                    ServiceName="{Binding ConfirmedServiceName}"
+                    DateDisplay="{Binding ConfirmedDateDisplay}"
+                    TimeDisplay="{Binding ConfirmedTimeDisplay}"/>
+
+                <VerticalStackLayout Spacing="20" IsVisible="{Binding BookingConfirmed, Converter={StaticResource InvertedBoolConverter}}">
+
+                    <Label Text="No staff available to book with right now." IsVisible="{Binding IsNoOperatorsAvailable}"
+                           Style="{StaticResource lbl14_Regular_TextDark}"/>
+
+                    <helpers:OperatorPickerView
+                        IsSectionVisible="{Binding ShowOperatorPicker}"
+                        Operators="{Binding Operators}"
+                        SelectedOperator="{Binding SelectedOperator}"
+                        SelectCommand="{Binding SelectOperatorCommand}"/>
+
+                    <helpers:ServicePickerView
+                        IsSectionVisible="{Binding ShowServiceSection}"
+                        IsEmpty="{Binding IsServicesEmpty}"
+                        Services="{Binding Services}"
+                        SelectCommand="{Binding SelectServiceCommand}"/>
+
+                    <helpers:DatePickerSectionView
+                        IsSectionVisible="{Binding ShowDateSection}"
+                        DateOptions="{Binding DateOptions}"
+                        SelectCommand="{Binding SelectDateCommand}"/>
+
+                    <helpers:SlotPickerView
+                        IsSectionVisible="{Binding ShowSlotSection}"
+                        IsLoading="{Binding IsLoadingSlots}"
+                        IsEmpty="{Binding IsSlotsEmpty}"
+                        Slots="{Binding Slots}"
+                        SelectCommand="{Binding SelectSlotCommand}"/>
+
+                    <controls:AlzowLoadingButton
+                        Text="Confirm booking"
+                        Command="{Binding ConfirmBookingCommand}"
+                        IsLoading="{Binding IsConfirmingBooking}"
+                        IsEnabled="{Binding SelectedSlot, Converter={StaticResource IsNotNullConverter}}"/>
+
+                </VerticalStackLayout>
             </VerticalStackLayout>
 
             <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"/>

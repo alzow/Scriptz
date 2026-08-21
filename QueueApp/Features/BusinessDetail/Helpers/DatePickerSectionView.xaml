@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             x:Name="Root"
+             x:Class="QueueApp.Features.BusinessDetail.Helpers.DatePickerSectionView">
+
+    <!-- Horizontal scroller, next 14 days -->
+    <VerticalStackLayout Spacing="8" IsVisible="{Binding IsSectionVisible, Source={x:Reference Root}}">
+        <Label Text="When?" Style="{StaticResource lbl18_Bold_TextDark}"/>
+        <CollectionView ItemsSource="{Binding DateOptions, Source={x:Reference Root}}"
+                        HeightRequest="64">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="sys:DateTime">
+                    <Border Style="{StaticResource brd16_White}" Padding="10">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding SelectCommand, Source={x:Reference Root}}"
+                                CommandParameter="{Binding .}"/>
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout>
+                            <Label Text="{Binding ., StringFormat='{0:ddd}'}" Style="{StaticResource lbl14_Regular_TextDark}" HorizontalOptions="Center"/>
+                            <Label Text="{Binding ., StringFormat='{0:d}'}" Style="{StaticResource lbl15_Bold_TextDark}" HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </VerticalStackLayout>
+
+</ContentView>

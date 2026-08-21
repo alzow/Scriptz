@@ -7,10 +7,42 @@ namespace QueueApp.Services.Stubs;
 // Registered instead of the real ServiceOfferingsService in DEBUG builds.
 public class StubServiceOfferingsService : IServiceOfferingsService
 {
-    private readonly List<ServiceResponse> _services = new();
+    private readonly Guid _defaultBusinessId = new("0637f5ef-c7fa-46dc-b4e5-b814f2d7d3bf");
+
+    private readonly List<ServiceResponse> _services;
+
+    public StubServiceOfferingsService()
+    {
+        _services = new List<ServiceResponse>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                BusinessId = _defaultBusinessId,
+                Name = "Haircut",
+                PriceCents = 15000,
+                EstMinutes = 30,
+                IsActive = true,
+                SortOrder = 0,
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                BusinessId = _defaultBusinessId,
+                Name = "Beard trim",
+                PriceCents = 8000,
+                EstMinutes = 15,
+                IsActive = true,
+                SortOrder = 1,
+            },
+        };
+    }
 
     public Task<List<ServiceResponse>> GetServicesAsync(Guid businessId)
         => Task.FromResult(_services.Where(s => s.BusinessId == businessId).OrderBy(s => s.SortOrder).ToList());
+
+    public Task<List<ServiceResponse>> GetActiveServicesAsync(Guid businessId)
+        => Task.FromResult(_services.Where(s => s.BusinessId == businessId && s.IsActive).OrderBy(s => s.SortOrder).ToList());
 
     public Task<List<ServiceResponse>> CreateServiceAsync(CreateServiceRequest request)
     {

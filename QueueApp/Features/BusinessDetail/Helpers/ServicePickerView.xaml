@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:serviceModels="clr-namespace:QueueApp.Services.Api.ServiceOfferings.Models"
+             x:Name="Root"
+             x:Class="QueueApp.Features.BusinessDetail.Helpers.ServicePickerView">
+
+    <VerticalStackLayout Spacing="8" IsVisible="{Binding IsSectionVisible, Source={x:Reference Root}}">
+        <Label Text="What are you in for?" Style="{StaticResource lbl18_Bold_TextDark}"/>
+        <Label Text="No services available to book right now." IsVisible="{Binding IsEmpty, Source={x:Reference Root}}"
+               Style="{StaticResource lbl14_Regular_TextDark}"/>
+        <VerticalStackLayout Spacing="0" BindableLayout.ItemsSource="{Binding Services, Source={x:Reference Root}}">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate x:DataType="serviceModels:ServiceResponse">
+                    <Border Style="{StaticResource brd16_White}" Padding="14" Margin="0,4">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding SelectCommand, Source={x:Reference Root}}"
+                                CommandParameter="{Binding .}"/>
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="{Binding Name}" Style="{StaticResource lbl15_Bold_TextDark}"/>
+                            <Label Grid.Column="1" Style="{StaticResource lbl14_Regular_TextDark}">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{Binding EstMinutes}"/>
+                                        <Span Text=" min · "/>
+                                        <Span Text="{Binding PriceDisplay}"/>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </VerticalStackLayout>
+    </VerticalStackLayout>
+
+</ContentView>

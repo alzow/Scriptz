@@ -3,6 +3,7 @@ using MPowerKit.Navigation;
 using MPowerKit.Navigation.Utilities;
 using QueueApp.Constants;
 using QueueApp.Services.Api;
+using QueueApp.Services.Api.Booking;
 using QueueApp.Services.Api.Business;
 using QueueApp.Services.Api.Operator;
 using QueueApp.Services.Api.Profile;
@@ -73,6 +74,7 @@ internal static class NavigationStartup
         services.AddSingleton<IQueueRealtimeService, StubQueueRealtimeService>();
         services.AddSingleton<IProfileService, StubProfileService>();
         services.AddSingleton<IServiceOfferingsService, StubServiceOfferingsService>();
+        services.AddSingleton<IBookingService, StubBookingService>();
 #else
         services.AddSingleton<IQueueService, QueueService>();
         services.AddSingleton<IBusinessService, BusinessService>();
@@ -80,6 +82,7 @@ internal static class NavigationStartup
         services.AddSingleton<IQueueRealtimeService, QueueRealtimeService>();
         services.AddSingleton<IProfileService, ProfileService>();
         services.AddSingleton<IServiceOfferingsService, ServiceOfferingsService>();
+        services.AddSingleton<IBookingService, BookingService>();
 #endif
     }
 }
