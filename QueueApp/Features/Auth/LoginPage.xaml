@@ -64,7 +64,7 @@
                             IsEnabled="{Binding IsFormValid}"
                             HeightRequest="54"
                             Margin="0,8,0,0"
-                            ButtonStyle="{StaticResource btn16_Bold_Orange}"/>
+                            ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
 
                     <!-- Forgot password -->
                     <HorizontalStackLayout HorizontalOptions="Center" Spacing="4">

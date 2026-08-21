@@ -8,53 +8,89 @@
         e.g. btn14_Bold_Orange, btn16_Bold_Green
     -->
 
-    <Style x:Key="btn12_Bold_Orange" TargetType="Button">
+    <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource Green}"/>
+        <Setter Property="TextColor" Value="{StaticResource DeepBackground}"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="CornerRadius" Value="14"/>
+        <Setter Property="Padding" Value="16,12"/>
+    </Style>
+
+    <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="BorderColor" Value="{StaticResource Purple}"/>
+        <Setter Property="BorderWidth" Value="1"/>
+        <Setter Property="TextColor" Value="{StaticResource Purple}"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="CornerRadius" Value="14"/>
+        <Setter Property="Padding" Value="14,10"/>
+    </Style>
+
+    <Style x:Key="DangerButtonStyle" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource Danger}"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="CornerRadius" Value="14"/>
+        <Setter Property="Padding" Value="14,10"/>
+    </Style>
+
+    <Style x:Key="TertiaryButtonStyle" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="CornerRadius" Value="14"/>
+        <Setter Property="Padding" Value="14,10"/>
+    </Style>
+
+    <Style x:Key="ToggleButtonStyle" TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+        <Style.Triggers>
+            <Trigger TargetType="Button"
+                     Property="Text"
+                     Value="Deactivate">
+                <Setter Property="BackgroundColor" Value="Transparent"/>
+                <Setter Property="BorderColor" Value="{StaticResource Danger}"/>
+                <Setter Property="TextColor" Value="{StaticResource Danger}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="btn12_Bold_Orange" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="FontAttributes" Value="Bold"/>
-        <Setter Property="BackgroundColor" Value="{StaticResource Orange}"/>
-        <Setter Property="TextColor" Value="{StaticResource White}"/>
         <Setter Property="CornerRadius" Value="10"/>
     </Style>
 
-    <Style x:Key="btn13_Bold_Green" TargetType="Button">
+    <Style x:Key="btn13_Bold_Green" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="FontAttributes" Value="Bold"/>
-        <Setter Property="BackgroundColor" Value="{StaticResource Green}"/>
-        <Setter Property="TextColor" Value="{StaticResource White}"/>
         <Setter Property="CornerRadius" Value="12"/>
     </Style>
 
-    <Style x:Key="btn14_Regular_Green" TargetType="Button">
+    <Style x:Key="btn14_Regular_Green" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
         <Setter Property="FontSize" Value="14"/>
-        <Setter Property="BackgroundColor" Value="{StaticResource Green}"/>
-        <Setter Property="TextColor" Value="{StaticResource White}"/>
     </Style>
 
-    <Style x:Key="btn14_Regular_Brown" TargetType="Button">
+    <Style x:Key="btn14_Regular_Brown" TargetType="Button" BasedOn="{StaticResource TertiaryButtonStyle}">
         <Setter Property="FontSize" Value="14"/>
-        <Setter Property="BackgroundColor" Value="{StaticResource Brown}"/>
-        <Setter Property="TextColor" Value="{StaticResource White}"/>
     </Style>
 
-    <Style x:Key="btn14_Regular_Red" TargetType="Button">
+    <Style x:Key="btn14_Regular_Red" TargetType="Button" BasedOn="{StaticResource DangerButtonStyle}">
         <Setter Property="FontSize" Value="14"/>
-        <Setter Property="BackgroundColor" Value="{StaticResource Red}"/>
-        <Setter Property="TextColor" Value="{StaticResource White}"/>
     </Style>
 
-    <Style x:Key="btn16_Bold_Orange" TargetType="Button">
+    <Style x:Key="btn16_Bold_Orange" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
         <Setter Property="FontSize" Value="16"/>
         <Setter Property="FontAttributes" Value="Bold"/>
-        <Setter Property="BackgroundColor" Value="{StaticResource Orange}"/>
-        <Setter Property="TextColor" Value="{StaticResource White}"/>
         <Setter Property="CornerRadius" Value="14"/>
     </Style>
 
-    <Style x:Key="btn17_Bold_Orange" TargetType="Button">
+    <Style x:Key="btn17_Bold_Orange" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
         <Setter Property="FontSize" Value="17"/>
         <Setter Property="FontAttributes" Value="Bold"/>
-        <Setter Property="BackgroundColor" Value="{StaticResource Orange}"/>
-        <Setter Property="TextColor" Value="{StaticResource White}"/>
         <Setter Property="CornerRadius" Value="14"/>
     </Style>
 

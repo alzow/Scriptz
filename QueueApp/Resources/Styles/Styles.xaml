@@ -435,40 +435,40 @@
 
     <Style TargetType="Page" ApplyToDerivedTypes="True">
         <Setter Property="Padding" Value="0"/>
-        <Setter Property="BackgroundColor" Value="{StaticResource Cream}"/>
+        <Setter Property="BackgroundColor" Value="{StaticResource DeepBackground}"/>
     </Style>
 
     <Style TargetType="Shell" ApplyToDerivedTypes="True">
-        <Setter Property="Shell.BackgroundColor" Value="{StaticResource Brown}"/>
-        <Setter Property="Shell.ForegroundColor" Value="{StaticResource Cream}"/>
-        <Setter Property="Shell.TitleColor" Value="{StaticResource Cream}"/>
-        <Setter Property="Shell.DisabledColor" Value="{StaticResource BrownLight}"/>
-        <Setter Property="Shell.UnselectedColor" Value="{StaticResource BrownLight}"/>
+        <Setter Property="Shell.BackgroundColor" Value="{StaticResource DeepBackground}"/>
+        <Setter Property="Shell.ForegroundColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="Shell.TitleColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="Shell.DisabledColor" Value="{StaticResource TextFaint}"/>
+        <Setter Property="Shell.UnselectedColor" Value="{StaticResource TextMuted}"/>
         <Setter Property="Shell.NavBarHasShadow" Value="False"/>
-        <Setter Property="Shell.TabBarBackgroundColor" Value="{StaticResource White}"/>
-        <Setter Property="Shell.TabBarForegroundColor" Value="{StaticResource Orange}"/>
-        <Setter Property="Shell.TabBarTitleColor" Value="{StaticResource Orange}"/>
-        <Setter Property="Shell.TabBarUnselectedColor" Value="{StaticResource TextLight}"/>
+        <Setter Property="Shell.TabBarBackgroundColor" Value="{StaticResource Surface}"/>
+        <Setter Property="Shell.TabBarForegroundColor" Value="{StaticResource Green}"/>
+        <Setter Property="Shell.TabBarTitleColor" Value="{StaticResource Green}"/>
+        <Setter Property="Shell.TabBarUnselectedColor" Value="{StaticResource TextMuted}"/>
     </Style>
 
     <Style TargetType="NavigationPage">
-        <Setter Property="BarBackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}" />
-        <Setter Property="BarTextColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource White}}" />
-        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource White}}" />
+        <Setter Property="BarBackgroundColor" Value="{StaticResource DeepBackground}" />
+        <Setter Property="BarTextColor" Value="{StaticResource TextPrimary}" />
+        <Setter Property="IconColor" Value="{StaticResource TextPrimary}" />
     </Style>
 
     <Style
         x:Key="NavigationPageStyle"
         TargetType="NavigationPage">
         <Setter Property="HasNavigationBar" Value="False" />
-        <Setter Property="BackgroundColor" Value="{StaticResource Gray25}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource DeepBackground}" />
     </Style>
 
     <Style TargetType="TabbedPage">
-        <Setter Property="BarBackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}" />
-        <Setter Property="BarTextColor" Value="{AppThemeBinding Light={StaticResource Magenta}, Dark={StaticResource White}}" />
-        <Setter Property="UnselectedTabColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray950}}" />
-        <Setter Property="SelectedTabColor" Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray200}}" />
+        <Setter Property="BarBackgroundColor" Value="{StaticResource Surface}" />
+        <Setter Property="BarTextColor" Value="{StaticResource TextPrimary}" />
+        <Setter Property="UnselectedTabColor" Value="{StaticResource TextMuted}" />
+        <Setter Property="SelectedTabColor" Value="{StaticResource Green}" />
     </Style>
 
 </ResourceDictionary>

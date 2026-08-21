@@ -18,7 +18,7 @@
         <controls:AlzowLoadingButton Grid.Row="1" Text="Blocked dates"
                 Margin="16,0,16,8" HeightRequest="48"
                 Command="{Binding GoToBlockedDatesCommand}"
-                ButtonStyle="{StaticResource btn14_Regular_Brown}"/>
+                ButtonStyle="{StaticResource TertiaryButtonStyle}"/>
 
         <Grid Grid.Row="2">
             <ScrollView>
@@ -41,7 +41,7 @@
                                                         Command="{Binding BindingContext.DeleteWindowCommand, Source={x:Reference Root}}"
                                                         CommandParameter="{Binding .}"
                                                         IsLoading="{Binding IsDeleting}"
-                                                        ButtonStyle="{StaticResource btn14_Regular_Brown}"/>
+                                                        ButtonStyle="{StaticResource TertiaryButtonStyle}"/>
                                             </Grid>
                                         </DataTemplate>
                                     </BindableLayout.ItemTemplate>
@@ -50,7 +50,7 @@
                                 <controls:AlzowLoadingButton Text="+ Add window"
                                         Command="{Binding BindingContext.AddWindowCommand, Source={x:Reference Root}}"
                                         CommandParameter="{Binding DayOfWeek}"
-                                        ButtonStyle="{StaticResource btn14_Regular_Brown}"/>
+                                        ButtonStyle="{StaticResource TertiaryButtonStyle}"/>
                             </VerticalStackLayout>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>

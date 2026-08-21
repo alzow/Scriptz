@@ -42,7 +42,7 @@
                 Command="{Binding SaveCommand}"
                 IsLoading="{Binding IsSaving}"
                 IsEnabled="{Binding IsFormValid}"
-                ButtonStyle="{StaticResource btn16_Bold_Orange}" />
+                ButtonStyle="{StaticResource PrimaryButtonStyle}" />
 
         </VerticalStackLayout>
     </Grid>

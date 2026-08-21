@@ -5,9 +5,9 @@
     <Style x:Key="SearchFrame"
             TargetType="Frame">
         <Setter Property="BackgroundColor"
-                Value="{StaticResource White}"/>
+                Value="{StaticResource Surface}"/>
         <Setter Property="BorderColor"
-                Value="{StaticResource CreamBorder}"/>
+                Value="{StaticResource Line}"/>
         <Setter Property="CornerRadius"
                 Value="16"/>
         <Setter Property="Padding"

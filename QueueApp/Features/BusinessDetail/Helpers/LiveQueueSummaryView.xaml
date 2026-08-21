@@ -32,7 +32,8 @@
                             Text="Join"
                             Command="{Binding JoinCommand, Source={x:Reference Root}}"
                             CommandParameter="{Binding .}"
-                            IsLoading="{Binding IsJoining}"/>
+                            IsLoading="{Binding IsJoining}"
+                            ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
                     </Grid>
                 </DataTemplate>
             </BindableLayout.ItemTemplate>

@@ -17,8 +17,8 @@
 
             <!-- Navigation bar styling -->
             <Style TargetType="NavigationPage">
-                <Setter Property="BarBackgroundColor" Value="{StaticResource Brown}"/>
-                <Setter Property="BarTextColor" Value="{StaticResource Cream}"/>
+                <Setter Property="BarBackgroundColor" Value="{StaticResource DeepBackground}"/>
+                <Setter Property="BarTextColor" Value="{StaticResource TextPrimary}"/>
             </Style>
 
             <!-- Converters -->

@@ -7,7 +7,7 @@
     <Grid>
         <Button
             x:Name="Button"
-            Style="{Binding Source={x:Reference LoadingButton}, Path=ButtonStyle}"
+            Style="{Binding Source={x:Reference LoadingButton}, Path=ButtonStyle, TargetNullValue={StaticResource PrimaryButtonStyle}}"
             IsEnabled="{Binding Source={x:Reference LoadingButton}, Path=IsEnabled}"
             Margin="{Binding Source={x:Reference LoadingButton}, Path=Margin}"
             Clicked="OnButtonClicked">

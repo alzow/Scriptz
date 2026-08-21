@@ -49,7 +49,7 @@
                                         Command="{Binding BindingContext.AddWalkInCommand, Source={x:Reference Root}}"
                                         CommandParameter="{Binding Operator}"
                                         IsLoading="{Binding IsAddingWalkIn}"
-                                        ButtonStyle="{StaticResource btn17_Bold_Orange}"/>
+                                        ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
 
                                 <!-- NOW SERVING -->
                                 <Border Grid.Row="3"
@@ -66,13 +66,13 @@
                                                 Command="{Binding BindingContext.DoneCommand, Source={x:Reference Root}}"
                                                 CommandParameter="{Binding Serving}"
                                                 IsLoading="{Binding Serving.IsCompleting}"
-                                                ButtonStyle="{StaticResource btn14_Regular_Brown}"/>
+                                            ButtonStyle="{StaticResource SecondaryButtonStyle}"/>
                                         <controls:AlzowLoadingButton Grid.Column="2" Text="✕"
                                                 Margin="0" HeightRequest="44"
                                                 Command="{Binding BindingContext.NoShowCommand, Source={x:Reference Root}}"
                                                 CommandParameter="{Binding Serving}"
                                                 IsLoading="{Binding Serving.IsMarkingNoShow}"
-                                                ButtonStyle="{StaticResource btn14_Regular_Red}"/>
+                                                ButtonStyle="{StaticResource DangerButtonStyle}"/>
                                     </Grid>
                                 </Border>
 
@@ -91,19 +91,19 @@
                                                             Command="{Binding BindingContext.ServeCommand, Source={x:Reference Root}}"
                                                             CommandParameter="{Binding .}"
                                                             IsLoading="{Binding IsServing}"
-                                                            ButtonStyle="{StaticResource btn14_Regular_Green}"/>
+                                                            ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
                                                     <controls:AlzowLoadingButton Grid.Column="2" Text="Done"
                                                             Margin="0" HeightRequest="44"
                                                             Command="{Binding BindingContext.DoneCommand, Source={x:Reference Root}}"
                                                             CommandParameter="{Binding .}"
                                                             IsLoading="{Binding IsCompleting}"
-                                                            ButtonStyle="{StaticResource btn14_Regular_Brown}"/>
+                                                            ButtonStyle="{StaticResource SecondaryButtonStyle}"/>
                                                     <controls:AlzowLoadingButton Grid.Column="3" Text="✕"
                                                             Margin="0" HeightRequest="44"
                                                             Command="{Binding BindingContext.NoShowCommand, Source={x:Reference Root}}"
                                                             CommandParameter="{Binding .}"
                                                             IsLoading="{Binding IsMarkingNoShow}"
-                                                            ButtonStyle="{StaticResource btn14_Regular_Red}"/>
+                                                            ButtonStyle="{StaticResource DangerButtonStyle}"/>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>

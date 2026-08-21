@@ -20,7 +20,7 @@
                 Command="{Binding AddOperatorCommand}"
                 IsLoading="{Binding IsAddingOperator}">
             <controls:AlzowLoadingButton.ButtonStyle>
-                <Style TargetType="Button" BasedOn="{StaticResource btn16_Bold_Orange}">
+                <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
                     <Setter Property="Padding" Value="0,16"/>
                 </Style>
             </controls:AlzowLoadingButton.ButtonStyle>
@@ -50,7 +50,7 @@
                                         CommandParameter="{Binding .}"
                                         IsLoading="{Binding IsToggling}">
                                     <controls:AlzowLoadingButton.ButtonStyle>
-                                        <Style TargetType="Button" BasedOn="{StaticResource btn14_Regular_Brown}">
+                                        <Style TargetType="Button" BasedOn="{StaticResource ToggleButtonStyle}">
                                             <Setter Property="Padding" Value="12,12"/>
                                         </Style>
                                     </controls:AlzowLoadingButton.ButtonStyle>

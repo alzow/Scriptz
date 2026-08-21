@@ -88,7 +88,7 @@
                         <Button Grid.Column="2"
                                 Text="View"
                                 Command="{Binding NavigateToMedicationsCommand}"
-                                Style="{StaticResource btn12_Bold_Orange}"
+                                Style="{StaticResource SecondaryButtonStyle}"
                                 Padding="12,8"
                                 HeightRequest="36"/>
                     </Grid>

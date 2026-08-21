@@ -30,7 +30,7 @@
                 Margin="0" HeightRequest="54"
                 Command="{Binding SaveCommand}"
                 IsLoading="{Binding IsSaving}"
-                ButtonStyle="{StaticResource btn16_Bold_Orange}" />
+                ButtonStyle="{StaticResource PrimaryButtonStyle}" />
 
         </VerticalStackLayout>
     </Grid>

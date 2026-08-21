@@ -2,7 +2,6 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="QueueApp.Features.SplashScreen.SplashScreenPage"
-             BackgroundColor="{StaticResource Secondary}"
              NavigationPage.HasNavigationBar="False"
              Title="SplashScreenPage">
     <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="16">

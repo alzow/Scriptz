@@ -33,7 +33,7 @@ public partial class AlzowSubPageHeader : ContentView
     }
 
     public static readonly BindableProperty BackIconProperty = BindableProperty.Create(
-        nameof(BackIcon), typeof(string), typeof(AlzowSubPageHeader), "left_arrow");
+        nameof(BackIcon), typeof(string), typeof(AlzowSubPageHeader), "left_arrow_white");
 
     public string BackIcon
     {
@@ -65,7 +65,7 @@ public partial class AlzowSubPageHeader : ContentView
         }
         else
         {
-            BackIcon = "left_arrow";
+            BackIcon = "left_arrow_white";
             TitleColor = (Color)Application.Current!.Resources["TextDark"];
         }
     }

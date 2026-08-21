@@ -45,7 +45,8 @@
             Text="Leave queue"
             Command="{Binding LeaveCommand, Source={x:Reference Root}}"
             IsLoading="{Binding IsLeaving, Source={x:Reference Root}}"
-            IsVisible="{Binding IsBeingServed, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}"/>
+            IsVisible="{Binding IsBeingServed, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}"
+            ButtonStyle="{StaticResource DangerButtonStyle}"/>
     </VerticalStackLayout>
 
 </ContentView>

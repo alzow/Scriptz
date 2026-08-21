@@ -4,70 +4,83 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
     <!-- Queue Design Tokens -->
-    <Color x:Key="Cream">#FAF6F1</Color>
-    <Color x:Key="CreamDark">#F2EBE0</Color>
-    <Color x:Key="CreamBorder">#E8DDD0</Color>
-    <Color x:Key="Orange">#E8621A</Color>
-    <Color x:Key="OrangeLight">#F4874A</Color>
-    <Color x:Key="OrangePale">#FDF0E8</Color>
-    <Color x:Key="Brown">#3D2314</Color>
-    <Color x:Key="BrownMid">#7A4A2E</Color>
-    <Color x:Key="BrownLight">#B07850</Color>
-    <Color x:Key="Green">#2D6A4F</Color>
-    <Color x:Key="GreenPale">#EAF4EE</Color>
-    <Color x:Key="Teal">#1A7A6E</Color>
-    <Color x:Key="TealPale">#E8F5F3</Color>
-    <Color x:Key="Red">#C0392B</Color>
-    <Color x:Key="RedPale">#FDECEA</Color>
-    <Color x:Key="Gold">#C8860A</Color>
-    <Color x:Key="GoldPale">#FDF6E3</Color>
-    <Color x:Key="White">#FFFFFF</Color>
-    <Color x:Key="TextDark">#2A1A0E</Color>
-    <Color x:Key="TextMid">#6B4C35</Color>
-    <Color x:Key="TextLight">#A0826A</Color>
+    <Color x:Key="DeepBackground">#0A0C11</Color>
+    <Color x:Key="Surface">#12151D</Color>
+    <Color x:Key="SurfaceRaised">#191D27</Color>
+    <Color x:Key="Line">#232833</Color>
+    <Color x:Key="Green">#39FF7A</Color>
+    <Color x:Key="GreenDim">#1F8A47</Color>
+    <Color x:Key="Purple">#A45EFF</Color>
+    <Color x:Key="PurpleDim">#5B3499</Color>
+    <Color x:Key="Danger">#FF3B5C</Color>
+    <Color x:Key="DangerDim">#7A1F30</Color>
+    <Color x:Key="TextPrimary">#F2F4F7</Color>
+    <Color x:Key="TextMuted">#8A8F98</Color>
+    <Color x:Key="TextFaint">#565C68</Color>
 
-    <!-- Legacy aliases kept for framework compat -->
-    <Color x:Key="Primary">#E8621A</Color>
-    <Color x:Key="PrimaryDark">#B07850</Color>
-    <Color x:Key="PrimaryDarkText">#FAF6F1</Color>
-    <Color x:Key="Secondary">#F2EBE0</Color>
-    <Color x:Key="SecondaryDarkText">#7A4A2E</Color>
-    <Color x:Key="Tertiary">#3D2314</Color>
-    <Color x:Key="Black">#2A1A0E</Color>
-    <Color x:Key="OffBlack">#3D2314</Color>
-    <Color x:Key="MidnightBlue">#3D2314</Color>
-    <Color x:Key="Magenta">#E8621A</Color>
+    <!-- Legacy aliases mapped to the dark design system -->
+    <Color x:Key="Cream">#F2F4F7</Color>
+    <Color x:Key="CreamDark">#EAF0F4</Color>
+    <Color x:Key="CreamBorder">#232833</Color>
+    <Color x:Key="Orange">#A45EFF</Color>
+    <Color x:Key="OrangeLight">#5B3499</Color>
+    <Color x:Key="OrangePale">#1B1626</Color>
+    <Color x:Key="Brown">#12151D</Color>
+    <Color x:Key="BrownMid">#8A8F98</Color>
+    <Color x:Key="BrownLight">#565C68</Color>
+    <Color x:Key="GreenPale">#12281B</Color>
+    <Color x:Key="Teal">#39FF7A</Color>
+    <Color x:Key="TealPale">#102B27</Color>
+    <Color x:Key="Red">#FF3B5C</Color>
+    <Color x:Key="RedPale">#2A1320</Color>
+    <Color x:Key="Gold">#A45EFF</Color>
+    <Color x:Key="GoldPale">#1B1626</Color>
+    <Color x:Key="White">#F2F4F7</Color>
+    <Color x:Key="TextDark">#F2F4F7</Color>
+    <Color x:Key="TextMid">#8A8F98</Color>
+    <Color x:Key="TextLight">#8A8F98</Color>
 
-    <Color x:Key="Gray25">#FDFBF9</Color>
-    <Color x:Key="Gray50">#FAF6F1</Color>
-    <Color x:Key="Gray100">#F2EBE0</Color>
-    <Color x:Key="Gray200">#E8DDD0</Color>
-    <Color x:Key="Gray300">#D4C4B0</Color>
-    <Color x:Key="Gray400">#B07850</Color>
-    <Color x:Key="Gray500">#A0826A</Color>
-    <Color x:Key="Gray600">#7A4A2E</Color>
-    <Color x:Key="Gray700">#6B4C35</Color>
-    <Color x:Key="Gray900">#2A1A0E</Color>
-    <Color x:Key="Gray950">#1A0E07</Color>
+    <Color x:Key="Primary">#39FF7A</Color>
+    <Color x:Key="PrimaryDark">#1F8A47</Color>
+    <Color x:Key="PrimaryDarkText">#F2F4F7</Color>
+    <Color x:Key="Secondary">#A45EFF</Color>
+    <Color x:Key="SecondaryDarkText">#F2F4F7</Color>
+    <Color x:Key="Tertiary">#12151D</Color>
+    <Color x:Key="Black">#0A0C11</Color>
+    <Color x:Key="OffBlack">#12151D</Color>
+    <Color x:Key="MidnightBlue">#0A0C11</Color>
+    <Color x:Key="Magenta">#A45EFF</Color>
 
-    <Color x:Key="Success">#2D6A4F</Color>
-    <Color x:Key="Warning">#C8860A</Color>
-    <Color x:Key="Error">#C0392B</Color>
+    <Color x:Key="Gray25">#0A0C11</Color>
+    <Color x:Key="Gray50">#12151D</Color>
+    <Color x:Key="Gray100">#191D27</Color>
+    <Color x:Key="Gray200">#232833</Color>
+    <Color x:Key="Gray300">#2A303C</Color>
+    <Color x:Key="Gray400">#565C68</Color>
+    <Color x:Key="Gray500">#8A8F98</Color>
+    <Color x:Key="Gray600">#A9AFB6</Color>
+    <Color x:Key="Gray700">#C0C6CD</Color>
+    <Color x:Key="Gray900">#F2F4F7</Color>
+    <Color x:Key="Gray950">#FFFFFF</Color>
 
-    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Orange}"/>
-    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource CreamDark}"/>
-    <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Brown}"/>
-    <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}"/>
-    <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource TextDark}"/>
+    <Color x:Key="Success">#39FF7A</Color>
+    <Color x:Key="Warning">#A45EFF</Color>
+    <Color x:Key="Error">#FF3B5C</Color>
+
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Green}"/>
+    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Purple}"/>
+    <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Surface}"/>
+    <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource TextPrimary}"/>
+    <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource DeepBackground}"/>
 
     <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="{StaticResource Orange}" Offset="0"/>
-        <GradientStop Color="{StaticResource BrownMid}" Offset="1"/>
+        <GradientStop Color="{StaticResource Green}" Offset="0"/>
+        <GradientStop Color="{StaticResource Purple}" Offset="1"/>
     </LinearGradientBrush>
 
     <LinearGradientBrush x:Key="BrownGradient" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="{StaticResource Brown}" Offset="0"/>
-        <GradientStop Color="{StaticResource BrownMid}" Offset="1"/>
+        <GradientStop Color="{StaticResource Surface}" Offset="0"/>
+        <GradientStop Color="{StaticResource SurfaceRaised}" Offset="1"/>
     </LinearGradientBrush>
 
 </ResourceDictionary>

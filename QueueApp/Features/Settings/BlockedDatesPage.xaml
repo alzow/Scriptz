@@ -18,7 +18,7 @@
         <controls:AlzowLoadingButton Grid.Row="1" Text="+ Block a date"
                 Margin="16" HeightRequest="56"
                 Command="{Binding AddBlockCommand}"
-                ButtonStyle="{StaticResource btn16_Bold_Orange}"/>
+                ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
 
         <Grid Grid.Row="2">
             <ScrollView IsVisible="{Binding IsEmpty, Converter={StaticResource InvertedBoolConverter}}">
@@ -38,7 +38,7 @@
                                             Command="{Binding BindingContext.DeleteBlockCommand, Source={x:Reference Root}}"
                                             CommandParameter="{Binding .}"
                                             IsLoading="{Binding IsDeleting}"
-                                            ButtonStyle="{StaticResource btn14_Regular_Brown}"/>
+                                            ButtonStyle="{StaticResource TertiaryButtonStyle}"/>
                                 </Grid>
                             </Border>
                         </DataTemplate>

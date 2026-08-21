@@ -85,7 +85,8 @@
                         Text="Confirm booking"
                         Command="{Binding ConfirmBookingCommand}"
                         IsLoading="{Binding IsConfirmingBooking}"
-                        IsEnabled="{Binding SelectedSlot, Converter={StaticResource IsNotNullConverter}}"/>
+                        IsEnabled="{Binding SelectedSlot, Converter={StaticResource IsNotNullConverter}}"
+                        ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
 
                 </VerticalStackLayout>
             </VerticalStackLayout>
