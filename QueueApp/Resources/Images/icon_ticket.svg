@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none">
+<defs><mask id="ticketMask"><rect x="0" y="0" width="24" height="24" fill="white"/><circle cx="3" cy="12" r="2" fill="black"/><circle cx="21" cy="12" r="2" fill="black"/></mask></defs>
+<rect x="3" y="7" width="18" height="10" rx="2" stroke="#F2F4F7" stroke-width="1.75" mask="url(#ticketMask)"/>
+<line x1="12" y1="7" x2="12" y2="17" stroke="#F2F4F7" stroke-width="1.75" stroke-dasharray="2 2"/>
+</svg>

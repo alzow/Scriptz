@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 100" width="420" height="100" fill="none">
+  <defs>
+    <mask id="cutoutWord" maskUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="240" height="240" fill="white"/>
+      <circle cx="48" cy="120" r="9" fill="black"/>
+      <circle cx="192" cy="120" r="9" fill="black"/>
+      <circle cx="120" cy="104" r="2.6" fill="black"/>
+      <circle cx="120" cy="120" r="2.6" fill="black"/>
+      <circle cx="120" cy="136" r="2.6" fill="black"/>
+    </mask>
+  </defs>
+  <g transform="translate(0,-70) scale(0.375)" mask="url(#cutoutWord)">
+    <rect x="48" y="95" width="68" height="50" rx="14" fill="#A45EFF"/>
+    <rect x="124" y="95" width="68" height="50" rx="14" fill="#39FF7A"/>
+  </g>
+  <text x="108" y="66" font-family="Roboto, Arial, sans-serif" font-weight="900" font-size="48" letter-spacing="-1" fill="#F2F4F7">queue</text>
+</svg>

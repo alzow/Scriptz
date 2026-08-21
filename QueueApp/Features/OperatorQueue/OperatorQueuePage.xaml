@@ -6,6 +6,7 @@
              xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
              x:Name="Root"
              Title="Manage"
+             IconImageSource="icon_manage_business"
              x:Class="QueueApp.Features.OperatorQueue.OperatorQueuePage"
              x:DataType="vm:OperatorQueuePageViewModel"
              Style="{StaticResource NavigationPageStyle}">

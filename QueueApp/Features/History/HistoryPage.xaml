@@ -5,6 +5,7 @@
              xmlns:vm="clr-namespace:QueueApp.Features.History"
              xmlns:models="clr-namespace:QueueApp.Services.Api.Queue.Models"
              x:DataType="vm:HistoryPageViewModel"
+             IconImageSource="icon_history"
              Title="History"
              Style="{StaticResource NavigationPageStyle}">
     <Grid>

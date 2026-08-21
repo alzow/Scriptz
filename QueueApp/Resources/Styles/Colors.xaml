@@ -4,10 +4,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
     <!-- Queue Design Tokens -->
-    <Color x:Key="DeepBackground">#0A0C11</Color>
-    <Color x:Key="Surface">#12151D</Color>
-    <Color x:Key="SurfaceRaised">#191D27</Color>
-    <Color x:Key="Line">#232833</Color>
+    <Color x:Key="DeepBackground">#141821</Color>
+    <Color x:Key="Surface">#1C222D</Color>
+    <Color x:Key="SurfaceRaised">#252C39</Color>
+    <Color x:Key="Line">#343D4D</Color>
     <Color x:Key="Green">#39FF7A</Color>
     <Color x:Key="GreenDim">#1F8A47</Color>
     <Color x:Key="Purple">#A45EFF</Color>
@@ -21,20 +21,20 @@
     <!-- Legacy aliases mapped to the dark design system -->
     <Color x:Key="Cream">#F2F4F7</Color>
     <Color x:Key="CreamDark">#EAF0F4</Color>
-    <Color x:Key="CreamBorder">#232833</Color>
+    <Color x:Key="CreamBorder">#343D4D</Color>
     <Color x:Key="Orange">#A45EFF</Color>
     <Color x:Key="OrangeLight">#5B3499</Color>
-    <Color x:Key="OrangePale">#1B1626</Color>
-    <Color x:Key="Brown">#12151D</Color>
+    <Color x:Key="OrangePale">#2A2338</Color>
+    <Color x:Key="Brown">#1C222D</Color>
     <Color x:Key="BrownMid">#8A8F98</Color>
     <Color x:Key="BrownLight">#565C68</Color>
-    <Color x:Key="GreenPale">#12281B</Color>
+    <Color x:Key="GreenPale">#193524</Color>
     <Color x:Key="Teal">#39FF7A</Color>
-    <Color x:Key="TealPale">#102B27</Color>
+    <Color x:Key="TealPale">#183833</Color>
     <Color x:Key="Red">#FF3B5C</Color>
-    <Color x:Key="RedPale">#2A1320</Color>
+    <Color x:Key="RedPale">#3A1D29</Color>
     <Color x:Key="Gold">#A45EFF</Color>
-    <Color x:Key="GoldPale">#1B1626</Color>
+    <Color x:Key="GoldPale">#2A2338</Color>
     <Color x:Key="White">#F2F4F7</Color>
     <Color x:Key="TextDark">#F2F4F7</Color>
     <Color x:Key="TextMid">#8A8F98</Color>
@@ -46,22 +46,22 @@
     <Color x:Key="Secondary">#A45EFF</Color>
     <Color x:Key="SecondaryDarkText">#F2F4F7</Color>
     <Color x:Key="Tertiary">#12151D</Color>
-    <Color x:Key="Black">#0A0C11</Color>
-    <Color x:Key="OffBlack">#12151D</Color>
-    <Color x:Key="MidnightBlue">#0A0C11</Color>
+    <Color x:Key="Black">#141821</Color>
+    <Color x:Key="OffBlack">#1C222D</Color>
+    <Color x:Key="MidnightBlue">#141821</Color>
     <Color x:Key="Magenta">#A45EFF</Color>
 
-    <Color x:Key="Gray25">#0A0C11</Color>
-    <Color x:Key="Gray50">#12151D</Color>
-    <Color x:Key="Gray100">#191D27</Color>
-    <Color x:Key="Gray200">#232833</Color>
-    <Color x:Key="Gray300">#2A303C</Color>
+    <Color x:Key="Gray25">#141821</Color>
+    <Color x:Key="Gray50">#1C222D</Color>
+    <Color x:Key="Gray100">#252C39</Color>
+    <Color x:Key="Gray200">#343D4D</Color>
+    <Color x:Key="Gray300">#414B5D</Color>
     <Color x:Key="Gray400">#565C68</Color>
     <Color x:Key="Gray500">#8A8F98</Color>
     <Color x:Key="Gray600">#A9AFB6</Color>
     <Color x:Key="Gray700">#C0C6CD</Color>
     <Color x:Key="Gray900">#F2F4F7</Color>
-    <Color x:Key="Gray950">#FFFFFF</Color>
+    <Color x:Key="Gray950">#F2F4F7</Color>
 
     <Color x:Key="Success">#39FF7A</Color>
     <Color x:Key="Warning">#A45EFF</Color>

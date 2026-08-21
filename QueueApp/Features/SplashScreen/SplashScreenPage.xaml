@@ -5,8 +5,11 @@
              NavigationPage.HasNavigationBar="False"
              Title="SplashScreenPage">
     <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="16">
-        <Label Text="Queue"
-               Style="{StaticResource lbl20_Bold_TextDark}"
+
+        <Image Source="logo_primary_mark"
+               HorizontalOptions="Center" />
+        <Label Text="queue"
+               Style="{StaticResource lbl32_Bold_TextDark}"
                HorizontalOptions="Center" />
         <ActivityIndicator IsRunning="True"
                            Color="{StaticResource Primary}" />

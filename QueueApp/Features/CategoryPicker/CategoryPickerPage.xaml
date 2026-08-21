@@ -6,6 +6,7 @@
              x:Class="QueueApp.Features.CategoryPicker.CategoryPickerPage"
              x:DataType="vm:CategoryPickerPageViewModel"
              Title="Browse"
+             IconImageSource="icon_dashboard"
              Style="{StaticResource NavigationPageStyle}">
 
     <ScrollView>
