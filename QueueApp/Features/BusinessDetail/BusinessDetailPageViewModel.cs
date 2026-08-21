@@ -75,7 +75,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     public ObservableCollection<OperatorResponse> Operators { get; } = new();
     public OperatorResponse? SelectedOperator { get; set; }
     public bool ShowOperatorPicker => IsBookingMode && Operators.Count > 1;
-    public bool IsNoOperatorsAvailable => IsBookingMode && !BookingConfirmed && Operators.Count == 0;
+    public bool IsNoOperatorsAvailable => IsBookingMode && Operators.Count == 0;
 
     public ObservableCollection<ServiceResponse> Services { get; } = new();
     public ServiceResponse? SelectedService { get; set; }
@@ -94,11 +94,15 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     public bool IsSlotsEmpty => Slots.Count == 0 && !IsLoadingSlots;
 
     public bool IsConfirmingBooking { get; set; }
-    public bool BookingConfirmed { get; set; }
-    public string ConfirmedOperatorName => SelectedOperator?.DisplayName ?? "";
-    public string ConfirmedServiceName => SelectedService?.Name ?? "";
-    public string ConfirmedDateDisplay => SelectedSlot?.SlotStart.ToOffset(TimeSpan.FromHours(2)).ToString("ddd d MMM") ?? "";
-    public string ConfirmedTimeDisplay => SelectedSlot?.TimeDisplay ?? "";
+
+    public ObservableCollection<MyBookingSummaryResponse> MyBookings { get; } = new();
+    public bool ShowBookingHistory => IsBookingMode && MyBookings.Count > 0;
+
+    public bool ShowConfirmationToast { get; set; }
+    public string ConfirmedOperatorName { get; set; } = "";
+    public string ConfirmedServiceName { get; set; } = "";
+    public string ConfirmedDateDisplay { get; set; } = "";
+    public string ConfirmedTimeDisplay { get; set; } = "";
 
     [RelayCommand]
     private async Task GoBackAsync()
@@ -155,6 +159,16 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
 
                 if (Operators.Count == 1)
                     SelectedOperator = Operators[0];
+
+                var userId = await _authService.GetUserIdAsync();
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    await LoadMyBookingsAsync(Guid.Parse(userId));
+
+                    await _realtimeService.SubscribeAsync(_businessId,
+                        async () => await MainThread.InvokeOnMainThreadAsync(() => LoadMyBookingsAsync(Guid.Parse(userId))),
+                        table: "bookings");
+                }
             }
 
             IsLoading = false;
@@ -169,8 +183,42 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     {
         await base.OnDisappearingAsync();
 
-        if (IsQueueMode)
+        if (IsQueueMode || IsBookingMode)
             await _realtimeService.UnsubscribeAsync();
+    }
+
+    private async Task LoadMyBookingsAsync(Guid customerId)
+    {
+        try
+        {
+            var bookings = await _bookingService.GetMyBookingsAsync(_businessId, customerId);
+            MyBookings.Clear();
+            foreach (var b in bookings)
+                MyBookings.Add(b);
+            OnPropertyChanged(nameof(ShowBookingHistory));
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    [RelayCommand]
+    private async Task CancelBookingAsync(MyBookingSummaryResponse booking)
+    {
+        booking.IsCancelling = true;
+        try
+        {
+            await _bookingService.CancelBookingAsync(booking.Id);
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+        finally
+        {
+            booking.IsCancelling = false;
+        }
     }
 
     private async Task RefreshQueueAsync()
@@ -311,7 +359,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             if (string.IsNullOrEmpty(userId))
                 throw new InvalidOperationException("No signed-in user id — should never happen post-splash-gate.");
 
-            await _bookingService.CreateBookingAsync(new CreateBookingRequest
+            var booking = await _bookingService.CreateBookingAsync(new CreateBookingRequest
             {
                 BusinessId = _businessId,
                 OperatorId = SelectedOperator.Id,
@@ -320,7 +368,33 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 StartsAt = SelectedSlot.SlotStart,
             });
 
-            BookingConfirmed = true;
+            MyBookings.Insert(0, new MyBookingSummaryResponse
+            {
+                Id = booking.Id,
+                StartsAt = booking.StartsAt,
+                EndsAt = booking.EndsAt,
+                Status = booking.Status,
+                Operator = new VisitOperatorRef { DisplayName = SelectedOperator.DisplayName },
+                Service = new VisitServiceRef { Name = SelectedService.Name },
+            });
+            if (MyBookings.Count > 5)
+                MyBookings.RemoveAt(MyBookings.Count - 1);
+            OnPropertyChanged(nameof(ShowBookingHistory));
+
+            ConfirmedOperatorName = SelectedOperator.DisplayName;
+            ConfirmedServiceName = SelectedService.Name;
+            ConfirmedDateDisplay = SelectedSlot.SlotStart.ToOffset(TimeSpan.FromHours(2)).ToString("ddd d MMM");
+            ConfirmedTimeDisplay = SelectedSlot.TimeDisplay;
+            ShowConfirmationToast = true;
+
+            SelectedOperator = Operators.Count == 1 ? Operators[0] : null;
+            SelectedService = null;
+            SelectedDate = null;
+            SelectedSlot = null;
+            Slots.Clear();
+            OnPropertyChanged(nameof(IsSlotsEmpty));
+
+            _ = HideToastAfterDelayAsync();
         }
         catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.Conflict)
         {
@@ -338,5 +412,11 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         {
             IsConfirmingBooking = false;
         }
+    }
+
+    private async Task HideToastAfterDelayAsync()
+    {
+        await Task.Delay(2500);
+        ShowConfirmationToast = false;
     }
 }

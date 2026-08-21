@@ -41,18 +41,15 @@
 
             </VerticalStackLayout>
 
-            <!-- BOOKING MODE — inline operator → service → date → slot flow, same page as queue mode -->
-            <VerticalStackLayout Spacing="20" IsVisible="{Binding IsBookingMode}">
+            <!-- BOOKING MODE — flow is always visible once loaded; the confirmation toast overlays it briefly -->
+            <Grid IsVisible="{Binding IsBookingMode}">
 
-                <!-- Confirmed state replaces the whole flow once booked -->
-                <helpers:BookingConfirmedView
-                    IsVisible="{Binding BookingConfirmed}"
-                    OperatorName="{Binding ConfirmedOperatorName}"
-                    ServiceName="{Binding ConfirmedServiceName}"
-                    DateDisplay="{Binding ConfirmedDateDisplay}"
-                    TimeDisplay="{Binding ConfirmedTimeDisplay}"/>
+                <VerticalStackLayout Spacing="20">
 
-                <VerticalStackLayout Spacing="20" IsVisible="{Binding BookingConfirmed, Converter={StaticResource InvertedBoolConverter}}">
+                    <helpers:BookingHistoryStripView
+                        IsVisible="{Binding ShowBookingHistory}"
+                        Bookings="{Binding MyBookings}"
+                        CancelCommand="{Binding CancelBookingCommand}"/>
 
                     <Label Text="No staff available to book with right now." IsVisible="{Binding IsNoOperatorsAvailable}"
                            Style="{StaticResource lbl14_Regular_TextDark}"/>
@@ -89,7 +86,23 @@
                         ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
 
                 </VerticalStackLayout>
-            </VerticalStackLayout>
+
+                <Border Style="{StaticResource brd16_White}"
+                        IsVisible="{Binding ShowConfirmationToast}"
+                        VerticalOptions="Start"
+                        Margin="16"
+                        Padding="16">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Opacity="0.15" Radius="12" Offset="0,4"/>
+                    </Border.Shadow>
+                    <helpers:BookingConfirmedView
+                        OperatorName="{Binding ConfirmedOperatorName}"
+                        ServiceName="{Binding ConfirmedServiceName}"
+                        DateDisplay="{Binding ConfirmedDateDisplay}"
+                        TimeDisplay="{Binding ConfirmedTimeDisplay}"/>
+                </Border>
+
+            </Grid>
 
             <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"/>
 

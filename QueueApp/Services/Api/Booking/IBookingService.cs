@@ -6,4 +6,6 @@ public interface IBookingService
 {
     Task<List<SlotResponse>> GetAvailableSlotsAsync(Guid operatorId, Guid serviceId, DateTime date);
     Task<BookingResponse> CreateBookingAsync(CreateBookingRequest request);
+    Task<BookingResponse> CancelBookingAsync(Guid bookingId);
+    Task<List<MyBookingSummaryResponse>> GetMyBookingsAsync(Guid businessId, Guid customerId);
 }

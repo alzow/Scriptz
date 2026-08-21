@@ -44,4 +44,28 @@ public class StubBookingService : IBookingService
         _bookings.Add(booking);
         return Task.FromResult(booking);
     }
+
+    public Task<BookingResponse> CancelBookingAsync(Guid bookingId)
+    {
+        var booking = _bookings.First(b => b.Id == bookingId);
+        booking.Status = "cancelled";
+        return Task.FromResult(booking);
+    }
+
+    public Task<List<MyBookingSummaryResponse>> GetMyBookingsAsync(Guid businessId, Guid customerId)
+    {
+        var summaries = _bookings
+            .Where(b => b.BusinessId == businessId && b.CustomerId == customerId)
+            .OrderByDescending(b => b.CreatedAt)
+            .Take(5)
+            .Select(b => new MyBookingSummaryResponse
+            {
+                Id = b.Id,
+                StartsAt = b.StartsAt,
+                EndsAt = b.EndsAt,
+                Status = b.Status,
+            })
+            .ToList();
+        return Task.FromResult(summaries);
+    }
 }

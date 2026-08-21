@@ -20,7 +20,7 @@ public class QueueRealtimeService : IQueueRealtimeService
         _authService = authService;
     }
 
-    public async Task SubscribeAsync(Guid businessId, Func<Task> onChange)
+    public async Task SubscribeAsync(Guid businessId, Func<Task> onChange, string table = "queue_entries")
     {
         var realtimeUrl = $"{SupabaseConfig.ProjectUrl.Replace("https://", "wss://")}/realtime/v1";
 
@@ -38,7 +38,7 @@ public class QueueRealtimeService : IQueueRealtimeService
         await _client.ConnectAsync();
         Debug.WriteLine("[Realtime] connected");
 
-        _channel = _client.Channel("realtime", "public", "queue_entries", "business_id", businessId.ToString(), null!);
+        _channel = _client.Channel("realtime", "public", table, "business_id", businessId.ToString(), null!);
         _channel.AddPostgresChangeHandler(PostgresChangesOptions.ListenType.All, async (_, _) =>
         {
             Debug.WriteLine($"[Realtime] event received {DateTime.Now:HH:mm:ss}");
@@ -46,7 +46,7 @@ public class QueueRealtimeService : IQueueRealtimeService
         });
 
         await _channel.Subscribe();
-        Debug.WriteLine($"[Realtime] subscribed to business {businessId}");
+        Debug.WriteLine($"[Realtime] subscribed to {table} for business {businessId}");
     }
 
     public Task UnsubscribeAsync()

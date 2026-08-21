@@ -10,4 +10,12 @@ public interface IBookingApi
 
     [Post("/rpc/create_booking")]
     Task<BookingResponse> CreateBookingAsync([Body] CreateBookingRequest request);
+
+    [Post("/rpc/cancel_booking")]
+    Task<BookingResponse> CancelBookingAsync([Body] CancelBookingRequest request);
+
+    [Get("/bookings?select=id,starts_at,ends_at,status,operator:operators(display_name),service:services(name)&order=created_at.desc&limit=5")]
+    Task<List<MyBookingSummaryResponse>> GetMyBookingsAsync(
+        [AliasAs("business_id")] string businessId,
+        [AliasAs("customer_id")] string customerId);
 }

@@ -23,4 +23,10 @@ public class BookingService : BaseService, IBookingService
 
     public Task<BookingResponse> CreateBookingAsync(CreateBookingRequest request) =>
         ExecuteApiCallAsync(_api.CreateBookingAsync(request));
+
+    public Task<BookingResponse> CancelBookingAsync(Guid bookingId) =>
+        ExecuteApiCallAsync(_api.CancelBookingAsync(new CancelBookingRequest { BookingId = bookingId }));
+
+    public Task<List<MyBookingSummaryResponse>> GetMyBookingsAsync(Guid businessId, Guid customerId) =>
+        ExecuteApiCallAsync(_api.GetMyBookingsAsync($"eq.{businessId}", $"eq.{customerId}"));
 }
