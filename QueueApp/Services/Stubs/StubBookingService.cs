@@ -52,6 +52,20 @@ public class StubBookingService : IBookingService
         return Task.FromResult(booking);
     }
 
+    public Task<BookingResponse> ConfirmBookingAsync(Guid bookingId)
+    {
+        var booking = _bookings.First(b => b.Id == bookingId);
+        booking.Status = "confirmed";
+        return Task.FromResult(booking);
+    }
+
+    public Task<BookingResponse> CompleteBookingAsync(Guid bookingId)
+    {
+        var booking = _bookings.First(b => b.Id == bookingId);
+        booking.Status = "completed";
+        return Task.FromResult(booking);
+    }
+
     public Task<List<MyBookingSummaryResponse>> GetMyBookingsAsync(Guid businessId, Guid customerId)
     {
         var summaries = _bookings
@@ -67,5 +81,24 @@ public class StubBookingService : IBookingService
             })
             .ToList();
         return Task.FromResult(summaries);
+    }
+
+    public Task<List<AgendaBookingResponse>> GetAgendaBookingsAsync(Guid businessId, DateTime date)
+    {
+        var dayStart = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
+        var dayEnd = dayStart.AddDays(1);
+        var agenda = _bookings
+            .Where(b => b.BusinessId == businessId &&
+                        b.StartsAt.UtcDateTime >= dayStart && b.StartsAt.UtcDateTime < dayEnd)
+            .OrderBy(b => b.StartsAt)
+            .Select(b => new AgendaBookingResponse
+            {
+                Id = b.Id,
+                StartsAt = b.StartsAt,
+                EndsAt = b.EndsAt,
+                Status = b.Status,
+            })
+            .ToList();
+        return Task.FromResult(agenda);
     }
 }

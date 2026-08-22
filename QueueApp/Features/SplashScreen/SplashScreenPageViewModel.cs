@@ -43,8 +43,8 @@ public class SplashScreenPageViewModel : BaseViewModel
                 return;
             }
 
-            var ownsBusiness = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
-            var uri = MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: ownsBusiness);
+            var (ownsBusiness, mode) = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
+            var uri = MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: ownsBusiness, manageMode: mode);
             await _navigationService.NavigateAsync(uri);
         }
         catch (Exception ex)

@@ -74,8 +74,8 @@ public partial class BusinessListPageViewModel : BaseViewModel
     {
         try
         {
-            var ownsBusiness = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
-            var uri = MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: ownsBusiness);
+            var (ownsBusiness, mode) = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
+            var uri = MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: ownsBusiness, manageMode: mode);
             await NavigationService.NavigateAsync(uri);
         }
         catch (Exception ex)

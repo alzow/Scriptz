@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:QueueApp.Features.BookingAgenda"
+             xmlns:models="clr-namespace:QueueApp.Services.Api.Booking.Models"
+             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
+             x:Name="Root"
+             Title="Bookings"
+             IconImageSource="icon_manage_business"
+             x:Class="QueueApp.Features.BookingAgenda.BookingAgendaPage"
+             x:DataType="vm:BookingAgendaPageViewModel"
+             Style="{StaticResource NavigationPageStyle}">
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="16,16,16,0">
+            <Label Grid.Column="0"
+                   Text="{Binding BusinessName}"
+                   Style="{StaticResource lbl24_Bold_TextDark}"
+                   VerticalOptions="Center"/>
+            <Label Grid.Column="1"
+                   Text="⚙"
+                   FontSize="24"
+                   VerticalOptions="Center">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenSettingsCommand}"/>
+                </Label.GestureRecognizers>
+            </Label>
+        </Grid>
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding DateOptions}" Margin="0,10"
+                        HeightRequest="72" VerticalOptions="Start">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:AgendaDateOption">
+                    <Border Padding="8" Margin="4,0" HeightRequest="64" WidthRequest="64"
+                            VerticalOptions="Center" HorizontalOptions="Center"
+                            StrokeThickness="0"
+                            BackgroundColor="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#A45EFF|#252C39'}">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12"/>
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding BindingContext.SelectDateCommand, Source={x:Reference Root}}"
+                                CommandParameter="{Binding .}"/>
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout VerticalOptions="Center">
+                            <Label Text="{Binding DayLabel}" HorizontalOptions="Center"
+                                   Style="{StaticResource lbl13_Regular_TextMid}"/>
+                            <Label Text="{Binding DateLabel}" HorizontalOptions="Center"
+                                   Style="{StaticResource lbl16_Regular_TextDark}" FontAttributes="Bold"/>
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Grid Grid.Row="2">
+            <CollectionView ItemsSource="{Binding Bookings}"
+                             IsVisible="{Binding IsEmpty, Converter={StaticResource InvertedBoolConverter}}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:AgendaBookingResponse">
+                        <Border Style="{StaticResource brd16_White}" Padding="14" Margin="12,6">
+                            <VerticalStackLayout Spacing="6">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Grid.Column="0" Text="{Binding TimeRangeDisplay}"
+                                           Style="{StaticResource lbl16_Regular_TextDark}" FontAttributes="Bold"/>
+                                    <Label Grid.Column="1" Text="{Binding StatusLabel}"
+                                           Style="{StaticResource lbl13_Regular_TextMid}"/>
+                                </Grid>
+                                <Label Text="{Binding CustomerName}" Style="{StaticResource lbl16_Regular_TextDark}"/>
+                                <Label Style="{StaticResource lbl13_Regular_TextMid}">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding ServiceName}"/>
+                                            <Span Text=" with "/>
+                                            <Span Text="{Binding OperatorName}"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <HorizontalStackLayout Spacing="8">
+                                    <controls:AlzowLoadingButton Text="Confirm" IsVisible="{Binding CanConfirm}"
+                                            Margin="0" HeightRequest="44"
+                                            Command="{Binding BindingContext.ConfirmCommand, Source={x:Reference Root}}"
+                                            CommandParameter="{Binding .}" IsLoading="{Binding IsConfirming}"
+                                            ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
+                                    <controls:AlzowLoadingButton Text="Complete" IsVisible="{Binding CanComplete}"
+                                            Margin="0" HeightRequest="44"
+                                            Command="{Binding BindingContext.CompleteCommand, Source={x:Reference Root}}"
+                                            CommandParameter="{Binding .}" IsLoading="{Binding IsCompleting}"
+                                            ButtonStyle="{StaticResource SecondaryButtonStyle}"/>
+                                    <controls:AlzowLoadingButton Text="Cancel" IsVisible="{Binding CanCancel}"
+                                            Margin="0" HeightRequest="44"
+                                            Command="{Binding BindingContext.CancelCommand, Source={x:Reference Root}}"
+                                            CommandParameter="{Binding .}" IsLoading="{Binding IsCancelling}"
+                                            ButtonStyle="{StaticResource DangerButtonStyle}"/>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Border IsVisible="{Binding IsEmpty}"
+                    StrokeThickness="0"
+                    BackgroundColor="Transparent"
+                    Padding="24"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Center">
+                <Label Text="No bookings this day" Style="{StaticResource lbl18_Bold_TextDark}"/>
+            </Border>
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                               HorizontalOptions="Center" VerticalOptions="Center"/>
+        </Grid>
+    </Grid>
+</ContentPage>
