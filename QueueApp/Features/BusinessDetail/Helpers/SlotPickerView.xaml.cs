@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Windows.Input;
+using QueueApp.Services.Api.Booking.Models;
 
 namespace QueueApp.Features.BusinessDetail.Helpers;
 
@@ -15,6 +16,14 @@ public partial class SlotPickerView : ContentView
         nameof(IsLoading), typeof(bool), typeof(SlotPickerView), default(bool));
     public static readonly BindableProperty IsEmptyProperty = BindableProperty.Create(
         nameof(IsEmpty), typeof(bool), typeof(SlotPickerView), default(bool));
+    public static readonly BindableProperty SelectedSlotProperty = BindableProperty.Create(
+        nameof(SelectedSlot), typeof(SlotResponse), typeof(SlotPickerView), default(SlotResponse));
+
+    public SlotResponse? SelectedSlot
+    {
+        get => (SlotResponse?)GetValue(SelectedSlotProperty);
+        set => SetValue(SelectedSlotProperty, value);
+    }
 
     public IEnumerable Slots
     {

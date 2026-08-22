@@ -64,11 +64,13 @@
                         IsSectionVisible="{Binding ShowServiceSection}"
                         IsEmpty="{Binding IsServicesEmpty}"
                         Services="{Binding Services}"
+                        SelectedService="{Binding SelectedService}"
                         SelectCommand="{Binding SelectServiceCommand}"/>
 
                     <helpers:DatePickerSectionView
                         IsSectionVisible="{Binding ShowDateSection}"
                         DateOptions="{Binding DateOptions}"
+                        SelectedDate="{Binding SelectedDate}"
                         SelectCommand="{Binding SelectDateCommand}"/>
 
                     <helpers:SlotPickerView
@@ -76,6 +78,7 @@
                         IsLoading="{Binding IsLoadingSlots}"
                         IsEmpty="{Binding IsSlotsEmpty}"
                         Slots="{Binding Slots}"
+                        SelectedSlot="{Binding SelectedSlot}"
                         SelectCommand="{Binding SelectSlotCommand}"/>
 
                     <controls:AlzowLoadingButton

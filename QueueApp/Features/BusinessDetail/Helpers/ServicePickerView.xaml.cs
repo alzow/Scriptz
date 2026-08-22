@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Windows.Input;
+using QueueApp.Services.Api.ServiceOfferings.Models;
 
 namespace QueueApp.Features.BusinessDetail.Helpers;
 
@@ -13,6 +14,14 @@ public partial class ServicePickerView : ContentView
         nameof(IsSectionVisible), typeof(bool), typeof(ServicePickerView), default(bool));
     public static readonly BindableProperty IsEmptyProperty = BindableProperty.Create(
         nameof(IsEmpty), typeof(bool), typeof(ServicePickerView), default(bool));
+    public static readonly BindableProperty SelectedServiceProperty = BindableProperty.Create(
+        nameof(SelectedService), typeof(ServiceResponse), typeof(ServicePickerView), default(ServiceResponse));
+
+    public ServiceResponse? SelectedService
+    {
+        get => (ServiceResponse?)GetValue(SelectedServiceProperty);
+        set => SetValue(SelectedServiceProperty, value);
+    }
 
     public IEnumerable Services
     {

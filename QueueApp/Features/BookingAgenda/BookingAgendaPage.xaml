@@ -48,9 +48,11 @@
                         </Border.GestureRecognizers>
                         <VerticalStackLayout VerticalOptions="Center">
                             <Label Text="{Binding DayLabel}" HorizontalOptions="Center"
-                                   Style="{StaticResource lbl13_Regular_TextMid}"/>
+                                   Style="{StaticResource lbl13_Regular_TextMid}"
+                                   TextColor="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#FFFFFF|#8A8F98'}"/>
                             <Label Text="{Binding DateLabel}" HorizontalOptions="Center"
-                                   Style="{StaticResource lbl16_Regular_TextDark}" FontAttributes="Bold"/>
+                                   Style="{StaticResource lbl16_Regular_TextDark}" FontAttributes="Bold"
+                                   TextColor="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#FFFFFF|#F2F4F7'}"/>
                         </VerticalStackLayout>
                     </Border>
                 </DataTemplate>

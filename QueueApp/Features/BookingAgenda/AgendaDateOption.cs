@@ -1,9 +1,12 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 namespace QueueApp.Features.BookingAgenda;
 
-public partial class AgendaDateOption
+public partial class AgendaDateOption : ObservableObject
 {
     public DateTime Date { get; }
-    public bool IsSelected { get; set; }
+
+    [ObservableProperty] private bool _isSelected;
 
     public AgendaDateOption(DateTime date)
     {

@@ -11,6 +11,14 @@ public partial class DatePickerSectionView : ContentView
         nameof(SelectCommand), typeof(ICommand), typeof(DatePickerSectionView), default(ICommand));
     public static readonly BindableProperty IsSectionVisibleProperty = BindableProperty.Create(
         nameof(IsSectionVisible), typeof(bool), typeof(DatePickerSectionView), default(bool));
+    public static readonly BindableProperty SelectedDateProperty = BindableProperty.Create(
+        nameof(SelectedDate), typeof(DateTime?), typeof(DatePickerSectionView), default(DateTime?));
+
+    public DateTime? SelectedDate
+    {
+        get => (DateTime?)GetValue(SelectedDateProperty);
+        set => SetValue(SelectedDateProperty, value);
+    }
 
     public IEnumerable DateOptions
     {

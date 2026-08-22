@@ -122,6 +122,30 @@ public class ActiveToLabelConverter : IValueConverter
     }
 }
 
+// Compares the two bound values (item, currently-selected item) for equality and returns one of two
+// colors — used to highlight the selected item in a picker CollectionView/BindableLayout.
+public class ItemEqualsSelectedToColorConverter : IMultiValueConverter
+{
+    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (values is [var item, var selected, ..] && parameter is string colors)
+        {
+            var colorPair = colors.Split('|');
+            if (colorPair.Length == 2)
+            {
+                var isSelected = item is not null && Equals(item, selected);
+                return Color.FromArgb(isSelected ? colorPair[0] : colorPair[1]);
+            }
+        }
+        return Colors.Transparent;
+    }
+
+    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
 public class EqualsToColorConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

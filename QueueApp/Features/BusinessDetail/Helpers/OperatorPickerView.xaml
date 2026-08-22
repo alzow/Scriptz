@@ -16,13 +16,29 @@
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="operatorModels:OperatorResponse">
-                    <Border Style="{StaticResource brd16_White}" Padding="12,8">
+                    <Border Padding="12,8" Stroke="{StaticResource Line}" StrokeThickness="1.5">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="16"/>
+                        </Border.StrokeShape>
+                        <Border.BackgroundColor>
+                            <MultiBinding Converter="{StaticResource ItemEqualsSelectedToColorConverter}" ConverterParameter="#A45EFF|#1C222D">
+                                <Binding Path="." />
+                                <Binding Path="SelectedOperator" Source="{x:Reference Root}" />
+                            </MultiBinding>
+                        </Border.BackgroundColor>
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer
                                 Command="{Binding SelectCommand, Source={x:Reference Root}}"
                                 CommandParameter="{Binding .}"/>
                         </Border.GestureRecognizers>
-                        <Label Text="{Binding DisplayName}" Style="{StaticResource lbl15_Bold_TextDark}"/>
+                        <Label Text="{Binding DisplayName}" Style="{StaticResource lbl15_Bold_TextDark}">
+                            <Label.TextColor>
+                                <MultiBinding Converter="{StaticResource ItemEqualsSelectedToColorConverter}" ConverterParameter="#FFFFFF|#F2F4F7">
+                                    <Binding Path="." />
+                                    <Binding Path="SelectedOperator" Source="{x:Reference Root}" />
+                                </MultiBinding>
+                            </Label.TextColor>
+                        </Label>
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
