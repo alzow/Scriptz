@@ -29,4 +29,7 @@ public interface IBookingApi
     Task<List<AgendaBookingResponse>> GetAgendaBookingsAsync(
         [AliasAs("business_id")] string businessId,
         [AliasAs("and")] string dateRangeFilter);
+
+    [Get("/bookings?select=id,starts_at,ends_at,status,business:businesses(name),operator:operators(display_name),service:services(name)&status=in.(pending,confirmed)&order=starts_at.asc")]
+    Task<List<UpcomingBookingResponse>> GetMyUpcomingBookingsAsync([AliasAs("customer_id")] string customerId);
 }

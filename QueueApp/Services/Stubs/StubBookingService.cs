@@ -101,4 +101,20 @@ public class StubBookingService : IBookingService
             .ToList();
         return Task.FromResult(agenda);
     }
+
+    public Task<List<UpcomingBookingResponse>> GetMyUpcomingBookingsAsync(Guid customerId)
+    {
+        var upcoming = _bookings
+            .Where(b => b.CustomerId == customerId && b.Status is "pending" or "confirmed")
+            .OrderBy(b => b.StartsAt)
+            .Select(b => new UpcomingBookingResponse
+            {
+                Id = b.Id,
+                StartsAt = b.StartsAt,
+                EndsAt = b.EndsAt,
+                Status = b.Status,
+            })
+            .ToList();
+        return Task.FromResult(upcoming);
+    }
 }
