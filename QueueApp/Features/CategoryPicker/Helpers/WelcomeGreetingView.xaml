@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Name="Root"
+             x:Class="QueueApp.Features.CategoryPicker.Helpers.WelcomeGreetingView">
+
+    <!-- Line 1: the customer's name, static. Line 2: a random saying, typed out character by
+         character on appearing. See code-behind. -->
+    <VerticalStackLayout Spacing="2">
+        <Label Text="{Binding NameLine, Source={x:Reference Root}}"
+               Style="{StaticResource lbl22_Bold_Cream}"/>
+        <Label Text="{Binding Saying, Source={x:Reference Root}}"
+               Style="{StaticResource lbl13_Regular_TextLight}"/>
+    </VerticalStackLayout>
+
+</ContentView>

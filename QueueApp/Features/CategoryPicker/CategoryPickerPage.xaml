@@ -18,7 +18,7 @@
                 <!-- Greeting + notifications -->
                 <Grid ColumnDefinitions="*,Auto">
                     <VerticalStackLayout Grid.Column="0" Spacing="4" VerticalOptions="Center">
-                        <Label Text="{Binding WelcomeMessage}" Style="{StaticResource lbl22_Bold_Cream}"/>
+                        <helpers:WelcomeGreetingView Name="{Binding CustomerDisplayName}"/>
                         <helpers:LocationBarView
                                 LocationLabel="{Binding LocationLabel}"
                                 IsResolving="{Binding IsResolvingLocation}"

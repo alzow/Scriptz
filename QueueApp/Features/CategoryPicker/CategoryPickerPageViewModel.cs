@@ -83,7 +83,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
 
     public IReadOnlyList<ServiceCategory> Categories { get; } = CategoryCatalog.All;
 
-    public string WelcomeMessage { get; set; } = "Welcome";
+    public string? CustomerDisplayName { get; set; }
     public bool IsLoading { get; set; }
     public bool IsRefreshing { get; set; }
     public string SearchText { get; set; } = string.Empty;
@@ -120,7 +120,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
             {
                 _customerId = Guid.Parse(userId);
                 var displayName = await _profileService.GetMyDisplayNameAsync(_customerId);
-                WelcomeMessage = string.IsNullOrWhiteSpace(displayName) ? "Welcome" : $"Salaam, {displayName}";
+                CustomerDisplayName = string.IsNullOrWhiteSpace(displayName) ? null : displayName;
             }
 
             // Cached location (no permission prompt, near-instant) gives the first paint real
