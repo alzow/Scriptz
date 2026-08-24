@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.Input;
 using MPowerKit.Navigation.Interfaces;
+using QueueApp.Constants;
 using QueueApp.Framework.Base;
 using QueueApp.Services.Api.Operator;
 using QueueApp.Services.Api.Operator.Models;
@@ -39,11 +40,11 @@ public partial class AddEditOperatorPageViewModel : BaseViewModel
         {
             await base.OnLoadedAsync(parameters);
 
-            _businessId = parameters is not null && parameters.TryGetValue("businessId", out var bizObj)
+            _businessId = parameters is not null && parameters.TryGetValue(NavigationKeys.BusinessId, out var bizObj)
                 ? (Guid)bizObj
                 : throw new InvalidOperationException("AddEditOperatorPage requires a businessId.");
 
-            if (parameters is not null && parameters.TryGetValue("operatorId", out var opObj))
+            if (parameters is not null && parameters.TryGetValue(NavigationKeys.OperatorId, out var opObj))
             {
                 _editingOperatorId = (Guid)opObj;
                 PageTitle = "Edit Staff Member";

@@ -55,7 +55,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         {
             await base.OnLoadedAsync(parameters);
 
-            _businessId = parameters is not null && parameters.TryGetValue("businessId", out var idObj)
+            _businessId = parameters is not null && parameters.TryGetValue(NavigationKeys.BusinessId, out var idObj)
                 ? (Guid)idObj
                 : await _businessService.GetOwnedBusinessIdAsync();
 

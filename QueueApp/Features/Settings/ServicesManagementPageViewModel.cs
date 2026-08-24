@@ -84,7 +84,7 @@ public partial class ServicesManagementPageViewModel : BaseViewModel
         try
         {
             await NavigationService.NavigateAsync(NavigationPaths.AddEditServicePage,
-                new NavigationParameters { ["businessId"] = _businessId });
+                new NavigationParameters { [NavigationKeys.BusinessId] = _businessId });
         }
         catch (Exception ex)
         {
@@ -100,7 +100,7 @@ public partial class ServicesManagementPageViewModel : BaseViewModel
     private async Task EditServiceAsync(ServiceResponse service)
     {
         await NavigationService.NavigateAsync(NavigationPaths.AddEditServicePage,
-            new NavigationParameters { ["businessId"] = _businessId, ["serviceId"] = service.Id });
+            new NavigationParameters { [NavigationKeys.BusinessId] = _businessId, [NavigationKeys.ServiceId] = service.Id });
     }
 
     [RelayCommand]

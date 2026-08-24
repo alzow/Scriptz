@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.Input;
 using MPowerKit.Navigation.Interfaces;
+using QueueApp.Constants;
 using QueueApp.Framework.Base;
 using QueueApp.Services.Api.Operator;
 using QueueApp.Services.Api.Operator.Models;
@@ -33,11 +34,11 @@ public partial class AddAvailabilityWindowPageViewModel : BaseViewModel
         {
             await base.OnLoadedAsync(parameters);
 
-            _operatorId = parameters is not null && parameters.TryGetValue("operatorId", out var idObj)
+            _operatorId = parameters is not null && parameters.TryGetValue(NavigationKeys.OperatorId, out var idObj)
                 ? (Guid)idObj
                 : throw new InvalidOperationException("AddAvailabilityWindowPage requires an operatorId.");
 
-            _dayOfWeek = parameters!.TryGetValue("dayOfWeek", out var dowObj) ? (int)dowObj : 0;
+            _dayOfWeek = parameters!.TryGetValue(NavigationKeys.DayOfWeek, out var dowObj) ? (int)dowObj : 0;
         }
         catch (Exception ex)
         {

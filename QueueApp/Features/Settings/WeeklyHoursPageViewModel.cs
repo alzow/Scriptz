@@ -45,11 +45,11 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
         {
             await base.OnLoadedAsync(parameters);
 
-            _operatorId = parameters is not null && parameters.TryGetValue("operatorId", out var idObj)
+            _operatorId = parameters is not null && parameters.TryGetValue(NavigationKeys.OperatorId, out var idObj)
                 ? (Guid)idObj
                 : throw new InvalidOperationException("WeeklyHoursPage requires an operatorId.");
 
-            OperatorName = parameters!.TryGetValue("operatorName", out var nameObj) ? (string)nameObj : "";
+            OperatorName = parameters!.TryGetValue(NavigationKeys.OperatorName, out var nameObj) ? (string)nameObj : "";
 
             await LoadAsync();
         }
@@ -97,7 +97,7 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
     private async Task AddWindowAsync(int dayOfWeek)
     {
         await NavigationService.NavigateAsync(NavigationPaths.AddAvailabilityWindowPage,
-            new NavigationParameters { ["operatorId"] = _operatorId, ["dayOfWeek"] = dayOfWeek });
+            new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId, [NavigationKeys.DayOfWeek] = dayOfWeek });
     }
 
     [RelayCommand]
@@ -123,7 +123,7 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
     private async Task GoToBlockedDatesAsync()
     {
         await NavigationService.NavigateAsync(NavigationPaths.BlockedDatesPage,
-            new NavigationParameters { ["operatorId"] = _operatorId, ["operatorName"] = OperatorName });
+            new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId, [NavigationKeys.OperatorName] = OperatorName });
     }
 
     [RelayCommand]

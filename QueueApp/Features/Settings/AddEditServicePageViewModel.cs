@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.Input;
 using MPowerKit.Navigation.Interfaces;
+using QueueApp.Constants;
 using QueueApp.Framework.Base;
 using QueueApp.Services.Api.ServiceOfferings;
 using QueueApp.Services.Api.ServiceOfferings.Models;
@@ -41,11 +42,11 @@ public partial class AddEditServicePageViewModel : BaseViewModel
         {
             await base.OnLoadedAsync(parameters);
 
-            _businessId = parameters is not null && parameters.TryGetValue("businessId", out var bizObj)
+            _businessId = parameters is not null && parameters.TryGetValue(NavigationKeys.BusinessId, out var bizObj)
                 ? (Guid)bizObj
                 : throw new InvalidOperationException("AddEditServicePage requires a businessId.");
 
-            if (parameters is not null && parameters.TryGetValue("serviceId", out var svcObj))
+            if (parameters is not null && parameters.TryGetValue(NavigationKeys.ServiceId, out var svcObj))
             {
                 _editingServiceId = (Guid)svcObj;
                 PageTitle = "Edit Service";

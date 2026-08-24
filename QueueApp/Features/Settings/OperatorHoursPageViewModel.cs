@@ -43,7 +43,7 @@ public partial class OperatorHoursPageViewModel : BaseViewModel
             if (operators.Count == 1)
             {
                 await NavigationService.NavigateAsync(NavigationPaths.WeeklyHoursPage,
-                    new NavigationParameters { ["operatorId"] = operators[0].Id, ["operatorName"] = operators[0].DisplayName });
+                    new NavigationParameters { [NavigationKeys.OperatorId] = operators[0].Id, [NavigationKeys.OperatorName] = operators[0].DisplayName });
                 return;
             }
 
@@ -63,7 +63,7 @@ public partial class OperatorHoursPageViewModel : BaseViewModel
     private async Task SelectOperatorAsync(OperatorResponse op)
     {
         await NavigationService.NavigateAsync(NavigationPaths.WeeklyHoursPage,
-            new NavigationParameters { ["operatorId"] = op.Id, ["operatorName"] = op.DisplayName });
+            new NavigationParameters { [NavigationKeys.OperatorId] = op.Id, [NavigationKeys.OperatorName] = op.DisplayName });
     }
 
     [RelayCommand]

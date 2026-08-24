@@ -406,8 +406,8 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         {
             var navParams = new NavigationParameters
             {
-                ["businessId"] = businessId.Value,
-                ["openedFromTabs"] = true,
+                [NavigationKeys.BusinessId] = businessId.Value,
+                [NavigationKeys.OpenedFromTabs] = true,
             };
             _messenger.Send(new NavigateAwayFromTabsMessage(
                 $"/NavigationPage/{NavigationPaths.BusinessDetailPage}", navParams, true));
@@ -425,7 +425,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
 
         try
         {
-            var navParams = new NavigationParameters { ["category"] = SelectedCategory.Key };
+            var navParams = new NavigationParameters { [NavigationKeys.Category] = SelectedCategory.Key };
             _messenger.Send(new NavigateAwayFromTabsMessage(
                 $"/NavigationPage/{NavigationPaths.BusinessListPage}", navParams, true));
         }

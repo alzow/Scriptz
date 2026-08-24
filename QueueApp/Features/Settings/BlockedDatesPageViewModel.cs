@@ -37,11 +37,11 @@ public partial class BlockedDatesPageViewModel : BaseViewModel
         {
             await base.OnLoadedAsync(parameters);
 
-            _operatorId = parameters is not null && parameters.TryGetValue("operatorId", out var idObj)
+            _operatorId = parameters is not null && parameters.TryGetValue(NavigationKeys.OperatorId, out var idObj)
                 ? (Guid)idObj
                 : throw new InvalidOperationException("BlockedDatesPage requires an operatorId.");
 
-            OperatorName = parameters!.TryGetValue("operatorName", out var nameObj) ? (string)nameObj : "";
+            OperatorName = parameters!.TryGetValue(NavigationKeys.OperatorName, out var nameObj) ? (string)nameObj : "";
 
             await LoadAsync();
         }
@@ -83,7 +83,7 @@ public partial class BlockedDatesPageViewModel : BaseViewModel
     private async Task AddBlockAsync()
     {
         await NavigationService.NavigateAsync(NavigationPaths.AddAvailabilityBlockPage,
-            new NavigationParameters { ["operatorId"] = _operatorId });
+            new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId });
     }
 
     [RelayCommand]

@@ -84,7 +84,7 @@ public partial class StaffManagementPageViewModel : BaseViewModel
         try
         {
             await NavigationService.NavigateAsync(NavigationPaths.AddEditOperatorPage,
-                new NavigationParameters { ["businessId"] = _businessId });
+                new NavigationParameters { [NavigationKeys.BusinessId] = _businessId });
         }
         catch (Exception ex)
         {
@@ -100,7 +100,7 @@ public partial class StaffManagementPageViewModel : BaseViewModel
     private async Task EditOperatorAsync(OperatorResponse op)
     {
         await NavigationService.NavigateAsync(NavigationPaths.AddEditOperatorPage,
-            new NavigationParameters { ["businessId"] = _businessId, ["operatorId"] = op.Id });
+            new NavigationParameters { [NavigationKeys.BusinessId] = _businessId, [NavigationKeys.OperatorId] = op.Id });
     }
 
     [RelayCommand]

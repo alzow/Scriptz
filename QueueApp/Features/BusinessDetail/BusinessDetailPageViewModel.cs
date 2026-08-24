@@ -4,6 +4,7 @@ using System.Threading;
 using CommunityToolkit.Mvvm.Input;
 using MPowerKit;
 using MPowerKit.Navigation;
+using QueueApp.Constants;
 using QueueApp.Framework.Base;
 using QueueApp.Framework.Navigation;
 using QueueApp.Services.Api.Booking;
@@ -134,10 +135,10 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         {
             await base.OnLoadedAsync(parameters);
 
-            _businessId = parameters is not null && parameters.TryGetValue("businessId", out var idObj)
+            _businessId = parameters is not null && parameters.TryGetValue(NavigationKeys.BusinessId, out var idObj)
                 ? (Guid)idObj
                 : throw new InvalidOperationException("BusinessDetailPage requires a 'businessId' parameter.");
-            _openedFromTabs = parameters is not null && parameters.TryGetValue("openedFromTabs", out var fromTabsObj)
+            _openedFromTabs = parameters is not null && parameters.TryGetValue(NavigationKeys.OpenedFromTabs, out var fromTabsObj)
                 && fromTabsObj is true;
 
             IsLoading = true;

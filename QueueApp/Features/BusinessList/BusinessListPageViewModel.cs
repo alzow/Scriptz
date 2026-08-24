@@ -35,7 +35,7 @@ public partial class BusinessListPageViewModel : BaseViewModel
         {
             await base.OnLoadedAsync(parameters);
 
-            _category = parameters is not null && parameters.TryGetValue("category", out var catObj)
+            _category = parameters is not null && parameters.TryGetValue(NavigationKeys.Category, out var catObj)
                 ? (string)catObj
                 : throw new InvalidOperationException("BusinessListPage requires a 'category' parameter.");
 
@@ -89,7 +89,7 @@ public partial class BusinessListPageViewModel : BaseViewModel
     {
         try
         {
-            var navParams = new NavigationParameters { ["businessId"] = business.Id };
+            var navParams = new NavigationParameters { [NavigationKeys.BusinessId] = business.Id };
             await NavigationService.NavigateAsync(NavigationPaths.BusinessDetailPage, navParams);
         }
         catch (Exception ex)
