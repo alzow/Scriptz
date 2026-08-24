@@ -4,9 +4,9 @@ using QueueApp.Features.CategoryPicker;
 namespace QueueApp.Services.Api.Business.Models;
 
 // Powers the Browse dashboard's "Open now near you" list — one row per business with a live
-// wait aggregate already attached, so the screen doesn't fire one queue-summary call per card.
-// Backed by a new nearby_business_summary(category, suburb) RPC; see
-// Documentation/README-UI-ENHANCEMENTS-SUPABASE.md.
+// wait aggregate (and, once the customer's location is known, distance) already attached, so the
+// screen doesn't fire one queue-summary call per card. Backed by nearby_business_summary(category,
+// suburb, customer_lat, customer_lng); see Documentation/README-SUPABASE-SETUP.md.
 public class BrowseBusinessSummaryResponse
 {
     [JsonPropertyName("id")] public Guid Id { get; set; }

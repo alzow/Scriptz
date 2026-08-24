@@ -4,7 +4,7 @@ namespace QueueApp.Services.Api.Queue.Models;
 
 // Cross-business version of MyQueueStatusResponse — the browse dashboard doesn't know which
 // business the customer is queued at, so it can't call my_queue_status(business_id). Backed by
-// a new my_active_queue_entry() RPC; see Documentation/README-UI-ENHANCEMENTS-SUPABASE.md.
+// a new my_active_queue_entry() RPC; see Documentation/README-SUPABASE-SETUP.md.
 public class MyActiveQueueEntryResponse
 {
     [JsonPropertyName("entry_id")] public Guid EntryId { get; set; }
