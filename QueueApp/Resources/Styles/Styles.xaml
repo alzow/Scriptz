@@ -18,6 +18,24 @@
         <Setter Property="StrokeThickness" Value="1"/>
     </Style>
 
+    <!-- Hide scroll bars on all scrollable views -->
+    <Style TargetType="ScrollView">
+        <Setter Property="VerticalScrollBarVisibility" Value="Never"/>
+        <Setter Property="HorizontalScrollBarVisibility" Value="Never"/>
+    </Style>
+    <Style TargetType="CollectionView">
+        <Setter Property="VerticalScrollBarVisibility" Value="Never"/>
+        <Setter Property="HorizontalScrollBarVisibility" Value="Never"/>
+    </Style>
+    <Style TargetType="CarouselView">
+        <Setter Property="VerticalScrollBarVisibility" Value="Never"/>
+        <Setter Property="HorizontalScrollBarVisibility" Value="Never"/>
+    </Style>
+    <Style TargetType="ListView">
+        <Setter Property="VerticalScrollBarVisibility" Value="Never"/>
+        <Setter Property="HorizontalScrollBarVisibility" Value="Never"/>
+    </Style>
+
     <Style TargetType="BoxView">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray200}}" />
     </Style>
