@@ -27,4 +27,8 @@ public interface IBusinessApi
     Task HeartbeatAsync(
         [AliasAs("id")] string idEq,
         [Body] Dictionary<string, object> patch);
+
+    // Browse dashboard list — wait/occupancy aggregate already attached per business.
+    [Post("/rpc/nearby_business_summary")]
+    Task<List<BrowseBusinessSummaryResponse>> GetBrowseBusinessesAsync([Body] NearbyBusinessSummaryRequest request);
 }

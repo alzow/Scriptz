@@ -146,6 +146,38 @@ public class ItemEqualsSelectedToColorConverter : IMultiValueConverter
     }
 }
 
+// Maps a BrowseBusinessSummaryResponse.WaitBucket string ("go"|"wait"|"busy"|"book"|"off"|"unknown")
+// to a color, keyed off a "|"-separated hex-color parameter matching that same order (6 entries).
+public class WaitBucketToColorConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is not string bucket || parameter is not string hexColors)
+            return Colors.Transparent;
+
+        var parts = hexColors.Split('|');
+        if (parts.Length != 6)
+            return Colors.Transparent;
+
+        var index = bucket switch
+        {
+            "go" => 0,
+            "wait" => 1,
+            "busy" => 2,
+            "book" => 3,
+            "off" => 4,
+            _ => 5, // "unknown"
+        };
+
+        return Color.FromArgb(parts[index]);
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
 public class EqualsToColorConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

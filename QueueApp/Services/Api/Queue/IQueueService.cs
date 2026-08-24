@@ -13,6 +13,7 @@ public interface IQueueService
     Task<QueueEntryResponse> JoinQueueAsync(Guid businessId, Guid? operatorId, Guid customerId, string? customerName);
     Task<QueueEntryResponse> CancelEntryAsync(Guid entryId);
     Task<MyQueueStatusResponse?> GetMyQueueStatusAsync(Guid businessId);
+    Task<MyActiveQueueEntryResponse?> GetMyActiveEntryAsync();
     Task<decimal?> GetEntryWaitMinutesAsync(Guid entryId);
     Task<List<VisitResponse>> GetMyVisitsAsync(Guid customerId);
 }

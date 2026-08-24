@@ -54,6 +54,12 @@ public class QueueService : BaseService, IQueueService
         return results.FirstOrDefault();
     }
 
+    public async Task<MyActiveQueueEntryResponse?> GetMyActiveEntryAsync()
+    {
+        var results = await ExecuteApiCallAsync(_api.GetMyActiveEntryAsync());
+        return results.FirstOrDefault();
+    }
+
     public Task<decimal?> GetEntryWaitMinutesAsync(Guid entryId) =>
         ExecuteApiCallAsync(_api.GetEntryWaitMinutesAsync(new QueueEntryIdRequest { EntryId = entryId }));
 

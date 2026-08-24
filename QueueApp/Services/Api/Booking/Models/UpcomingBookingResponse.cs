@@ -30,6 +30,10 @@ public class UpcomingBookingResponse
     [JsonIgnore]
     public string DateTimeDisplay => LocalStart.ToString("ddd d MMM, h:mm tt");
 
+    [JsonIgnore] public string DayText => LocalStart.ToString("d");
+    [JsonIgnore] public string MonthText => LocalStart.ToString("MMM").ToUpperInvariant();
+    [JsonIgnore] public string TimeText => LocalStart.ToString("h:mm tt");
+
     [JsonIgnore] public bool IsCancellable => Status is "pending" or "confirmed";
     [JsonIgnore] public string StatusLabel => Status == "pending" ? "Pending" : "Confirmed";
 }

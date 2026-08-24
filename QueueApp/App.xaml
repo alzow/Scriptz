@@ -32,6 +32,7 @@
             <converters:IsNullConverter x:Key="IsNullConverter"/>
             <converters:ActiveToLabelConverter x:Key="ActiveToLabelConverter"/>
             <converters:ItemEqualsSelectedToColorConverter x:Key="ItemEqualsSelectedToColorConverter"/>
+            <converters:WaitBucketToColorConverter x:Key="WaitBucketToColorConverter"/>
 
         </ResourceDictionary>
     </Application.Resources>

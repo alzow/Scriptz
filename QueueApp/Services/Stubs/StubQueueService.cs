@@ -125,6 +125,39 @@ public class StubQueueService : IQueueService
         });
     }
 
+    public Task<MyActiveQueueEntryResponse?> GetMyActiveEntryAsync()
+    {
+        var mine = _entries
+            .Where(e => e.Status is "waiting" or "serving")
+            .OrderBy(e => e.JoinedAt)
+            .LastOrDefault();
+
+        if (mine is null)
+            return Task.FromResult<MyActiveQueueEntryResponse?>(null);
+
+        var position = _entries
+            .Where(e => e.BusinessId == mine.BusinessId && e.OperatorId == mine.OperatorId
+                        && e.Status is "waiting" or "serving")
+            .OrderBy(e => e.JoinedAt)
+            .ToList()
+            .IndexOf(mine) + 1;
+
+        return Task.FromResult<MyActiveQueueEntryResponse?>(new MyActiveQueueEntryResponse
+        {
+            EntryId = mine.Id,
+            BusinessId = mine.BusinessId,
+            BusinessName = "Nu-Look Barbers",
+            BusinessLatitude = -26.3167,
+            BusinessLongitude = 27.8500,
+            OperatorId = mine.OperatorId,
+            OperatorName = mine.OperatorId.HasValue ? "Operator" : "Any available",
+            Position = position,
+            Status = mine.Status,
+            JoinedAt = mine.JoinedAt,
+            WaitMinutes = position * 7,
+        });
+    }
+
     public Task<decimal?> GetEntryWaitMinutesAsync(Guid entryId)
         => Task.FromResult<decimal?>(10);
 
