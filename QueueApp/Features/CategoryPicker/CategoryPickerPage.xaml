@@ -18,10 +18,10 @@
                 <Grid ColumnDefinitions="*,Auto">
                     <VerticalStackLayout Grid.Column="0" Spacing="4" VerticalOptions="Center">
                         <Label Text="{Binding WelcomeMessage}" Style="{StaticResource lbl22_Bold_Cream}"/>
-                        <HorizontalStackLayout Spacing="6">
-                            <Ellipse Fill="{StaticResource Green}" WidthRequest="5" HeightRequest="5" VerticalOptions="Center"/>
-                            <Label Text="Lenasia" Style="{StaticResource lbl12_Regular_TextLight}"/>
-                        </HorizontalStackLayout>
+                        <helpers:LocationBarView
+                                LocationLabel="{Binding LocationLabel}"
+                                IsResolving="{Binding IsResolvingLocation}"
+                                RefreshCommand="{Binding RefreshLocationCommand}"/>
                     </VerticalStackLayout>
                     <Border Grid.Column="1"
                             WidthRequest="38" HeightRequest="38"

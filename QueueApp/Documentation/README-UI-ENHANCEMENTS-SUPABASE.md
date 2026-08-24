@@ -94,6 +94,11 @@ grant execute on function my_active_queue_entry() to authenticated;
 
 ## 2. `nearby_business_summary(p_category, p_suburb)` — powers "Open now near you"
 
+> **Superseded:** the `location-services` branch (off this one) extends this function with
+> customer lat/lng params and a computed `distance_km` column — see
+> `README-LOCATION-SUPABASE.md` §2 for the version to actually run if that branch is in play.
+> The version below still works standalone if you're applying only this PR.
+
 **Why it's needed:** `business_queue_summary(business_id)` returns a live wait breakdown for
 *one* business (already used on the business detail page). The Browse list needs the same kind
 of live number for *every* business in a category in a single call, so the screen doesn't fire

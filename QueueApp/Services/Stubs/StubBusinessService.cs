@@ -42,8 +42,12 @@ public class StubBusinessService : IBusinessService
 
     public Task HeartbeatAsync(Guid businessId) => Task.CompletedTask;
 
-    public Task<List<BrowseBusinessSummaryResponse>> GetBrowseBusinessesAsync(string? category, string suburb = "Lenasia")
-        => Task.FromResult(new List<BrowseBusinessSummaryResponse>
+    public Task UpdateLocationAsync(Guid businessId, double latitude, double longitude) => Task.CompletedTask;
+
+    public Task<List<BrowseBusinessSummaryResponse>> GetBrowseBusinessesAsync(
+        string? category, string suburb = "Lenasia", double? customerLatitude = null, double? customerLongitude = null)
+    {
+        var businesses = new List<BrowseBusinessSummaryResponse>
         {
             new()
             {
@@ -54,7 +58,7 @@ public class StubBusinessService : IBusinessService
                 Address = "Rose Ave, Lenasia",
                 Latitude = -26.3167,
                 Longitude = 27.8500,
-                DistanceKm = 1.2,
+                DistanceKm = 1.2, // fallback shown until a customer location is known
                 IsActive = true,
                 LastSeenAt = DateTime.UtcNow,
                 WaitingCount = 2,
@@ -68,6 +72,8 @@ public class StubBusinessService : IBusinessService
                 Category = "barber",
                 Mode = "queue",
                 Address = "Main Rd, Lenasia",
+                Latitude = -26.3200,
+                Longitude = 27.8450,
                 DistanceKm = 0.8,
                 IsActive = true,
                 LastSeenAt = DateTime.UtcNow,
@@ -82,6 +88,8 @@ public class StubBusinessService : IBusinessService
                 Category = "barber",
                 Mode = "booking",
                 Address = "Extension 2, Lenasia",
+                Latitude = -26.3050,
+                Longitude = 27.8600,
                 DistanceKm = 3.1,
                 IsActive = true,
                 NextSlotStartsAt = DateTimeOffset.UtcNow.Date.AddHours(15).AddMinutes(30).AddHours(-2),
@@ -93,9 +101,40 @@ public class StubBusinessService : IBusinessService
                 Category = "barber",
                 Mode = "queue",
                 Address = "Extension 2, Lenasia",
+                Latitude = -26.3180,
+                Longitude = 27.8520,
                 DistanceKm = 1.1,
                 IsActive = true,
                 LastSeenAt = DateTime.UtcNow.AddHours(-12), // outside the 15-min presence window -> closed
             },
-        });
+        };
+
+        // Once a customer location is known, replace the placeholder distances with real ones —
+        // mirrors what nearby_business_summary does server-side, so the sort order is demoable.
+        if (customerLatitude.HasValue && customerLongitude.HasValue)
+        {
+            foreach (var b in businesses)
+            {
+                if (b.Latitude.HasValue && b.Longitude.HasValue)
+                {
+                    b.DistanceKm = HaversineKm(
+                        customerLatitude.Value, customerLongitude.Value, b.Latitude.Value, b.Longitude.Value);
+                }
+            }
+        }
+
+        return Task.FromResult(businesses);
+    }
+
+    private static double HaversineKm(double lat1, double lon1, double lat2, double lon2)
+    {
+        const double earthRadiusKm = 6371;
+        var dLat = double.DegreesToRadians(lat2 - lat1);
+        var dLon = double.DegreesToRadians(lon2 - lon1);
+        var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                Math.Cos(double.DegreesToRadians(lat1)) * Math.Cos(double.DegreesToRadians(lat2)) *
+                Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+        var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        return earthRadiusKm * c;
+    }
 }

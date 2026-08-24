@@ -16,6 +16,7 @@ using QueueApp.Services.Api.Profile;
 using QueueApp.Services.Api.Queue;
 using QueueApp.Services.Api.Queue.Models;
 using QueueApp.Services.Auth;
+using QueueApp.Services.Location;
 using QueueApp.Services.Popup;
 using QueueApp.Services.Realtime;
 using QueueApp.Services.Storage;
@@ -35,9 +36,12 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     private readonly IAuthService _authService;
     private readonly IQueuePopupService _popupService;
     private readonly IQueueRealtimeService _realtimeService;
+    private readonly ILocationService _locationService;
 
     private List<BrowseBusinessSummaryResponse> _allBusinesses = new();
     private Guid _customerId;
+    private double? _customerLatitude;
+    private double? _customerLongitude;
 
     // Tracks which Postgres Changes filter we're currently subscribed under, so
     // EnsureRealtimeSubscriptionAsync only tears down/reopens the socket when the scope
@@ -58,7 +62,8 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         IProfileService profileService,
         IAuthService authService,
         IQueuePopupService popupService,
-        IQueueRealtimeService realtimeService)
+        IQueueRealtimeService realtimeService,
+        ILocationService locationService)
         : base(navigationService, secureStorageService)
     {
         _messenger = messenger;
@@ -69,6 +74,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         _authService = authService;
         _popupService = popupService;
         _realtimeService = realtimeService;
+        _locationService = locationService;
 
         // Fody's PropertyChanged weaver raises this for every auto-property below — react to
         // search text edits here instead of hand-rolling a partial-changed hook per property.
@@ -85,6 +91,8 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     public MyActiveQueueEntryResponse? ActiveEntry { get; set; }
     public bool IsLeavingQueue { get; set; }
     public string? QuietestNowText { get; set; }
+    public string LocationLabel { get; set; } = "Lenasia";
+    public bool IsResolvingLocation { get; set; }
 
     public ObservableCollection<BrowseBusinessSummaryResponse> Businesses { get; } = new();
     public ObservableCollection<UpcomingBookingResponse> UpcomingBookings { get; } = new();
@@ -115,12 +123,65 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
                 WelcomeMessage = string.IsNullOrWhiteSpace(displayName) ? "Welcome" : $"Salaam, {displayName}";
             }
 
+            // Cached location (no permission prompt, near-instant) gives the first paint real
+            // distances if we've resolved one before; RefreshLocationAsync below then gets a
+            // live fix and re-sorts if it's meaningfully different.
+            var cached = await _locationService.GetCachedLocationAsync();
+            if (cached is not null)
+            {
+                _customerLatitude = cached.Latitude;
+                _customerLongitude = cached.Longitude;
+                LocationLabel = cached.Label;
+            }
+
             SelectedCategory ??= Categories.FirstOrDefault(c => c.Available) ?? Categories.First();
             await LoadAsync();
+
+            // Silent: a denied/unavailable GPS fix on every automatic app-open attempt would be
+            // a nagging alert, not a helpful one — only the explicit tap below (the location bar,
+            // RefreshLocationCommand) surfaces a "couldn't get your location" message.
+            await RefreshLocationAsync(silent: true);
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
+        }
+    }
+
+    [RelayCommand]
+    private Task RefreshLocationAsync() => RefreshLocationAsync(silent: false);
+
+    private async Task RefreshLocationAsync(bool silent)
+    {
+        IsResolvingLocation = true;
+        try
+        {
+            var location = await _locationService.RefreshLocationAsync();
+            if (location is null)
+            {
+                if (!silent)
+                {
+                    await _popupService.ShowAlertAsync("Location unavailable",
+                        "Couldn't get your location — showing businesses in Lenasia instead.");
+                }
+                return;
+            }
+
+            var moved = _customerLatitude != location.Latitude || _customerLongitude != location.Longitude;
+            _customerLatitude = location.Latitude;
+            _customerLongitude = location.Longitude;
+            LocationLabel = location.Label;
+
+            if (moved)
+                await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+        finally
+        {
+            IsResolvingLocation = false;
         }
     }
 
@@ -225,7 +286,8 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
 
             if (SelectedCategory is not null)
             {
-                _allBusinesses = await _businessService.GetBrowseBusinessesAsync(SelectedCategory.Key);
+                _allBusinesses = await _businessService.GetBrowseBusinessesAsync(
+                    SelectedCategory.Key, customerLatitude: _customerLatitude, customerLongitude: _customerLongitude);
                 ApplyBusinessFilter();
             }
 
@@ -283,8 +345,11 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
             ? _allBusinesses
             : _allBusinesses.Where(b => b.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
 
+        // Nearest-first once we know where the customer is (the "Mr Delivery" feel) — wait time
+        // is still the tiebreaker for businesses at an equal/unknown distance.
         var ordered = filtered
             .OrderByDescending(b => b.IsAvailableNow)
+            .ThenBy(b => b.DistanceKm ?? double.MaxValue)
             .ThenBy(b => b.AvgWaitMinutes ?? decimal.MaxValue)
             .ToList();
 

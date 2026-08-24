@@ -64,15 +64,7 @@
                                 </Border>
                             </Grid>
 
-                            <Label Style="{StaticResource lbl12_Regular_TextLight}">
-                                <Label.FormattedText>
-                                    <FormattedString>
-                                        <Span Text="{Binding Category}"/>
-                                        <Span Text=" · "/>
-                                        <Span Text="{Binding DistanceKm, StringFormat='{0:0.0} km'}"/>
-                                    </FormattedString>
-                                </Label.FormattedText>
-                            </Label>
+                            <Label Text="{Binding MetaText}" Style="{StaticResource lbl12_Regular_TextLight}"/>
 
                             <ProgressBar Progress="{Binding WaitFraction}"
                                          HeightRequest="3"

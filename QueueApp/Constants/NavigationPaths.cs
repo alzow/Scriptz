@@ -34,6 +34,7 @@ public static class NavigationPaths
     public const string AddAvailabilityWindowPage = "AddAvailabilityWindowPage";
     public const string BlockedDatesPage       = "BlockedDatesPage";
     public const string AddAvailabilityBlockPage = "AddAvailabilityBlockPage";
+    public const string BusinessLocationPage   = "BusinessLocationPage";
 
     // ── Browse (customer-facing) ───────────────────────────────────────────────
     public const string BusinessListPage     = "BusinessListPage";

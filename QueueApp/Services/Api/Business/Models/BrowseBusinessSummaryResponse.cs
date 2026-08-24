@@ -78,4 +78,14 @@ public class BrowseBusinessSummaryResponse
 
     [JsonIgnore]
     public string CategoryIcon => CategoryCatalog.All.FirstOrDefault(c => c.Key == Category)?.Icon ?? "🏪";
+
+    [JsonIgnore]
+    public string CategoryDisplay => CategoryCatalog.All.FirstOrDefault(c => c.Key == Category)?.Display ?? Category;
+
+    // Distance is only known once the customer's location has resolved (see ILocationService) —
+    // degrades to just the category label rather than showing a blank/broken "· km" fragment.
+    [JsonIgnore]
+    public string MetaText => DistanceKm.HasValue
+        ? $"{CategoryDisplay} · {DistanceKm:0.0} km"
+        : CategoryDisplay;
 }

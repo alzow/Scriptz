@@ -33,6 +33,12 @@ public partial class BusinessSettingsPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private async Task OpenLocationAsync()
+    {
+        await NavigationService.NavigateAsync(NavigationPaths.BusinessLocationPage);
+    }
+
+    [RelayCommand]
     private async Task GoBackAsync()
     {
         try

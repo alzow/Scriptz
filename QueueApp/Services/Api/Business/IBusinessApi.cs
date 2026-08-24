@@ -31,4 +31,10 @@ public interface IBusinessApi
     // Browse dashboard list — wait/occupancy aggregate already attached per business.
     [Post("/rpc/nearby_business_summary")]
     Task<List<BrowseBusinessSummaryResponse>> GetBrowseBusinessesAsync([Body] NearbyBusinessSummaryRequest request);
+
+    // Owner sets their business's map location (captured via device GPS in BusinessLocationPage).
+    [Patch("/businesses")]
+    Task UpdateLocationAsync(
+        [AliasAs("id")] string idEq,
+        [Body] Dictionary<string, object> patch);
 }

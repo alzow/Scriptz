@@ -13,6 +13,7 @@ using QueueApp.Services.Auth;
 using QueueApp.Services.Storage;
 using QueueApp.Services.Popup;
 using QueueApp.Services.Realtime;
+using QueueApp.Services.Location;
 using CommunityToolkit.Mvvm.Messaging;
 #if USE_STUBS
 using QueueApp.Services.Stubs;
@@ -60,6 +61,11 @@ internal static class NavigationStartup
         services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
         services.AddSingleton<ISecureStorageService, SecureStorageService>();
         services.AddSingleton<IQueuePopupService, QueuePopupService>();
+
+        // Always the real implementation, even in USE_STUBS builds — device GPS/geocoding are OS
+        // capabilities, not a Supabase dependency, and it already fails soft (returns null) when
+        // permission is denied or no fix is available, so it doesn't need a stub.
+        services.AddSingleton<ILocationService, LocationService>();
     }
 
     private static void RegisterApiServices(IServiceCollection services)

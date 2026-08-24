@@ -39,14 +39,21 @@ public class BusinessService : BaseService, IBusinessService
     public Task<List<BusinessResponse>> GetBusinessesAsync(string category, string suburb = "Lenasia") =>
         ExecuteApiCallAsync(_api.GetBusinessesByCategoryAsync($"eq.{category}", $"eq.{suburb}"));
 
-    public Task<List<BrowseBusinessSummaryResponse>> GetBrowseBusinessesAsync(string? category, string suburb = "Lenasia") =>
+    public Task<List<BrowseBusinessSummaryResponse>> GetBrowseBusinessesAsync(
+        string? category, string suburb = "Lenasia", double? customerLatitude = null, double? customerLongitude = null) =>
         ExecuteApiCallAsync(_api.GetBrowseBusinessesAsync(new NearbyBusinessSummaryRequest
         {
             Category = category,
             Suburb = suburb,
+            CustomerLatitude = customerLatitude,
+            CustomerLongitude = customerLongitude,
         }));
 
     public Task HeartbeatAsync(Guid businessId) =>
         ExecuteApiCallAsync(_api.HeartbeatAsync($"eq.{businessId}",
             new Dictionary<string, object> { ["last_seen_at"] = DateTime.UtcNow }));
+
+    public Task UpdateLocationAsync(Guid businessId, double latitude, double longitude) =>
+        ExecuteApiCallAsync(_api.UpdateLocationAsync($"eq.{businessId}",
+            new Dictionary<string, object> { ["latitude"] = latitude, ["longitude"] = longitude }));
 }

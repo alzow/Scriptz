@@ -6,6 +6,8 @@
     <string>za.co.alzow.alzowmauicomponents</string>
     <key>CFBundleShortVersionString</key>
     <string>2.0.0</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Queue uses your location to show how far nearby businesses are and sort them by distance.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIDeviceFamily</key>
