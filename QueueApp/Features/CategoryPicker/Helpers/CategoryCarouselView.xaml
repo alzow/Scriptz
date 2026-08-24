@@ -32,7 +32,8 @@
                                 <Binding Path="BindingContext.SelectedCategory" Source="{x:Reference Root}"/>
                             </MultiBinding>
                         </Border.Stroke>
-                        <Label Text="{Binding Icon}" Style="{StaticResource lbl26_Regular_Emoji}"
+                        <Image Source="{Binding IconSource}"
+                               WidthRequest="30" HeightRequest="30"
                                HorizontalOptions="Center" VerticalOptions="Center"/>
                     </Border>
                     <Label Text="{Binding Display}" Style="{StaticResource lbl11_Bold_TextMid}"

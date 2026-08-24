@@ -17,7 +17,8 @@
                     <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
                         <Border Style="{StaticResource brd14_Orange}"
                                 WidthRequest="44" HeightRequest="44">
-                            <Label Text="💊" FontSize="22"
+                            <Image Source="logo_monogram_reversed"
+                                   WidthRequest="24" HeightRequest="24"
                                    HorizontalOptions="Center" VerticalOptions="Center"/>
                         </Border>
                         <VerticalStackLayout Spacing="0" VerticalOptions="Center">

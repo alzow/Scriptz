@@ -77,7 +77,7 @@ public class BrowseBusinessSummaryResponse
     public double WaitFraction => Math.Clamp((double)(AvgWaitMinutes ?? 0) / 45.0, 0, 1);
 
     [JsonIgnore]
-    public string CategoryIcon => CategoryCatalog.All.FirstOrDefault(c => c.Key == Category)?.Icon ?? "🏪";
+    public string CategoryIcon => CategoryCatalog.All.FirstOrDefault(c => c.Key == Category)?.IconSource ?? "ic_other";
 
     [JsonIgnore]
     public string CategoryDisplay => CategoryCatalog.All.FirstOrDefault(c => c.Key == Category)?.Display ?? Category;

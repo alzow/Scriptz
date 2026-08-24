@@ -12,11 +12,11 @@
             <TapGestureRecognizer Command="{Binding RefreshCommand, Source={x:Reference Root}}"/>
         </HorizontalStackLayout.GestureRecognizers>
 
-        <Label Text="📍" FontSize="11" VerticalOptions="Center"/>
+        <Image Source="ic_pin" WidthRequest="12" HeightRequest="12" VerticalOptions="Center"/>
         <Label Text="{Binding LocationLabel, Source={x:Reference Root}}"
                Style="{StaticResource lbl12_Regular_TextLight}"
                VerticalOptions="Center"/>
-        <Label Text="⌄" FontSize="11" TextColor="{StaticResource TextMuted}"
+        <Image Source="ic_chevron_down" WidthRequest="11" HeightRequest="11"
                VerticalOptions="Center"
                IsVisible="{Binding IsResolving, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}"/>
         <ActivityIndicator IsRunning="{Binding IsResolving, Source={x:Reference Root}}"

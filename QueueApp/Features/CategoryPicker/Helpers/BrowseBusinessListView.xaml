@@ -33,7 +33,8 @@
                                          Converter="{StaticResource WaitBucketToColorConverter}"
                                          ConverterParameter="#39FF7A|#A45EFF|#FF3B5C|#343D4D|#343D4D|#343D4D"/>
                             </Border.Stroke>
-                            <Label Text="{Binding CategoryIcon}" FontSize="24"
+                            <Image Source="{Binding CategoryIcon}"
+                                   WidthRequest="26" HeightRequest="26"
                                    HorizontalOptions="Center" VerticalOptions="Center"/>
                         </Border>
 

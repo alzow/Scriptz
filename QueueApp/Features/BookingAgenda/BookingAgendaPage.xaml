@@ -17,14 +17,14 @@
                    Text="{Binding BusinessName}"
                    Style="{StaticResource lbl24_Bold_TextDark}"
                    VerticalOptions="Center"/>
-            <Label Grid.Column="1"
-                   Text="⚙"
-                   FontSize="24"
+            <Image Grid.Column="1"
+                   Source="ic_settings"
+                   WidthRequest="24" HeightRequest="24"
                    VerticalOptions="Center">
-                <Label.GestureRecognizers>
+                <Image.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding OpenSettingsCommand}"/>
-                </Label.GestureRecognizers>
-            </Label>
+                </Image.GestureRecognizers>
+            </Image>
         </Grid>
 
         <CollectionView Grid.Row="1" ItemsSource="{Binding DateOptions}" Margin="0,10"

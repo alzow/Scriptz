@@ -28,7 +28,7 @@
 
                 <!-- Search -->
                 <entry:AlzowEntry Margin="0,16,0,0"
-                        LeftEmojiIcon="🔍"
+                        LeftIcon="ic_search"
                         EntryText="{Binding SearchText}"
                         PlaceholderText="Search barbers, car washes, clinics"
                         ShowClearTextButton="True"

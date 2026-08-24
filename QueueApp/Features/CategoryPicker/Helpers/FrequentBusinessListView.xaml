@@ -23,7 +23,8 @@
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="14"/>
                             </Border.StrokeShape>
-                            <Label Text="🔁" FontSize="22" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            <Image Source="ic_refresh" WidthRequest="24" HeightRequest="24"
+                                   HorizontalOptions="Center" VerticalOptions="Center"/>
                         </Border>
                         <VerticalStackLayout Grid.Column="1" Spacing="3">
                             <Grid ColumnDefinitions="*,Auto">
