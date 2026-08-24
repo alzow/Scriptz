@@ -135,7 +135,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             {
                 await RefreshQueueAsync();
                 await RefreshMyStatusAsync();
-                await _realtimeService.SubscribeAsync(_businessId,
+                await _realtimeService.SubscribeAsync("business_id", _businessId.ToString(),
                     async () => await MainThread.InvokeOnMainThreadAsync(async () =>
                     {
                         await RefreshMyStatusAsync();
@@ -165,7 +165,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 {
                     await LoadMyBookingsAsync(Guid.Parse(userId));
 
-                    await _realtimeService.SubscribeAsync(_businessId,
+                    await _realtimeService.SubscribeAsync("business_id", _businessId.ToString(),
                         async () => await MainThread.InvokeOnMainThreadAsync(() => LoadMyBookingsAsync(Guid.Parse(userId))),
                         table: "bookings");
                 }

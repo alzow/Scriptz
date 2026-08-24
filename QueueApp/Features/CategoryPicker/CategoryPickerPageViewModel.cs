@@ -17,6 +17,7 @@ using QueueApp.Services.Api.Queue;
 using QueueApp.Services.Api.Queue.Models;
 using QueueApp.Services.Auth;
 using QueueApp.Services.Popup;
+using QueueApp.Services.Realtime;
 using QueueApp.Services.Storage;
 
 namespace QueueApp.Features.CategoryPicker;
@@ -33,9 +34,19 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     private readonly IProfileService _profileService;
     private readonly IAuthService _authService;
     private readonly IQueuePopupService _popupService;
+    private readonly IQueueRealtimeService _realtimeService;
 
     private List<BrowseBusinessSummaryResponse> _allBusinesses = new();
     private Guid _customerId;
+
+    // Tracks which Postgres Changes filter we're currently subscribed under, so
+    // EnsureRealtimeSubscriptionAsync only tears down/reopens the socket when the scope
+    // actually changes (idle <-> queued-at-a-business), not on every refresh.
+    private string? _subscribedScopeKey;
+
+    // OnAppearingAsync and OnLoadedAsync's first LoadAsync can both race to (re)subscribe on
+    // first tab creation — serialize so they can't both mutate the single realtime channel at once.
+    private readonly SemaphoreSlim _realtimeLock = new(1, 1);
 
     public CategoryPickerPageViewModel(
         INavigationService navigationService,
@@ -46,7 +57,8 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         IBookingService bookingService,
         IProfileService profileService,
         IAuthService authService,
-        IQueuePopupService popupService)
+        IQueuePopupService popupService,
+        IQueueRealtimeService realtimeService)
         : base(navigationService, secureStorageService)
     {
         _messenger = messenger;
@@ -56,6 +68,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         _profileService = profileService;
         _authService = authService;
         _popupService = popupService;
+        _realtimeService = realtimeService;
 
         // Fody's PropertyChanged weaver raises this for every auto-property below — react to
         // search text edits here instead of hand-rolling a partial-changed hook per property.
@@ -111,14 +124,104 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         }
     }
 
+    // This page is a persistent TabbedPage child, not a pushed page — OnLoadedAsync only fires
+    // once (first tab creation) but OnAppearing/OnDisappearing fire on every tab switch, so the
+    // realtime subscription lives here, symmetric with the teardown below.
+    public override async Task OnAppearingAsync()
+    {
+        await base.OnAppearingAsync();
+        try
+        {
+            if (_customerId == Guid.Empty)
+            {
+                var userId = await _authService.GetUserIdAsync();
+                if (!string.IsNullOrEmpty(userId))
+                    _customerId = Guid.Parse(userId);
+            }
+
+            await EnsureRealtimeSubscriptionAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    public override async Task OnDisappearingAsync()
+    {
+        await base.OnDisappearingAsync();
+        await _realtimeLock.WaitAsync();
+        try
+        {
+            await _realtimeService.UnsubscribeAsync();
+            _subscribedScopeKey = null;
+        }
+        finally
+        {
+            _realtimeLock.Release();
+        }
+    }
+
+    // Re-subscribes only when the scope actually needs to change:
+    //  - idle: watch the customer's own rows (customer_id) so joining a queue is picked up.
+    //  - queued: watch the whole business (business_id), same scope BusinessDetailPage uses, so
+    //    position/serving updates caused by OTHER customers ahead of us are picked up too —
+    //    not just changes to our own row.
+    private async Task EnsureRealtimeSubscriptionAsync()
+    {
+        if (_customerId == Guid.Empty) return;
+
+        await _realtimeLock.WaitAsync();
+        try
+        {
+            var desiredKey = ActiveEntry is not null
+                ? $"business:{ActiveEntry.BusinessId}"
+                : $"customer:{_customerId}";
+
+            if (desiredKey == _subscribedScopeKey) return;
+
+            await _realtimeService.UnsubscribeAsync();
+
+            if (ActiveEntry is not null)
+            {
+                await _realtimeService.SubscribeAsync("business_id", ActiveEntry.BusinessId.ToString(),
+                    () => MainThread.InvokeOnMainThreadAsync(RefreshActiveEntryAsync));
+            }
+            else
+            {
+                await _realtimeService.SubscribeAsync("customer_id", _customerId.ToString(),
+                    () => MainThread.InvokeOnMainThreadAsync(RefreshActiveEntryAsync));
+            }
+
+            _subscribedScopeKey = desiredKey;
+        }
+        finally
+        {
+            _realtimeLock.Release();
+        }
+    }
+
+    private async Task RefreshActiveEntryAsync()
+    {
+        try
+        {
+            ActiveEntry = await _queueService.GetMyActiveEntryAsync();
+            OnPropertyChanged(nameof(HasActiveEntry));
+            await EnsureRealtimeSubscriptionAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
     [RelayCommand]
     private async Task LoadAsync()
     {
         IsLoading = true;
         try
         {
-            ActiveEntry = await _queueService.GetMyActiveEntryAsync();
-            OnPropertyChanged(nameof(HasActiveEntry));
+            await RefreshActiveEntryAsync();
 
             if (SelectedCategory is not null)
             {
@@ -309,8 +412,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         try
         {
             await _queueService.CancelEntryAsync(ActiveEntry.EntryId);
-            ActiveEntry = null;
-            OnPropertyChanged(nameof(HasActiveEntry));
+            await RefreshActiveEntryAsync();
         }
         catch (Exception ex)
         {

@@ -73,7 +73,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     public override async Task OnAppearingAsync()
     {
         await base.OnAppearingAsync();
-        await _realtimeService.SubscribeAsync(_businessId,
+        await _realtimeService.SubscribeAsync("business_id", _businessId.ToString(),
                 async () => await MainThread.InvokeOnMainThreadAsync(LoadQueueAsync));
         StartHeartbeat();
     }

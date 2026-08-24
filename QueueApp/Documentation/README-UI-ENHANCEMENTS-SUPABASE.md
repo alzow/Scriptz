@@ -164,7 +164,34 @@ $$;
 grant execute on function nearby_business_summary(text, text) to authenticated;
 ```
 
-## 3. Already-covered by existing RLS — no migration needed
+## 3. Live updates — no new SQL, but worth confirming
+
+The hero card is realtime now, not just refresh-on-load: `CategoryPickerPageViewModel` subscribes
+through `IQueueRealtimeService` (the same Postgres Changes mechanism `BusinessDetailPage` already
+uses), scoped dynamically —
+
+- **Idle** (not queued anywhere): subscribed to `queue_entries` filtered on `customer_id = <me>`,
+  so joining a queue from any screen is picked up immediately.
+- **Queued somewhere**: switches to `business_id = <that business>`, the same scope
+  `BusinessDetailPage` uses — deliberately business-wide rather than customer-only, so the
+  position/wait shown updates when people *ahead* of the customer are served or leave, not only
+  when the customer's own row changes.
+
+It re-evaluates which scope it needs after every change and only tears down/reopens the socket
+when the scope actually flips (idle ↔ queued), not on every event.
+
+This reuses the existing `queue_entries` Realtime publication and RLS — `queue_entries` already
+has a public read policy (§1b of the schema doc), which is what lets `BusinessDetailPage`'s
+existing business-scoped subscription work today, so the customer-scoped one needs nothing extra
+enabled. Worth a quick check in the Supabase dashboard (Database → Replication) that `queue_entries`
+is still in the `supabase_realtime` publication, since I can't verify that from here.
+
+`IQueueRealtimeService.SubscribeAsync` changed shape to support this: it now takes an explicit
+`(filterColumn, filterValue)` pair instead of a hardcoded `business_id`. All four existing
+call sites (`BusinessDetailPage` ×2, `OperatorQueuePage`, `BookingAgendaPage`) were updated to
+pass `"business_id"` explicitly — behavior for those screens is unchanged.
+
+## 4. Already-covered by existing RLS — no migration needed
 
 - **`businesses.latitude` / `longitude`** already exist (§1c of the schema doc) and are read by
   the two functions above, and by `BusinessResponse`/`BrowseBusinessSummaryResponse` on the C#
@@ -179,7 +206,7 @@ grant execute on function nearby_business_summary(text, text) to authenticated;
 - **Upcoming bookings** (`UpcomingBookingsListView`) uses `GetMyUpcomingBookingsAsync`, which
   already existed and is unchanged.
 
-## 4. Deliberately out of scope for this PR
+## 5. Deliberately out of scope for this PR
 
 - **Travel-time-aware "leave at HH:MM"**: the mockup's ring shows a wait-time countdown only —
   not adjusted for how long it'd take the customer to get there. That needs either geo distance
