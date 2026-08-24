@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.CategoryPicker"
              xmlns:helpers="clr-namespace:QueueApp.Features.CategoryPicker.Helpers"
+             xmlns:entry="clr-namespace:QueueApp.Shared.Templates.AlzowEntry"
              x:Name="Root"
              x:Class="QueueApp.Features.CategoryPicker.CategoryPickerPage"
              x:DataType="vm:CategoryPickerPageViewModel"
@@ -23,39 +24,15 @@
                                 IsResolving="{Binding IsResolvingLocation}"
                                 RefreshCommand="{Binding RefreshLocationCommand}"/>
                     </VerticalStackLayout>
-                    <Border Grid.Column="1"
-                            WidthRequest="38" HeightRequest="38"
-                            BackgroundColor="{StaticResource Surface}"
-                            Stroke="{StaticResource Line}" StrokeThickness="1"
-                            VerticalOptions="Start">
-                        <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="12"/>
-                        </Border.StrokeShape>
-                        <Label Text="🔔" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center"/>
-                    </Border>
                 </Grid>
 
                 <!-- Search -->
-                <Border BackgroundColor="{StaticResource Surface}"
-                        Stroke="{StaticResource Line}" StrokeThickness="1"
-                        HeightRequest="44"
-                        Margin="0,16,0,0"
-                        Padding="14,0">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="13"/>
-                    </Border.StrokeShape>
-                    <Grid ColumnDefinitions="Auto,*">
-                        <Label Grid.Column="0" Text="🔍" FontSize="13" VerticalOptions="Center" Margin="0,0,10,0"/>
-                        <Entry Grid.Column="1"
-                               Text="{Binding SearchText}"
-                               Placeholder="Search barbers, car washes, clinics"
-                               PlaceholderColor="{StaticResource TextMuted}"
-                               TextColor="{StaticResource TextPrimary}"
-                               FontSize="13.5"
-                               BackgroundColor="Transparent"
-                               VerticalOptions="Center"/>
-                    </Grid>
-                </Border>
+                <entry:AlzowEntry Margin="0,16,0,0"
+                        LeftEmojiIcon="🔍"
+                        EntryText="{Binding SearchText}"
+                        PlaceholderText="Search barbers, car washes, clinics"
+                        ShowClearTextButton="True"
+                        ReturnType="Search"/>
 
                 <!-- Live queue hero, or the quiet idle band -->
                 <helpers:LiveQueueHeroView Margin="0,16,0,0"

@@ -376,11 +376,17 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     [RelayCommand]
     private async Task SelectCategoryAsync(ServiceCategory category)
     {
-        if (!category.Available || category == SelectedCategory)
+        try
+        {
+            if (!category.Available || category == SelectedCategory)
             return;
-
-        SelectedCategory = category;
-        await LoadAsync();
+             throw new NotImplementedException("Navigation to category-specific business list not yet implemented.");
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+        
     }
 
     [RelayCommand]
@@ -398,7 +404,11 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
 
         try
         {
-            var navParams = new NavigationParameters { ["businessId"] = businessId.Value };
+            var navParams = new NavigationParameters
+            {
+                ["businessId"] = businessId.Value,
+                ["openedFromTabs"] = true,
+            };
             _messenger.Send(new NavigateAwayFromTabsMessage(
                 $"/NavigationPage/{NavigationPaths.BusinessDetailPage}", navParams, true));
         }

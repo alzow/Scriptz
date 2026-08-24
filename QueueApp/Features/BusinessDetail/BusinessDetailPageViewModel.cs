@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using MPowerKit;
 using MPowerKit.Navigation;
 using QueueApp.Framework.Base;
+using QueueApp.Framework.Navigation;
 using QueueApp.Services.Api.Booking;
 using QueueApp.Services.Api.Booking.Models;
 using QueueApp.Services.Api.Business;
@@ -35,6 +36,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     private readonly IQueueRealtimeService _realtimeService;
     private readonly SemaphoreSlim _loadLock = new(1, 1);
     private Guid _businessId;
+    private bool _openedFromTabs;
 
     public BusinessDetailPageViewModel(
         INavigationService navigationService,
@@ -109,7 +111,16 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.GoBackAsync();
+            if (_openedFromTabs)
+            {
+                var (ownsBusiness, mode) = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
+                var uri = MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: ownsBusiness, manageMode: mode);
+                await NavigationService.NavigateAsync(uri);
+            }
+            else
+            {
+                await NavigationService.GoBackAsync();
+            }
         }
         catch (Exception ex)
         {
@@ -126,6 +137,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             _businessId = parameters is not null && parameters.TryGetValue("businessId", out var idObj)
                 ? (Guid)idObj
                 : throw new InvalidOperationException("BusinessDetailPage requires a 'businessId' parameter.");
+            _openedFromTabs = parameters is not null && parameters.TryGetValue("openedFromTabs", out var fromTabsObj)
+                && fromTabsObj is true;
 
             IsLoading = true;
             Business = await _businessService.GetBusinessAsync(_businessId);
