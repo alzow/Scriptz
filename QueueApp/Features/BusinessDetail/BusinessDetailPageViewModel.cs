@@ -415,6 +415,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 Initials = Initials(op.DisplayName),
                 Name = op.DisplayName,
                 SubLabel = subLabel,
+                ShowSubLabel = !IsBookingMode,
                 IsOnShift = op.IsAvailable,
                 RowOpacity = op.IsAvailable ? 1 : 0.4,
             });

@@ -233,6 +233,7 @@
                                 <Label Text="{Binding Name}" HorizontalOptions="Center" Margin="0,8,0,0"
                                        Style="{StaticResource lbl12_Regular_Cream}"/>
                                 <Label Text="{Binding SubLabel}" HorizontalOptions="Center" Margin="0,2,0,0"
+                                        IsVisible="{Binding ShowSubLabel}"
                                        Style="{StaticResource lbl12_Regular_TextLight}" FontSize="10"/>
                             </VerticalStackLayout>
                         </DataTemplate>
