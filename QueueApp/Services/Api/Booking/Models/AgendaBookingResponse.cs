@@ -18,10 +18,14 @@ public partial class AgendaBookingResponse : ObservableObject
     [JsonPropertyName("operator")] public VisitOperatorRef? Operator { get; set; }
     [JsonPropertyName("service")] public VisitServiceRef? Service { get; set; }
     [JsonPropertyName("customer")] public AgendaCustomerRef? Customer { get; set; }
+    [JsonPropertyName("progress_status")] public string? ProgressStatus { get; set; }
 
     [JsonIgnore] [ObservableProperty] private bool _isConfirming;
     [JsonIgnore] [ObservableProperty] private bool _isCompleting;
     [JsonIgnore] [ObservableProperty] private bool _isCancelling;
+    [JsonIgnore] [ObservableProperty] private bool _isSavingProgress;
+
+    [JsonIgnore] public bool HasProgress => !string.IsNullOrWhiteSpace(ProgressStatus);
 
     [JsonIgnore] public string OperatorName => Operator?.DisplayName ?? "Any available";
     [JsonIgnore] public string ServiceName => Service?.Name ?? "";

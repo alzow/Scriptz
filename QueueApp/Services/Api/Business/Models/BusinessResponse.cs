@@ -31,6 +31,12 @@ public class BusinessResponse
     [JsonPropertyName("is_active")]
     public bool IsActive { get; set; }
 
+    // Multi-resource businesses (e.g. a car wash with several bays) can let the system assign the
+    // resource at the last responsible moment instead of making the customer pick one. Defaults
+    // true so every existing single-operator business is unaffected.
+    [JsonPropertyName("allow_operator_choice")]
+    public bool AllowOperatorChoice { get; set; } = true;
+
     [JsonPropertyName("last_seen_at")]
     public DateTime? LastSeenAt { get; set; }
 

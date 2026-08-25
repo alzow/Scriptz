@@ -10,4 +10,7 @@ public class MyQueueStatusResponse
     [JsonPropertyName("queue_position")] public int Position { get; set; }
     [JsonPropertyName("status")] public string Status { get; set; } = string.Empty;
     [JsonPropertyName("joined_at")] public DateTime JoinedAt { get; set; }
+    [JsonPropertyName("progress_status")] public string? ProgressStatus { get; set; }
+
+    [JsonIgnore] public bool HasProgress => !string.IsNullOrWhiteSpace(ProgressStatus);
 }

@@ -8,6 +8,7 @@ public class UpcomingBookingBusinessRef
     [JsonPropertyName("id")] public Guid Id { get; set; }
     [JsonPropertyName("name")] public string Name { get; set; } = "";
     [JsonPropertyName("category")] public string Category { get; set; } = "other";
+    [JsonPropertyName("allow_operator_choice")] public bool AllowOperatorChoice { get; set; } = true;
 }
 
 public class UpcomingBookingResponse
@@ -19,6 +20,7 @@ public class UpcomingBookingResponse
     [JsonPropertyName("business")] public UpcomingBookingBusinessRef? Business { get; set; }
     [JsonPropertyName("operator")] public VisitOperatorRef? Operator { get; set; }
     [JsonPropertyName("service")] public VisitServiceRef? Service { get; set; }
+    [JsonPropertyName("progress_status")] public string? ProgressStatus { get; set; }
 
     [JsonIgnore] public bool IsCancelling { get; set; }
 
@@ -27,6 +29,14 @@ public class UpcomingBookingResponse
     [JsonIgnore] public string OperatorName => Operator?.DisplayName ?? "Any available";
     [JsonIgnore] public string ServiceName => Service?.Name ?? "";
     [JsonIgnore] public string Category => Business?.Category ?? "other";
+    [JsonIgnore] public bool HasProgress => !string.IsNullOrWhiteSpace(ProgressStatus);
+
+    // "with Bay 3" reads as useful detail at a barbershop, noise at a car wash the customer never
+    // got to choose a bay at — omit the operator clause entirely for pooled businesses.
+    [JsonIgnore]
+    public string ScheduleText => Business?.AllowOperatorChoice == false
+        ? $"{TimeText} · {ServiceName}"
+        : $"{TimeText} · {ServiceName} with {OperatorName}";
 
     [JsonIgnore]
     private DateTimeOffset LocalStart => StartsAt.ToOffset(TimeSpan.FromHours(2));

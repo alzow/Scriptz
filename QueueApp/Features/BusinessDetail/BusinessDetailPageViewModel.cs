@@ -19,6 +19,7 @@ using QueueApp.Services.Api.Queue.Models;
 using QueueApp.Services.Api.ServiceOfferings;
 using QueueApp.Services.Api.ServiceOfferings.Models;
 using QueueApp.Services.Auth;
+using QueueApp.Services.Popup;
 using QueueApp.Services.Realtime;
 using QueueApp.Services.Storage;
 using Refit;
@@ -35,6 +36,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     private readonly IProfileService _profileService;
     private readonly IAuthService _authService;
     private readonly IQueueRealtimeService _realtimeService;
+    private readonly IQueuePopupService _popupService;
     private readonly SemaphoreSlim _loadLock = new(1, 1);
     private Guid _businessId;
     private bool _openedFromTabs;
@@ -49,7 +51,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         IBookingService bookingService,
         IProfileService profileService,
         IAuthService authService,
-        IQueueRealtimeService realtimeService)
+        IQueueRealtimeService realtimeService,
+        IQueuePopupService popupService)
         : base(navigationService, secureStorageService)
     {
         _businessService = businessService;
@@ -60,6 +63,15 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         _profileService = profileService;
         _authService = authService;
         _realtimeService = realtimeService;
+        _popupService = popupService;
+    }
+
+    // Base HandleExceptionAsync only logs — surface real failures to the customer instead, most
+    // notably a pooled join/booking race ("all resources are currently busy", "that time was
+    // just taken") — those are normal operational states, not faults, and deserve to be seen.
+    protected override Task HandleExceptionAsync(Exception exception)
+    {
+        return _popupService.ShowAlertAsync("Couldn't do that", GetFriendlyErrorMessage(exception));
     }
 
     // --- Queue-mode state ---
@@ -74,23 +86,39 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     public bool IsLoading { get; set; }
     public bool IsLeaving { get; set; }
 
+    // Multi-resource businesses (e.g. a car wash with several bays) can let the system assign the
+    // resource itself instead of making the customer pick one — allow_operator_choice only
+    // changes what the customer sees; Manage-side columns/Serve/Done are unaffected either way.
+    public bool AllowOperatorChoice => Business?.AllowOperatorChoice ?? true;
+    public bool ShowOperatorList => IsQueueMode && AllowOperatorChoice && !IsInQueue;
+    public bool ShowPooledJoin => IsQueueMode && !AllowOperatorChoice && !IsInQueue;
+
+    // Pooled businesses show one combined figure instead of per-operator rows.
+    public int PooledWaitingCount => QueueSummary.Sum(r => r.WaitingCount);
+    public double PooledWaitMinutes => QueueSummary.Count > 0
+        ? QueueSummary.Min(r => r.NewJoinWaitMinutes) // soonest-free resource sets the real wait
+        : 0;
+
     // --- Queue-mode join (service picker) state ---
     public ObservableCollection<ServiceResponse> QueueServices { get; } = new();
     public ServiceResponse? SelectedQueueService { get; set; }
     public bool IsQueueServicesEmpty => QueueServices.Count == 0;
     public bool ShowQueueServicePicker { get; set; }
     public QueueSummaryRow? PendingJoinRow { get; set; }
+    public bool IsPooledJoinPending { get; set; }
     public bool IsJoining { get; set; }
 
     // --- Booking-mode state ---
     public ObservableCollection<OperatorResponse> Operators { get; } = new();
     public OperatorResponse? SelectedOperator { get; set; }
-    public bool ShowOperatorPicker => IsBookingMode && Operators.Count > 1;
+    public bool ShowOperatorPicker => IsBookingMode && AllowOperatorChoice && Operators.Count > 1;
     public bool IsNoOperatorsAvailable => IsBookingMode && Operators.Count == 0;
 
     public ObservableCollection<ServiceResponse> Services { get; } = new();
     public ServiceResponse? SelectedService { get; set; }
-    public bool ShowServiceSection => IsBookingMode && SelectedOperator is not null;
+
+    // Pooled businesses don't wait on an operator pick that's never coming.
+    public bool ShowServiceSection => IsBookingMode && (!AllowOperatorChoice || SelectedOperator is not null);
     public bool IsServicesEmpty => ShowServiceSection && Services.Count == 0;
 
     public List<DateTime> DateOptions { get; } =
@@ -261,6 +289,12 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 QueueSummary.Clear();
                 foreach (var row in rows)
                     QueueSummary.Add(row);
+
+                // LINQ over QueueSummary, not a direct property read — Fody's dependency
+                // detection can't see through that, so these need an explicit nudge (same as
+                // every other collection-derived computed property in this file).
+                OnPropertyChanged(nameof(PooledWaitingCount));
+                OnPropertyChanged(nameof(PooledWaitMinutes));
             });
         }
         finally
@@ -282,6 +316,18 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     {
         if (row is null) return;
         PendingJoinRow = row;
+        IsPooledJoinPending = false;
+        SelectedQueueService = null;
+        ShowQueueServicePicker = true;
+    }
+
+    // Pooled businesses have no per-operator rows to pick from — join with "any available"
+    // (null operator) and let start_serving assign a real resource later.
+    [RelayCommand]
+    private void RequestPooledJoin()
+    {
+        PendingJoinRow = null;
+        IsPooledJoinPending = true;
         SelectedQueueService = null;
         ShowQueueServicePicker = true;
     }
@@ -292,11 +338,11 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     [RelayCommand]
     private async Task ConfirmJoinAsync()
     {
-        if (PendingJoinRow is null || SelectedQueueService is null) return;
+        if ((PendingJoinRow is null && !IsPooledJoinPending) || SelectedQueueService is null) return;
 
         var row = PendingJoinRow;
         IsJoining = true;
-        row.IsJoining = true;
+        if (row is not null) row.IsJoining = true;
         try
         {
             var userId = await _authService.GetUserIdAsync();
@@ -304,12 +350,14 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 throw new InvalidOperationException("No signed-in user id — should never happen post-splash-gate.");
 
             var customerName = await _profileService.GetMyDisplayNameAsync(Guid.Parse(userId));
+            var operatorId = IsPooledJoinPending ? null : row?.OperatorId;
             await _queueService.JoinQueueAsync(
-                _businessId, row.OperatorId, Guid.Parse(userId), customerName, SelectedQueueService.Id);
+                _businessId, operatorId, Guid.Parse(userId), customerName, SelectedQueueService.Id);
 
             ShowQueueServicePicker = false;
             SelectedQueueService = null;
             PendingJoinRow = null;
+            IsPooledJoinPending = false;
 
             await RefreshQueueAsync();
             await RefreshMyStatusAsync();
@@ -321,7 +369,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         finally
         {
             IsJoining = false;
-            row.IsJoining = false;
+            if (row is not null) row.IsJoining = false;
         }
     }
 
@@ -371,13 +419,16 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
 
     private async Task LoadSlotsAsync()
     {
-        if (SelectedOperator is null || SelectedService is null || SelectedDate is null) return;
+        if (SelectedService is null || SelectedDate is null) return;
+        if (AllowOperatorChoice && SelectedOperator is null) return;
 
         IsLoadingSlots = true;
         try
         {
-            var slots = await _bookingService.GetAvailableSlotsAsync(
-                SelectedOperator.Id, SelectedService.Id, SelectedDate.Value);
+            var slots = AllowOperatorChoice
+                ? await _bookingService.GetAvailableSlotsAsync(SelectedOperator!.Id, SelectedService.Id, SelectedDate.Value)
+                : await _bookingService.GetAvailableSlotsAnyAsync(_businessId, SelectedService.Id, SelectedDate.Value);
+
             Slots.Clear();
             foreach (var s in slots)
                 Slots.Add(s);
@@ -399,7 +450,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     [RelayCommand]
     private async Task ConfirmBookingAsync()
     {
-        if (SelectedOperator is null || SelectedService is null || SelectedSlot is null) return;
+        if (SelectedService is null || SelectedSlot is null) return;
+        if (AllowOperatorChoice && SelectedOperator is null) return;
 
         IsConfirmingBooking = true;
         try
@@ -408,14 +460,28 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             if (string.IsNullOrEmpty(userId))
                 throw new InvalidOperationException("No signed-in user id — should never happen post-splash-gate.");
 
-            var booking = await _bookingService.CreateBookingAsync(new CreateBookingRequest
-            {
-                BusinessId = _businessId,
-                OperatorId = SelectedOperator.Id,
-                ServiceId = SelectedService.Id,
-                CustomerId = Guid.Parse(userId),
-                StartsAt = SelectedSlot.SlotStart,
-            });
+            var booking = AllowOperatorChoice
+                ? await _bookingService.CreateBookingAsync(new CreateBookingRequest
+                  {
+                      BusinessId = _businessId,
+                      OperatorId = SelectedOperator!.Id,
+                      ServiceId = SelectedService.Id,
+                      CustomerId = Guid.Parse(userId),
+                      StartsAt = SelectedSlot.SlotStart,
+                  })
+                : await _bookingService.CreateBookingAnyAsync(new CreateBookingAnyRequest
+                  {
+                      BusinessId = _businessId,
+                      ServiceId = SelectedService.Id,
+                      CustomerId = Guid.Parse(userId),
+                      StartsAt = SelectedSlot.SlotStart,
+                  });
+
+            // Pooled path: the customer never picked one, so look up whichever resource the
+            // server actually assigned for the confirmation/history display.
+            var assignedOperatorName = AllowOperatorChoice
+                ? SelectedOperator!.DisplayName
+                : Operators.FirstOrDefault(o => o.Id == booking.OperatorId)?.DisplayName ?? "Any available";
 
             MyBookings.Insert(0, new MyBookingSummaryResponse
             {
@@ -423,14 +489,14 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 StartsAt = booking.StartsAt,
                 EndsAt = booking.EndsAt,
                 Status = booking.Status,
-                Operator = new VisitOperatorRef { DisplayName = SelectedOperator.DisplayName },
+                Operator = new VisitOperatorRef { DisplayName = assignedOperatorName },
                 Service = new VisitServiceRef { Name = SelectedService.Name },
             });
             if (MyBookings.Count > 5)
                 MyBookings.RemoveAt(MyBookings.Count - 1);
             OnPropertyChanged(nameof(ShowBookingHistory));
 
-            ConfirmedOperatorName = SelectedOperator.DisplayName;
+            ConfirmedOperatorName = assignedOperatorName;
             ConfirmedServiceName = SelectedService.Name;
             ConfirmedDateDisplay = SelectedSlot.SlotStart.ToOffset(TimeSpan.FromHours(2)).ToString("ddd d MMM");
             ConfirmedTimeDisplay = SelectedSlot.TimeDisplay;

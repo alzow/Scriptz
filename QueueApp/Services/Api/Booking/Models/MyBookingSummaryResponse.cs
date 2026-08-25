@@ -11,11 +11,13 @@ public class MyBookingSummaryResponse
     [JsonPropertyName("status")] public string Status { get; set; } = "";
     [JsonPropertyName("operator")] public VisitOperatorRef? Operator { get; set; }
     [JsonPropertyName("service")] public VisitServiceRef? Service { get; set; }
+    [JsonPropertyName("progress_status")] public string? ProgressStatus { get; set; }
 
     [JsonIgnore] public bool IsCancelling { get; set; }
 
     [JsonIgnore] public string OperatorName => Operator?.DisplayName ?? "Any available";
     [JsonIgnore] public string ServiceName => Service?.Name ?? "";
+    [JsonIgnore] public bool HasProgress => !string.IsNullOrWhiteSpace(ProgressStatus);
 
     [JsonIgnore]
     private DateTimeOffset LocalStart => StartsAt.ToOffset(TimeSpan.FromHours(2));

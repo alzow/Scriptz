@@ -242,6 +242,25 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private async Task SaveProgressAsync(QueueEntryResponse entry)
+    {
+        entry.IsSavingProgress = true;
+        try
+        {
+            await _queueService.SetQueueProgressAsync(entry.Id, entry.ProgressStatus);
+            // No manual reload — realtime picks it up, same as every other mutation on this screen.
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+        finally
+        {
+            entry.IsSavingProgress = false;
+        }
+    }
+
+    [RelayCommand]
     private async Task NoShowAsync(QueueEntryResponse entry)
     {
         entry.IsMarkingNoShow = true;
@@ -264,5 +283,14 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         {
             entry.IsMarkingNoShow = false;
         }
+    }
+
+    // Base HandleExceptionAsync only logs — this screen already has a popup service on hand
+    // (used for the no-show confirm), so use it to surface real failures, most notably
+    // start_serving's "all resources are currently busy" on a pooled business at capacity.
+    // That's a normal operational state for staff, not a fault, so it deserves to actually be seen.
+    protected override Task HandleExceptionAsync(Exception exception)
+    {
+        return _popupService.ShowAlertAsync("Couldn't do that", GetFriendlyErrorMessage(exception));
     }
 }

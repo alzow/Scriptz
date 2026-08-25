@@ -28,17 +28,11 @@
 
                         <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
                             <Label Text="{Binding BusinessName}" Style="{StaticResource lbl15_Bold_TextDark}"/>
-                            <Label Style="{StaticResource lbl12_Regular_TextLight}">
-                                <Label.FormattedText>
-                                    <FormattedString>
-                                        <Span Text="{Binding TimeText}"/>
-                                        <Span Text=" · "/>
-                                        <Span Text="{Binding ServiceName}"/>
-                                        <Span Text=" with "/>
-                                        <Span Text="{Binding OperatorName}"/>
-                                    </FormattedString>
-                                </Label.FormattedText>
-                            </Label>
+                            <Label Text="{Binding ScheduleText}" Style="{StaticResource lbl12_Regular_TextLight}"/>
+                            <Label Text="{Binding ProgressStatus}"
+                                   IsVisible="{Binding HasProgress}"
+                                   FontFamily="RobotoMedium" FontSize="11.5"
+                                   TextColor="{StaticResource Green}"/>
                         </VerticalStackLayout>
 
                         <VerticalStackLayout Grid.Column="2" Spacing="6" HorizontalOptions="End">

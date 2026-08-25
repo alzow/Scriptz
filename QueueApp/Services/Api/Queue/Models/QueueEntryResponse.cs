@@ -13,8 +13,12 @@ public partial class QueueEntryResponse : ObservableObject
     [JsonPropertyName("customer_name")] public string? CustomerName { get; set; }
     [JsonPropertyName("status")] public string Status { get; set; } = "waiting";
     [JsonPropertyName("joined_at")] public DateTime JoinedAt { get; set; }
+    [JsonPropertyName("progress_status")] public string? ProgressStatus { get; set; }
+
+    [JsonIgnore] public bool HasProgress => !string.IsNullOrWhiteSpace(ProgressStatus);
 
     [JsonIgnore] [ObservableProperty] private bool _isServing;
     [JsonIgnore] [ObservableProperty] private bool _isCompleting;
     [JsonIgnore] [ObservableProperty] private bool _isMarkingNoShow;
+    [JsonIgnore] [ObservableProperty] private bool _isSavingProgress;
 }

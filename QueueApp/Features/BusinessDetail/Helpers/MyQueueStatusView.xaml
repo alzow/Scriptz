@@ -18,6 +18,12 @@
             </Label.FormattedText>
         </Label>
 
+        <!-- Optional staff-entered note — "finishing interior", etc. Quiet, never blocks anything -->
+        <Label Text="{Binding MyStatus.ProgressStatus, Source={x:Reference Root}}"
+               Style="{StaticResource lbl14_Regular_TextDark}"
+               TextColor="{StaticResource Green}"
+               IsVisible="{Binding MyStatus.HasProgress, Source={x:Reference Root}}"/>
+
         <!-- Still waiting — the position/wait estimate as before -->
         <VerticalStackLayout IsVisible="{Binding IsBeingServed, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}">
             <Label Style="{StaticResource lbl18_Bold_TextDark}">

@@ -50,6 +50,10 @@
                             </FormattedString>
                         </Label.FormattedText>
                     </Label>
+                    <Label Text="{Binding ActiveEntry.ProgressStatus, Source={x:Reference Root}}"
+                           Style="{StaticResource lbl13_Regular_TextLight}"
+                           TextColor="{StaticResource Green}"
+                           IsVisible="{Binding ActiveEntry.HasProgress, Source={x:Reference Root}}"/>
                     <Label Style="{StaticResource lbl18_Bold_TextDark}"
                            IsVisible="{Binding ActiveEntry.IsBeingServed, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}">
                         <Label.FormattedText>

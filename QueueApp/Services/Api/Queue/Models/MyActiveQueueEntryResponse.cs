@@ -18,6 +18,8 @@ public class MyActiveQueueEntryResponse
     [JsonPropertyName("status")] public string Status { get; set; } = string.Empty;
     [JsonPropertyName("joined_at")] public DateTime JoinedAt { get; set; }
     [JsonPropertyName("wait_minutes")] public decimal? WaitMinutes { get; set; }
+    [JsonPropertyName("progress_status")] public string? ProgressStatus { get; set; }
 
     [JsonIgnore] public bool IsBeingServed => Status == "serving";
+    [JsonIgnore] public bool HasProgress => !string.IsNullOrWhiteSpace(ProgressStatus);
 }
