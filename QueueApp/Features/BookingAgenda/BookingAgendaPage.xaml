@@ -84,16 +84,19 @@
                                 </Label>
                                 <HorizontalStackLayout Spacing="8">
                                     <controls:AlzowLoadingButton Text="Confirm" IsVisible="{Binding CanConfirm}"
+                                            LoadingText="Confirming…"
                                             Margin="0" HeightRequest="44"
                                             Command="{Binding BindingContext.ConfirmCommand, Source={x:Reference Root}}"
                                             CommandParameter="{Binding .}" IsLoading="{Binding IsConfirming}"
                                             ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
                                     <controls:AlzowLoadingButton Text="Complete" IsVisible="{Binding CanComplete}"
+                                            LoadingText="Completing…"
                                             Margin="0" HeightRequest="44"
                                             Command="{Binding BindingContext.CompleteCommand, Source={x:Reference Root}}"
                                             CommandParameter="{Binding .}" IsLoading="{Binding IsCompleting}"
                                             ButtonStyle="{StaticResource SecondaryButtonStyle}"/>
                                     <controls:AlzowLoadingButton Text="Cancel" IsVisible="{Binding CanCancel}"
+                                            LoadingText="Cancelling…"
                                             Margin="0" HeightRequest="44"
                                             Command="{Binding BindingContext.CancelCommand, Source={x:Reference Root}}"
                                             CommandParameter="{Binding .}" IsLoading="{Binding IsCancelling}"

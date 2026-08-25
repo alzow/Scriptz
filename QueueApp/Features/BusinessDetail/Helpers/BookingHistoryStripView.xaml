@@ -29,6 +29,7 @@
                             </VerticalStackLayout>
                             <controls:AlzowLoadingButton Grid.Column="1"
                                     Text="Cancel"
+                                    LoadingText="Cancelling…"
                                     IsVisible="{Binding IsCancellable}"
                                     Command="{Binding CancelCommand, Source={x:Reference Root}}"
                                     CommandParameter="{Binding .}"

@@ -16,6 +16,7 @@
                                        BackCommand="{Binding GoBackCommand}"/>
 
         <controls:AlzowLoadingButton Grid.Row="1" Text="+ Add staff member"
+                LoadingText="Adding…"
                 Margin="16" HeightRequest="56"
                 Command="{Binding AddOperatorCommand}"
                 IsLoading="{Binding IsAddingOperator}">
@@ -45,6 +46,7 @@
                                 </VerticalStackLayout>
                                 <controls:AlzowLoadingButton Grid.Column="1"
                                         Text="{Binding IsActive, Converter={StaticResource ActiveToLabelConverter}}"
+                                        LoadingText="Updating…"
                                         Margin="0" HeightRequest="44"
                                         Command="{Binding BindingContext.ToggleActiveCommand, Source={x:Reference Root}}"
                                         CommandParameter="{Binding .}"

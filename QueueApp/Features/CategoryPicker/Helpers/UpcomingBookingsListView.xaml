@@ -59,6 +59,7 @@
                             </Border>
                             <controls:AlzowLoadingButton
                                     Text="Cancel"
+                                    LoadingText="Cancelling…"
                                     IsVisible="{Binding IsCancellable}"
                                     Command="{Binding BindingContext.CancelCommand, Source={x:Reference Root}}"
                                     CommandParameter="{Binding .}"

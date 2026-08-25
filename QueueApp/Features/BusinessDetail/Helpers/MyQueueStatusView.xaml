@@ -43,6 +43,7 @@
 
         <controls:AlzowLoadingButton
             Text="Leave queue"
+            LoadingText="Leaving…"
             Command="{Binding LeaveCommand, Source={x:Reference Root}}"
             IsLoading="{Binding IsLeaving, Source={x:Reference Root}}"
             IsVisible="{Binding IsBeingServed, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}"

@@ -83,6 +83,7 @@
                         Command="{Binding DirectionsCommand, Source={x:Reference Root}}"/>
                 <controls:AlzowLoadingButton Grid.Column="1"
                         Text="Leave queue"
+                        LoadingText="Leaving…"
                         ButtonStyle="{StaticResource TertiaryButtonStyle}"
                         Command="{Binding LeaveCommand, Source={x:Reference Root}}"
                         IsLoading="{Binding IsLeaving, Source={x:Reference Root}}"/>

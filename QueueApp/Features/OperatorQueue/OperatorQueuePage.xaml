@@ -46,6 +46,7 @@
 
                                 <controls:AlzowLoadingButton Grid.Row="2"
                                         Text="+ Add walk-in"
+                                        LoadingText="Adding…"
                                         Margin="0" HeightRequest="56"
                                         Command="{Binding BindingContext.AddWalkInCommand, Source={x:Reference Root}}"
                                         CommandParameter="{Binding Operator}"
@@ -63,6 +64,7 @@
                                             <Label Text="{Binding Serving.CustomerName}" Style="{StaticResource lbl16_Regular_TextDark}"/>
                                         </VerticalStackLayout>
                                         <controls:AlzowLoadingButton Grid.Column="1" Text="Done"
+                                                LoadingText="Completing…"
                                                 Margin="0" HeightRequest="44"
                                                 Command="{Binding BindingContext.DoneCommand, Source={x:Reference Root}}"
                                                 CommandParameter="{Binding Serving}"
@@ -88,12 +90,14 @@
                                                            VerticalOptions="Center"
                                                            Style="{StaticResource lbl16_Regular_TextDark}"/>
                                                     <controls:AlzowLoadingButton Grid.Column="1" Text="Serve"
+                                                            LoadingText="Serving…"
                                                             Margin="0" HeightRequest="44"
                                                             Command="{Binding BindingContext.ServeCommand, Source={x:Reference Root}}"
                                                             CommandParameter="{Binding .}"
                                                             IsLoading="{Binding IsServing}"
                                                             ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
                                                     <controls:AlzowLoadingButton Grid.Column="2" Text="Done"
+                                                            LoadingText="Completing…"
                                                             Margin="0" HeightRequest="44"
                                                             Command="{Binding BindingContext.DoneCommand, Source={x:Reference Root}}"
                                                             CommandParameter="{Binding .}"

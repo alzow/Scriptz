@@ -111,6 +111,7 @@
 
                     <!-- Create Account button -->
                     <controls:AlzowLoadingButton Text="Create Account →"
+                            LoadingText="Creating account…"
                             Command="{Binding RegisterCommand}"
                             IsLoading="{Binding IsSigningUp}"
                             HeightRequest="54"

@@ -41,6 +41,7 @@
                                 </VerticalStackLayout>
                                 <controls:AlzowLoadingButton Grid.Column="1"
                                         Text="Cancel"
+                                        LoadingText="Cancelling…"
                                         IsVisible="{Binding IsCancellable}"
                                         Command="{Binding CancelUpcomingBookingCommand, Source={RelativeSource AncestorType={x:Type vm:HistoryPageViewModel}}}"
                                         CommandParameter="{Binding .}"

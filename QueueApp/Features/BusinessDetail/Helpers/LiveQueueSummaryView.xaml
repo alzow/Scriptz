@@ -30,6 +30,7 @@
                         <controls:AlzowLoadingButton
                             Grid.Column="1"
                             Text="Join"
+                            LoadingText="Joining…"
                             Command="{Binding JoinCommand, Source={x:Reference Root}}"
                             CommandParameter="{Binding .}"
                             IsLoading="{Binding IsJoining}"

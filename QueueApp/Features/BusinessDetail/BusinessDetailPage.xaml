@@ -83,6 +83,7 @@
 
                     <controls:AlzowLoadingButton
                         Text="Confirm booking"
+                        LoadingText="Confirming…"
                         Command="{Binding ConfirmBookingCommand}"
                         IsLoading="{Binding IsConfirmingBooking}"
                         IsEnabled="{Binding SelectedSlot, Converter={StaticResource IsNotNullConverter}}"

@@ -31,6 +31,7 @@
 
             <controls:AlzowLoadingButton
                     Text="{Binding HasLocation, Converter={StaticResource BoolToTextConverter}, ConverterParameter='Update my current location|Use my current location'}"
+                    LoadingText="Capturing location…"
                     Command="{Binding CaptureLocationCommand}"
                     IsLoading="{Binding IsCapturing}"
                     ButtonStyle="{StaticResource PrimaryButtonStyle}"/>

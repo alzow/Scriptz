@@ -24,6 +24,9 @@ public partial class AlzowLoadingButton : ContentView
     public static readonly BindableProperty DisplayTextProperty = BindableProperty.Create(
         nameof(DisplayText), typeof(string), typeof(AlzowLoadingButton), default(string));
 
+    public static readonly BindableProperty LoadingTextProperty = BindableProperty.Create(
+        nameof(LoadingText), typeof(string), typeof(AlzowLoadingButton), default(string));
+
     public static readonly BindableProperty ButtonStyleProperty = BindableProperty.Create(
         nameof(ButtonStyle), typeof(Style), typeof(AlzowLoadingButton), null);
 
@@ -86,6 +89,12 @@ public partial class AlzowLoadingButton : ContentView
     {
         get => (string)GetValue(DisplayTextProperty);
         private set => SetValue(DisplayTextProperty, value);
+    }
+
+    public string LoadingText
+    {
+        get => (string)GetValue(LoadingTextProperty);
+        set => SetValue(LoadingTextProperty, value);
     }
 
     public Style ButtonStyle

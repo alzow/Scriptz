@@ -35,6 +35,7 @@
                                                IsVisible="{Binding HasReason}"/>
                                     </VerticalStackLayout>
                                     <controls:AlzowLoadingButton Grid.Column="1" Text="Remove"
+                                            LoadingText="Removing…"
                                             Command="{Binding BindingContext.DeleteBlockCommand, Source={x:Reference Root}}"
                                             CommandParameter="{Binding .}"
                                             IsLoading="{Binding IsDeleting}"

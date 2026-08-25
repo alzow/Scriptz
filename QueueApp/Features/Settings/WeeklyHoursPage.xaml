@@ -38,6 +38,7 @@
                                                        Style="{StaticResource lbl14_Regular_TextDark}"
                                                        VerticalOptions="Center"/>
                                                 <controls:AlzowLoadingButton Grid.Column="1" Text="Remove"
+                                                        LoadingText="Removing…"
                                                         Command="{Binding BindingContext.DeleteWindowCommand, Source={x:Reference Root}}"
                                                         CommandParameter="{Binding .}"
                                                         IsLoading="{Binding IsDeleting}"

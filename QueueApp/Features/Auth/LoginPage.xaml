@@ -58,6 +58,7 @@
 
                     <!-- Sign In button -->
                     <controls:AlzowLoadingButton Text="Sign In →"
+                            LoadingText="Signing in…"
                             Command="{Binding LoginCommand}"
                             IsLoading="{Binding IsSigningIn}"
                             HeightRequest="54"

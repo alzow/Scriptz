@@ -22,15 +22,25 @@
             Margin="{Binding Source={x:Reference LoadingButton}, Path=Margin}"
             VerticalOptions="Fill"
             HorizontalOptions="Fill">
-            <StackLayout VerticalOptions="Center"
-                    HorizontalOptions="Center">
+            <HorizontalStackLayout VerticalOptions="Center"
+                    HorizontalOptions="Center"
+                    Spacing="8">
                 <ActivityIndicator
                     HorizontalOptions="Center"
+                    WidthRequest="20"
+                    HeightRequest="20"
                     IsRunning="{Binding Source={x:Reference LoadingButton}, Path=IsLoading}"
                     IsVisible="{Binding Source={x:Reference LoadingButton}, Path=IsLoading}"
-                    Color="{StaticResource White}"
+                    Color="{Binding Source={x:Reference Button}, Path=TextColor}"
                     VerticalOptions="Center"/>
-            </StackLayout>
+                <Label
+                    Text="{Binding Source={x:Reference LoadingButton}, Path=LoadingText}"
+                    IsVisible="{Binding Source={x:Reference LoadingButton}, Path=LoadingText, Converter={StaticResource IsNotNullOrEmptyConverter}}"
+                    TextColor="{Binding Source={x:Reference Button}, Path=TextColor}"
+                    FontFamily="{Binding Source={x:Reference Button}, Path=FontFamily}"
+                    FontSize="{Binding Source={x:Reference Button}, Path=FontSize}"
+                    VerticalOptions="Center"/>
+            </HorizontalStackLayout>
         </Grid>
     </Grid>
 </ContentView>
