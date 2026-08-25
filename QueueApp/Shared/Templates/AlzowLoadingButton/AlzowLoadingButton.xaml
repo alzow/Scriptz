@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Name="LoadingButton"
+             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
+             x:Class="QueueApp.Shared.Templates.QueueLoadingButton.AlzowLoadingButton">
+    <Grid>
+        <Button
+            x:Name="Button"
+            Style="{Binding Source={x:Reference LoadingButton}, Path=ButtonStyle, TargetNullValue={StaticResource PrimaryButtonStyle}}"
+            IsEnabled="{Binding Source={x:Reference LoadingButton}, Path=IsEnabled}"
+            Margin="{Binding Source={x:Reference LoadingButton}, Path=Margin}"
+            Clicked="OnButtonClicked">
+            <Button.Text>
+                <Binding Source="{x:Reference LoadingButton}"
+                        Path="DisplayText"/>
+            </Button.Text>
+        </Button>
+        <Grid
+            IsVisible="{Binding Source={x:Reference LoadingButton}, Path=IsLoading}"
+            BackgroundColor="Transparent"
+            Margin="{Binding Source={x:Reference LoadingButton}, Path=Margin}"
+            VerticalOptions="Fill"
+            HorizontalOptions="Fill">
+            <HorizontalStackLayout VerticalOptions="Center"
+                    HorizontalOptions="Center"
+                    Spacing="8">
+                <ActivityIndicator
+                    HorizontalOptions="Center"
+                    WidthRequest="20"
+                    HeightRequest="20"
+                    IsRunning="{Binding Source={x:Reference LoadingButton}, Path=IsLoading}"
+                    IsVisible="{Binding Source={x:Reference LoadingButton}, Path=IsLoading}"
+                    Color="{Binding Source={x:Reference Button}, Path=TextColor}"
+                    VerticalOptions="Center"/>
+                <Label
+                    Text="{Binding Source={x:Reference LoadingButton}, Path=LoadingText}"
+                    IsVisible="{Binding Source={x:Reference LoadingButton}, Path=LoadingText, Converter={StaticResource IsNotNullOrEmptyConverter}}"
+                    TextColor="{Binding Source={x:Reference Button}, Path=TextColor}"
+                    FontFamily="{Binding Source={x:Reference Button}, Path=FontFamily}"
+                    FontSize="{Binding Source={x:Reference Button}, Path=FontSize}"
+                    VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+        </Grid>
+    </Grid>
+</ContentView>

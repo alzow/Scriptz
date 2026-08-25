@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:QueueApp.Features.Auth"
+             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
+             x:Class="QueueApp.Features.Auth.RegisterPage"
+             x:DataType="vm:RegisterPageViewModel"
+             Style="{StaticResource NavigationPageStyle}">
+
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Spacing="0">
+
+                <!-- Brown Header -->
+                <Grid BackgroundColor="{StaticResource Brown}"
+                      Padding="24,52,24,36">
+                    <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                        <Border Style="{StaticResource brd14_Orange}"
+                                WidthRequest="44" HeightRequest="44">
+                            <Image Source="logo_monogram_reversed"
+                                   WidthRequest="24" HeightRequest="24"
+                                   HorizontalOptions="Center" VerticalOptions="Center"/>
+                        </Border>
+                        <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                            <Label Text="Create account"
+                                   Style="{StaticResource lbl22_Bold_Cream}"/>
+                            <Label Text="Join Queue today"
+                                   Style="{StaticResource lbl13_Regular_BrownLight}"/>
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                </Grid>
+
+                <!-- Form body -->
+                <VerticalStackLayout Padding="24,32,24,24" Spacing="16">
+
+                    <!-- First Name -->
+                    <VerticalStackLayout Spacing="7">
+                        <Label Text="FIRST NAME" Style="{StaticResource SectionTitle}"/>
+                        <Border Style="{StaticResource brd14_White}" Padding="16,0">
+                            <Entry Placeholder="Ahmed"
+                                   Text="{Binding FirstName}"
+                                   HeightRequest="52"
+                                   TextColor="{StaticResource TextDark}"
+                                   PlaceholderColor="{StaticResource TextLight}"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Last Name -->
+                    <VerticalStackLayout Spacing="7">
+                        <Label Text="LAST NAME" Style="{StaticResource SectionTitle}"/>
+                        <Border Style="{StaticResource brd14_White}" Padding="16,0">
+                            <Entry Placeholder="Cassim"
+                                   Text="{Binding LastName}"
+                                   HeightRequest="52"
+                                   TextColor="{StaticResource TextDark}"
+                                   PlaceholderColor="{StaticResource TextLight}"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Phone Number -->
+                    <VerticalStackLayout Spacing="7">
+                        <Label Text="PHONE NUMBER" Style="{StaticResource SectionTitle}"/>
+                        <Border Style="{StaticResource brd14_White}" Padding="16,0">
+                            <Entry Placeholder="072 000 0000"
+                                   Text="{Binding PhoneNumber}"
+                                   Keyboard="Telephone"
+                                   HeightRequest="52"
+                                   TextColor="{StaticResource TextDark}"
+                                   PlaceholderColor="{StaticResource TextLight}"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Email -->
+                    <VerticalStackLayout Spacing="7">
+                        <Label Text="EMAIL" Style="{StaticResource SectionTitle}"/>
+                        <Border Style="{StaticResource brd14_White}" Padding="16,0">
+                            <Entry Placeholder="you@email.com"
+                                   Text="{Binding Email}"
+                                   Keyboard="Email"
+                                   HeightRequest="52"
+                                   TextColor="{StaticResource TextDark}"
+                                   PlaceholderColor="{StaticResource TextLight}"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Password -->
+                    <VerticalStackLayout Spacing="7">
+                        <Label Text="PASSWORD" Style="{StaticResource SectionTitle}"/>
+                        <Border Style="{StaticResource brd14_White}" Padding="16,0">
+                            <Entry Placeholder="••••••••"
+                                   Text="{Binding Password}"
+                                   IsPassword="True"
+                                   HeightRequest="52"
+                                   TextColor="{StaticResource TextDark}"
+                                   PlaceholderColor="{StaticResource TextLight}"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Confirm Password -->
+                    <VerticalStackLayout Spacing="7">
+                        <Label Text="CONFIRM PASSWORD" Style="{StaticResource SectionTitle}"/>
+                        <Border Style="{StaticResource brd14_White}" Padding="16,0">
+                            <Entry Placeholder="••••••••"
+                                   Text="{Binding ConfirmPassword}"
+                                   IsPassword="True"
+                                   HeightRequest="52"
+                                   TextColor="{StaticResource TextDark}"
+                                   PlaceholderColor="{StaticResource TextLight}"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Create Account button -->
+                    <controls:AlzowLoadingButton Text="Create Account →"
+                            LoadingText="Creating account…"
+                            Command="{Binding RegisterCommand}"
+                            IsLoading="{Binding IsSigningUp}"
+                            HeightRequest="54"
+                            Margin="0,8,0,0">
+                        <controls:AlzowLoadingButton.ButtonStyle>
+                            <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+                                <Setter Property="Padding" Value="16,12"/>
+                            </Style>
+                        </controls:AlzowLoadingButton.ButtonStyle>
+                    </controls:AlzowLoadingButton>
+
+                    <Label Text="Pay on delivery · No upfront cost"
+                           Style="{StaticResource lbl12_Regular_TextLight}"
+                           HorizontalOptions="Center"/>
+
+                    <!-- Divider -->
+                    <BoxView HeightRequest="1" BackgroundColor="{StaticResource CreamBorder}" Margin="0,8,0,8"/>
+
+                    <!-- Login link -->
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="4">
+                        <Label Text="Already have an account?"
+                               Style="{StaticResource lbl13_Regular_TextMid}"/>
+                        <Label Text="Sign In"
+                               Style="{StaticResource lbl13_Bold_Orange}">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding NavigateToLoginCommand}"/>
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </HorizontalStackLayout>
+
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentPage>

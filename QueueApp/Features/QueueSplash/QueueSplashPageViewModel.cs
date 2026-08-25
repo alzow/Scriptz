@@ -1,0 +1,57 @@
+using QueueApp.Constants;
+using QueueApp.Framework.Base;
+using QueueApp.Framework.Navigation;
+using QueueApp.Services.Api.Business;
+using QueueApp.Services.Auth;
+using QueueApp.Services.Storage;
+
+namespace QueueApp.Features.QueueSplash;
+
+public class QueueSplashPageViewModel : BaseViewModel
+{
+    private readonly INavigationService _navigationService;
+    private readonly IAuthService _authService;
+    private readonly IBusinessService _businessService;
+
+    public QueueSplashPageViewModel(
+        INavigationService navigationService,
+        ISecureStorageService secureStorageService,
+        IAuthService authService,
+        IBusinessService businessService)
+        : base(navigationService, secureStorageService)
+    {
+        _navigationService = navigationService;
+        _authService = authService;
+        _businessService = businessService;
+    }
+
+    public override async Task OnAppearingAsync()
+    {
+        await base.OnAppearingAsync();
+        await SplashOrchestration();
+    }
+
+    public async Task SplashOrchestration()
+    {
+        try
+        {
+            var isValid = await _authService.EnsureValidSessionAsync();
+
+            if (!isValid)
+            {
+                await _navigationService.NavigateAsync($"/{NavigationPaths.LoginPage}");
+                return;
+            }
+
+            var (ownsBusiness, mode) = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
+            var uri = MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: ownsBusiness, manageMode: mode);
+            await _navigationService.NavigateAsync(uri);
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+            await _navigationService.NavigateAsync($"/{NavigationPaths.LoginPage}");
+        }
+    }
+
+}

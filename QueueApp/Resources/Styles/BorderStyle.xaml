@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!--
+        Naming convention: brd{CornerRadius}_{BackgroundColor}
+        e.g. brd14_White, brd20_Brown
+    -->
+
+    <Style x:Key="brd10_White" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
+        <Setter Property="Stroke" Value="{StaticResource Line}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="10"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd12_White" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
+        <Setter Property="Stroke" Value="{StaticResource Line}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="12"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd12_Cream" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceRaised}"/>
+        <Setter Property="StrokeThickness" Value="0"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="12"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd14_White" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
+        <Setter Property="Stroke" Value="{StaticResource Line}"/>
+        <Setter Property="StrokeThickness" Value="1.5"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="14"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd14_Orange" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource Purple}"/>
+        <Setter Property="StrokeThickness" Value="0"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="14"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd16_White" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
+        <Setter Property="Stroke" Value="{StaticResource Line}"/>
+        <Setter Property="StrokeThickness" Value="1.5"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="16"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd16_OrangePale" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceRaised}"/>
+        <Setter Property="Stroke" Value="{StaticResource Purple}"/>
+        <Setter Property="StrokeThickness" Value="1.5"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="16"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd18_OrangePale" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceRaised}"/>
+        <Setter Property="Stroke" Value="{StaticResource Green}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="18"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd20_White" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
+        <Setter Property="Stroke" Value="{StaticResource Line}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="20"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd20_Brown" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceRaised}"/>
+        <Setter Property="StrokeThickness" Value="0"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="20"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

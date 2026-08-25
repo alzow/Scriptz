@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:businessModels="clr-namespace:QueueApp.Services.Api.Business.Models"
+             x:Name="Root"
+             x:Class="QueueApp.Features.CategoryPicker.Helpers.BrowseBusinessListView">
+
+    <VerticalStackLayout Spacing="0" BindableLayout.ItemsSource="{Binding Items, Source={x:Reference Root}}">
+        <BindableLayout.ItemTemplate>
+            <DataTemplate x:DataType="businessModels:BrowseBusinessSummaryResponse">
+                <Border Style="{StaticResource brd16_White}" Padding="14" Margin="0,5">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Command="{Binding OpenCommand, Source={x:Reference Root}}"
+                            CommandParameter="{Binding .}"/>
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="52,*" ColumnSpacing="13">
+                        <Border Grid.Column="0"
+                                WidthRequest="52" HeightRequest="52"
+                                StrokeThickness="1"
+                                Padding="0"
+                                VerticalOptions="Start">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="14"/>
+                            </Border.StrokeShape>
+                            <Border.BackgroundColor>
+                                <Binding Path="WaitBucket"
+                                         Converter="{StaticResource WaitBucketToColorConverter}"
+                                         ConverterParameter="#1439FF7A|#17A45EFF|#14FF3B5C|#252C39|#252C39|#252C39"/>
+                            </Border.BackgroundColor>
+                            <Border.Stroke>
+                                <Binding Path="WaitBucket"
+                                         Converter="{StaticResource WaitBucketToColorConverter}"
+                                         ConverterParameter="#39FF7A|#A45EFF|#FF3B5C|#343D4D|#343D4D|#343D4D"/>
+                            </Border.Stroke>
+                            <Image Source="{Binding CategoryIcon}"
+                                   WidthRequest="26" HeightRequest="26"
+                                   HorizontalOptions="Center" VerticalOptions="Center"/>
+                        </Border>
+
+                        <VerticalStackLayout Grid.Column="1" Spacing="3">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <Label Grid.Column="0" Text="{Binding Name}"
+                                       Style="{StaticResource lbl15_Bold_TextDark}"
+                                       LineBreakMode="TailTruncation"/>
+                                <Border Grid.Column="1"
+                                        StrokeThickness="0"
+                                        Padding="8,4"
+                                        VerticalOptions="Center">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="7"/>
+                                    </Border.StrokeShape>
+                                    <Border.BackgroundColor>
+                                        <Binding Path="WaitBucket"
+                                                 Converter="{StaticResource WaitBucketToColorConverter}"
+                                                 ConverterParameter="#2139FF7A|#26A45EFF|#21FF3B5C|#252C39|#00000000|#00000000"/>
+                                    </Border.BackgroundColor>
+                                    <Label FontFamily="RobotoBold" FontSize="10" Text="{Binding PillText}">
+                                        <Label.TextColor>
+                                            <Binding Path="WaitBucket"
+                                                     Converter="{StaticResource WaitBucketToColorConverter}"
+                                                     ConverterParameter="#39FF7A|#A45EFF|#FF3B5C|#8A8F98|#565C68|#8A8F98"/>
+                                        </Label.TextColor>
+                                    </Label>
+                                </Border>
+                            </Grid>
+
+                            <Label Text="{Binding MetaText}" Style="{StaticResource lbl12_Regular_TextLight}"/>
+
+                            <ProgressBar Progress="{Binding WaitFraction}"
+                                         HeightRequest="3"
+                                         Margin="0,2,0,0"
+                                         BackgroundColor="{StaticResource SurfaceRaised}"
+                                         IsVisible="{Binding AvgWaitMinutes, Converter={StaticResource IsNotNullConverter}}">
+                                <ProgressBar.ProgressColor>
+                                    <Binding Path="WaitBucket"
+                                             Converter="{StaticResource WaitBucketToColorConverter}"
+                                             ConverterParameter="#39FF7A|#A45EFF|#FF3B5C|#343D4D|#343D4D|#343D4D"/>
+                                </ProgressBar.ProgressColor>
+                            </ProgressBar>
+
+                            <Label Text="{Binding SubText}"
+                                   FontFamily="RobotoRegular" FontSize="10.5"
+                                   TextColor="{StaticResource TextMuted}"
+                                   Margin="0,1,0,0"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+            </DataTemplate>
+        </BindableLayout.ItemTemplate>
+    </VerticalStackLayout>
+
+</ContentView>

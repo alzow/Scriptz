@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:queueModels="clr-namespace:QueueApp.Services.Api.Queue.Models"
+             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
+             x:Name="Root"
+             x:Class="QueueApp.Features.CategoryPicker.Helpers.LiveQueueHeroView">
+
+    <!-- The one loud card on the Browse dashboard — only rendered while the customer is
+         actually queued somewhere. IdleDiscoveryBandView takes its place otherwise. -->
+    <Border Style="{StaticResource brd18_OrangePale}" Padding="0">
+        <VerticalStackLayout Spacing="0">
+
+            <!-- Kicker row -->
+            <Grid ColumnDefinitions="*,Auto" Padding="16,13,16,0">
+                <HorizontalStackLayout Grid.Column="0" Spacing="7">
+                    <Ellipse Fill="{StaticResource Green}" WidthRequest="6" HeightRequest="6" VerticalOptions="Center"/>
+                    <Label Text="YOU'RE IN THE QUEUE" Style="{StaticResource SectionTitle}" TextColor="{StaticResource Green}"/>
+                </HorizontalStackLayout>
+                <Label Grid.Column="1"
+                       Text="{Binding ActiveEntry.BusinessName, Source={x:Reference Root}}"
+                       Style="{StaticResource lbl11_Bold_TextMid}"
+                       VerticalOptions="Center"/>
+            </Grid>
+
+            <!-- Ring + copy -->
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16" Padding="16,10,16,4">
+                <Border Grid.Column="0"
+                        WidthRequest="92" HeightRequest="92"
+                        BackgroundColor="{StaticResource Surface}"
+                        Stroke="{StaticResource Green}" StrokeThickness="6"
+                        StrokeShape="Ellipse"
+                        Padding="0">
+                    <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="2">
+                        <Label x:Name="CountdownLabel"
+                               HorizontalOptions="Center"
+                               FontFamily="RobotoBold" FontSize="18"
+                               TextColor="{StaticResource TextPrimary}"/>
+                        <Label Text="TO GO" Style="{StaticResource SectionTitle}" FontSize="8" HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="6">
+                    <Label Style="{StaticResource lbl18_Bold_TextDark}"
+                           IsVisible="{Binding ActiveEntry.IsBeingServed, Source={x:Reference Root}}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="Being served by "/>
+                                <Span Text="{Binding ActiveEntry.OperatorName, Source={x:Reference Root}}"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <Label Style="{StaticResource lbl18_Bold_TextDark}"
+                           IsVisible="{Binding ActiveEntry.IsBeingServed, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="You're #"/>
+                                <Span Text="{Binding ActiveEntry.Position, Source={x:Reference Root}}"/>
+                                <Span Text=" for "/>
+                                <Span Text="{Binding ActiveEntry.OperatorName, Source={x:Reference Root}}"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <Label Style="{StaticResource lbl13_Regular_TextLight}"
+                           IsVisible="{Binding ActiveEntry.IsBeingServed, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="~"/>
+                                <Span Text="{Binding ActiveEntry.WaitMinutes, Source={x:Reference Root}}"/>
+                                <Span Text=" min estimated wait"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- Actions -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="9" Padding="16,13,16,15">
+                <Button Grid.Column="0"
+                        Text="Directions"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        HeightRequest="42"
+                        Command="{Binding DirectionsCommand, Source={x:Reference Root}}"/>
+                <controls:AlzowLoadingButton Grid.Column="1"
+                        Text="Leave queue"
+                        LoadingText="Leaving…"
+                        ButtonStyle="{StaticResource TertiaryButtonStyle}"
+                        Command="{Binding LeaveCommand, Source={x:Reference Root}}"
+                        IsLoading="{Binding IsLeaving, Source={x:Reference Root}}"/>
+            </Grid>
+        </VerticalStackLayout>
+    </Border>
+
+</ContentView>

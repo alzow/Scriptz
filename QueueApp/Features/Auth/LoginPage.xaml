@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:QueueApp.Features.Auth"
+             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
+             xmlns:entry="clr-namespace:QueueApp.Shared.Templates.QueueEntry"
+             x:Class="QueueApp.Features.Auth.LoginPage"
+             x:DataType="vm:LoginPageViewModel"
+             Style="{StaticResource NavigationPageStyle}">
+
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Spacing="0">
+
+                <!-- Brown Header -->
+                <Grid BackgroundColor="{StaticResource Brown}"
+                      Padding="24,52,24,36">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Logo row -->
+                    <HorizontalStackLayout Grid.Row="1" Spacing="12" VerticalOptions="Center">
+                        <Border Style="{StaticResource brd14_Orange}"
+                                WidthRequest="44" HeightRequest="44">
+                            <Image Source="logo_monogram_reversed"
+                                   WidthRequest="24" HeightRequest="24"
+                                   HorizontalOptions="Center" VerticalOptions="Center"/>
+                        </Border>
+                        <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                            <Label Text="Welcome back"
+                                   Style="{StaticResource lbl22_Bold_Cream}"/>
+                            <Label Text="Sign in to Queue"
+                                   Style="{StaticResource lbl13_Regular_BrownLight}"/>
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                </Grid>
+
+                <!-- Form body -->
+                <VerticalStackLayout Padding="24,32,24,24" Spacing="16">
+
+                    <!-- Email field -->
+                    <entry:QueueEntry
+                        Placeholder="Email / Phone"
+                        Text="{Binding Email}"
+                        InputType="Email"
+                        Validator="{Binding EmailValidator}"
+                        ValidateOnTextChanged="True"/>
+
+                    <!-- Password field -->
+                    <entry:QueueEntry
+                        Placeholder="Password"
+                        Text="{Binding Password}"
+                        IsPassword="True"
+                        Validator="{Binding PasswordValidator}"
+                        ValidateOnTextChanged="True"/>
+
+                    <!-- Sign In button -->
+                    <controls:AlzowLoadingButton Text="Sign In →"
+                            LoadingText="Signing in…"
+                            Command="{Binding LoginCommand}"
+                            IsLoading="{Binding IsSigningIn}"
+                            HeightRequest="54"
+                            Margin="0,8,0,0"
+                            ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
+
+                    <!-- Forgot password -->
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="4">
+                        <Label Text="Forgot password?"
+                               Style="{StaticResource lbl13_Regular_TextLight}"/>
+                        <Label Text="Reset it"
+                               Style="{StaticResource lbl13_Bold_Orange}"/>
+                    </HorizontalStackLayout>
+
+                    <!-- Divider -->
+                    <BoxView HeightRequest="1" BackgroundColor="{StaticResource CreamBorder}" Margin="0,8,0,8"/>
+
+                    <!-- Register link -->
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="4">
+                        <Label Text="New to Queue?"
+                               Style="{StaticResource lbl13_Regular_TextMid}"/>
+                        <Label Text="Create account"
+                               Style="{StaticResource lbl13_Bold_Orange}">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding NavigateToRegisterCommand}"/>
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </HorizontalStackLayout>
+
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentPage>

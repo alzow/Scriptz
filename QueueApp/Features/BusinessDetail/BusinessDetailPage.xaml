@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:QueueApp.Features.BusinessDetail"
+             xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
+             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
+             xmlns:helpers="clr-namespace:QueueApp.Features.BusinessDetail.Helpers"
+             x:Name="Root"
+             x:Class="QueueApp.Features.BusinessDetail.BusinessDetailPage"
+             x:DataType="vm:BusinessDetailPageViewModel"
+             Title="{Binding Business.Name}"
+             Style="{StaticResource NavigationPageStyle}">
+
+    <Grid RowDefinitions="Auto,*">
+        <templates:AlzowSubPageHeader Grid.Row="0"
+                                       Title="{Binding Business.Name}"
+                                       BackCommand="{Binding GoBackCommand}"/>
+
+        <ScrollView Grid.Row="1">
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <Label Text="{Binding Business.Name}" Style="{StaticResource lbl24_Bold_TextDark}"/>
+            <Label Text="{Binding Business.Address}" Style="{StaticResource lbl14_Regular_TextDark}"/>
+
+            <VerticalStackLayout Spacing="10" IsVisible="{Binding IsQueueMode}">
+
+                <!-- BROWSING: not in this queue yet -->
+                <helpers:LiveQueueSummaryView
+                    IsVisible="{Binding IsInQueue, Converter={StaticResource InvertedBoolConverter}}"
+                    QueueSummary="{Binding QueueSummary}"
+                    JoinCommand="{Binding JoinCommand}"/>
+
+                <!-- IN QUEUE: show position, not the summary list -->
+                <helpers:MyQueueStatusView
+                    IsVisible="{Binding IsInQueue}"
+                    MyStatus="{Binding MyStatus}"
+                    MyWaitMinutes="{Binding MyWaitMinutes}"
+                    IsBeingServed="{Binding IsBeingServed}"
+                    LeaveCommand="{Binding LeaveCommand}"
+                    IsLeaving="{Binding IsLeaving}"/>
+
+            </VerticalStackLayout>
+
+            <!-- BOOKING MODE — flow is always visible once loaded; the confirmation toast overlays it briefly -->
+            <Grid IsVisible="{Binding IsBookingMode}">
+
+                <VerticalStackLayout Spacing="20">
+
+                    <helpers:BookingHistoryStripView
+                        IsVisible="{Binding ShowBookingHistory}"
+                        Bookings="{Binding MyBookings}"
+                        CancelCommand="{Binding CancelBookingCommand}"/>
+
+                    <Label Text="No staff available to book with right now." IsVisible="{Binding IsNoOperatorsAvailable}"
+                           Style="{StaticResource lbl14_Regular_TextDark}"/>
+
+                    <helpers:OperatorPickerView
+                        IsSectionVisible="{Binding ShowOperatorPicker}"
+                        Operators="{Binding Operators}"
+                        SelectedOperator="{Binding SelectedOperator}"
+                        SelectCommand="{Binding SelectOperatorCommand}"/>
+
+                    <helpers:ServicePickerView
+                        IsSectionVisible="{Binding ShowServiceSection}"
+                        IsEmpty="{Binding IsServicesEmpty}"
+                        Services="{Binding Services}"
+                        SelectedService="{Binding SelectedService}"
+                        SelectCommand="{Binding SelectServiceCommand}"/>
+
+                    <helpers:DatePickerSectionView
+                        IsSectionVisible="{Binding ShowDateSection}"
+                        DateOptions="{Binding DateOptions}"
+                        SelectedDate="{Binding SelectedDate}"
+                        SelectCommand="{Binding SelectDateCommand}"/>
+
+                    <helpers:SlotPickerView
+                        IsSectionVisible="{Binding ShowSlotSection}"
+                        IsLoading="{Binding IsLoadingSlots}"
+                        IsEmpty="{Binding IsSlotsEmpty}"
+                        Slots="{Binding Slots}"
+                        SelectedSlot="{Binding SelectedSlot}"
+                        SelectCommand="{Binding SelectSlotCommand}"/>
+
+                    <controls:AlzowLoadingButton
+                        Text="Confirm booking"
+                        LoadingText="Confirming…"
+                        Command="{Binding ConfirmBookingCommand}"
+                        IsLoading="{Binding IsConfirmingBooking}"
+                        IsEnabled="{Binding SelectedSlot, Converter={StaticResource IsNotNullConverter}}"
+                        ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
+
+                </VerticalStackLayout>
+
+                <Border Style="{StaticResource brd16_White}"
+                        IsVisible="{Binding ShowConfirmationToast}"
+                        VerticalOptions="Start"
+                        Margin="16"
+                        Padding="16">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Opacity="0.15" Radius="12" Offset="0,4"/>
+                    </Border.Shadow>
+                    <helpers:BookingConfirmedView
+                        OperatorName="{Binding ConfirmedOperatorName}"
+                        ServiceName="{Binding ConfirmedServiceName}"
+                        DateDisplay="{Binding ConfirmedDateDisplay}"
+                        TimeDisplay="{Binding ConfirmedTimeDisplay}"/>
+                </Border>
+
+            </Grid>
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"/>
+
+        </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentPage>

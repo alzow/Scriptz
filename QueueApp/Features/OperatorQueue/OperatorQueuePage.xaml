@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:QueueApp.Features.OperatorQueue"
+             xmlns:responses="clr-namespace:QueueApp.Services.Api.Queue.Models"
+             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
+             x:Name="Root"
+             Title="Manage"
+             IconImageSource="icon_manage_business"
+             x:Class="QueueApp.Features.OperatorQueue.OperatorQueuePage"
+             x:DataType="vm:OperatorQueuePageViewModel"
+             Style="{StaticResource NavigationPageStyle}">
+
+    <Grid RowDefinitions="Auto,*">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="16,16,16,0">
+            <Label Grid.Column="0"
+                   Text="{Binding BusinessName}"
+                   Style="{StaticResource lbl24_Bold_TextDark}"
+                   VerticalOptions="Center"/>
+            <Image Grid.Column="1"
+                   Source="ic_settings"
+                   WidthRequest="24" HeightRequest="24"
+                   VerticalOptions="Center">
+                <Image.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenSettingsCommand}"/>
+                </Image.GestureRecognizers>
+            </Image>
+        </Grid>
+
+        <ScrollView Grid.Row="1" Orientation="Horizontal" Padding="16">
+            <CollectionView ItemsSource="{Binding Columns}"
+                             ItemsLayout="HorizontalList">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:OperatorColumn">
+                        <Border Style="{StaticResource brd16_White}"
+                                Margin="8" Padding="16" WidthRequest="300"
+                                HeightRequest="600">
+                            <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="12">
+
+                                <Label Grid.Row="0"
+                                       Text="{Binding Operator.DisplayName}"
+                                       Style="{StaticResource lbl20_Bold_TextDark}"/>
+                                <Label Grid.Row="1"
+                                       Text="{Binding Waiting.Count, StringFormat='{0} waiting'}"
+                                       Style="{StaticResource lbl13_Bold_Orange}"/>
+
+                                <controls:AlzowLoadingButton Grid.Row="2"
+                                        Text="+ Add walk-in"
+                                        LoadingText="Adding…"
+                                        Margin="0" HeightRequest="56"
+                                        Command="{Binding BindingContext.AddWalkInCommand, Source={x:Reference Root}}"
+                                        CommandParameter="{Binding Operator}"
+                                        IsLoading="{Binding IsAddingWalkIn}"
+                                        ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
+
+                                <!-- NOW SERVING -->
+                                <Border Grid.Row="3"
+                                        Style="{StaticResource brd12_Cream}"
+                                        Padding="12"
+                                        IsVisible="{Binding Serving, Converter={StaticResource IsNotNullConverter}}">
+                                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
+                                        <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                            <Label Text="Now serving" Style="{StaticResource lbl13_Bold_Orange}"/>
+                                            <Label Text="{Binding Serving.CustomerName}" Style="{StaticResource lbl16_Regular_TextDark}"/>
+                                        </VerticalStackLayout>
+                                        <controls:AlzowLoadingButton Grid.Column="1" Text="Done"
+                                                LoadingText="Completing…"
+                                                Margin="0" HeightRequest="44"
+                                                Command="{Binding BindingContext.DoneCommand, Source={x:Reference Root}}"
+                                                CommandParameter="{Binding Serving}"
+                                                IsLoading="{Binding Serving.IsCompleting}"
+                                            ButtonStyle="{StaticResource SecondaryButtonStyle}"/>
+                                        <controls:AlzowLoadingButton Grid.Column="2" Text="✕"
+                                                Margin="0" HeightRequest="44"
+                                                Command="{Binding BindingContext.NoShowCommand, Source={x:Reference Root}}"
+                                                CommandParameter="{Binding Serving}"
+                                                IsLoading="{Binding Serving.IsMarkingNoShow}"
+                                                ButtonStyle="{StaticResource DangerButtonStyle}"/>
+                                    </Grid>
+                                </Border>
+
+                                <CollectionView Grid.Row="4" ItemsSource="{Binding Waiting}">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="responses:QueueEntryResponse">
+                                            <Border Style="{StaticResource brd12_Cream}"
+                                                    Padding="12" Margin="0,4">
+                                                <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="6">
+                                                    <Label Grid.Column="0"
+                                                           Text="{Binding CustomerName}"
+                                                           VerticalOptions="Center"
+                                                           Style="{StaticResource lbl16_Regular_TextDark}"/>
+                                                    <controls:AlzowLoadingButton Grid.Column="1" Text="Serve"
+                                                            LoadingText="Serving…"
+                                                            Margin="0" HeightRequest="44"
+                                                            Command="{Binding BindingContext.ServeCommand, Source={x:Reference Root}}"
+                                                            CommandParameter="{Binding .}"
+                                                            IsLoading="{Binding IsServing}"
+                                                            ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
+                                                    <controls:AlzowLoadingButton Grid.Column="2" Text="Done"
+                                                            LoadingText="Completing…"
+                                                            Margin="0" HeightRequest="44"
+                                                            Command="{Binding BindingContext.DoneCommand, Source={x:Reference Root}}"
+                                                            CommandParameter="{Binding .}"
+                                                            IsLoading="{Binding IsCompleting}"
+                                                            ButtonStyle="{StaticResource SecondaryButtonStyle}"/>
+                                                    <controls:AlzowLoadingButton Grid.Column="3" Text="✕"
+                                                            Margin="0" HeightRequest="44"
+                                                            Command="{Binding BindingContext.NoShowCommand, Source={x:Reference Root}}"
+                                                            CommandParameter="{Binding .}"
+                                                            IsLoading="{Binding IsMarkingNoShow}"
+                                                            ButtonStyle="{StaticResource DangerButtonStyle}"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </ScrollView>
+
+        <!-- TODO USE SKELETONS INSTEAD -->
+        <!-- <Grid Grid.Row="0" Grid.RowSpan="2" IsVisible="{Binding IsLoading}" BackgroundColor="#80000000">
+            <ActivityIndicator IsRunning="{Binding IsLoading}"
+                               Color="{StaticResource Orange}"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Center"
+                               Scale="1.5"/>
+        </Grid> -->
+
+        <Border Grid.Row="0" Grid.RowSpan="2"
+                IsVisible="{Binding IsEmpty}"
+                StrokeThickness="0"
+                BackgroundColor="Transparent"
+                Padding="24"
+                VerticalOptions="Center"
+                HorizontalOptions="Center">
+            <Label Text="No customers waiting"
+                   Style="{StaticResource lbl18_Bold_TextDark}"/>
+        </Border>
+    </Grid>
+
+</ContentPage>

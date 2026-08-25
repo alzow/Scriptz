@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="tileGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#252C39"/>
+      <stop offset="100%" stop-color="#141821"/>
+    </linearGradient>
+    <mask id="cutoutIcon" maskUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="512" height="512" fill="white"/>
+      <circle cx="147" cy="292" r="20" fill="black"/>
+      <circle cx="365" cy="292" r="20" fill="black"/>
+      <circle cx="256" cy="257" r="6" fill="black"/>
+      <circle cx="256" cy="292" r="6" fill="black"/>
+      <circle cx="256" cy="327" r="6" fill="black"/>
+    </mask>
+    <filter id="iconGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect x="0" y="0" width="512" height="512" rx="112" fill="url(#tileGrad)"/>
+  <g mask="url(#cutoutIcon)">
+    <rect x="102" y="203" width="145" height="107" rx="30" fill="#A45EFF"/>
+    <rect x="265" y="203" width="145" height="107" rx="30" fill="#39FF7A" filter="url(#iconGlow)"/>
+  </g>
+</svg>

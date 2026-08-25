@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:operatorModels="clr-namespace:QueueApp.Services.Api.Operator.Models"
+             x:Name="Root"
+             x:Class="QueueApp.Features.BusinessDetail.Helpers.OperatorPickerView">
+
+    <!-- Hidden entirely for single-operator businesses -->
+    <VerticalStackLayout Spacing="8" IsVisible="{Binding IsSectionVisible, Source={x:Reference Root}}">
+        <Label Text="Who would you like to see?" Style="{StaticResource lbl18_Bold_TextDark}"/>
+        <CollectionView ItemsSource="{Binding Operators, Source={x:Reference Root}}" SelectionMode="Single"
+                        SelectedItem="{Binding SelectedOperator, Source={x:Reference Root}}"
+                        HeightRequest="56">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="operatorModels:OperatorResponse">
+                    <Border Padding="12,8" Stroke="{StaticResource Line}" StrokeThickness="1.5">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="16"/>
+                        </Border.StrokeShape>
+                        <Border.BackgroundColor>
+                            <MultiBinding Converter="{StaticResource ItemEqualsSelectedToColorConverter}" ConverterParameter="#A45EFF|#1C222D">
+                                <Binding Path="." />
+                                <Binding Path="SelectedOperator" Source="{x:Reference Root}" />
+                            </MultiBinding>
+                        </Border.BackgroundColor>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding SelectCommand, Source={x:Reference Root}}"
+                                CommandParameter="{Binding .}"/>
+                        </Border.GestureRecognizers>
+                        <Label Text="{Binding DisplayName}" Style="{StaticResource lbl15_Bold_TextDark}">
+                            <Label.TextColor>
+                                <MultiBinding Converter="{StaticResource ItemEqualsSelectedToColorConverter}" ConverterParameter="#FFFFFF|#F2F4F7">
+                                    <Binding Path="." />
+                                    <Binding Path="SelectedOperator" Source="{x:Reference Root}" />
+                                </MultiBinding>
+                            </Label.TextColor>
+                        </Label>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </VerticalStackLayout>
+
+</ContentView>

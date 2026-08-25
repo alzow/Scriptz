@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:QueueApp.Converters"
+             x:Class="QueueApp.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Styles/Colors.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/Styles.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/LabelStyle.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/ButtonStyle.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/BorderStyle.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/FrameStyle.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/EntryStyle.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Navigation bar styling -->
+            <Style TargetType="NavigationPage">
+                <Setter Property="BarBackgroundColor" Value="{StaticResource DeepBackground}"/>
+                <Setter Property="BarTextColor" Value="{StaticResource TextPrimary}"/>
+            </Style>
+
+            <!-- Converters -->
+            <converters:IsNotNullOrEmptyConverter x:Key="IsNotNullOrEmptyConverter"/>
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+            <converters:BoolToTextConverter x:Key="BoolToTextConverter"/>
+            <converters:EqualsToColorConverter x:Key="EqualsToColorConverter"/>
+            <converters:BoolToOpacityConverter x:Key="BoolToOpacityConverter"/>
+            <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
+            <converters:IsNotNullConverter x:Key="IsNotNullConverter"/>
+            <converters:IsNullConverter x:Key="IsNullConverter"/>
+            <converters:ActiveToLabelConverter x:Key="ActiveToLabelConverter"/>
+            <converters:ItemEqualsSelectedToColorConverter x:Key="ItemEqualsSelectedToColorConverter"/>
+            <converters:WaitBucketToColorConverter x:Key="WaitBucketToColorConverter"/>
+
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
