@@ -3,85 +3,50 @@
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.History"
-             xmlns:models="clr-namespace:QueueApp.Services.Api.Queue.Models"
-             xmlns:bookingModels="clr-namespace:QueueApp.Services.Api.Booking.Models"
-             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
+             xmlns:models="clr-namespace:QueueApp.Features.History.Models"
+             xmlns:helpers="clr-namespace:QueueApp.Features.History.Helpers"
              x:DataType="vm:HistoryPageViewModel"
              IconImageSource="icon_history"
              Title="History"
              Style="{StaticResource NavigationPageStyle}">
-    <Grid RowDefinitions="Auto,*">
-        <VerticalStackLayout Grid.Row="0" Spacing="10" IsVisible="{Binding HasUpcoming}">
-            <Label Text="Upcoming" FontAttributes="Bold" FontSize="16" Margin="12,12,12,0"/>
-            <VerticalStackLayout Spacing="0" BindableLayout.ItemsSource="{Binding UpcomingBookings}">
-                <BindableLayout.ItemTemplate>
-                    <DataTemplate x:DataType="bookingModels:UpcomingBookingResponse">
-                        <Border Padding="14" Margin="12,6">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                    <Label Text="{Binding BusinessName}" Style="{StaticResource lbl16_Regular_TextDark}" FontAttributes="Bold"/>
-                                    <Label FontSize="13" TextColor="Gray">
-                                        <Label.FormattedText>
-                                            <FormattedString>
-                                                <Span Text="{Binding ServiceName}"/>
-                                                <Span Text=" · "/>
-                                                <Span Text="{Binding OperatorName}"/>
-                                            </FormattedString>
-                                        </Label.FormattedText>
-                                    </Label>
-                                    <Label FontSize="13" TextColor="Gray">
-                                        <Label.FormattedText>
-                                            <FormattedString>
-                                                <Span Text="{Binding DateTimeDisplay}"/>
-                                                <Span Text=" · "/>
-                                                <Span Text="{Binding StatusLabel}"/>
-                                            </FormattedString>
-                                        </Label.FormattedText>
-                                    </Label>
-                                </VerticalStackLayout>
-                                <controls:AlzowLoadingButton Grid.Column="1"
-                                        Text="Cancel"
-                                        LoadingText="Cancelling…"
-                                        IsVisible="{Binding IsCancellable}"
-                                        Command="{Binding CancelUpcomingBookingCommand, Source={RelativeSource AncestorType={x:Type vm:HistoryPageViewModel}}}"
-                                        CommandParameter="{Binding .}"
-                                        IsLoading="{Binding IsCancelling}"/>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </VerticalStackLayout>
-        </VerticalStackLayout>
+    <Grid RowDefinitions="Auto,Auto,*" BackgroundColor="{StaticResource DeepBackground}">
 
-        <Grid Grid.Row="1">
-            <CollectionView ItemsSource="{Binding Visits}"
-                             IsVisible="{Binding IsEmpty, Converter={StaticResource InvertedBoolConverter}}">
+        <Label Grid.Row="0" Text="History"
+               Margin="20,16,20,0"
+               FontFamily="RobotoBold" FontSize="26" CharacterSpacing="-0.3"
+               TextColor="{StaticResource TextPrimary}"/>
+
+        <helpers:HistoryFilterBar Grid.Row="1"
+                                   IsAllSelected="{Binding IsAllSelected}"
+                                   IsVisitsSelected="{Binding IsVisitsSelected}"
+                                   IsBookingsSelected="{Binding IsBookingsSelected}"
+                                   SetFilterCommand="{Binding SetFilterCommand}"/>
+
+        <Grid Grid.Row="2">
+
+            <CollectionView ItemsSource="{Binding Groups}"
+                             IsGrouped="True"
+                             IsVisible="{Binding IsEmpty, Converter={StaticResource InvertedBoolConverter}}"
+                             ItemSizingStrategy="MeasureFirstItem"
+                             ItemsUpdatingScrollMode="KeepScrollOffset">
+
+                <CollectionView.GroupHeaderTemplate>
+                    <DataTemplate x:DataType="models:HistoryGroup">
+                        <helpers:HistoryGroupHeaderView/>
+                    </DataTemplate>
+                </CollectionView.GroupHeaderTemplate>
+
                 <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:VisitResponse">
-                        <Border Padding="14" Margin="12,6">
-                            <VerticalStackLayout Spacing="4">
-                                <Label Text="{Binding BusinessName}" Style="{StaticResource lbl16_Regular_TextDark}" FontAttributes="Bold"/>
-                                <Label FontSize="13" TextColor="Gray">
-                                    <Label.FormattedText>
-                                        <FormattedString>
-                                            <Span Text="{Binding OperatorName}"/>
-                                            <Span Text=" · "/>
-                                            <Span Text="{Binding VisitedAt, StringFormat='{0:dd MMM yyyy, HH:mm}'}"/>
-                                        </FormattedString>
-                                    </Label.FormattedText>
-                                </Label>
-                                <Label Text="{Binding ServiceLabel}" FontSize="13" TextColor="Gray"
-                                       IsVisible="{Binding ServiceLabel, Converter={StaticResource IsNotNullOrEmptyConverter}}"/>
-                            </VerticalStackLayout>
-                        </Border>
+                    <DataTemplate x:DataType="models:HistoryRow">
+                        <helpers:HistoryRowView OpenCommand="{Binding OpenRowCommand, Source={RelativeSource AncestorType={x:Type vm:HistoryPageViewModel}}}"/>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-            <VerticalStackLayout IsVisible="{Binding IsEmpty}" HorizontalOptions="Center" VerticalOptions="Center" Spacing="8">
-                <Label Text="No visits yet" Style="{StaticResource lbl20_Bold_TextDark}" HorizontalOptions="Center"/>
-                <Label Text="Once you've been served somewhere, it'll show up here." TextColor="Gray" HorizontalOptions="Center"/>
-            </VerticalStackLayout>
+            <helpers:HistoryEmptyStateView IsVisible="{Binding IsEmpty}"
+                                            EmptyTitle="{Binding EmptyTitle}"
+                                            EmptyBody="{Binding EmptyBody}"
+                                            BrowseCommand="{Binding BrowseCommand}"/>
 
             <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
                                 HorizontalOptions="Center" VerticalOptions="Center"/>

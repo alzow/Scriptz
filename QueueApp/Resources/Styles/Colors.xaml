@@ -10,6 +10,7 @@
     <Color x:Key="Line">#343D4D</Color>
     <Color x:Key="Green">#39FF7A</Color>
     <Color x:Key="GreenDim">#1F8A47</Color>
+    <Color x:Key="GreenSelectedFill">#1839FF7A</Color>
     <Color x:Key="Purple">#A45EFF</Color>
     <Color x:Key="PurpleDim">#5B3499</Color>
     <Color x:Key="Danger">#FF3B5C</Color>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:QueueApp.Features.History.Models"
+             x:DataType="models:HistoryGroup"
+             x:Class="QueueApp.Features.History.Helpers.HistoryGroupHeaderView">
+    <Grid HeightRequest="40" Padding="20,0" BackgroundColor="{StaticResource DeepBackground}">
+        <Label Text="{Binding Title}"
+               VerticalOptions="Center"
+               FontFamily="RobotoBold" FontSize="10" CharacterSpacing="1.5"
+               LineBreakMode="NoWrap"
+               TextColor="{StaticResource TextFaint}">
+            <Label.Triggers>
+                <DataTrigger TargetType="Label" Binding="{Binding IsUpcoming}" Value="True">
+                    <Setter Property="TextColor" Value="{StaticResource Green}"/>
+                </DataTrigger>
+            </Label.Triggers>
+        </Label>
+    </Grid>
+</ContentView>

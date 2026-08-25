@@ -117,4 +117,20 @@ public class StubBookingService : IBookingService
             .ToList();
         return Task.FromResult(upcoming);
     }
+
+    public Task<List<UpcomingBookingResponse>> GetMyBookingHistoryAsync(Guid customerId)
+    {
+        var history = _bookings
+            .Where(b => b.CustomerId == customerId)
+            .OrderByDescending(b => b.StartsAt)
+            .Select(b => new UpcomingBookingResponse
+            {
+                Id = b.Id,
+                StartsAt = b.StartsAt,
+                EndsAt = b.EndsAt,
+                Status = b.Status,
+            })
+            .ToList();
+        return Task.FromResult(history);
+    }
 }

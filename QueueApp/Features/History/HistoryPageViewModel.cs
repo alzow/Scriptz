@@ -1,9 +1,14 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using MPowerKit;
+using MPowerKit.Navigation;
 using MPowerKit.Navigation.Interfaces;
-using Newtonsoft.Json;
+using QueueApp.Constants;
 using QueueApp.Framework.Base;
+using QueueApp.Framework.Messages;
+using QueueApp.Features.History.Models;
 using QueueApp.Services.Api.Booking;
 using QueueApp.Services.Api.Booking.Models;
 using QueueApp.Services.Api.Queue;
@@ -15,30 +20,51 @@ namespace QueueApp.Features.History;
 
 public partial class HistoryPageViewModel : BaseViewModel
 {
+    private readonly IMessenger _messenger;
     private readonly IQueueService _queueService;
     private readonly IBookingService _bookingService;
     private readonly IAuthService _authService;
 
+    private List<VisitResponse> _visits = new();
+    private List<UpcomingBookingResponse> _bookings = new();
+
     public HistoryPageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
+        IMessenger messenger,
         IQueueService queueService,
         IBookingService bookingService,
         IAuthService authService)
         : base(navigationService, secureStorageService)
     {
+        _messenger = messenger;
         _queueService = queueService;
         _bookingService = bookingService;
         _authService = authService;
     }
 
-    public ObservableCollection<VisitResponse> Visits { get; } = new();
+    public ObservableCollection<HistoryGroup> Groups { get; } = new();
     public bool IsLoading { get; set; }
-    public bool IsEmpty => Visits.Count == 0 && !IsLoading;
+    public bool IsEmpty => Groups.Count == 0 && !IsLoading;
 
-    public ObservableCollection<UpcomingBookingResponse> UpcomingBookings { get; } = new();
-    public bool IsLoadingUpcoming { get; set; }
-    public bool HasUpcoming => UpcomingBookings.Count > 0;
+    public HistoryFilter SelectedFilter { get; set; } = HistoryFilter.All;
+    public bool IsAllSelected => SelectedFilter == HistoryFilter.All;
+    public bool IsVisitsSelected => SelectedFilter == HistoryFilter.Visits;
+    public bool IsBookingsSelected => SelectedFilter == HistoryFilter.Bookings;
+
+    public string EmptyTitle => SelectedFilter switch
+    {
+        HistoryFilter.Visits => "You haven't been served anywhere yet.",
+        HistoryFilter.Bookings => "No bookings yet.",
+        _ => "No history yet.",
+    };
+
+    public string EmptyBody => SelectedFilter switch
+    {
+        HistoryFilter.Visits => "Join a queue and it'll show up here once you're done — along with who served you and how long you waited.",
+        HistoryFilter.Bookings => "Not every business takes bookings yet — once you make one, it'll show up here.",
+        _ => "Once you've joined a queue or made a booking, it shows up here.",
+    };
 
     private bool _isLoaded;
     private readonly SemaphoreSlim _refreshLock = new(1, 1);
@@ -47,21 +73,20 @@ public partial class HistoryPageViewModel : BaseViewModel
     {
         await base.OnAppearingAsync();
 
-        // OnLoadedAsync already fetches on first navigation; avoid a duplicate race on initial appear.
         if (!_isLoaded)
             return;
 
-        await RefreshVisitsAsync();
-    }
+        await RefreshAsync();
+    }  
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
         await base.OnLoadedAsync(parameters);
         _isLoaded = true;
-        await RefreshVisitsAsync();
+        await RefreshAsync();
     }
 
-    private async Task RefreshVisitsAsync()
+    public async Task RefreshAsync()
     {
         if (!await _refreshLock.WaitAsync(0))
             return;
@@ -69,7 +94,7 @@ public partial class HistoryPageViewModel : BaseViewModel
         try
         {
             IsLoading = true;
-            IsLoadingUpcoming = true;
+            OnPropertyChanged(nameof(IsEmpty));
 
             var userId = await _authService.GetUserIdAsync();
             if (string.IsNullOrEmpty(userId))
@@ -77,19 +102,11 @@ public partial class HistoryPageViewModel : BaseViewModel
 
             var customerId = Guid.Parse(userId);
 
-            var visits = await _queueService.GetMyVisitsAsync(customerId);
-            Debug.WriteLine($"[History] fetched {visits.Count} visits for user {JsonConvert.SerializeObject(visits)}");
+            _visits = await _queueService.GetMyVisitsAsync(customerId);
+            _bookings = await _bookingService.GetMyBookingHistoryAsync(customerId);
+            Debug.WriteLine($"[History] fetched {_visits.Count} visits, {_bookings.Count} bookings for user {customerId}");
 
-            Visits.Clear();
-            foreach (var visit in visits)
-                Visits.Add(visit);
-
-            var upcoming = await _bookingService.GetMyUpcomingBookingsAsync(customerId);
-
-            UpcomingBookings.Clear();
-            foreach (var booking in upcoming)
-                UpcomingBookings.Add(booking);
-            OnPropertyChanged(nameof(HasUpcoming));
+            ApplyFilter();
         }
         catch (Exception ex)
         {
@@ -98,27 +115,119 @@ public partial class HistoryPageViewModel : BaseViewModel
         finally
         {
             IsLoading = false;
-            IsLoadingUpcoming = false;
+            OnPropertyChanged(nameof(IsEmpty));
             _refreshLock.Release();
         }
     }
 
-    [RelayCommand]
-    private async Task CancelUpcomingBookingAsync(UpcomingBookingResponse booking)
+    public void ApplyFilter()
     {
-        booking.IsCancelling = true;
         try
         {
-            await _bookingService.CancelBookingAsync(booking.Id);
-            UpcomingBookings.Remove(booking);
+            IEnumerable<HistoryRow> rows = SelectedFilter switch
+            {
+                HistoryFilter.Visits => _visits.Select(HistoryRow.FromVisit),
+                HistoryFilter.Bookings => _bookings.Select(HistoryRow.FromBooking),
+                _ => _visits.Select(HistoryRow.FromVisit).Concat(_bookings.Select(HistoryRow.FromBooking)),
+            };
+
+            var now = DateTimeOffset.UtcNow;
+            var upcoming = rows
+                .Where(r => r.Kind == HistoryRowKind.Booking && r.OccurredAt >= now && (r.StatusText is "CONFIRMED" or "PENDING"))
+                .OrderBy(r => r.OccurredAt)
+                .ToList();
+            var past = rows.Except(upcoming).OrderByDescending(r => r.OccurredAt).ToList();
+
+            Groups.Clear();
+            if (upcoming.Count > 0)
+                Groups.Add(new HistoryGroup("UPCOMING", upcoming));
+            foreach (var group in BucketByDate(past))
+                Groups.Add(group);
+
+            OnPropertyChanged(nameof(IsEmpty));
         }
         catch (Exception ex)
         {
-            await HandleExceptionAsync(ex);
+            _ = HandleExceptionAsync(ex);
         }
-        finally
+    }
+
+    public static IEnumerable<HistoryGroup> BucketByDate(List<HistoryRow> rows)
+    {
+        var today = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(2)).Date;
+        var weekStart = today.AddDays(-6);
+
+        return rows
+            .GroupBy(r => BucketKey(r.OccurredAt.ToOffset(TimeSpan.FromHours(2)).Date, today, weekStart))
+            .Select(g => new HistoryGroup(g.Key, g));
+    }
+
+    public static string BucketKey(DateTime date, DateTime today, DateTime weekStart)
+    {
+        if (date == today) return "TODAY";
+        if (date == today.AddDays(-1)) return "YESTERDAY";
+        if (date >= weekStart) return "THIS WEEK";
+        return date.ToString("MMMM").ToUpperInvariant();
+    }
+
+    [RelayCommand]
+    public void SetFilter(string filter)
+    {
+        try
         {
-            booking.IsCancelling = false;
+            SelectedFilter = filter switch
+            {
+                "Visits" => HistoryFilter.Visits,
+                "Bookings" => HistoryFilter.Bookings,
+                _ => HistoryFilter.All,
+            };
+
+            OnPropertyChanged(nameof(IsAllSelected));
+            OnPropertyChanged(nameof(IsVisitsSelected));
+            OnPropertyChanged(nameof(IsBookingsSelected));
+            OnPropertyChanged(nameof(EmptyTitle));
+            OnPropertyChanged(nameof(EmptyBody));
+
+            ApplyFilter();
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
+    }
+
+    [RelayCommand]
+    public void OpenRow(HistoryRow row)
+    {
+        try
+        {
+            if (row.BusinessId == Guid.Empty)
+                return;
+
+            var navParams = new NavigationParameters
+            {
+                [NavigationKeys.BusinessId] = row.BusinessId,
+                [NavigationKeys.OpenedFromTabs] = true,
+            };
+            _messenger.Send(new NavigateAwayFromTabsMessage(
+                $"/NavigationPage/{NavigationPaths.BusinessDetailPage}", navParams, true));
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
+    }
+
+    [RelayCommand]
+    public void Browse()
+    {
+        try
+        {
+            _messenger.Send(new NavigateAwayFromTabsMessage($"/NavigationPage/{NavigationPaths.CategoryPickerPage}"));
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
         }
     }
 }

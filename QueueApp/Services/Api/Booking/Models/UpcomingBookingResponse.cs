@@ -5,7 +5,9 @@ namespace QueueApp.Services.Api.Booking.Models;
 
 public class UpcomingBookingBusinessRef
 {
+    [JsonPropertyName("id")] public Guid Id { get; set; }
     [JsonPropertyName("name")] public string Name { get; set; } = "";
+    [JsonPropertyName("category")] public string Category { get; set; } = "other";
 }
 
 public class UpcomingBookingResponse
@@ -20,9 +22,11 @@ public class UpcomingBookingResponse
 
     [JsonIgnore] public bool IsCancelling { get; set; }
 
+    [JsonIgnore] public Guid BusinessId => Business?.Id ?? Guid.Empty;
     [JsonIgnore] public string BusinessName => Business?.Name ?? "";
     [JsonIgnore] public string OperatorName => Operator?.DisplayName ?? "Any available";
     [JsonIgnore] public string ServiceName => Service?.Name ?? "";
+    [JsonIgnore] public string Category => Business?.Category ?? "other";
 
     [JsonIgnore]
     private DateTimeOffset LocalStart => StartsAt.ToOffset(TimeSpan.FromHours(2));
@@ -33,6 +37,9 @@ public class UpcomingBookingResponse
     [JsonIgnore] public string DayText => LocalStart.ToString("d");
     [JsonIgnore] public string MonthText => LocalStart.ToString("MMM").ToUpperInvariant();
     [JsonIgnore] public string TimeText => LocalStart.ToString("h:mm tt");
+
+    [JsonIgnore]
+    public string EffectiveStatus => Status == "confirmed" && EndsAt < DateTimeOffset.UtcNow ? "expired" : Status;
 
     [JsonIgnore] public bool IsCancellable => Status is "pending" or "confirmed";
     [JsonIgnore] public string StatusLabel => Status == "pending" ? "Pending" : "Confirmed";

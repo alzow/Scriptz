@@ -41,6 +41,6 @@ public interface IQueueApi
     [Post("/rpc/business_queue_summary")]
     Task<List<QueueSummaryRow>> GetQueueSummaryAsync([Body] BusinessIdRequest request);
 
-    [Get("/visits?select=id,visited_at,business:businesses(id,name),operator:operators(display_name),service:services(name)&order=visited_at.desc")]
+    [Get("/visits?select=id,visited_at,business:businesses(id,name,category),operator:operators(display_name),service:services(name)&order=visited_at.desc")]
     Task<List<VisitResponse>> GetMyVisitsAsync([AliasAs("customer_id")] string customerIdEq);
 }

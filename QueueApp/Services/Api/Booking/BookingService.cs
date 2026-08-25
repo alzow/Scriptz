@@ -48,4 +48,7 @@ public class BookingService : BaseService, IBookingService
 
     public Task<List<UpcomingBookingResponse>> GetMyUpcomingBookingsAsync(Guid customerId) =>
         ExecuteApiCallAsync(_api.GetMyUpcomingBookingsAsync($"eq.{customerId}"));
+
+    public Task<List<UpcomingBookingResponse>> GetMyBookingHistoryAsync(Guid customerId) =>
+        ExecuteApiCallAsync(_api.GetMyBookingHistoryAsync($"eq.{customerId}"));
 }

@@ -12,4 +12,5 @@ public interface IBookingService
     Task<List<MyBookingSummaryResponse>> GetMyBookingsAsync(Guid businessId, Guid customerId);
     Task<List<AgendaBookingResponse>> GetAgendaBookingsAsync(Guid businessId, DateTime date);
     Task<List<UpcomingBookingResponse>> GetMyUpcomingBookingsAsync(Guid customerId);
+    Task<List<UpcomingBookingResponse>> GetMyBookingHistoryAsync(Guid customerId);
 }

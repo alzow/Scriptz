@@ -14,12 +14,14 @@ public class VisitResponse
     [JsonIgnore] public string BusinessName => Business?.Name ?? "Unknown business";
     [JsonIgnore] public string OperatorName => Operator?.DisplayName ?? "Any available";
     [JsonIgnore] public string ServiceLabel => Service?.Name ?? "";
+    [JsonIgnore] public string Category => Business?.Category ?? "other";
 }
 
 public class VisitBusinessRef
 {
     [JsonPropertyName("id")] public Guid Id { get; set; }
     [JsonPropertyName("name")] public string Name { get; set; } = "";
+    [JsonPropertyName("category")] public string Category { get; set; } = "other";
 }
 
 public class VisitOperatorRef
