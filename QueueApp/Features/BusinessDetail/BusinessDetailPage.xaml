@@ -553,7 +553,8 @@
                             <VerticalStackLayout Spacing="0">
                                 <Grid ColumnDefinitions="*,Auto" Padding="0,9">
                                     <Label Grid.Column="0" Text="Selected" Style="{StaticResource lbl12_Regular_TextLight}"/>
-                                    <Label Grid.Column="1" Text="{Binding FooterLabel}" Style="{StaticResource lbl13_Mono_TextPrimary}"/>
+                                    <Label Grid.Column="1" Text="{Binding SelectedDay.Date, StringFormat='{0:ddd d MMM}'}"
+                                           Style="{StaticResource lbl13_Mono_TextPrimary}"/>
                                 </Grid>
                                 <Grid ColumnDefinitions="*,Auto" Padding="0,9">
                                     <Label Grid.Column="0" Text="{Binding ReviewOperatorLabel}" Style="{StaticResource lbl12_Regular_TextLight}"/>
