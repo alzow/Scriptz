@@ -1193,7 +1193,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             ? QueueSummary.FirstOrDefault(r => r.OperatorId == operatorId)
             : QueueSummary.OrderBy(r => r.NewJoinWaitMinutes).FirstOrDefault();
 
-        var ahead = row?.WaitingCount ?? 0;
+        var ahead = row is null ? 0 : row.WaitingCount + row.ServingCount;
         var waitMinutes = row?.NewJoinWaitMinutes ?? 0;
 
         ReviewPositionText = Ordinal(ahead + 1) + " in line";
