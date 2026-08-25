@@ -571,7 +571,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             TertiaryStatLabel = next?.Label ?? "Closed";
             TertiaryStatValue = next?.TimeText ?? "—";
             CtaText = next is not null ? $"Queue opens {next.TimeText}" : "Queue is closed";
-            IsCtaEnabled = false;
+            IsCtaEnabled = true;//TODO revert later after testing
             LiveFootnote = "The queue reopens when the shop does";
             return;
         }
@@ -616,8 +616,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             var next = _hours.FindNextOpening(LocalTime.Now);
             TertiaryStatLabel = next?.Label ?? "Closed";
             TertiaryStatValue = next?.TimeText ?? "—";
-            CtaText = next is not null ? $"Booking opens {next.TimeText}" : "Bookings are closed";
-            IsCtaEnabled = false;
+            CtaText = next is not null ? $"Booking opens {next.TimeText}" : "Currently closed";
+            IsCtaEnabled = true;
         }
     }
 
@@ -698,17 +698,24 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     [RelayCommand]
     private async Task NextAsync()
     {
-        if (!IsFooterCtaEnabled)
-            return;
-
-        if (CurrentStepIndex >= _steps.Count - 1)
+        try
         {
-            await SubmitAsync();
-            return;
-        }
+            if (!IsFooterCtaEnabled)
+                return;
 
-        CurrentStepIndex++;
-        ApplyStep();
+            if (CurrentStepIndex >= _steps.Count - 1)
+            {
+                await SubmitAsync();
+                return;
+            }
+
+            CurrentStepIndex++;
+            ApplyStep();
+        }
+        finally
+        {
+            IsSubmitting = false;
+        }
     }
 
     [RelayCommand]

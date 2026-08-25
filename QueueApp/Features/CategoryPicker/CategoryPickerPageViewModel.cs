@@ -227,7 +227,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
 
             if (desiredKey == _subscribedScopeKey) return;
 
-            await _realtimeService.UnsubscribeAsync();
+            // await _realtimeService.UnsubscribeAsync(); //ReAdd later TODO messing up manage subscription
 
             if (ActiveEntry is not null)
             {
