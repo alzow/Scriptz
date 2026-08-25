@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Windows.Input;
+using QueueApp.Features.CategoryPicker.Models;
 
 namespace QueueApp.Features.CategoryPicker.Helpers;
 

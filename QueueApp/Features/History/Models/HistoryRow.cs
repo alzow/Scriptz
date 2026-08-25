@@ -1,4 +1,4 @@
-using QueueApp.Features.CategoryPicker;
+using QueueApp.Features.CategoryPicker.Models;
 using QueueApp.Services.Api.Booking.Models;
 using QueueApp.Services.Api.Queue.Models;
 

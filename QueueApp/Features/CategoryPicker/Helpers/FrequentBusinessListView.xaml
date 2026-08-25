@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:vm="clr-namespace:QueueApp.Features.CategoryPicker"
+             xmlns:models="clr-namespace:QueueApp.Features.CategoryPicker.Models"
              x:Name="Root"
              x:Class="QueueApp.Features.CategoryPicker.Helpers.FrequentBusinessListView">
 
     <VerticalStackLayout Spacing="0" BindableLayout.ItemsSource="{Binding Items, Source={x:Reference Root}}">
         <BindableLayout.ItemTemplate>
-            <DataTemplate x:DataType="vm:FrequentBusinessItem">
+            <DataTemplate x:DataType="models:FrequentBusinessItem">
                 <Border Style="{StaticResource brd16_White}" Padding="14" Margin="0,5">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer

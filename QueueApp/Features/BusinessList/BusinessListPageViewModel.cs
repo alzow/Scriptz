@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using MPowerKit;
 using MPowerKit.Navigation;
 using QueueApp.Constants;
+using QueueApp.Features.CategoryPicker.Models;
 using QueueApp.Framework.Base;
 using QueueApp.Framework.Navigation;
 using QueueApp.Services.Api.Business;
@@ -39,7 +40,7 @@ public partial class BusinessListPageViewModel : BaseViewModel
                 ? (string)catObj
                 : throw new InvalidOperationException("BusinessListPage requires a 'category' parameter.");
 
-            Title = CategoryPicker.CategoryCatalog.All.First(c => c.Key == _category).Display;
+            Title = CategoryCatalog.All.First(c => c.Key == _category).Display;
             await LoadAsync();
         }
         catch (Exception ex)

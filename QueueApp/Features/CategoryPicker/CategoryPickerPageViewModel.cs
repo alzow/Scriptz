@@ -6,6 +6,7 @@ using MPowerKit;
 using MPowerKit.Navigation;
 using QueueApp.Constants;
 using QueueApp.Features.CategoryPicker.Helpers;
+using QueueApp.Features.CategoryPicker.Models;
 using QueueApp.Framework.Base;
 using QueueApp.Framework.Messages;
 using QueueApp.Services.Api.Booking;
@@ -23,11 +24,34 @@ using QueueApp.Services.Storage;
 
 namespace QueueApp.Features.CategoryPicker;
 
-// The customer-facing home screen (Browse tab). Shows a live-queue hero when the customer is
-// queued somewhere, otherwise a quiet discovery band, then a category rail, upcoming bookings,
-// nearby businesses with live wait times, and the businesses they visit most.
 public partial class CategoryPickerPageViewModel : BaseViewModel
 {
+    private List<BrowseBusinessSummaryResponse> _allBusinesses = new();
+    private Guid _customerId;
+    private double? _customerLatitude;
+    private double? _customerLongitude;
+    private string? _subscribedScopeKey;
+    private readonly SemaphoreSlim _realtimeLock = new(1, 1);
+    public IReadOnlyList<ServiceCategory> Categories { get; } = CategoryCatalog.All;
+    public string? CustomerDisplayName { get; set; }
+    public bool IsLoading { get; set; }
+    public bool IsRefreshing { get; set; }
+    public string SearchText { get; set; } = string.Empty;
+    public ServiceCategory? SelectedCategory { get; set; }
+    public MyActiveQueueEntryResponse? ActiveEntry { get; set; }
+    public bool IsLeavingQueue { get; set; }
+    public string? QuietestNowText { get; set; }
+    public string LocationLabel { get; set; } = "Lenasia";
+    public bool IsResolvingLocation { get; set; }
+    public ObservableCollection<BrowseBusinessSummaryResponse> Businesses { get; } = new();
+    public ObservableCollection<UpcomingBookingResponse> UpcomingBookings { get; } = new();
+    public ObservableCollection<FrequentBusinessItem> FrequentBusinesses { get; } = new();
+
+    public bool HasActiveEntry => ActiveEntry is not null;
+    public bool HasUpcomingBookings => UpcomingBookings.Count > 0;
+    public bool HasFrequentBusinesses => FrequentBusinesses.Count > 0;
+    public bool IsBusinessesEmpty => Businesses.Count == 0 && !IsLoading;
+
     private readonly IMessenger _messenger;
     private readonly IBusinessService _businessService;
     private readonly IQueueService _queueService;
@@ -37,20 +61,6 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     private readonly IQueuePopupService _popupService;
     private readonly IQueueRealtimeService _realtimeService;
     private readonly ILocationService _locationService;
-
-    private List<BrowseBusinessSummaryResponse> _allBusinesses = new();
-    private Guid _customerId;
-    private double? _customerLatitude;
-    private double? _customerLongitude;
-
-    // Tracks which Postgres Changes filter we're currently subscribed under, so
-    // EnsureRealtimeSubscriptionAsync only tears down/reopens the socket when the scope
-    // actually changes (idle <-> queued-at-a-business), not on every refresh.
-    private string? _subscribedScopeKey;
-
-    // OnAppearingAsync and OnLoadedAsync's first LoadAsync can both race to (re)subscribe on
-    // first tab creation — serialize so they can't both mutate the single realtime channel at once.
-    private readonly SemaphoreSlim _realtimeLock = new(1, 1);
 
     public CategoryPickerPageViewModel(
         INavigationService navigationService,
@@ -76,37 +86,21 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         _realtimeService = realtimeService;
         _locationService = locationService;
 
-        // Fody's PropertyChanged weaver raises this for every auto-property below — react to
-        // search text edits here instead of hand-rolling a partial-changed hook per property.
         PropertyChanged += OnAnyPropertyChanged;
     }
 
-    public IReadOnlyList<ServiceCategory> Categories { get; } = CategoryCatalog.All;
 
-    public string? CustomerDisplayName { get; set; }
-    public bool IsLoading { get; set; }
-    public bool IsRefreshing { get; set; }
-    public string SearchText { get; set; } = string.Empty;
-    public ServiceCategory? SelectedCategory { get; set; }
-    public MyActiveQueueEntryResponse? ActiveEntry { get; set; }
-    public bool IsLeavingQueue { get; set; }
-    public string? QuietestNowText { get; set; }
-    public string LocationLabel { get; set; } = "Lenasia";
-    public bool IsResolvingLocation { get; set; }
-
-    public ObservableCollection<BrowseBusinessSummaryResponse> Businesses { get; } = new();
-    public ObservableCollection<UpcomingBookingResponse> UpcomingBookings { get; } = new();
-    public ObservableCollection<FrequentBusinessItem> FrequentBusinesses { get; } = new();
-
-    public bool HasActiveEntry => ActiveEntry is not null;
-    public bool HasUpcomingBookings => UpcomingBookings.Count > 0;
-    public bool HasFrequentBusinesses => FrequentBusinesses.Count > 0;
-    public bool IsBusinessesEmpty => Businesses.Count == 0 && !IsLoading;
-
-    private void OnAnyPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    public void OnAnyPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(SearchText))
-            ApplyBusinessFilter();
+        try
+        {
+            if (e.PropertyName == nameof(SearchText))
+                ApplyBusinessFilter();
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
     }
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
@@ -123,9 +117,6 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
                 CustomerDisplayName = string.IsNullOrWhiteSpace(displayName) ? null : displayName;
             }
 
-            // Cached location (no permission prompt, near-instant) gives the first paint real
-            // distances if we've resolved one before; RefreshLocationAsync below then gets a
-            // live fix and re-sorts if it's meaningfully different.
             var cached = await _locationService.GetCachedLocationAsync();
             if (cached is not null)
             {
@@ -137,9 +128,6 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
             SelectedCategory ??= Categories.FirstOrDefault(c => c.Available) ?? Categories.First();
             await LoadAsync();
 
-            // Silent: a denied/unavailable GPS fix on every automatic app-open attempt would be
-            // a nagging alert, not a helpful one — only the explicit tap below (the location bar,
-            // RefreshLocationCommand) surfaces a "couldn't get your location" message.
             await RefreshLocationAsync(silent: true);
         }
         catch (Exception ex)
@@ -149,9 +137,9 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private Task RefreshLocationAsync() => RefreshLocationAsync(silent: false);
+    public Task RefreshLocationAsync() => RefreshLocationAsync(silent: false);
 
-    private async Task RefreshLocationAsync(bool silent)
+    public async Task RefreshLocationAsync(bool silent)
     {
         IsResolvingLocation = true;
         try
@@ -185,9 +173,6 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         }
     }
 
-    // This page is a persistent TabbedPage child, not a pushed page — OnLoadedAsync only fires
-    // once (first tab creation) but OnAppearing/OnDisappearing fire on every tab switch, so the
-    // realtime subscription lives here, symmetric with the teardown below.
     public override async Task OnAppearingAsync()
     {
         await base.OnAppearingAsync();
@@ -211,24 +196,26 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     public override async Task OnDisappearingAsync()
     {
         await base.OnDisappearingAsync();
-        await _realtimeLock.WaitAsync();
         try
         {
-            await _realtimeService.UnsubscribeAsync();
-            _subscribedScopeKey = null;
+            await _realtimeLock.WaitAsync();
+            try
+            {
+                await _realtimeService.UnsubscribeAsync();
+                _subscribedScopeKey = null;
+            }
+            finally
+            {
+                _realtimeLock.Release();
+            }
         }
-        finally
+        catch (Exception ex)
         {
-            _realtimeLock.Release();
+            await HandleExceptionAsync(ex);
         }
     }
 
-    // Re-subscribes only when the scope actually needs to change:
-    //  - idle: watch the customer's own rows (customer_id) so joining a queue is picked up.
-    //  - queued: watch the whole business (business_id), same scope BusinessDetailPage uses, so
-    //    position/serving updates caused by OTHER customers ahead of us are picked up too —
-    //    not just changes to our own row.
-    private async Task EnsureRealtimeSubscriptionAsync()
+    public async Task EnsureRealtimeSubscriptionAsync()
     {
         if (_customerId == Guid.Empty) return;
 
@@ -256,13 +243,17 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
 
             _subscribedScopeKey = desiredKey;
         }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
         finally
         {
             _realtimeLock.Release();
         }
     }
 
-    private async Task RefreshActiveEntryAsync()
+    public async Task RefreshActiveEntryAsync()
     {
         try
         {
@@ -277,7 +268,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task LoadAsync()
+    public async Task LoadAsync()
     {
         IsLoading = true;
         try
@@ -318,7 +309,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         }
     }
 
-    private static IEnumerable<FrequentBusinessItem> BuildFrequentBusinesses(List<VisitResponse> visits) =>
+    public static IEnumerable<FrequentBusinessItem> BuildFrequentBusinesses(List<VisitResponse> visits) =>
         visits
             .Where(v => v.BusinessId != Guid.Empty)
             .GroupBy(v => v.BusinessId)
@@ -339,58 +330,71 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
             .ThenByDescending(f => f.LastVisitedAt)
             .Take(3);
 
-    private void ApplyBusinessFilter()
-    {
-        var filtered = string.IsNullOrWhiteSpace(SearchText)
-            ? _allBusinesses
-            : _allBusinesses.Where(b => b.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
-
-        // Nearest-first once we know where the customer is (the "Mr Delivery" feel) — wait time
-        // is still the tiebreaker for businesses at an equal/unknown distance.
-        var ordered = filtered
-            .OrderByDescending(b => b.IsAvailableNow)
-            .ThenBy(b => b.DistanceKm ?? double.MaxValue)
-            .ThenBy(b => b.AvgWaitMinutes ?? decimal.MaxValue)
-            .ToList();
-
-        Businesses.Clear();
-        foreach (var b in ordered)
-            Businesses.Add(b);
-
-        var quietest = _allBusinesses
-            .Where(b => b.WaitBucket is "go" or "wait")
-            .OrderBy(b => b.AvgWaitMinutes)
-            .FirstOrDefault();
-        QuietestNowText = quietest is not null ? $"{quietest.Name} · {quietest.AvgWaitMinutes:0} min" : null;
-
-        OnPropertyChanged(nameof(IsBusinessesEmpty));
-    }
-
-    [RelayCommand]
-    private async Task RefreshAsync()
-    {
-        IsRefreshing = true;
-        await LoadAsync();
-    }
-
-    [RelayCommand]
-    private async Task SelectCategoryAsync(ServiceCategory category)
+    public void ApplyBusinessFilter()
     {
         try
         {
-            if (!category.Available || category == SelectedCategory)
-            return;
-             throw new NotImplementedException("Navigation to category-specific business list not yet implemented.");
+            var filtered = string.IsNullOrWhiteSpace(SearchText)
+                ? _allBusinesses
+                : _allBusinesses.Where(b => b.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+
+            var ordered = filtered
+                .OrderByDescending(b => b.IsAvailableNow)
+                .ThenBy(b => b.DistanceKm ?? double.MaxValue)
+                .ThenBy(b => b.AvgWaitMinutes ?? decimal.MaxValue)
+                .ToList();
+
+            Businesses.Clear();
+            foreach (var b in ordered)
+                Businesses.Add(b);
+
+            var quietest = _allBusinesses
+                .Where(b => b.WaitBucket is "go" or "wait")
+                .OrderBy(b => b.AvgWaitMinutes)
+                .FirstOrDefault();
+            QuietestNowText = quietest is not null ? $"{quietest.Name} · {quietest.AvgWaitMinutes:0} min" : null;
+
+            OnPropertyChanged(nameof(IsBusinessesEmpty));
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
+    }
+
+    [RelayCommand]
+    public async Task RefreshAsync()
+    {
+        try
+        {
+            IsRefreshing = true;
+            await LoadAsync();
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
         }
-        
     }
 
     [RelayCommand]
-    private async Task OpenBusinessAsync(object? item)
+    public async Task SelectCategoryAsync(ServiceCategory category)
+    {
+        try
+        {
+            if (!category.Available || category == SelectedCategory)
+                return;
+
+            SelectedCategory = category;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    [RelayCommand]
+    public async Task OpenBusinessAsync(object? item)
     {
         Guid? businessId = item switch
         {
@@ -419,7 +423,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task SeeAllBusinessesAsync()
+    public async Task SeeAllBusinessesAsync()
     {
         if (SelectedCategory is null) return;
 
@@ -436,7 +440,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task CancelBookingAsync(UpcomingBookingResponse booking)
+    public async Task CancelBookingAsync(UpcomingBookingResponse booking)
     {
         booking.IsCancelling = true;
         try
@@ -456,19 +460,19 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task OpenDirectionsAsync()
+    public async Task OpenDirectionsAsync()
     {
         if (ActiveEntry is null) return;
 
-        if (!ActiveEntry.BusinessLatitude.HasValue || !ActiveEntry.BusinessLongitude.HasValue)
-        {
-            await _popupService.ShowAlertAsync("Location not set",
-                $"{ActiveEntry.BusinessName} hasn't added a map location yet.");
-            return;
-        }
-
         try
         {
+            if (!ActiveEntry.BusinessLatitude.HasValue || !ActiveEntry.BusinessLongitude.HasValue)
+            {
+                await _popupService.ShowAlertAsync("Location not set",
+                    $"{ActiveEntry.BusinessName} hasn't added a map location yet.");
+                return;
+            }
+
             var location = new Location(ActiveEntry.BusinessLatitude.Value, ActiveEntry.BusinessLongitude.Value);
             await Map.Default.OpenAsync(location, new MapLaunchOptions { Name = ActiveEntry.BusinessName });
         }
@@ -479,7 +483,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task LeaveQueueAsync()
+    public async Task LeaveQueueAsync()
     {
         if (ActiveEntry is null) return;
 

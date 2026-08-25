@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using QueueApp.Features.CategoryPicker;
+using QueueApp.Features.CategoryPicker.Models;
 
 namespace QueueApp.Services.Api.Business.Models;
 

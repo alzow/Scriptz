@@ -1,4 +1,4 @@
-namespace QueueApp.Features.CategoryPicker;
+namespace QueueApp.Features.CategoryPicker.Models;
 
 public record ServiceCategory(string Key, string Display, string IconSource, bool Available);
 

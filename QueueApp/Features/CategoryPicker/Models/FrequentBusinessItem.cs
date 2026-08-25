@@ -1,7 +1,5 @@
-namespace QueueApp.Features.CategoryPicker;
+namespace QueueApp.Features.CategoryPicker.Models;
 
-// Computed client-side in CategoryPickerPageViewModel by grouping GetMyVisitsAsync results per
-// business — no new endpoint needed, visits already carry business/operator/service names.
 public class FrequentBusinessItem
 {
     public Guid BusinessId { get; set; }

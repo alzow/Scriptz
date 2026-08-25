@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:vm="clr-namespace:QueueApp.Features.CategoryPicker"
+             xmlns:models="clr-namespace:QueueApp.Features.CategoryPicker.Models"
              x:Name="Root"
              x:Class="QueueApp.Features.CategoryPicker.Helpers.CategoryCarouselView">
 
@@ -12,7 +12,7 @@
             <LinearItemsLayout Orientation="Horizontal" ItemSpacing="14" SnapPointsType="None"/>
         </CollectionView.ItemsLayout>
         <CollectionView.ItemTemplate>
-            <DataTemplate x:DataType="vm:ServiceCategory">
+            <DataTemplate x:DataType="models:ServiceCategory">
                 <VerticalStackLayout Spacing="8" WidthRequest="64"
                                       Opacity="{Binding Available, Converter={StaticResource BoolToOpacityConverter}}">
                     <VerticalStackLayout.GestureRecognizers>

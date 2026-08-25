@@ -49,55 +49,77 @@ public partial class LiveQueueHeroView : ContentView
         Unloaded += (_, _) => StopCountdown();
     }
 
-    private static void OnActiveEntryChanged(BindableObject bindable, object oldValue, object newValue)
+    public static void OnActiveEntryChanged(BindableObject bindable, object oldValue, object newValue)
     {
-        ((LiveQueueHeroView)bindable).RestartCountdown();
+        try
+        {
+            ((LiveQueueHeroView)bindable).RestartCountdown();
+        }
+        catch (Exception)
+        {
+        }
     }
 
-    // The ring shows a live mm:ss countdown that ticks locally, matching the design's note that
-    // this should recompute every second client-side rather than re-polling the server for it.
-    private void RestartCountdown()
+    public void RestartCountdown()
     {
-        StopCountdown();
-
-        var minutes = ActiveEntry?.WaitMinutes;
-        if (ActiveEntry is null || minutes is null || ActiveEntry.IsBeingServed)
+        try
         {
-            CountdownLabel.Text = ActiveEntry?.IsBeingServed == true ? "NOW" : "--:--";
-            return;
-        }
+            StopCountdown();
 
-        _remainingSeconds = (int)(minutes.Value * 60);
-        UpdateCountdownLabel();
-
-        _timer = Dispatcher.CreateTimer();
-        _timer.Interval = TimeSpan.FromSeconds(1);
-        _timer.Tick += (_, _) =>
-        {
-            if (_remainingSeconds <= 0)
+            var minutes = ActiveEntry?.WaitMinutes;
+            if (ActiveEntry is null || minutes is null || ActiveEntry.IsBeingServed)
             {
-                StopCountdown();
+                CountdownLabel.Text = ActiveEntry?.IsBeingServed == true ? "NOW" : "--:--";
                 return;
             }
-            _remainingSeconds--;
+
+            _remainingSeconds = (int)(minutes.Value * 60);
             UpdateCountdownLabel();
-        };
-        _timer.Start();
+
+            _timer = Dispatcher.CreateTimer();
+            _timer.Interval = TimeSpan.FromSeconds(1);
+            _timer.Tick += (_, _) =>
+            {
+                if (_remainingSeconds <= 0)
+                {
+                    StopCountdown();
+                    return;
+                }
+                _remainingSeconds--;
+                UpdateCountdownLabel();
+            };
+            _timer.Start();
+        }
+        catch (Exception)
+        {
+        }
     }
 
-    private void UpdateCountdownLabel()
+    public void UpdateCountdownLabel()
     {
-        var span = TimeSpan.FromSeconds(Math.Max(0, _remainingSeconds));
-        CountdownLabel.Text = _remainingSeconds <= 0 ? "GO" : $"{span.Minutes:00}:{span.Seconds:00}";
-        CountdownLabel.TextColor = _remainingSeconds <= 0
-            ? (Color)Application.Current!.Resources["Green"]
-            : (Color)Application.Current!.Resources["TextPrimary"];
+        try
+        {
+            var span = TimeSpan.FromSeconds(Math.Max(0, _remainingSeconds));
+            CountdownLabel.Text = _remainingSeconds <= 0 ? "GO" : $"{span.Minutes:00}:{span.Seconds:00}";
+            CountdownLabel.TextColor = _remainingSeconds <= 0
+                ? (Color)Application.Current!.Resources["Green"]
+                : (Color)Application.Current!.Resources["TextPrimary"];
+        }
+        catch (Exception)
+        {
+        }
     }
 
-    private void StopCountdown()
+    public void StopCountdown()
     {
-        if (_timer is null) return;
-        _timer.Stop();
-        _timer = null;
+        try
+        {
+            if (_timer is null) return;
+            _timer.Stop();
+            _timer = null;
+        }
+        catch (Exception)
+        {
+        }
     }
 }

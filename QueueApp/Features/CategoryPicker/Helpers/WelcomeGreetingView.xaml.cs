@@ -1,8 +1,5 @@
 namespace QueueApp.Features.CategoryPicker.Helpers;
 
-// Claude-new-chat-style greeting. Line 1 is the customer's name (static); line 2 is a random
-// saying, typed out character by character on appearing. Bind Name to the customer's display
-// name, or null for a generic first line.
 public partial class WelcomeGreetingView : ContentView
 {
     private static readonly string[] Sayings =
@@ -63,27 +60,39 @@ public partial class WelcomeGreetingView : ContentView
             PlayGreeting();
     }
 
-    private static void OnNameChanged(BindableObject bindable, object oldValue, object newValue)
+    public static void OnNameChanged(BindableObject bindable, object oldValue, object newValue)
     {
-        if (bindable is WelcomeGreetingView view && view.Handler is not null)
-            view.PlayGreeting();
+        try
+        {
+            if (bindable is WelcomeGreetingView view && view.Handler is not null)
+                view.PlayGreeting();
+        }
+        catch (Exception)
+        {
+        }
     }
 
-    private void PlayGreeting()
+    public void PlayGreeting()
     {
-        NameLine = string.IsNullOrWhiteSpace(Name) ? "Welcome" : $"Hi, {Name}";
-
-        var saying = Sayings[Rng.Next(Sayings.Length)];
-        var token = unchecked(++_animationToken);
-
-        Saying = string.Empty;
-        var i = 0;
-        Dispatcher.StartTimer(CharacterDelay, () =>
+        try
         {
-            if (token != _animationToken) return false;
-            i++;
-            Saying = saying[..i];
-            return i < saying.Length;
-        });
+            NameLine = string.IsNullOrWhiteSpace(Name) ? "Welcome" : $"Hi, {Name}";
+
+            var saying = Sayings[Rng.Next(Sayings.Length)];
+            var token = unchecked(++_animationToken);
+
+            Saying = string.Empty;
+            var i = 0;
+            Dispatcher.StartTimer(CharacterDelay, () =>
+            {
+                if (token != _animationToken) return false;
+                i++;
+                Saying = saying[..i];
+                return i < saying.Length;
+            });
+        }
+        catch (Exception)
+        {
+        }
     }
 }
