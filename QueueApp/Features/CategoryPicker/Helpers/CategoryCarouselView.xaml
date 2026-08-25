@@ -17,7 +17,7 @@
                                       Opacity="{Binding Available, Converter={StaticResource BoolToOpacityConverter}}">
                     <VerticalStackLayout.GestureRecognizers>
                         <TapGestureRecognizer
-                            Command="{Binding BindingContext.SelectCommand, Source={x:Reference Root}}"
+                            Command="{Binding SelectCommand, Source={x:Reference Root}}"
                             CommandParameter="{Binding .}"/>
                     </VerticalStackLayout.GestureRecognizers>
                     <Border WidthRequest="62" HeightRequest="62"
@@ -29,7 +29,7 @@
                             <MultiBinding Converter="{StaticResource ItemEqualsSelectedToColorConverter}"
                                           ConverterParameter="#39FF7A|#343D4D">
                                 <Binding Path="."/>
-                                <Binding Path="BindingContext.SelectedCategory" Source="{x:Reference Root}"/>
+                                <Binding Path="SelectedCategory" Source="{x:Reference Root}"/>
                             </MultiBinding>
                         </Border.Stroke>
                         <Image Source="{Binding IconSource}"

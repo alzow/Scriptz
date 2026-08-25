@@ -9,20 +9,45 @@ public class StubBusinessService : IBusinessService
 {
     private readonly Guid _defaultBusinessId = new("0637f5ef-c7fa-46dc-b4e5-b814f2d7d3bf");
 
+    // A second, fixed-id business so the "allow_operator_choice = false" (pooled) customer-facing
+    // flow — no picker, one Join button — is reachable and testable in USE_STUBS builds without a
+    // live Supabase project. Matches "Trim & Fade" in GetBrowseBusinessesAsync below.
+    //
+    // Known stub-fidelity gap: StubOperatorService's operator roster isn't business-scoped (a
+    // pre-existing simplification — it always returns the same "Ahmed"/"Yusuf" pair regardless of
+    // business id), and StubQueueService.StartServingAsync doesn't simulate 17a's real
+    // resource-assignment-on-Serve logic. So this covers the customer-facing join flow
+    // (17b.2/17b.4) end to end, but not the Manage-side "assign to a free bay" nuance (17b.3) —
+    // that needs the real backend once STEP-17-SUPABASE.md's SQL is applied.
+    private static readonly Guid PooledBusinessId = new("7c9e5a2b-3f6d-4e1a-8b2c-5d9f0a1e6c47");
+
     public Task<Guid> GetOwnedBusinessIdAsync() => Task.FromResult(_defaultBusinessId);
 
     public Task<BusinessResponse?> GetBusinessAsync(Guid businessId)
-        => Task.FromResult<BusinessResponse?>(new BusinessResponse
-        {
-            Id = businessId,
-            Name = "My Test Barber",
-            Category = "barber",
-            Mode = "queue",
-            Suburb = "Lenasia",
-            Address = "123 Test Street",
-            IsActive = true,
-            LastSeenAt = DateTime.UtcNow,
-        });
+        => Task.FromResult<BusinessResponse?>(businessId == PooledBusinessId
+            ? new BusinessResponse
+              {
+                  Id = businessId,
+                  Name = "Trim & Fade",
+                  Category = "barber",
+                  Mode = "queue",
+                  Suburb = "Lenasia",
+                  Address = "Main Rd, Lenasia",
+                  IsActive = true,
+                  LastSeenAt = DateTime.UtcNow,
+                  AllowOperatorChoice = false,
+              }
+            : new BusinessResponse
+              {
+                  Id = businessId,
+                  Name = "My Test Barber",
+                  Category = "barber",
+                  Mode = "queue",
+                  Suburb = "Lenasia",
+                  Address = "123 Test Street",
+                  IsActive = true,
+                  LastSeenAt = DateTime.UtcNow,
+              });
 
     public Task<List<BusinessResponse>> GetBusinessesAsync(string category, string suburb = "Lenasia")
         => Task.FromResult(new List<BusinessResponse>
@@ -67,7 +92,7 @@ public class StubBusinessService : IBusinessService
             },
             new()
             {
-                Id = Guid.NewGuid(),
+                Id = PooledBusinessId,
                 Name = "Trim & Fade",
                 Category = "barber",
                 Mode = "queue",

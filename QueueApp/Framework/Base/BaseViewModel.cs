@@ -92,4 +92,33 @@ public abstract class BaseViewModel : ObservableObject,
         System.Diagnostics.Debug.WriteLine($"Error: {exception.Message}");
         return Task.CompletedTask;
     }
+
+    // A Postgres RAISE EXCEPTION surfaces through PostgREST as a JSON body like
+    // {"message": "...", ...} — Refit's ApiException.Message is just generic HTTP status text,
+    // so a VM that wants to show the real reason (e.g. "all resources are currently busy") to
+    // the user needs this instead. Falls back to the exception's own message when there's
+    // nothing to parse (not an API error, or the body isn't the shape above).
+    protected static string GetFriendlyErrorMessage(Exception exception)
+    {
+        if (exception is Refit.ApiException { Content: { Length: > 0 } content })
+        {
+            try
+            {
+                using var doc = System.Text.Json.JsonDocument.Parse(content);
+                if (doc.RootElement.TryGetProperty("message", out var messageEl) &&
+                    messageEl.ValueKind == System.Text.Json.JsonValueKind.String)
+                {
+                    var message = messageEl.GetString();
+                    if (!string.IsNullOrWhiteSpace(message))
+                        return message;
+                }
+            }
+            catch (System.Text.Json.JsonException)
+            {
+                // Not JSON — fall through to the exception's own message.
+            }
+        }
+
+        return exception.Message;
+    }
 }

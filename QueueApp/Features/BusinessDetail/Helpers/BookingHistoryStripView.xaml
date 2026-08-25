@@ -15,7 +15,10 @@
                         <Grid ColumnDefinitions="*,Auto">
                             <VerticalStackLayout Grid.Column="0" Spacing="2">
                                 <Label Text="{Binding DateTimeDisplay}" Style="{StaticResource lbl15_Bold_TextDark}"/>
-                                <Label Style="{StaticResource lbl14_Regular_TextDark}">
+
+                                <!-- Per-operator businesses: "Service · Operator · Status" -->
+                                <Label Style="{StaticResource lbl14_Regular_TextDark}"
+                                       IsVisible="{Binding AllowOperatorChoice, Source={x:Reference Root}}">
                                     <Label.FormattedText>
                                         <FormattedString>
                                             <Span Text="{Binding ServiceName}"/>
@@ -26,6 +29,23 @@
                                         </FormattedString>
                                     </Label.FormattedText>
                                 </Label>
+
+                                <!-- Pooled businesses: "with Bay 3" is noise the customer never chose — "Service · Status" -->
+                                <Label Style="{StaticResource lbl14_Regular_TextDark}"
+                                       IsVisible="{Binding AllowOperatorChoice, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding ServiceName}"/>
+                                            <Span Text=" · "/>
+                                            <Span Text="{Binding StatusLabel}"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+
+                                <Label Text="{Binding ProgressStatus}"
+                                       Style="{StaticResource lbl13_Regular_TextLight}"
+                                       TextColor="{StaticResource Green}"
+                                       IsVisible="{Binding HasProgress}"/>
                             </VerticalStackLayout>
                             <controls:AlzowLoadingButton Grid.Column="1"
                                     Text="Cancel"

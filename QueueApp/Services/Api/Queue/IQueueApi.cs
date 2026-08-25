@@ -31,6 +31,10 @@ public interface IQueueApi
     [Post("/rpc/queue_entry_wait_minutes")]
     Task<decimal?> GetEntryWaitMinutesAsync([Body] QueueEntryIdRequest request);
 
+    // Optional, quiet staff-facing note on a serving entry — "finishing interior", etc.
+    [Post("/rpc/set_queue_progress")]
+    Task<QueueEntryResponse> SetQueueProgressAsync([Body] SetProgressRequest request);
+
     // Reads (PostgREST filter syntax, e.g. "eq.<guid>")
     [Get("/queue_entries")]
     Task<List<QueueEntryResponse>> GetActiveEntriesAsync(

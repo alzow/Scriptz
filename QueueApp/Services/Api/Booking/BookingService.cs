@@ -21,8 +21,22 @@ public class BookingService : BaseService, IBookingService
             Date = date.ToString("yyyy-MM-dd"),
         }));
 
+    public Task<List<SlotResponse>> GetAvailableSlotsAnyAsync(Guid businessId, Guid serviceId, DateTime date) =>
+        ExecuteApiCallAsync(_api.GetAvailableSlotsAnyAsync(new GetAvailableSlotsAnyRequest
+        {
+            BusinessId = businessId,
+            ServiceId = serviceId,
+            Date = date.ToString("yyyy-MM-dd"),
+        }));
+
     public Task<BookingResponse> CreateBookingAsync(CreateBookingRequest request) =>
         ExecuteApiCallAsync(_api.CreateBookingAsync(request));
+
+    public Task<BookingResponse> CreateBookingAnyAsync(CreateBookingAnyRequest request) =>
+        ExecuteApiCallAsync(_api.CreateBookingAnyAsync(request));
+
+    public Task<BookingResponse> SetBookingProgressAsync(Guid bookingId, string? status) =>
+        ExecuteApiCallAsync(_api.SetBookingProgressAsync(new SetBookingProgressRequest { BookingId = bookingId, Status = status }));
 
     public Task<BookingResponse> CancelBookingAsync(Guid bookingId) =>
         ExecuteApiCallAsync(_api.CancelBookingAsync(new CancelBookingRequest { BookingId = bookingId }));

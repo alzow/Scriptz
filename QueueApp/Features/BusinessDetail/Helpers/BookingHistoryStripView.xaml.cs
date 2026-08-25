@@ -9,6 +9,8 @@ public partial class BookingHistoryStripView : ContentView
         nameof(Bookings), typeof(IEnumerable), typeof(BookingHistoryStripView), default(IEnumerable));
     public static readonly BindableProperty CancelCommandProperty = BindableProperty.Create(
         nameof(CancelCommand), typeof(ICommand), typeof(BookingHistoryStripView), default(ICommand));
+    public static readonly BindableProperty AllowOperatorChoiceProperty = BindableProperty.Create(
+        nameof(AllowOperatorChoice), typeof(bool), typeof(BookingHistoryStripView), true);
 
     public IEnumerable Bookings
     {
@@ -20,6 +22,12 @@ public partial class BookingHistoryStripView : ContentView
     {
         get => (ICommand)GetValue(CancelCommandProperty);
         set => SetValue(CancelCommandProperty, value);
+    }
+
+    public bool AllowOperatorChoice
+    {
+        get => (bool)GetValue(AllowOperatorChoiceProperty);
+        set => SetValue(AllowOperatorChoiceProperty, value);
     }
 
     public BookingHistoryStripView()

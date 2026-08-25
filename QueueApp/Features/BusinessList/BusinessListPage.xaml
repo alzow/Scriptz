@@ -19,7 +19,7 @@
                          ItemsSource="{Binding Businesses}"
                          IsVisible="{Binding IsEmpty, Converter={StaticResource InvertedBoolConverter}}">
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="responses:BusinessResponse">
+                <DataTemplate x:DataType="responses:BrowseBusinessSummaryResponse">
                     <Border Style="{StaticResource brd16_White}"
                             Padding="16" Margin="12,6"
                             Opacity="{Binding IsAvailableNow, Converter={StaticResource BoolToOpacityConverter}}">

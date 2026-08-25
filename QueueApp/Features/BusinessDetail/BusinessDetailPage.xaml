@@ -24,11 +24,19 @@
 
             <VerticalStackLayout Spacing="10" IsVisible="{Binding IsQueueMode}">
 
-                <!-- BROWSING: not in this queue yet -->
+                <!-- BROWSING, per-operator choice allowed: not in this queue yet -->
                 <helpers:LiveQueueSummaryView
-                    IsVisible="{Binding IsInQueue, Converter={StaticResource InvertedBoolConverter}}"
+                    IsVisible="{Binding ShowOperatorList}"
                     QueueSummary="{Binding QueueSummary}"
                     JoinCommand="{Binding RequestJoinCommand}"/>
+
+                <!-- BROWSING, pooled (system assigns the resource): not in this queue yet -->
+                <helpers:PooledQueueJoinView
+                    IsVisible="{Binding ShowPooledJoin}"
+                    WaitingCount="{Binding PooledWaitingCount}"
+                    WaitMinutes="{Binding PooledWaitMinutes}"
+                    JoinCommand="{Binding RequestPooledJoinCommand}"
+                    IsJoining="{Binding IsJoining}"/>
 
                 <!-- IN QUEUE: show position, not the summary list -->
                 <helpers:MyQueueStatusView
@@ -67,7 +75,8 @@
                     <helpers:BookingHistoryStripView
                         IsVisible="{Binding ShowBookingHistory}"
                         Bookings="{Binding MyBookings}"
-                        CancelCommand="{Binding CancelBookingCommand}"/>
+                        CancelCommand="{Binding CancelBookingCommand}"
+                        AllowOperatorChoice="{Binding AllowOperatorChoice}"/>
 
                     <Label Text="No staff available to book with right now." IsVisible="{Binding IsNoOperatorsAvailable}"
                            Style="{StaticResource lbl14_Regular_TextDark}"/>

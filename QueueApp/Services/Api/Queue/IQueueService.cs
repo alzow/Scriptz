@@ -15,5 +15,6 @@ public interface IQueueService
     Task<MyQueueStatusResponse?> GetMyQueueStatusAsync(Guid businessId);
     Task<MyActiveQueueEntryResponse?> GetMyActiveEntryAsync();
     Task<decimal?> GetEntryWaitMinutesAsync(Guid entryId);
+    Task<QueueEntryResponse> SetQueueProgressAsync(Guid entryId, string? status);
     Task<List<VisitResponse>> GetMyVisitsAsync(Guid customerId);
 }

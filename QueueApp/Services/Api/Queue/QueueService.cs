@@ -65,6 +65,9 @@ public class QueueService : BaseService, IQueueService
     public Task<decimal?> GetEntryWaitMinutesAsync(Guid entryId) =>
         ExecuteApiCallAsync(_api.GetEntryWaitMinutesAsync(new QueueEntryIdRequest { EntryId = entryId }));
 
+    public Task<QueueEntryResponse> SetQueueProgressAsync(Guid entryId, string? status) =>
+        ExecuteApiCallAsync(_api.SetQueueProgressAsync(new SetProgressRequest { EntryId = entryId, Status = status }));
+
     public Task<List<VisitResponse>> GetMyVisitsAsync(Guid customerId) =>
         ExecuteApiCallAsync(_api.GetMyVisitsAsync($"eq.{customerId}"));
 }

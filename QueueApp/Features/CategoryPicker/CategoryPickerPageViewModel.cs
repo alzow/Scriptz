@@ -125,7 +125,6 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
                 LocationLabel = cached.Label;
             }
 
-            SelectedCategory ??= Categories.FirstOrDefault(c => c.Available) ?? Categories.First();
             await LoadAsync();
 
             await RefreshLocationAsync(silent: true);
@@ -275,12 +274,9 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         {
             await RefreshActiveEntryAsync();
 
-            if (SelectedCategory is not null)
-            {
-                _allBusinesses = await _businessService.GetBrowseBusinessesAsync(
-                    SelectedCategory.Key, customerLatitude: _customerLatitude, customerLongitude: _customerLongitude);
-                ApplyBusinessFilter();
-            }
+            _allBusinesses = await _businessService.GetBrowseBusinessesAsync(
+                SelectedCategory?.Key, customerLatitude: _customerLatitude, customerLongitude: _customerLongitude);
+            ApplyBusinessFilter();
 
             if (_customerId != Guid.Empty)
             {
@@ -381,10 +377,10 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     {
         try
         {
-            if (!category.Available || category == SelectedCategory)
+            if (!category.Available)
                 return;
 
-            SelectedCategory = category;
+            SelectedCategory = category == SelectedCategory ? null : category;
             await LoadAsync();
         }
         catch (Exception ex)
@@ -425,11 +421,12 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     [RelayCommand]
     public async Task SeeAllBusinessesAsync()
     {
-        if (SelectedCategory is null) return;
-
         try
         {
-            var navParams = new NavigationParameters { [NavigationKeys.Category] = SelectedCategory.Key };
+            var navParams = new NavigationParameters();
+            if (SelectedCategory is not null)
+                navParams[NavigationKeys.Category] = SelectedCategory.Key;
+
             _messenger.Send(new NavigateAwayFromTabsMessage(
                 $"/NavigationPage/{NavigationPaths.BusinessListPage}", navParams, true));
         }

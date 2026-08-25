@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:QueueApp.Features.BookingAgenda"
              xmlns:models="clr-namespace:QueueApp.Services.Api.Booking.Models"
              xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
+             xmlns:queueEntry="clr-namespace:QueueApp.Shared.Templates.QueueEntry"
              x:Name="Root"
              Title="Bookings"
              IconImageSource="icon_manage_business"
@@ -102,6 +103,20 @@
                                             CommandParameter="{Binding .}" IsLoading="{Binding IsCancelling}"
                                             ButtonStyle="{StaticResource DangerButtonStyle}"/>
                                 </HorizontalStackLayout>
+
+                                <!-- Optional, quiet — never blocks Confirm/Complete/Cancel -->
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6" Margin="0,4,0,0">
+                                    <queueEntry:QueueEntry Grid.Column="0"
+                                            Text="{Binding ProgressStatus}"
+                                            Placeholder="What's happening? (optional)"/>
+                                    <controls:AlzowLoadingButton Grid.Column="1" Text="Save"
+                                            LoadingText="Saving…"
+                                            Margin="0" HeightRequest="44"
+                                            Command="{Binding BindingContext.SaveProgressCommand, Source={x:Reference Root}}"
+                                            CommandParameter="{Binding .}"
+                                            IsLoading="{Binding IsSavingProgress}"
+                                            ButtonStyle="{StaticResource TertiaryButtonStyle}"/>
+                                </Grid>
                             </VerticalStackLayout>
                         </Border>
                     </DataTemplate>

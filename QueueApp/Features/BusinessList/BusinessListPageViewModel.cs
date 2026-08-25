@@ -15,7 +15,7 @@ namespace QueueApp.Features.BusinessList;
 public partial class BusinessListPageViewModel : BaseViewModel
 {
     private readonly IBusinessService _businessService;
-    private string _category = "";
+    private string? _category;
 
     public BusinessListPageViewModel(
         INavigationService navigationService,
@@ -26,7 +26,7 @@ public partial class BusinessListPageViewModel : BaseViewModel
         _businessService = businessService;
     }
 
-    public ObservableCollection<BusinessResponse> Businesses { get; } = new();
+    public ObservableCollection<BrowseBusinessSummaryResponse> Businesses { get; } = new();
     public bool IsLoading { get; set; }
     public bool IsEmpty => Businesses.Count == 0 && !IsLoading;
 
@@ -38,9 +38,11 @@ public partial class BusinessListPageViewModel : BaseViewModel
 
             _category = parameters is not null && parameters.TryGetValue(NavigationKeys.Category, out var catObj)
                 ? (string)catObj
-                : throw new InvalidOperationException("BusinessListPage requires a 'category' parameter.");
+                : null;
 
-            Title = CategoryCatalog.All.First(c => c.Key == _category).Display;
+            Title = _category is not null
+                ? CategoryCatalog.All.First(c => c.Key == _category).Display
+                : "All businesses";
             await LoadAsync();
         }
         catch (Exception ex)
@@ -55,7 +57,7 @@ public partial class BusinessListPageViewModel : BaseViewModel
         IsLoading = true;
         try
         {
-            var results = await _businessService.GetBusinessesAsync(_category);
+            var results = await _businessService.GetBrowseBusinessesAsync(_category);
             Businesses.Clear();
             foreach (var b in results.OrderByDescending(b => b.IsAvailableNow))
                 Businesses.Add(b);
@@ -86,7 +88,7 @@ public partial class BusinessListPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task OpenBusinessAsync(BusinessResponse business)
+    private async Task OpenBusinessAsync(BrowseBusinessSummaryResponse business)
     {
         try
         {

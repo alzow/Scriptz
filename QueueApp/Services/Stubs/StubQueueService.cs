@@ -157,11 +157,19 @@ public class StubQueueService : IQueueService
             Status = mine.Status,
             JoinedAt = mine.JoinedAt,
             WaitMinutes = position * 7,
+            ProgressStatus = mine.ProgressStatus,
         });
     }
 
     public Task<decimal?> GetEntryWaitMinutesAsync(Guid entryId)
         => Task.FromResult<decimal?>(10);
+
+    public Task<QueueEntryResponse> SetQueueProgressAsync(Guid entryId, string? status)
+    {
+        var entry = _entries.FirstOrDefault(e => e.Id == entryId);
+        if (entry != null) entry.ProgressStatus = status;
+        return Task.FromResult(entry ?? new QueueEntryResponse { Id = entryId, ProgressStatus = status });
+    }
 
     public Task<List<VisitResponse>> GetMyVisitsAsync(Guid customerId)
         => Task.FromResult(new List<VisitResponse>());

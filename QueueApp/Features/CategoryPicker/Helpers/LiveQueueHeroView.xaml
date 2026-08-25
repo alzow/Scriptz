@@ -50,6 +50,13 @@
                             </FormattedString>
                         </Label.FormattedText>
                     </Label>
+                    <VerticalStackLayout Spacing="1"
+                           IsVisible="{Binding ActiveEntry.HasProgress, Source={x:Reference Root}}">
+                        <Label Text="LATEST UPDATE" Style="{StaticResource SectionTitle}" FontSize="8" TextColor="{StaticResource Green}"/>
+                        <Label Text="{Binding ActiveEntry.ProgressStatus, Source={x:Reference Root}}"
+                               Style="{StaticResource lbl13_Regular_TextLight}"
+                               TextColor="{StaticResource Green}"/>
+                    </VerticalStackLayout>
                     <Label Style="{StaticResource lbl18_Bold_TextDark}"
                            IsVisible="{Binding ActiveEntry.IsBeingServed, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}">
                         <Label.FormattedText>

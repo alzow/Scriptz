@@ -138,6 +138,15 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private async Task SaveProgressAsync(AgendaBookingResponse booking)
+    {
+        booking.IsSavingProgress = true;
+        try { await _bookingService.SetBookingProgressAsync(booking.Id, booking.ProgressStatus); }
+        catch (Exception ex) { await HandleExceptionAsync(ex); }
+        finally { booking.IsSavingProgress = false; }
+    }
+
+    [RelayCommand]
     private async Task OpenSettingsAsync()
     {
         await NavigationService.NavigateAsync(NavigationPaths.BusinessSettingsPage);
