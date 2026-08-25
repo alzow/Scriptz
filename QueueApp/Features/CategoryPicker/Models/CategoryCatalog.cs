@@ -6,7 +6,7 @@ public static class CategoryCatalog
 {
     public static readonly IReadOnlyList<ServiceCategory> All = new List<ServiceCategory>
     {
-        new("barber",     "Barbers",           "ic_barbershop",  false),
+        new("barber",     "Barbers",           "ic_barbershop",  true),
         new("hairsalon",  "Hair salons",       "ic_hair_salon",  false),
         new("nails",      "Nails & beauty",    "ic_nails",       false),
         new("spa",        "Spa & wellness",    "ic_spa",         false),
