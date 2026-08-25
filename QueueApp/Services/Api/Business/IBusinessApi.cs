@@ -9,7 +9,8 @@ public interface IBusinessApi
     [Get("/businesses")]
     Task<List<BusinessIdResponse>> GetOwnedBusinessesAsync(
         [AliasAs("owner_id")] string ownerIdEq,
-        [AliasAs("select")] string select = "id");
+        [AliasAs("select")] string select = "id",
+        [AliasAs("is_active")] string isActiveEq = "eq.true");
 
     [Get("/businesses")]
     Task<List<BusinessResponse>> GetBusinessesAsync(
