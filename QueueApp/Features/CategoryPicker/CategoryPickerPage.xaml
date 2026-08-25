@@ -63,7 +63,7 @@
 
                 <!-- Nearby businesses -->
                 <Grid ColumnDefinitions="*,Auto" Margin="0,26,0,10">
-                    <Label Grid.Column="0" Text="OPEN NOW NEAR YOU" Style="{StaticResource SectionTitle}"/>
+                    <Label Grid.Column="0" Text="NEAR YOU" Style="{StaticResource SectionTitle}"/>
                     <Label Grid.Column="1" Text="See all" Style="{StaticResource lbl13_Bold_Orange}" FontSize="11">
                         <Label.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding SeeAllBusinessesCommand}"/>

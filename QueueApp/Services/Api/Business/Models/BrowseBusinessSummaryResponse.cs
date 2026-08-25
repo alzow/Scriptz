@@ -49,15 +49,6 @@ public class BrowseBusinessSummaryResponse
     }
 
     [JsonIgnore]
-    public string PillText => WaitBucket switch
-    {
-        "off" => "Closed",
-        "book" => "Booking",
-        "unknown" => "—",
-        _ => $"{AvgWaitMinutes:0} min",
-    };
-
-    [JsonIgnore]
     public string SubText
     {
         get
