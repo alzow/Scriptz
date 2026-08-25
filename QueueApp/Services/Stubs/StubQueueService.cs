@@ -157,6 +157,7 @@ public class StubQueueService : IQueueService
             Status = mine.Status,
             JoinedAt = mine.JoinedAt,
             WaitMinutes = position * 7,
+            ProgressStatus = mine.ProgressStatus,
         });
     }
 
