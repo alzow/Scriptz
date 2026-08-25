@@ -2,143 +2,1080 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.BusinessDetail"
-             xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
+             xmlns:models="clr-namespace:QueueApp.Features.BusinessDetail.Models"
              xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
-             xmlns:helpers="clr-namespace:QueueApp.Features.BusinessDetail.Helpers"
-             x:Name="Root"
              x:Class="QueueApp.Features.BusinessDetail.BusinessDetailPage"
              x:DataType="vm:BusinessDetailPageViewModel"
-             Title="{Binding Business.Name}"
+             Title="{Binding BusinessName}"
+             BackgroundColor="{StaticResource DeepBackground}"
              Style="{StaticResource NavigationPageStyle}">
 
-    <Grid RowDefinitions="Auto,*">
-        <templates:AlzowSubPageHeader Grid.Row="0"
-                                       Title="{Binding Business.Name}"
-                                       BackCommand="{Binding GoBackCommand}"/>
+    <Grid RowDefinitions="Auto,*,Auto">
 
-        <ScrollView Grid.Row="1">
-        <VerticalStackLayout Padding="20" Spacing="16">
+        <!-- ================= TOP BAR — flow and confirmation only ================= -->
+        <Grid Grid.Row="0"
+              ColumnDefinitions="Auto,*"
+              ColumnSpacing="12"
+              Padding="20,14,20,6"
+              IsVisible="{Binding IsShowingLanding, Converter={StaticResource InvertedBoolConverter}}">
 
-            <Label Text="{Binding Business.Name}" Style="{StaticResource lbl24_Bold_TextDark}"/>
-            <Label Text="{Binding Business.Address}" Style="{StaticResource lbl14_Regular_TextDark}"/>
+            <Border Grid.Column="0" WidthRequest="36" HeightRequest="36" Padding="0"
+                    BackgroundColor="{StaticResource Surface}"
+                    Stroke="{StaticResource Line}" StrokeThickness="1">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="11"/>
+                </Border.StrokeShape>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding GoBackCommand}"/>
+                </Border.GestureRecognizers>
+                <Image Source="ic_chevron_left" WidthRequest="18" HeightRequest="18"
+                       HorizontalOptions="Center" VerticalOptions="Center"/>
+            </Border>
 
-            <VerticalStackLayout Spacing="10" IsVisible="{Binding IsQueueMode}">
+            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                <Label Text="{Binding FlowTitle}" Style="{StaticResource lbl15_Bold_TextDark}"
+                       IsVisible="{Binding IsFlowActive}"/>
+                <Label Text="{Binding TicketHeadline}" Style="{StaticResource lbl15_Bold_TextDark}"
+                       IsVisible="{Binding IsInQueue}"/>
+                <Label Text="Request sent" Style="{StaticResource lbl15_Bold_TextDark}"
+                       IsVisible="{Binding ActiveBooking, Converter={StaticResource IsNotNullConverter}}"/>
+                <Label Text="{Binding BusinessName}" Style="{StaticResource lbl11_Bold_White}"
+                       TextColor="{StaticResource TextMuted}"/>
+            </VerticalStackLayout>
+        </Grid>
 
-                <!-- BROWSING, per-operator choice allowed: not in this queue yet -->
-                <helpers:LiveQueueSummaryView
-                    IsVisible="{Binding ShowOperatorList}"
-                    QueueSummary="{Binding QueueSummary}"
-                    JoinCommand="{Binding RequestJoinCommand}"/>
+        <!-- ========================================================================
+             LANDING
+             ======================================================================== -->
+        <ScrollView Grid.Row="1" x:Name="LandingScroll" IsVisible="{Binding IsShowingLanding}">
+            <VerticalStackLayout Spacing="0" Padding="0,0,0,24">
 
-                <!-- BROWSING, pooled (system assigns the resource): not in this queue yet -->
-                <helpers:PooledQueueJoinView
-                    IsVisible="{Binding ShowPooledJoin}"
-                    WaitingCount="{Binding PooledWaitingCount}"
-                    WaitMinutes="{Binding PooledWaitMinutes}"
-                    JoinCommand="{Binding RequestPooledJoinCommand}"
-                    IsJoining="{Binding IsJoining}"/>
+                <!-- Back row: the word, not a bare chevron -->
+                <HorizontalStackLayout Spacing="6" Padding="20,12,20,16">
+                    <HorizontalStackLayout.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}"/>
+                    </HorizontalStackLayout.GestureRecognizers>
+                    <Image Source="ic_chevron_left" WidthRequest="16" HeightRequest="16" VerticalOptions="Center"/>
+                    <Label Text="Back" Style="{StaticResource lbl13_Regular_TextMid}" VerticalOptions="Center"/>
+                </HorizontalStackLayout>
 
-                <!-- IN QUEUE: show position, not the summary list -->
-                <helpers:MyQueueStatusView
-                    IsVisible="{Binding IsInQueue}"
-                    MyStatus="{Binding MyStatus}"
-                    MyWaitMinutes="{Binding MyWaitMinutes}"
-                    IsBeingServed="{Binding IsBeingServed}"
-                    LeaveCommand="{Binding LeaveCommand}"
-                    IsLeaving="{Binding IsLeaving}"/>
+                <!-- Title + OPEN/CLOSED pill -->
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Padding="20,0">
+                    <Label Grid.Column="0" Text="{Binding BusinessName}"
+                           Style="{StaticResource lbl24_Bold_TextDark}"/>
+                    <Border Grid.Column="1" Padding="9,5" VerticalOptions="Start"
+                            BackgroundColor="{StaticResource GreenSelectedFill}"
+                            Stroke="Transparent" StrokeThickness="0">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="8"/>
+                        </Border.StrokeShape>
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding IsOpen}" Value="False">
+                                <Setter Property="BackgroundColor" Value="Transparent"/>
+                                <Setter Property="Stroke" Value="{StaticResource Line}"/>
+                                <Setter Property="StrokeThickness" Value="1"/>
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Label Text="{Binding OpenPillText}" Style="{StaticResource lbl10_Mono_Green}">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding IsOpen}" Value="False">
+                                    <Setter Property="TextColor" Value="{StaticResource TextFaint}"/>
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </Border>
+                </Grid>
 
-                <!-- JOIN: required service picker, appears once "Join" is tapped for a given operator -->
-                <VerticalStackLayout Spacing="12" IsVisible="{Binding ShowQueueServicePicker}">
-                    <helpers:ServicePickerView
-                        IsSectionVisible="{Binding ShowQueueServicePicker}"
-                        IsEmpty="{Binding IsQueueServicesEmpty}"
-                        Services="{Binding QueueServices}"
-                        SelectedService="{Binding SelectedQueueService}"
-                        SelectCommand="{Binding SelectQueueServiceCommand}"/>
+                <Label Text="{Binding AddressLine}" Style="{StaticResource lbl13_Regular_TextMid}"
+                       Padding="20,7,20,0"/>
 
-                    <controls:AlzowLoadingButton
-                        Text="Confirm"
-                        LoadingText="Joining…"
-                        Command="{Binding ConfirmJoinCommand}"
-                        IsLoading="{Binding IsJoining}"
-                        IsEnabled="{Binding SelectedQueueService, Converter={StaticResource IsNotNullConverter}}"
-                        ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
+                <!-- Mode line closes the header with a bottom border -->
+                <Label Text="{Binding ModeLine}" Style="{StaticResource lbl10_Mono_TextFaint}"
+                       Padding="20,12,20,16"/>
+                <BoxView HeightRequest="1" BackgroundColor="{StaticResource Line}" Margin="20,0"/>
+
+                <!-- ===================== LIVE CARD ===================== -->
+                <Border x:Name="LiveCard" Margin="20,18,20,0" Padding="15"
+                        BackgroundColor="{StaticResource Surface}"
+                        Stroke="{StaticResource Line}" StrokeThickness="1">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="18"/>
+                    </Border.StrokeShape>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsBookingMode}" Value="True">
+                            <Setter Property="Stroke" Value="{StaticResource PurpleDim}"/>
+                        </DataTrigger>
+                    </Border.Triggers>
+
+                    <VerticalStackLayout Spacing="0">
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="{Binding LiveCardTitle}"
+                                   Style="{StaticResource lbl9_Mono_TextMuted}" VerticalOptions="Center"/>
+                            <HorizontalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
+                                <Ellipse WidthRequest="6" HeightRequest="6" VerticalOptions="Center"
+                                         Fill="{StaticResource Green}"
+                                         IsVisible="{Binding ShowLiveDot}"/>
+                                <Label Text="{Binding LiveCardStatus}" Style="{StaticResource lbl10_Mono_Green}">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsBookingMode}" Value="True">
+                                            <Setter Property="TextColor" Value="{StaticResource Purple}"/>
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsOpen}" Value="False">
+                                            <Setter Property="TextColor" Value="{StaticResource TextFaint}"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </HorizontalStackLayout>
+                        </Grid>
+
+                        <!-- Three stats -->
+                        <Grid ColumnDefinitions="*,1,*,1,*" Margin="0,14,0,15">
+                            <VerticalStackLayout Grid.Column="0" Spacing="6">
+                                <Label Text="{Binding PrimaryStatValue}" HorizontalOptions="Center"
+                                       Style="{StaticResource lbl22_Mono_TextPrimary}"/>
+                                <Label Text="{Binding PrimaryStatLabel}" HorizontalOptions="Center"
+                                       Style="{StaticResource lbl12_Regular_TextLight}"/>
+                            </VerticalStackLayout>
+                            <BoxView Grid.Column="1" WidthRequest="1" HeightRequest="30"
+                                     BackgroundColor="{StaticResource Line}" VerticalOptions="Center"/>
+                            <VerticalStackLayout Grid.Column="2" Spacing="6">
+                                <Label Text="{Binding SecondaryStatValue}" HorizontalOptions="Center"
+                                       Style="{StaticResource lbl22_Mono_TextPrimary}"/>
+                                <Label Text="{Binding SecondaryStatLabel}" HorizontalOptions="Center"
+                                       Style="{StaticResource lbl12_Regular_TextLight}"/>
+                            </VerticalStackLayout>
+                            <BoxView Grid.Column="3" WidthRequest="1" HeightRequest="30"
+                                     BackgroundColor="{StaticResource Line}" VerticalOptions="Center"/>
+                            <VerticalStackLayout Grid.Column="4" Spacing="6">
+                                <Label Text="{Binding TertiaryStatValue}" HorizontalOptions="Center"
+                                       Style="{StaticResource lbl22_Mono_TextPrimary}"/>
+                                <Label Text="{Binding TertiaryStatLabel}" HorizontalOptions="Center"
+                                       Style="{StaticResource lbl12_Regular_TextLight}"/>
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <!-- One CTA, inside the card. No shadow: the green fill is loud enough. -->
+                        <Button Text="{Binding CtaText}"
+                                Command="{Binding StartFlowCommand}"
+                                IsEnabled="{Binding IsCtaEnabled}"
+                                HeightRequest="48"
+                                Style="{StaticResource PrimaryButtonStyle}"/>
+
+                        <Label Text="{Binding LiveFootnote}" HorizontalOptions="Center"
+                               Margin="0,11,0,0"
+                               Style="{StaticResource lbl9_Mono_TextMuted}"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ===================== SERVICES — display only ===================== -->
+                <Grid ColumnDefinitions="*,Auto" Padding="20,22,20,10" IsVisible="{Binding HasServices}">
+                    <Label Grid.Column="0" Text="Services" Style="{StaticResource lbl15_Bold_TextDark}"/>
+                    <Label Grid.Column="1" Text="{Binding ServicesCountText}" VerticalOptions="Center"
+                           Style="{StaticResource lbl9_Mono_TextMuted}"/>
+                </Grid>
+
+                <CollectionView ItemsSource="{Binding ServiceRows}"
+                                HeightRequest="{Binding ServicesListHeight}"
+                                IsVisible="{Binding HasServices}"
+                                Margin="20,0">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:ServiceChoiceItem">
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12"
+                                  Padding="12" HeightRequest="50">
+                                <Label Grid.Column="0" Text="{Binding Name}" VerticalOptions="Center"
+                                       Style="{StaticResource lbl14_Bold_TextDark}"/>
+                                <Label Grid.Column="1" Text="{Binding DurationText}" VerticalOptions="Center"
+                                       Style="{StaticResource lbl12_Regular_TextLight}"/>
+                                <Label Grid.Column="2" Text="{Binding PriceText}" VerticalOptions="Center"
+                                       Style="{StaticResource lbl13_Mono_TextPrimary}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- ===================== TEAM / BAYS ===================== -->
+                <Grid ColumnDefinitions="*,Auto" Padding="20,22,20,10" IsVisible="{Binding HasTeam}">
+                    <Label Grid.Column="0" Text="{Binding TeamSectionTitle}" Style="{StaticResource lbl15_Bold_TextDark}"/>
+                    <Label Grid.Column="1" Text="{Binding TeamCountText}" VerticalOptions="Center"
+                           Style="{StaticResource lbl9_Mono_TextMuted}"/>
+                </Grid>
+
+                <CollectionView ItemsSource="{Binding TeamMembers}"
+                                HeightRequest="98"
+                                IsVisible="{Binding HasTeam}"
+                                Margin="20,0">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="10"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:TeamMemberItem">
+                            <VerticalStackLayout WidthRequest="78" Spacing="0"
+                                                 Opacity="{Binding RowOpacity}">
+                                <Grid WidthRequest="52" HeightRequest="52" HorizontalOptions="Center">
+                                    <!-- Neutral, never purple: identity is not a status -->
+                                    <Border BackgroundColor="{StaticResource SurfaceRaised}"
+                                            Stroke="{StaticResource Line}" StrokeThickness="1"
+                                            WidthRequest="52" HeightRequest="52" Padding="0">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="26"/>
+                                        </Border.StrokeShape>
+                                        <Label Text="{Binding Initials}"
+                                               HorizontalOptions="Center" VerticalOptions="Center"
+                                               Style="{StaticResource lbl13_Mono_TextPrimary}"/>
+                                    </Border>
+                                    <Ellipse WidthRequest="11" HeightRequest="11"
+                                             Fill="{StaticResource Green}"
+                                             Stroke="{StaticResource DeepBackground}" StrokeThickness="2.5"
+                                             HorizontalOptions="End" VerticalOptions="End"
+                                             IsVisible="{Binding IsOnShift}"/>
+                                </Grid>
+                                <Label Text="{Binding Name}" HorizontalOptions="Center" Margin="0,8,0,0"
+                                       Style="{StaticResource lbl12_Regular_Cream}"/>
+                                <Label Text="{Binding SubLabel}" HorizontalOptions="Center" Margin="0,2,0,0"
+                                       Style="{StaticResource lbl12_Regular_TextLight}" FontSize="10"/>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- ===================== GETTING THERE ===================== -->
+                <Label Text="Getting there" Style="{StaticResource lbl15_Bold_TextDark}" Padding="20,22,20,10"/>
+
+                <Border Margin="20,0" Padding="13"
+                        BackgroundColor="{StaticResource Surface}"
+                        Stroke="{StaticResource Line}" StrokeThickness="1">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="15"/>
+                    </Border.StrokeShape>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenDirectionsCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                        <Border Grid.Column="0" WidthRequest="42" HeightRequest="42" Padding="0"
+                                BackgroundColor="{StaticResource SurfaceRaised}"
+                                Stroke="{StaticResource Line}" StrokeThickness="1">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="13"/>
+                            </Border.StrokeShape>
+                            <Image Source="ic_pin" WidthRequest="19" HeightRequest="19"
+                                   HorizontalOptions="Center" VerticalOptions="Center"/>
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                            <Label Text="{Binding AddressLine}" Style="{StaticResource lbl14_Bold_TextDark}"/>
+                            <Label Text="{Binding DistanceText}" Style="{StaticResource lbl12_Regular_TextLight}"
+                                   IsVisible="{Binding HasDistance}"/>
+                        </VerticalStackLayout>
+                        <Image Grid.Column="2" Source="ic_chevron_right" WidthRequest="16" HeightRequest="16"
+                               VerticalOptions="Center"/>
+                    </Grid>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ========================================================================
+             STEP FLOW — inline takeover, no page push
+             ======================================================================== -->
+        <Grid Grid.Row="1" RowDefinitions="Auto,*" IsVisible="{Binding IsFlowActive}">
+
+            <VerticalStackLayout Grid.Row="0" Spacing="0">
+
+                <!-- Rail: one equal segment per step that will actually happen, so a two-step flow
+                     looks like a two-step flow. FlexLayout because the segment count is dynamic and
+                     the widths have to divide the row. -->
+                <FlexLayout Direction="Row" JustifyContent="SpaceBetween" HeightRequest="3"
+                            Margin="20,16,20,0"
+                            BindableLayout.ItemsSource="{Binding RailSegments}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:RailSegment">
+                            <BoxView HeightRequest="3" CornerRadius="2" Margin="2,0"
+                                     FlexLayout.Grow="1" FlexLayout.Basis="0"
+                                     BackgroundColor="{StaticResource Line}">
+                                <BoxView.Triggers>
+                                    <DataTrigger TargetType="BoxView" Binding="{Binding IsDone}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource GreenDim}"/>
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="BoxView" Binding="{Binding IsCurrent}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource Green}"/>
+                                    </DataTrigger>
+                                </BoxView.Triggers>
+                            </BoxView>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+
+                <Grid ColumnDefinitions="*,Auto" Padding="20,9,20,0">
+                    <Label Grid.Column="0" Text="{Binding RailStepLabel}" Style="{StaticResource lbl10_Mono_Green}"/>
+                    <Label Grid.Column="1" Text="{Binding RailCountText}" Style="{StaticResource lbl10_Mono_TextFaint}"/>
+                </Grid>
+
+                <!-- Crumbs: completed steps, tappable to jump back -->
+                <CollectionView ItemsSource="{Binding Crumbs}" HeightRequest="40"
+                                IsVisible="{Binding HasCrumbs}" Margin="20,10,20,0">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="7"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:CrumbChip">
+                            <Border Padding="9,5" VerticalOptions="Center"
+                                    BackgroundColor="{StaticResource SurfaceRaised}"
+                                    Stroke="{StaticResource Line}" StrokeThickness="1">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="9"/>
+                                </Border.StrokeShape>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BusinessDetailPageViewModel}}, Path=JumpToCrumbCommand}"
+                                        CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="6">
+                                    <Label Text="{Binding Text}" Style="{StaticResource lbl12_Regular_Cream}"
+                                           VerticalOptions="Center"/>
+                                    <Image Source="ic_close" WidthRequest="10" HeightRequest="10"
+                                           VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <VerticalStackLayout Spacing="7" Padding="20,20,20,14">
+                    <Label Text="{Binding StepHeading}" Style="{StaticResource lbl22_Bold_Cream}"/>
+                    <Label Text="{Binding StepSubheading}" Style="{StaticResource lbl12_Regular_TextLight}"/>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Step bodies are siblings toggled by IsVisible — nothing is re-templated on Next -->
+            <Grid Grid.Row="1">
+
+                <!-- OPERATOR STEP -->
+                <CollectionView ItemsSource="{Binding OperatorChoices}"
+                                IsVisible="{Binding ShowOperatorStep}"
+                                Margin="20,0,20,0">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:OperatorChoiceItem">
+                            <VerticalStackLayout Spacing="0">
+                                <Border Padding="12" Margin="0,0,0,8"
+                                        BackgroundColor="{StaticResource Surface}"
+                                        Stroke="{StaticResource Line}" StrokeThickness="1">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="15"/>
+                                    </Border.StrokeShape>
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="Stroke" Value="{StaticResource Green}"/>
+                                            <Setter Property="BackgroundColor" Value="{StaticResource GreenSelectedFill}"/>
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BusinessDetailPageViewModel}}, Path=SelectOperatorCommand}"
+                                            CommandParameter="{Binding .}"/>
+                                    </Border.GestureRecognizers>
+
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                        <Border Grid.Column="0" WidthRequest="42" HeightRequest="42" Padding="0"
+                                                BackgroundColor="{StaticResource SurfaceRaised}"
+                                                Stroke="{StaticResource Line}" StrokeThickness="1">
+                                            <Border.StrokeShape>
+                                                <RoundRectangle CornerRadius="21"/>
+                                            </Border.StrokeShape>
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsAnyAvailable}" Value="True">
+                                                    <Setter Property="Stroke" Value="{StaticResource GreenDim}"/>
+                                                </DataTrigger>
+                                            </Border.Triggers>
+                                            <Label Text="{Binding Initials}"
+                                                   HorizontalOptions="Center" VerticalOptions="Center"
+                                                   Style="{StaticResource lbl13_Mono_TextPrimary}">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsAnyAvailable}" Value="True">
+                                                        <Setter Property="TextColor" Value="{StaticResource Green}"/>
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                        </Border>
+
+                                        <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                            <HorizontalStackLayout Spacing="7">
+                                                <Label Text="{Binding Name}" Style="{StaticResource lbl14_Bold_TextDark}"
+                                                       VerticalOptions="Center"/>
+                                                <Border Padding="6,3" IsVisible="{Binding ShowFastestTag}"
+                                                        BackgroundColor="{StaticResource GreenSelectedFill}"
+                                                        Stroke="Transparent" StrokeThickness="0"
+                                                        VerticalOptions="Center">
+                                                    <Border.StrokeShape>
+                                                        <RoundRectangle CornerRadius="6"/>
+                                                    </Border.StrokeShape>
+                                                    <Label Text="FASTEST" Style="{StaticResource lbl9_Mono_Green}"/>
+                                                </Border>
+                                            </HorizontalStackLayout>
+                                            <Label Text="{Binding SubLabel}" Style="{StaticResource lbl12_Regular_TextLight}"/>
+                                        </VerticalStackLayout>
+
+                                        <Border Grid.Column="2" WidthRequest="22" HeightRequest="22" Padding="0"
+                                                BackgroundColor="Transparent"
+                                                Stroke="{StaticResource Line}" StrokeThickness="1"
+                                                VerticalOptions="Center">
+                                            <Border.StrokeShape>
+                                                <RoundRectangle CornerRadius="11"/>
+                                            </Border.StrokeShape>
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                    <Setter Property="Stroke" Value="{StaticResource Green}"/>
+                                                </DataTrigger>
+                                            </Border.Triggers>
+                                            <Image Source="ic_check" WidthRequest="12" HeightRequest="12"
+                                                   HorizontalOptions="Center" VerticalOptions="Center"
+                                                   IsVisible="{Binding IsSelected}"/>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+
+                                <!-- "or choose" separates the pinned any-available row from named operators -->
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="0,4,0,12"
+                                      IsVisible="{Binding IsAnyAvailable}">
+                                    <Label Grid.Column="0" Text="OR CHOOSE" Style="{StaticResource lbl9_Mono_TextFaint}"
+                                           VerticalOptions="Center"/>
+                                    <BoxView Grid.Column="1" HeightRequest="1" VerticalOptions="Center"
+                                             BackgroundColor="{StaticResource Line}"/>
+                                </Grid>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- SERVICE STEP -->
+                <CollectionView ItemsSource="{Binding ServiceRows}"
+                                IsVisible="{Binding ShowServiceStep}"
+                                Margin="20,0,20,0">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:ServiceChoiceItem">
+                            <Border Padding="12" Margin="0,0,0,8"
+                                    BackgroundColor="{StaticResource Surface}"
+                                    Stroke="{StaticResource Line}" StrokeThickness="1">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="15"/>
+                                </Border.StrokeShape>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                        <Setter Property="Stroke" Value="{StaticResource Green}"/>
+                                        <Setter Property="BackgroundColor" Value="{StaticResource GreenSelectedFill}"/>
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BusinessDetailPageViewModel}}, Path=SelectServiceCommand}"
+                                        CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
+
+                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
+                                        <Label Text="{Binding Name}" Style="{StaticResource lbl14_Bold_TextDark}"/>
+                                        <Label Text="{Binding DurationText}" Style="{StaticResource lbl12_Regular_TextLight}"/>
+                                    </VerticalStackLayout>
+                                    <Label Grid.Column="1" Text="{Binding PriceText}" VerticalOptions="Center"
+                                           Style="{StaticResource lbl13_Mono_TextPrimary}"/>
+                                    <Border Grid.Column="2" WidthRequest="22" HeightRequest="22" Padding="0"
+                                            BackgroundColor="Transparent"
+                                            Stroke="{StaticResource Line}" StrokeThickness="1"
+                                            VerticalOptions="Center">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="11"/>
+                                        </Border.StrokeShape>
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="Stroke" Value="{StaticResource Green}"/>
+                                            </DataTrigger>
+                                        </Border.Triggers>
+                                        <Image Source="ic_check" WidthRequest="12" HeightRequest="12"
+                                               HorizontalOptions="Center" VerticalOptions="Center"
+                                               IsVisible="{Binding IsSelected}"/>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- DAY STEP -->
+                <ScrollView IsVisible="{Binding ShowDayStep}">
+                    <VerticalStackLayout Spacing="0">
+
+                        <CollectionView ItemsSource="{Binding DayChoices}" HeightRequest="86" Margin="20,0">
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="9"/>
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:DayChoiceItem">
+                                    <Border WidthRequest="64" Padding="4,11"
+                                            Opacity="{Binding DayOpacity}"
+                                            BackgroundColor="{StaticResource Surface}"
+                                            Stroke="{StaticResource Line}" StrokeThickness="1">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="14"/>
+                                        </Border.StrokeShape>
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="Stroke" Value="{StaticResource Green}"/>
+                                                <Setter Property="BackgroundColor" Value="{StaticResource GreenSelectedFill}"/>
+                                            </DataTrigger>
+                                        </Border.Triggers>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BusinessDetailPageViewModel}}, Path=SelectDayCommand}"
+                                                CommandParameter="{Binding .}"/>
+                                        </Border.GestureRecognizers>
+                                        <VerticalStackLayout Spacing="5">
+                                            <Label Text="{Binding DayOfWeekText}" HorizontalOptions="Center"
+                                                   Style="{StaticResource lbl9_Mono_TextMuted}"/>
+                                            <Label Text="{Binding DayNumberText}" HorizontalOptions="Center"
+                                                   Style="{StaticResource lbl18_Bold_TextDark}"/>
+                                            <Label Text="{Binding FreeText}" HorizontalOptions="Center"
+                                                   LineBreakMode="TailTruncation"
+                                                   Style="{StaticResource lbl12_Regular_TextLight}" FontSize="9"/>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+
+                        <ActivityIndicator IsRunning="{Binding IsLoadingDays}" IsVisible="{Binding IsLoadingDays}"
+                                           Color="{StaticResource Green}" Margin="0,12,0,0"/>
+
+                        <Border Margin="20,16,20,0" Padding="14,6"
+                                BackgroundColor="{StaticResource Surface}"
+                                Stroke="{StaticResource Line}" StrokeThickness="1">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="15"/>
+                            </Border.StrokeShape>
+                            <VerticalStackLayout Spacing="0">
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,9">
+                                    <Label Grid.Column="0" Text="Selected" Style="{StaticResource lbl12_Regular_TextLight}"/>
+                                    <Label Grid.Column="1" Text="{Binding FooterLabel}" Style="{StaticResource lbl13_Mono_TextPrimary}"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,9">
+                                    <Label Grid.Column="0" Text="{Binding ReviewOperatorLabel}" Style="{StaticResource lbl12_Regular_TextLight}"/>
+                                    <Label Grid.Column="1" Text="{Binding SelectedOperatorChoice.Name}" Style="{StaticResource lbl13_Mono_TextPrimary}"/>
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Label Text="{Binding DayFineprint}" Margin="20,14,20,20"
+                               Style="{StaticResource lbl12_Regular_TextLight}" FontSize="11"/>
+                    </VerticalStackLayout>
+                </ScrollView>
+
+                <!-- TIME STEP -->
+                <ScrollView IsVisible="{Binding ShowTimeStep}">
+                    <VerticalStackLayout Spacing="0" Padding="0,0,0,20">
+
+                        <ActivityIndicator IsRunning="{Binding IsLoadingSlots}" IsVisible="{Binding IsLoadingSlots}"
+                                           Color="{StaticResource Green}"/>
+
+                        <!-- MORNING -->
+                        <Grid ColumnDefinitions="*,Auto" Padding="20,20,20,9">
+                            <Label Grid.Column="0" Text="{Binding Morning.Title}" Style="{StaticResource lbl9_Mono_TextMuted}"
+                                   TextColor="{StaticResource TextPrimary}"/>
+                            <Label Grid.Column="1" Text="{Binding Morning.CountText}" Style="{StaticResource lbl10_Mono_TextFaint}"/>
+                        </Grid>
+                        <CollectionView ItemsSource="{Binding Morning.Slots}"
+                                        HeightRequest="{Binding Morning.GridHeight}"
+                                        IsVisible="{Binding Morning.HasSlots}"
+                                        Margin="20,0">
+                            <CollectionView.ItemsLayout>
+                                <GridItemsLayout Orientation="Vertical" Span="4"
+                                                 HorizontalItemSpacing="8" VerticalItemSpacing="8"/>
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:SlotChoiceItem">
+                                    <Border Padding="0,11" HeightRequest="42"
+                                            BackgroundColor="{StaticResource Surface}"
+                                            Stroke="{StaticResource Line}" StrokeThickness="1">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="11"/>
+                                        </Border.StrokeShape>
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="Stroke" Value="{StaticResource Green}"/>
+                                                <Setter Property="BackgroundColor" Value="{StaticResource Green}"/>
+                                            </DataTrigger>
+                                        </Border.Triggers>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BusinessDetailPageViewModel}}, Path=SelectSlotCommand}"
+                                                CommandParameter="{Binding .}"/>
+                                        </Border.GestureRecognizers>
+                                        <Label Text="{Binding TimeText}" HorizontalOptions="Center" VerticalOptions="Center"
+                                               Style="{StaticResource lbl13_Mono_TextPrimary}">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                    <Setter Property="TextColor" Value="{StaticResource DeepBackground}"/>
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                        <Border Margin="20,0" Padding="14" IsVisible="{Binding Morning.IsEmpty}"
+                                BackgroundColor="Transparent"
+                                Stroke="{StaticResource Line}" StrokeThickness="1"
+                                StrokeDashArray="4,4" StrokeDashOffset="0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12"/>
+                            </Border.StrokeShape>
+                            <Label Text="No slot long enough left in the day" HorizontalOptions="Center"
+                                   Style="{StaticResource lbl12_Regular_TextLight}" FontSize="11"/>
+                        </Border>
+
+                        <!-- AFTERNOON -->
+                        <Grid ColumnDefinitions="*,Auto" Padding="20,20,20,9">
+                            <Label Grid.Column="0" Text="{Binding Afternoon.Title}" Style="{StaticResource lbl9_Mono_TextMuted}"
+                                   TextColor="{StaticResource TextPrimary}"/>
+                            <Label Grid.Column="1" Text="{Binding Afternoon.CountText}" Style="{StaticResource lbl10_Mono_TextFaint}"/>
+                        </Grid>
+                        <CollectionView ItemsSource="{Binding Afternoon.Slots}"
+                                        HeightRequest="{Binding Afternoon.GridHeight}"
+                                        IsVisible="{Binding Afternoon.HasSlots}"
+                                        Margin="20,0">
+                            <CollectionView.ItemsLayout>
+                                <GridItemsLayout Orientation="Vertical" Span="4"
+                                                 HorizontalItemSpacing="8" VerticalItemSpacing="8"/>
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:SlotChoiceItem">
+                                    <Border Padding="0,11" HeightRequest="42"
+                                            BackgroundColor="{StaticResource Surface}"
+                                            Stroke="{StaticResource Line}" StrokeThickness="1">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="11"/>
+                                        </Border.StrokeShape>
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="Stroke" Value="{StaticResource Green}"/>
+                                                <Setter Property="BackgroundColor" Value="{StaticResource Green}"/>
+                                            </DataTrigger>
+                                        </Border.Triggers>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BusinessDetailPageViewModel}}, Path=SelectSlotCommand}"
+                                                CommandParameter="{Binding .}"/>
+                                        </Border.GestureRecognizers>
+                                        <Label Text="{Binding TimeText}" HorizontalOptions="Center" VerticalOptions="Center"
+                                               Style="{StaticResource lbl13_Mono_TextPrimary}">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                    <Setter Property="TextColor" Value="{StaticResource DeepBackground}"/>
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                        <Border Margin="20,0" Padding="14" IsVisible="{Binding Afternoon.IsEmpty}"
+                                BackgroundColor="Transparent"
+                                Stroke="{StaticResource Line}" StrokeThickness="1"
+                                StrokeDashArray="4,4" StrokeDashOffset="0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12"/>
+                            </Border.StrokeShape>
+                            <Label Text="No slot long enough left in the day" HorizontalOptions="Center"
+                                   Style="{StaticResource lbl12_Regular_TextLight}" FontSize="11"/>
+                        </Border>
+
+                        <!-- EVENING -->
+                        <Grid ColumnDefinitions="*,Auto" Padding="20,20,20,9">
+                            <Label Grid.Column="0" Text="{Binding Evening.Title}" Style="{StaticResource lbl9_Mono_TextMuted}"
+                                   TextColor="{StaticResource TextPrimary}"/>
+                            <Label Grid.Column="1" Text="{Binding Evening.CountText}" Style="{StaticResource lbl10_Mono_TextFaint}"/>
+                        </Grid>
+                        <CollectionView ItemsSource="{Binding Evening.Slots}"
+                                        HeightRequest="{Binding Evening.GridHeight}"
+                                        IsVisible="{Binding Evening.HasSlots}"
+                                        Margin="20,0">
+                            <CollectionView.ItemsLayout>
+                                <GridItemsLayout Orientation="Vertical" Span="4"
+                                                 HorizontalItemSpacing="8" VerticalItemSpacing="8"/>
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:SlotChoiceItem">
+                                    <Border Padding="0,11" HeightRequest="42"
+                                            BackgroundColor="{StaticResource Surface}"
+                                            Stroke="{StaticResource Line}" StrokeThickness="1">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="11"/>
+                                        </Border.StrokeShape>
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="Stroke" Value="{StaticResource Green}"/>
+                                                <Setter Property="BackgroundColor" Value="{StaticResource Green}"/>
+                                            </DataTrigger>
+                                        </Border.Triggers>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BusinessDetailPageViewModel}}, Path=SelectSlotCommand}"
+                                                CommandParameter="{Binding .}"/>
+                                        </Border.GestureRecognizers>
+                                        <Label Text="{Binding TimeText}" HorizontalOptions="Center" VerticalOptions="Center"
+                                               Style="{StaticResource lbl13_Mono_TextPrimary}">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                    <Setter Property="TextColor" Value="{StaticResource DeepBackground}"/>
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                        <Border Margin="20,0" Padding="14" IsVisible="{Binding Evening.IsEmpty}"
+                                BackgroundColor="Transparent"
+                                Stroke="{StaticResource Line}" StrokeThickness="1"
+                                StrokeDashArray="4,4" StrokeDashOffset="0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12"/>
+                            </Border.StrokeShape>
+                            <Label Text="No slot long enough left in the day" HorizontalOptions="Center"
+                                   Style="{StaticResource lbl12_Regular_TextLight}" FontSize="11"/>
+                        </Border>
+
+                    </VerticalStackLayout>
+                </ScrollView>
+
+                <!-- REVIEW STEP (queue only) -->
+                <ScrollView IsVisible="{Binding ShowReviewStep}">
+                    <VerticalStackLayout Spacing="0">
+
+                        <Border Margin="20,0" Padding="15,6"
+                                BackgroundColor="{StaticResource Surface}"
+                                Stroke="{StaticResource Line}" StrokeThickness="1">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="17"/>
+                            </Border.StrokeShape>
+                            <VerticalStackLayout Spacing="0">
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,11">
+                                    <Label Grid.Column="0" Text="{Binding ReviewOperatorLabel}" Style="{StaticResource lbl13_Regular_TextMid}"/>
+                                    <Label Grid.Column="1" Text="{Binding ReviewOperatorText}" Style="{StaticResource lbl14_Bold_TextDark}"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,11">
+                                    <Label Grid.Column="0" Text="Service" Style="{StaticResource lbl13_Regular_TextMid}"/>
+                                    <Label Grid.Column="1" Text="{Binding ReviewServiceText}" Style="{StaticResource lbl14_Bold_TextDark}"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,11">
+                                    <Label Grid.Column="0" Text="Price" Style="{StaticResource lbl13_Regular_TextMid}"/>
+                                    <Label Grid.Column="1" Text="{Binding ReviewPriceText}" Style="{StaticResource lbl14_Bold_TextDark}"/>
+                                </Grid>
+
+                                <BoxView HeightRequest="1" BackgroundColor="{StaticResource Line}" Margin="0,4"/>
+
+                                <!-- The part the customer hasn't seen yet — shown before committing -->
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,11">
+                                    <Label Grid.Column="0" Text="You'll be" Style="{StaticResource lbl13_Regular_TextMid}"/>
+                                    <Label Grid.Column="1" Text="{Binding ReviewPositionText}" Style="{StaticResource lbl13_Mono_Green}"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,11">
+                                    <Label Grid.Column="0" Text="Your turn about" Style="{StaticResource lbl13_Regular_TextMid}"/>
+                                    <Label Grid.Column="1" Text="{Binding ReviewTurnText}" Style="{StaticResource lbl13_Mono_Green}"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,11" IsVisible="{Binding ShowReviewLeaveRow}">
+                                    <Label Grid.Column="0" Text="Leave home at" Style="{StaticResource lbl13_Regular_TextMid}"/>
+                                    <Label Grid.Column="1" Text="{Binding ReviewLeaveText}" Style="{StaticResource lbl13_Mono_Green}"/>
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Label Text="{Binding ReviewFineprint}" Margin="20,14,20,20"
+                               Style="{StaticResource lbl13_Regular_BrownLight}" FontSize="11"/>
+                    </VerticalStackLayout>
+                </ScrollView>
+
+            </Grid>
+        </Grid>
+
+        <!-- ========================================================================
+             CONFIRMATION — queue ticket and booking pending
+             ======================================================================== -->
+        <ScrollView Grid.Row="1" IsVisible="{Binding IsShowingConfirmation}">
+            <VerticalStackLayout Spacing="0" Padding="0,0,0,24">
+
+                <!-- QUEUE TICKET -->
+                <VerticalStackLayout Spacing="0" IsVisible="{Binding IsInQueue}">
+
+                    <VerticalStackLayout Spacing="0" Padding="34,32,34,22" HorizontalOptions="Center">
+                        <Border WidthRequest="76" HeightRequest="76" Padding="0" HorizontalOptions="Center"
+                                BackgroundColor="{StaticResource GreenSelectedFill}"
+                                Stroke="{StaticResource GreenDim}" StrokeThickness="1">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="24"/>
+                            </Border.StrokeShape>
+                            <Image Source="ic_check_circle" WidthRequest="42" HeightRequest="42"
+                                   HorizontalOptions="Center" VerticalOptions="Center"/>
+                        </Border>
+                        <Label Text="{Binding TicketHeadline}" HorizontalOptions="Center" Margin="0,18,0,0"
+                               HorizontalTextAlignment="Center"
+                               Style="{StaticResource lbl20_Bold_TextDark}"/>
+                        <Label Text="We'll nudge you when it's nearly your turn." HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center" Margin="0,9,0,0"
+                               Style="{StaticResource lbl12_Regular_TextLight}"/>
+                    </VerticalStackLayout>
+
+                    <Border Margin="20,0" Padding="15,13"
+                            BackgroundColor="{StaticResource Surface}"
+                            Stroke="{StaticResource GreenDim}" StrokeThickness="1">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="18"/>
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="0">
+
+                            <Grid ColumnDefinitions="*,Auto">
+                                <HorizontalStackLayout Grid.Column="0" Spacing="7">
+                                    <Ellipse WidthRequest="6" HeightRequest="6" VerticalOptions="Center"
+                                             Fill="{StaticResource Green}"/>
+                                    <Label Text="LIVE" Style="{StaticResource lbl10_Mono_Green}" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                                <Label Grid.Column="1" Text="{Binding MyStatus.OperatorName}"
+                                       Style="{StaticResource lbl10_Mono_TextMuted}"/>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="15" Margin="0,8,0,0">
+                                <Grid Grid.Column="0" WidthRequest="88" HeightRequest="88">
+                                    <GraphicsView Drawable="{Binding TicketRing}"
+                                                  WidthRequest="88" HeightRequest="88"/>
+                                    <VerticalStackLayout Spacing="5" HorizontalOptions="Center" VerticalOptions="Center">
+                                        <Label Text="{Binding TicketWaitText}" HorizontalOptions="Center"
+                                               Style="{StaticResource lbl18_Bold_TextDark}"/>
+                                        <Label Text="TO GO" HorizontalOptions="Center"
+                                               Style="{StaticResource lbl9_Mono_TextMuted}"/>
+                                    </VerticalStackLayout>
+                                </Grid>
+
+                                <VerticalStackLayout Grid.Column="1" Spacing="7" VerticalOptions="Center">
+                                    <Label Style="{StaticResource lbl18_Bold_TextDark}"
+                                           IsVisible="{Binding ShowTicketLeaveText}">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="Leave at "/>
+                                                <Span Text="{Binding TicketLeaveText}"/>
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                    <Label Style="{StaticResource lbl12_Regular_TextLight}">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="Your turn about "/>
+                                                <Span Text="{Binding TicketTurnText}"
+                                                      TextColor="{StaticResource TextPrimary}"/>
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                    <Label Text="{Binding TicketTravelNote}" Style="{StaticResource lbl12_Regular_TextLight}"
+                                           IsVisible="{Binding ShowTicketLeaveText}"/>
+                                </VerticalStackLayout>
+                            </Grid>
+
+                            <!-- Position strip. queue_entries has no ticket sequence, so this is
+                                 dots; a real per-day code slots in behind ITicketScheme. -->
+                            <CollectionView ItemsSource="{Binding TicketDots}" HeightRequest="30" Margin="0,14,0,0">
+                                <CollectionView.ItemsLayout>
+                                    <LinearItemsLayout Orientation="Horizontal" ItemSpacing="6"/>
+                                </CollectionView.ItemsLayout>
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:TicketDot">
+                                        <Border WidthRequest="46" Padding="0,5"
+                                                BackgroundColor="Transparent"
+                                                Stroke="{StaticResource Line}" StrokeThickness="1">
+                                            <Border.StrokeShape>
+                                                <RoundRectangle CornerRadius="8"/>
+                                            </Border.StrokeShape>
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsNowServing}" Value="True">
+                                                    <Setter Property="BackgroundColor" Value="{StaticResource Green}"/>
+                                                    <Setter Property="Stroke" Value="{StaticResource Green}"/>
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsMine}" Value="True">
+                                                    <Setter Property="Stroke" Value="{StaticResource Green}"/>
+                                                </DataTrigger>
+                                            </Border.Triggers>
+                                            <Label Text="{Binding Label}" HorizontalOptions="Center" VerticalOptions="Center"
+                                                   Style="{StaticResource lbl13_Mono_TextPrimary}"
+                                                   TextColor="{StaticResource TextMuted}">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsNowServing}" Value="True">
+                                                        <Setter Property="TextColor" Value="{StaticResource DeepBackground}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsMine}" Value="True">
+                                                        <Setter Property="TextColor" Value="{StaticResource Green}"/>
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                        </Border>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Label Text="{Binding MyStatus.ProgressStatus}" Margin="20,12,20,0"
+                           Style="{StaticResource lbl13_Regular_TextLight}"
+                           TextColor="{StaticResource Green}"
+                           IsVisible="{Binding MyStatus.HasProgress}"/>
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="9" Padding="20,16,20,0">
+                        <Button Grid.Column="0" Text="Directions"
+                                Command="{Binding OpenDirectionsCommand}"
+                                HeightRequest="44"
+                                Style="{StaticResource PrimaryButtonStyle}"/>
+                        <controls:AlzowLoadingButton Grid.Column="1"
+                                Text="Leave queue"
+                                LoadingText="Leaving…"
+                                Command="{Binding LeaveQueueCommand}"
+                                IsLoading="{Binding IsLeaving}"
+                                IsVisible="{Binding IsBeingServed, Converter={StaticResource InvertedBoolConverter}}"
+                                ButtonStyle="{StaticResource TertiaryButtonStyle}"/>
+                    </Grid>
+                </VerticalStackLayout>
+
+                <!-- BOOKING PENDING -->
+                <VerticalStackLayout Spacing="0"
+                                     IsVisible="{Binding ActiveBooking, Converter={StaticResource IsNotNullConverter}}">
+
+                    <VerticalStackLayout Spacing="0" Padding="34,32,34,22">
+                        <Border WidthRequest="76" HeightRequest="76" Padding="0" HorizontalOptions="Center"
+                                BackgroundColor="{StaticResource OrangePale}"
+                                Stroke="{StaticResource PurpleDim}" StrokeThickness="1">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="24"/>
+                            </Border.StrokeShape>
+                            <Image Source="ic_clock" WidthRequest="42" HeightRequest="42"
+                                   HorizontalOptions="Center" VerticalOptions="Center"/>
+                        </Border>
+                        <Label Text="Waiting on the shop" HorizontalOptions="Center" Margin="0,18,0,0"
+                               Style="{StaticResource lbl20_Bold_TextDark}"/>
+                        <Label Text="{Binding BookingPendingBlurb}" HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center" Margin="0,9,0,0"
+                               Style="{StaticResource lbl12_Regular_TextLight}"/>
+                    </VerticalStackLayout>
+
+                    <Border Margin="20,0" Padding="15,6"
+                            BackgroundColor="{StaticResource Surface}"
+                            Stroke="{StaticResource PurpleDim}" StrokeThickness="1">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="17"/>
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="0">
+                            <Grid ColumnDefinitions="*,Auto" Padding="0,11">
+                                <Label Grid.Column="0" Text="When" Style="{StaticResource lbl13_Regular_TextMid}"/>
+                                <Label Grid.Column="1" Text="{Binding BookingWhenText}" Style="{StaticResource lbl14_Bold_TextDark}"/>
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto" Padding="0,11">
+                                <Label Grid.Column="0" Text="Ends about" Style="{StaticResource lbl13_Regular_TextMid}"/>
+                                <Label Grid.Column="1" Text="{Binding BookingEndsText}" Style="{StaticResource lbl14_Bold_TextDark}"/>
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto" Padding="0,11">
+                                <Label Grid.Column="0" Text="{Binding BookingOperatorLabel}" Style="{StaticResource lbl13_Regular_TextMid}"/>
+                                <Label Grid.Column="1" Text="{Binding BookingOperatorText}" Style="{StaticResource lbl14_Bold_TextDark}"/>
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto" Padding="0,11">
+                                <Label Grid.Column="0" Text="Service" Style="{StaticResource lbl13_Regular_TextMid}"/>
+                                <Label Grid.Column="1" Text="{Binding BookingServiceText}" Style="{StaticResource lbl14_Bold_TextDark}"/>
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto" Padding="0,11">
+                                <Label Grid.Column="0" Text="Price" Style="{StaticResource lbl13_Regular_TextMid}"/>
+                                <Label Grid.Column="1" Text="{Binding BookingPriceText}" Style="{StaticResource lbl14_Bold_TextDark}"/>
+                            </Grid>
+
+                            <BoxView HeightRequest="1" BackgroundColor="{StaticResource Line}" Margin="0,4"/>
+
+                            <Grid ColumnDefinitions="*,Auto" Padding="0,11">
+                                <Label Grid.Column="0" Text="Status" Style="{StaticResource lbl13_Regular_TextMid}"
+                                       VerticalOptions="Center"/>
+                                <Border Grid.Column="1" Padding="8,4"
+                                        BackgroundColor="{StaticResource OrangePale}"
+                                        Stroke="Transparent" StrokeThickness="0">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="7"/>
+                                    </Border.StrokeShape>
+                                    <Label Text="{Binding ActiveBooking.StatusLabel}"
+                                           Style="{StaticResource lbl10_Mono_Purple}"/>
+                                </Border>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <controls:AlzowLoadingButton Margin="20,16,20,0"
+                            Text="Cancel request"
+                            LoadingText="Cancelling…"
+                            Command="{Binding CancelBookingCommand}"
+                            IsLoading="{Binding IsCancellingBooking}"
+                            ButtonStyle="{StaticResource TertiaryButtonStyle}"/>
+
+                    <!-- bookings_no_overlap covers pending as well as confirmed, so this is true —
+                         and without saying it, a pending booking feels like it might evaporate. -->
+                    <Label Margin="20,14,20,0" Style="{StaticResource lbl13_Regular_BrownLight}" FontSize="11">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="The slot is held for you while it's pending, so nobody else can take "/>
+                                <Span Text="{Binding BookingWhenText}"/>
+                                <Span Text="."/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
                 </VerticalStackLayout>
 
             </VerticalStackLayout>
-
-            <!-- BOOKING MODE — flow is always visible once loaded; the confirmation toast overlays it briefly -->
-            <Grid IsVisible="{Binding IsBookingMode}">
-
-                <VerticalStackLayout Spacing="20">
-
-                    <helpers:BookingHistoryStripView
-                        IsVisible="{Binding ShowBookingHistory}"
-                        Bookings="{Binding MyBookings}"
-                        CancelCommand="{Binding CancelBookingCommand}"
-                        AllowOperatorChoice="{Binding AllowOperatorChoice}"/>
-
-                    <Label Text="No staff available to book with right now." IsVisible="{Binding IsNoOperatorsAvailable}"
-                           Style="{StaticResource lbl14_Regular_TextDark}"/>
-
-                    <helpers:OperatorPickerView
-                        IsSectionVisible="{Binding ShowOperatorPicker}"
-                        Operators="{Binding Operators}"
-                        SelectedOperator="{Binding SelectedOperator}"
-                        SelectCommand="{Binding SelectOperatorCommand}"/>
-
-                    <helpers:ServicePickerView
-                        IsSectionVisible="{Binding ShowServiceSection}"
-                        IsEmpty="{Binding IsServicesEmpty}"
-                        Services="{Binding Services}"
-                        SelectedService="{Binding SelectedService}"
-                        SelectCommand="{Binding SelectServiceCommand}"/>
-
-                    <helpers:DatePickerSectionView
-                        IsSectionVisible="{Binding ShowDateSection}"
-                        DateOptions="{Binding DateOptions}"
-                        SelectedDate="{Binding SelectedDate}"
-                        SelectCommand="{Binding SelectDateCommand}"/>
-
-                    <helpers:SlotPickerView
-                        IsSectionVisible="{Binding ShowSlotSection}"
-                        IsLoading="{Binding IsLoadingSlots}"
-                        IsEmpty="{Binding IsSlotsEmpty}"
-                        Slots="{Binding Slots}"
-                        SelectedSlot="{Binding SelectedSlot}"
-                        SelectCommand="{Binding SelectSlotCommand}"/>
-
-                    <controls:AlzowLoadingButton
-                        Text="Confirm booking"
-                        LoadingText="Confirming…"
-                        Command="{Binding ConfirmBookingCommand}"
-                        IsLoading="{Binding IsConfirmingBooking}"
-                        IsEnabled="{Binding SelectedSlot, Converter={StaticResource IsNotNullConverter}}"
-                        ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
-
-                </VerticalStackLayout>
-
-                <Border Style="{StaticResource brd16_White}"
-                        IsVisible="{Binding ShowConfirmationToast}"
-                        VerticalOptions="Start"
-                        Margin="16"
-                        Padding="16">
-                    <Border.Shadow>
-                        <Shadow Brush="Black" Opacity="0.15" Radius="12" Offset="0,4"/>
-                    </Border.Shadow>
-                    <helpers:BookingConfirmedView
-                        OperatorName="{Binding ConfirmedOperatorName}"
-                        ServiceName="{Binding ConfirmedServiceName}"
-                        DateDisplay="{Binding ConfirmedDateDisplay}"
-                        TimeDisplay="{Binding ConfirmedTimeDisplay}"/>
-                </Border>
-
-            </Grid>
-
-            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"/>
-
-        </VerticalStackLayout>
         </ScrollView>
+
+        <!-- ========================================================================
+             BOTTOM BARS — never more than one CTA on screen
+             ======================================================================== -->
+
+        <!-- Sticky landing CTA, fades in once the live card scrolls away -->
+        <Border Grid.Row="2" x:Name="StickyCta" Padding="18,13,18,18" Opacity="0"
+                BackgroundColor="{StaticResource Surface}"
+                Stroke="{StaticResource Line}" StrokeThickness="0"
+                IsVisible="{Binding ShowStickyCta}">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
+                    <Label Text="{Binding TertiaryStatLabel}" Style="{StaticResource lbl9_Mono_TextMuted}"/>
+                    <Label Text="{Binding TertiaryStatValue}" Style="{StaticResource lbl14_Bold_TextDark}"/>
+                </VerticalStackLayout>
+                <Button Grid.Column="1" Text="{Binding CtaText}"
+                        Command="{Binding StartFlowCommand}"
+                        IsEnabled="{Binding IsCtaEnabled}"
+                        MinimumWidthRequest="132" HeightRequest="44"
+                        Style="{StaticResource PrimaryButtonStyle}"/>
+            </Grid>
+        </Border>
+
+        <!-- Flow footer -->
+        <Border Grid.Row="2" Padding="18,13,18,18"
+                BackgroundColor="{StaticResource Surface}"
+                Stroke="{StaticResource Line}" StrokeThickness="0"
+                IsVisible="{Binding IsFlowActive}">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
+                    <Label Text="{Binding FooterLabel}" Style="{StaticResource lbl9_Mono_TextMuted}"
+                           LineBreakMode="TailTruncation"/>
+                    <Label Text="{Binding FooterValue}" Style="{StaticResource lbl14_Bold_TextDark}"/>
+                </VerticalStackLayout>
+                <controls:AlzowLoadingButton Grid.Column="1"
+                        Text="{Binding FooterCtaText}"
+                        LoadingText="Sending…"
+                        Command="{Binding NextCommand}"
+                        IsLoading="{Binding IsSubmitting}"
+                        IsEnabled="{Binding IsFooterCtaEnabled}"
+                        ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
+            </Grid>
+        </Border>
+
+        <ActivityIndicator Grid.Row="1" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                           Color="{StaticResource Green}"
+                           HorizontalOptions="Center" VerticalOptions="Center"/>
+
     </Grid>
 
 </ContentPage>
