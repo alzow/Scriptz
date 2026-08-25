@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.Settings"
-             xmlns:entry="clr-namespace:QueueApp.Shared.Templates.AlzowEntry"
+             xmlns:entry="clr-namespace:QueueApp.Shared.Templates.QueueEntry"
              xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
              xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
              x:Class="QueueApp.Features.Settings.AddAvailabilityBlockPage"
@@ -38,9 +38,9 @@
                             FontSize="16"/>
             </VerticalStackLayout>
 
-            <entry:AlzowEntry
-                PlaceholderText="Reason (optional)"
-                EntryText="{Binding Reason}" />
+            <entry:QueueEntry
+                Placeholder="Reason (optional)"
+                Text="{Binding Reason}" />
 
             <controls:AlzowLoadingButton
                 Text="Save"

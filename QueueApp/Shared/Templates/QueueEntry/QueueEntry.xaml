@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Name="Root"
+             x:Class="QueueApp.Shared.Templates.QueueEntry.QueueEntry">
+    <StackLayout>
+        <Border
+            x:Name="QueueEntryBorder"
+            HeightRequest="50"
+            HorizontalOptions="Fill"
+            Stroke="{StaticResource Line}"
+            StrokeShape="RoundRectangle 16"
+            StrokeThickness="1"
+            BackgroundColor="{StaticResource Surface}">
+            <Grid
+                ColumnDefinitions="Auto,*,Auto"
+                RowDefinitions="Auto"
+                VerticalOptions="Center">
+                <Image
+                    x:Name="ControlLeftIcon"
+                    Grid.Column="0"
+                    Margin="12,0,0,0"
+                    Aspect="AspectFit"
+                    MinimumHeightRequest="16"
+                    MaximumWidthRequest="20"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center"
+                    Source="{Binding Source={x:Reference Root}, Path=LeftIcon}"
+                    IsVisible="{Binding Source={x:Reference Root}, Path=HasLeftIcon}"/>
+
+                <Entry
+                    x:Name="QueueEntryControl"
+                    Grid.Column="1"
+                    Margin="12,0,8,0"
+                    ClearButtonVisibility="Never"
+                    Focused="OnEntryFocused"
+                    Unfocused="OnEntryUnfocused"
+                    TextChanged="OnTextChanged"
+                    Style="{StaticResource FloatingLabelEntry}"
+                    Placeholder="{Binding Source={x:Reference Root}, Path=Placeholder}"
+                    Text="{Binding Source={x:Reference Root}, Path=Text}"
+                    IsEnabled="{Binding Source={x:Reference Root}, Path=IsEntryEnabled}"
+                    Keyboard="{Binding Source={x:Reference Root}, Path=InputType}"
+                    MaxLength="{Binding Source={x:Reference Root}, Path=MaxLength}"
+                    ReturnType="{Binding Source={x:Reference Root}, Path=ReturnType}"/>
+
+                <ImageButton
+                    x:Name="ClearButton"
+                    Grid.Column="2"
+                    Margin="0,0,12,0"
+                    HeightRequest="18"
+                    WidthRequest="18"
+                    HorizontalOptions="End"
+                    VerticalOptions="Center"
+                    IsVisible="False"
+                    Source="ic_close"
+                    Clicked="OnClearButtonClicked"/>
+            </Grid>
+        </Border>
+
+        <Label
+            x:Name="ErrorLabel"
+            Margin="12,4,0,0"
+            FontSize="12"
+            TextColor="{StaticResource Danger}"
+            LineBreakMode="WordWrap"
+            IsVisible="False"/>
+    </StackLayout>
+</ContentView>

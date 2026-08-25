@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.CategoryPicker"
              xmlns:helpers="clr-namespace:QueueApp.Features.CategoryPicker.Helpers"
-             xmlns:entry="clr-namespace:QueueApp.Shared.Templates.AlzowEntry"
+             xmlns:entry="clr-namespace:QueueApp.Shared.Templates.QueueEntry"
              x:Name="Root"
              x:Class="QueueApp.Features.CategoryPicker.CategoryPickerPage"
              x:DataType="vm:CategoryPickerPageViewModel"
@@ -27,10 +27,10 @@
                 </Grid>
 
                 <!-- Search -->
-                <entry:AlzowEntry Margin="0,16,0,0"
+                <entry:QueueEntry Margin="0,16,0,0"
                         LeftIcon="ic_search"
-                        EntryText="{Binding SearchText}"
-                        PlaceholderText="Search barbers, car washes, clinics"
+                        Text="{Binding SearchText}"
+                        Placeholder="Search barbers, car washes, clinics"
                         ShowClearTextButton="True"
                         ReturnType="Search"/>
 

@@ -5,7 +5,7 @@ using QueueApp.Framework.Base;
 using QueueApp.Services.Api.Operator;
 using QueueApp.Services.Api.Operator.Models;
 using QueueApp.Services.Storage;
-using QueueApp.Shared.Templates.AlzowEntry.Validators;
+using QueueApp.Shared.Templates.QueueEntry.Validators;
 
 namespace QueueApp.Features.Settings;
 
@@ -22,15 +22,12 @@ public partial class AddEditOperatorPageViewModel : BaseViewModel
         : base(navigationService, secureStorageService)
     {
         _operatorService = operatorService;
-        FormStateManager.ValidationStateChanged += isValid => IsFormValid = isValid;
     }
 
-    public ISharedStateManager FormStateManager { get; } = new SharedStateManager();
     public IValidator NameValidator { get; } = new RequiredValidator("Name is required.");
 
     public string DisplayName { get; set; } = "";
     public string SortOrderText { get; set; } = "0";
-    public bool IsFormValid { get; set; }
     public bool IsSaving { get; set; }
     public string PageTitle { get; set; } = "Add Staff Member";
 
@@ -83,6 +80,11 @@ public partial class AddEditOperatorPageViewModel : BaseViewModel
     [RelayCommand]
     private async Task SaveAsync()
     {
+        if (!NameValidator.Validate(DisplayName))
+        {
+            return;
+        }
+
         IsSaving = true;
         try
         {

@@ -9,7 +9,7 @@
         Only add a new key here when an existing one doesn't already cover the combination.
     -->
 
-    <!-- AlzowEntry floating-label placeholder -->
+    <!-- QueueEntry floating-label placeholder -->
     <Style x:Key="PlaceHolderLabelStyle" TargetType="Label">
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="TextColor" Value="{StaticResource TextMuted}"/>

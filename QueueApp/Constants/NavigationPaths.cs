@@ -3,8 +3,8 @@ namespace QueueApp.Constants;
 public static class NavigationPaths
 {
     // ── App start ──────────────────────────────────────────────────────────────
-    public const string AppStart             = "NavigationPage/SplashScreenPage";
-    public const string SplashScreenPage     = "SplashScreenPage";
+    public const string AppStart             = "NavigationPage/QueueSplashPage";
+    public const string QueueSplashPage      = "QueueSplashPage";
 
     // ── Auth ───────────────────────────────────────────────────────────────────
     public const string LoginPage            = "LoginPage";

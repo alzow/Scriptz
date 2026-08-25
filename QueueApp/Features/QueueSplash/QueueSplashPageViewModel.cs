@@ -5,15 +5,15 @@ using QueueApp.Services.Api.Business;
 using QueueApp.Services.Auth;
 using QueueApp.Services.Storage;
 
-namespace QueueApp.Features.SplashScreen;
+namespace QueueApp.Features.QueueSplash;
 
-public class SplashScreenPageViewModel : BaseViewModel
+public class QueueSplashPageViewModel : BaseViewModel
 {
     private readonly INavigationService _navigationService;
     private readonly IAuthService _authService;
     private readonly IBusinessService _businessService;
 
-    public SplashScreenPageViewModel(
+    public QueueSplashPageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
         IAuthService authService,

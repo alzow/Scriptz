@@ -5,7 +5,7 @@ using QueueApp.Framework.Base;
 using QueueApp.Services.Api.ServiceOfferings;
 using QueueApp.Services.Api.ServiceOfferings.Models;
 using QueueApp.Services.Storage;
-using QueueApp.Shared.Templates.AlzowEntry.Validators;
+using QueueApp.Shared.Templates.QueueEntry.Validators;
 
 namespace QueueApp.Features.Settings;
 
@@ -22,17 +22,14 @@ public partial class AddEditServicePageViewModel : BaseViewModel
         : base(navigationService, secureStorageService)
     {
         _serviceOfferingsService = serviceOfferingsService;
-        FormStateManager.ValidationStateChanged += isValid => IsFormValid = isValid;
     }
 
-    public ISharedStateManager FormStateManager { get; } = new SharedStateManager();
     public IValidator NameValidator { get; } = new RequiredValidator("Service name is required.");
     public IValidator DurationValidator { get; } = new RequiredValidator("Duration is required.");
 
     public string Name { get; set; } = "";
     public string DurationMinutesText { get; set; } = "";
     public string PriceRandText { get; set; } = "";
-    public bool IsFormValid { get; set; }
     public bool IsSaving { get; set; }
     public string PageTitle { get; set; } = "Add Service";
 
@@ -86,6 +83,11 @@ public partial class AddEditServicePageViewModel : BaseViewModel
     [RelayCommand]
     private async Task SaveAsync()
     {
+        if (!NameValidator.Validate(Name) || !DurationValidator.Validate(DurationMinutesText))
+        {
+            return;
+        }
+
         IsSaving = true;
         try
         {

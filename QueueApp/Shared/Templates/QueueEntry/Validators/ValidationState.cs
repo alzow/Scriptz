@@ -1,4 +1,4 @@
-namespace QueueApp.Shared.Templates.AlzowEntry.Validators;
+namespace QueueApp.Shared.Templates.QueueEntry.Validators;
 
 public enum ValidationState
 {

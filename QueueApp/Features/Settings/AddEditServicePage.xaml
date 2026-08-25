@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.Settings"
-             xmlns:entry="clr-namespace:QueueApp.Shared.Templates.AlzowEntry"
+             xmlns:entry="clr-namespace:QueueApp.Shared.Templates.QueueEntry"
              xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
              xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
              x:Class="QueueApp.Features.Settings.AddEditServicePage"
@@ -16,24 +16,22 @@
 
         <VerticalStackLayout Grid.Row="1" Padding="20" Spacing="16">
 
-            <entry:AlzowEntry
-                PlaceholderText="Service name"
-                EntryText="{Binding Name}"
+            <entry:QueueEntry
+                Placeholder="Service name"
+                Text="{Binding Name}"
                 Validator="{Binding NameValidator}"
-                ValidateOnTextChanged="True"
-                SharedStateManager="{Binding FormStateManager}" />
+                ValidateOnTextChanged="True" />
 
-            <entry:AlzowEntry
-                PlaceholderText="Duration (minutes)"
-                EntryText="{Binding DurationMinutesText}"
+            <entry:QueueEntry
+                Placeholder="Duration (minutes)"
+                Text="{Binding DurationMinutesText}"
                 InputType="Numeric"
                 Validator="{Binding DurationValidator}"
-                ValidateOnTextChanged="True"
-                SharedStateManager="{Binding FormStateManager}" />
+                ValidateOnTextChanged="True" />
 
-            <entry:AlzowEntry
-                PlaceholderText="Price in Rand (optional)"
-                EntryText="{Binding PriceRandText}"
+            <entry:QueueEntry
+                Placeholder="Price in Rand (optional)"
+                Text="{Binding PriceRandText}"
                 InputType="Numeric" />
 
             <controls:AlzowLoadingButton
@@ -41,7 +39,6 @@
                 Margin="0" HeightRequest="54"
                 Command="{Binding SaveCommand}"
                 IsLoading="{Binding IsSaving}"
-                IsEnabled="{Binding IsFormValid}"
                 ButtonStyle="{StaticResource PrimaryButtonStyle}" />
 
         </VerticalStackLayout>

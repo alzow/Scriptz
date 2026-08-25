@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.Auth"
              xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
-             xmlns:entry="clr-namespace:QueueApp.Shared.Templates.AlzowEntry"
+             xmlns:entry="clr-namespace:QueueApp.Shared.Templates.QueueEntry"
              x:Class="QueueApp.Features.Auth.LoginPage"
              x:DataType="vm:LoginPageViewModel"
              Style="{StaticResource NavigationPageStyle}">
@@ -41,28 +41,25 @@
                 <VerticalStackLayout Padding="24,32,24,24" Spacing="16">
 
                     <!-- Email field -->
-                    <entry:AlzowEntry
-                        PlaceholderText="Email / Phone"
-                        EntryText="{Binding Email}"
+                    <entry:QueueEntry
+                        Placeholder="Email / Phone"
+                        Text="{Binding Email}"
                         InputType="Email"
                         Validator="{Binding EmailValidator}"
-                        ValidateOnTextChanged="True"
-                        SharedStateManager="{Binding FormStateManager}"/>
+                        ValidateOnTextChanged="True"/>
 
                     <!-- Password field -->
-                    <entry:AlzowEntry
-                        PlaceholderText="Password"
-                        EntryText="{Binding Password}"
+                    <entry:QueueEntry
+                        Placeholder="Password"
+                        Text="{Binding Password}"
                         IsPassword="True"
                         Validator="{Binding PasswordValidator}"
-                        ValidateOnTextChanged="True"
-                        SharedStateManager="{Binding FormStateManager}"/>
+                        ValidateOnTextChanged="True"/>
 
                     <!-- Sign In button -->
                     <controls:AlzowLoadingButton Text="Sign In →"
                             Command="{Binding LoginCommand}"
                             IsLoading="{Binding IsSigningIn}"
-                            IsEnabled="{Binding IsFormValid}"
                             HeightRequest="54"
                             Margin="0,8,0,0"
                             ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
