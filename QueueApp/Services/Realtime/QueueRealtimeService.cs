@@ -23,20 +23,38 @@ public class QueueRealtimeService : IQueueRealtimeService
     public async Task SubscribeAsync(string filterColumn, string filterValue, Func<Task> onChange, string table = "queue_entries")
     {
         var realtimeUrl = $"{SupabaseConfig.ProjectUrl.Replace("https://", "wss://")}/realtime/v1";
-
-        _client = new Client(realtimeUrl, new ClientOptions())
-        {
-            GetHeaders = () => new Dictionary<string, string> { ["apikey"] = SupabaseConfig.AnonKey },
-        };
-
         var token = await _authService.GetAccessTokenAsync();
-        if (!string.IsNullOrEmpty(token))
+
+        Client CreateClient()
         {
-            _client.SetAuth(token);
+            var c = new Client(realtimeUrl, new ClientOptions())
+            {
+                GetHeaders = () => new Dictionary<string, string> { ["apikey"] = SupabaseConfig.AnonKey },
+            };
+            if (!string.IsNullOrEmpty(token))
+                c.SetAuth(token);
+            return c;
         }
 
-        await _client.ConnectAsync();
+        // ClientWebSocket's connect/handshake occasionally NREs on a cold-start Android socket
+        // race (underlying platform bug, not ours) — one retry after a short delay clears it.
+        // A failed client/socket can't be reused (its background reconnect loop keeps running
+        // and races a second ConnectAsync on the same instance), so build a fresh one to retry.
+        var client = CreateClient();
+        try
+        {
+            await client.ConnectAsync();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[Realtime] connect failed, retrying once: {ex.Message}");
+            await Task.Delay(500);
+            client = CreateClient();
+            await client.ConnectAsync();
+        }
+
         Debug.WriteLine("[Realtime] connected");
+        _client = client;
 
         _channel = _client.Channel("realtime", "public", table, filterColumn, filterValue, null!);
         _channel.AddPostgresChangeHandler(PostgresChangesOptions.ListenType.All, async (_, _) =>
