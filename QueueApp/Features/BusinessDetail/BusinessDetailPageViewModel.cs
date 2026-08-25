@@ -400,9 +400,15 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             var summary = QueueSummary.FirstOrDefault(r => r.OperatorId == op.Id);
             var subLabel = !op.IsAvailable
                 ? "off today"
-                : summary is null || summary.WaitingCount == 0
+                : summary is null
                     ? "free now"
-                    : $"{summary.WaitingCount} waiting";
+                    : (summary.WaitingCount, summary.ServingCount) switch
+                    {
+                        (0, 0) => "free now",
+                        (var waiting, 0) => $"{waiting} waiting",
+                        (0, var serving) => $"{serving} being served",
+                        (var waiting, var serving) => $"{waiting} waiting · {serving} being served",
+                    };
 
             TeamMembers.Add(new TeamMemberItem
             {
@@ -984,9 +990,16 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             var summary = QueueSummary.FirstOrDefault(r => r.OperatorId == op.Id);
             var subLabel = IsBookingMode
                 ? "Tap to see their times"
-                : summary is null || summary.WaitingCount == 0
-                    ? $"Free now · about {summary?.NewJoinWaitMinutes ?? 0:0} min"
-                    : $"{summary.WaitingCount} waiting · about {summary.NewJoinWaitMinutes:0} min";
+                : summary is null
+                    ? "Free now · about 0 min"
+                    : (summary.WaitingCount, summary.ServingCount) switch
+                    {
+                        (0, 0) => $"Free now · about {summary.NewJoinWaitMinutes:0} min",
+                        (var waiting, 0) => $"{waiting} waiting · about {summary.NewJoinWaitMinutes:0} min",
+                        (0, var serving) => $"{serving} being served · about {summary.NewJoinWaitMinutes:0} min",
+                        (var waiting, var serving) =>
+                            $"{waiting} waiting · {serving} being served · about {summary.NewJoinWaitMinutes:0} min",
+                    };
 
             OperatorChoices.Add(new OperatorChoiceItem
             {

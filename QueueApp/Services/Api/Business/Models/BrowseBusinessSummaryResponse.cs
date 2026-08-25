@@ -20,6 +20,7 @@ public class BrowseBusinessSummaryResponse
     [JsonPropertyName("is_active")] public bool IsActive { get; set; }
     [JsonPropertyName("last_seen_at")] public DateTime? LastSeenAt { get; set; }
     [JsonPropertyName("waiting_count")] public int WaitingCount { get; set; }
+    [JsonPropertyName("serving_count")] public int ServingCount { get; set; }
     [JsonPropertyName("operators_working_count")] public int OperatorsWorkingCount { get; set; }
     [JsonPropertyName("avg_wait_minutes")] public decimal? AvgWaitMinutes { get; set; }
     [JsonPropertyName("next_slot_starts_at")] public DateTimeOffset? NextSlotStartsAt { get; set; }
@@ -67,8 +68,7 @@ public class BrowseBusinessSummaryResponse
                     ? $"Next slot {NextSlotStartsAt.Value.ToOffset(TimeSpan.FromHours(2)):ddd HH:mm}"
                     : "By appointment";
 
-            var staffNoun = OperatorsWorkingCount == 1 ? "staff" : "staff";
-            return $"{WaitingCount} ahead · {OperatorsWorkingCount} {staffNoun} working";
+            return $"{WaitingCount} ahead · {ServingCount} being served · {OperatorsWorkingCount} staff working";
         }
     }
 
