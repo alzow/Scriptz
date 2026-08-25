@@ -9,5 +9,4 @@ public class OperatorColumn
     public OperatorResponse Operator { get; set; } = new();
     public QueueEntryResponse? Serving { get; set; }
     public ObservableCollection<QueueEntryResponse> Waiting { get; } = new();
-    public bool IsAddingWalkIn { get; set; }
 }

@@ -9,6 +9,8 @@ using QueueApp.Services.Api.Operator;
 using QueueApp.Services.Api.Operator.Models;
 using QueueApp.Services.Api.Queue;
 using QueueApp.Services.Api.Queue.Models;
+using QueueApp.Services.Api.ServiceOfferings;
+using QueueApp.Services.Api.ServiceOfferings.Models;
 using QueueApp.Services.Auth;
 using QueueApp.Services.Popup;
 using QueueApp.Services.Realtime;
@@ -21,6 +23,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     private readonly IQueueService _queueService;
     private readonly IBusinessService _businessService;
     private readonly IOperatorService _operatorService;
+    private readonly IServiceOfferingsService _serviceOfferingsService;
     private readonly IQueueRealtimeService _realtimeService;
     private readonly IQueuePopupService _popupService;
     private readonly SemaphoreSlim _loadLock = new(1, 1);
@@ -32,12 +35,20 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     public bool IsLoading { get; set; }
     public bool IsEmpty => Columns.Count == 0 && !IsLoading;
 
+    public ObservableCollection<ServiceResponse> WalkInServices { get; } = new();
+    public ServiceResponse? SelectedWalkInService { get; set; }
+    public bool IsWalkInServicesEmpty => WalkInServices.Count == 0;
+    public OperatorResponse? PendingWalkInOperator { get; set; }
+    public bool ShowWalkInServicePicker { get; set; }
+    public bool IsAddingWalkIn { get; set; }
+
     public OperatorQueuePageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
         IQueueService queueService,
         IBusinessService businessService,
         IOperatorService operatorService,
+        IServiceOfferingsService serviceOfferingsService,
         IQueueRealtimeService realtimeService,
         IQueuePopupService popupService)
         : base(navigationService, secureStorageService)
@@ -45,6 +56,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         _queueService = queueService;
         _businessService = businessService;
         _operatorService = operatorService;
+        _serviceOfferingsService = serviceOfferingsService;
         _realtimeService = realtimeService;
         _popupService = popupService;
     }
@@ -61,6 +73,12 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
 
             var business = await _businessService.GetBusinessAsync(_businessId);
             BusinessName = business?.Name ?? "Queue";
+
+            var services = await _serviceOfferingsService.GetActiveServicesAsync(_businessId);
+            WalkInServices.Clear();
+            foreach (var service in services)
+                WalkInServices.Add(service);
+            OnPropertyChanged(nameof(IsWalkInServicesEmpty));
 
             await LoadQueueAsync();
         }
@@ -151,14 +169,31 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task AddWalkInAsync(OperatorResponse op)
+    private void RequestAddWalkIn(OperatorResponse op)
     {
-        var column = Columns.FirstOrDefault(c => c.Operator == op);
-        if (column is not null)
-            column.IsAddingWalkIn = true;
+        PendingWalkInOperator = op;
+        SelectedWalkInService = null;
+        ShowWalkInServicePicker = true;
+    }
+
+    [RelayCommand]
+    private void SelectWalkInService(ServiceResponse service) => SelectedWalkInService = service;
+
+    [RelayCommand]
+    private async Task ConfirmAddWalkInAsync()
+    {
+        if (PendingWalkInOperator is null || SelectedWalkInService is null) return;
+
+        var op = PendingWalkInOperator;
+        IsAddingWalkIn = true;
         try
         {
-            await _queueService.AddWalkInAsync(_businessId, op.Id == Guid.Empty ? null : op.Id, "Walk-in");
+            await _queueService.AddWalkInAsync(
+                _businessId, op.Id == Guid.Empty ? null : op.Id, "Walk-in", SelectedWalkInService.Id);
+
+            ShowWalkInServicePicker = false;
+            SelectedWalkInService = null;
+            PendingWalkInOperator = null;
         }
         catch (Exception ex)
         {
@@ -166,8 +201,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
         finally
         {
-            if (column is not null)
-                column.IsAddingWalkIn = false;
+            IsAddingWalkIn = false;
         }
     }
 

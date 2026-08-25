@@ -74,6 +74,14 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     public bool IsLoading { get; set; }
     public bool IsLeaving { get; set; }
 
+    // --- Queue-mode join (service picker) state ---
+    public ObservableCollection<ServiceResponse> QueueServices { get; } = new();
+    public ServiceResponse? SelectedQueueService { get; set; }
+    public bool IsQueueServicesEmpty => QueueServices.Count == 0;
+    public bool ShowQueueServicePicker { get; set; }
+    public QueueSummaryRow? PendingJoinRow { get; set; }
+    public bool IsJoining { get; set; }
+
     // --- Booking-mode state ---
     public ObservableCollection<OperatorResponse> Operators { get; } = new();
     public OperatorResponse? SelectedOperator { get; set; }
@@ -147,6 +155,12 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
 
             if (IsQueueMode)
             {
+                var queueServices = await _serviceOfferingsService.GetActiveServicesAsync(_businessId);
+                QueueServices.Clear();
+                foreach (var service in queueServices)
+                    QueueServices.Add(service);
+                OnPropertyChanged(nameof(IsQueueServicesEmpty));
+
                 await RefreshQueueAsync();
                 await RefreshMyStatusAsync();
                 await _realtimeService.SubscribeAsync("business_id", _businessId.ToString(),
@@ -264,10 +278,24 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task JoinAsync(QueueSummaryRow? row)
+    private void RequestJoin(QueueSummaryRow? row)
     {
         if (row is null) return;
+        PendingJoinRow = row;
+        SelectedQueueService = null;
+        ShowQueueServicePicker = true;
+    }
 
+    [RelayCommand]
+    private void SelectQueueService(ServiceResponse service) => SelectedQueueService = service;
+
+    [RelayCommand]
+    private async Task ConfirmJoinAsync()
+    {
+        if (PendingJoinRow is null || SelectedQueueService is null) return;
+
+        var row = PendingJoinRow;
+        IsJoining = true;
         row.IsJoining = true;
         try
         {
@@ -276,7 +304,13 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 throw new InvalidOperationException("No signed-in user id — should never happen post-splash-gate.");
 
             var customerName = await _profileService.GetMyDisplayNameAsync(Guid.Parse(userId));
-            await _queueService.JoinQueueAsync(_businessId, row.OperatorId, Guid.Parse(userId), customerName);
+            await _queueService.JoinQueueAsync(
+                _businessId, row.OperatorId, Guid.Parse(userId), customerName, SelectedQueueService.Id);
+
+            ShowQueueServicePicker = false;
+            SelectedQueueService = null;
+            PendingJoinRow = null;
+
             await RefreshQueueAsync();
             await RefreshMyStatusAsync();
         }
@@ -286,6 +320,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         }
         finally
         {
+            IsJoining = false;
             row.IsJoining = false;
         }
     }

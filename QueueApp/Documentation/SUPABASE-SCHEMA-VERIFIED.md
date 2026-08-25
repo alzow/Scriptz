@@ -255,6 +255,12 @@ All verified against live source, matching what's documented in the step files w
 `my_queue_status` — all confirmed matching current step files, including the `count(*) >= 3` guard and
 `greatest(avg, 1)` floor on `operator_avg_minutes`, and the ranking-before-filtering fix on `my_queue_status`.
 
+**Step 16b update:** `queue_entry_wait_minutes` and `business_queue_summary` now delegate to
+`compute_wait_minutes(business_id, operator_id, ahead_of)`, which sums `services.est_minutes` for waiting
+entries (configured durations, not rolling averages) plus remaining time on the entry being served. See
+`sql/step16b-simple-wait-calculation.sql`. `operator_avg_minutes`, `operator_service_avg_minutes`, and
+`business_service_avg_minutes` (Step 16) are left in place but no longer called by anything customer-facing.
+
 **New, not previously documented:**
 - **`handle_new_user()`** — trigger function, inserts a `profiles` row on new `auth.users` signup, pulling
   `display_name` from `raw_user_meta_data`. See §1e.

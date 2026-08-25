@@ -15,13 +15,14 @@ public class StubQueueService : IQueueService
             .OrderBy(e => e.JoinedAt)
             .ToList());
 
-    public Task AddWalkInAsync(Guid businessId, Guid? operatorId, string name)
+    public Task AddWalkInAsync(Guid businessId, Guid? operatorId, string name, Guid serviceId)
     {
         _entries.Add(new QueueEntryResponse
         {
             Id = Guid.NewGuid(),
             BusinessId = businessId,
             OperatorId = operatorId,
+            ServiceId = serviceId,
             CustomerName = name,
             Status = "waiting",
             JoinedAt = DateTime.UtcNow,
@@ -74,13 +75,14 @@ public class StubQueueService : IQueueService
         return Task.FromResult(rows);
     }
 
-    public Task<QueueEntryResponse> JoinQueueAsync(Guid businessId, Guid? operatorId, Guid customerId, string? customerName)
+    public Task<QueueEntryResponse> JoinQueueAsync(Guid businessId, Guid? operatorId, Guid customerId, string? customerName, Guid serviceId)
     {
         var entry = new QueueEntryResponse
         {
             Id = Guid.NewGuid(),
             BusinessId = businessId,
             OperatorId = operatorId,
+            ServiceId = serviceId,
             CustomerId = customerId,
             CustomerName = customerName,
             Status = "waiting",

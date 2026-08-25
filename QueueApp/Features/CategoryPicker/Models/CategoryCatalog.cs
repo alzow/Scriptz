@@ -10,7 +10,7 @@ public static class CategoryCatalog
         new("hairsalon",  "Hair salons",       "ic_hair_salon",  false),
         new("nails",      "Nails & beauty",    "ic_nails",       false),
         new("spa",        "Spa & wellness",    "ic_spa",         false),
-        new("carwash",    "Car washes",        "ic_car_wash",    false),
+        new("carwash",    "Car washes",        "ic_car_wash",    true),
         new("carservice", "Car service",       "ic_car_service", false),
         new("tyre",       "Tyre & fitment",    "ic_tyre",        false),
         new("doctor",     "Doctors & clinics", "ic_doctor",      false),

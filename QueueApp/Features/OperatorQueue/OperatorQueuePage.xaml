@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:QueueApp.Features.OperatorQueue"
              xmlns:responses="clr-namespace:QueueApp.Services.Api.Queue.Models"
              xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
+             xmlns:helpers="clr-namespace:QueueApp.Features.BusinessDetail.Helpers"
              x:Name="Root"
              Title="Manage"
              IconImageSource="icon_manage_business"
@@ -32,7 +33,8 @@
                              ItemsLayout="HorizontalList">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="vm:OperatorColumn">
-                        <Border Style="{StaticResource brd16_White}"
+                        <Border x:Name="ColumnRoot"
+                                Style="{StaticResource brd16_White}"
                                 Margin="8" Padding="16" WidthRequest="300"
                                 HeightRequest="600">
                             <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="12">
@@ -46,11 +48,9 @@
 
                                 <controls:AlzowLoadingButton Grid.Row="2"
                                         Text="+ Add walk-in"
-                                        LoadingText="Adding…"
                                         Margin="0" HeightRequest="56"
-                                        Command="{Binding BindingContext.AddWalkInCommand, Source={x:Reference Root}}"
+                                        Command="{Binding BindingContext.RequestAddWalkInCommand, Source={x:Reference Root}}"
                                         CommandParameter="{Binding Operator}"
-                                        IsLoading="{Binding IsAddingWalkIn}"
                                         ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
 
                                 <!-- NOW SERVING -->
@@ -95,6 +95,7 @@
                                                             Command="{Binding BindingContext.ServeCommand, Source={x:Reference Root}}"
                                                             CommandParameter="{Binding .}"
                                                             IsLoading="{Binding IsServing}"
+                                                            IsEnabled="{Binding BindingContext.Serving, Source={x:Reference ColumnRoot}, Converter={StaticResource IsNullConverter}}"
                                                             ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
                                                     <controls:AlzowLoadingButton Grid.Column="2" Text="Done"
                                                             LoadingText="Completing…"
@@ -141,6 +142,33 @@
             <Label Text="No customers waiting"
                    Style="{StaticResource lbl18_Bold_TextDark}"/>
         </Border>
+
+        <!-- Required service picker for a staff-added walk-in — appears once "+ Add walk-in" is tapped -->
+        <Grid Grid.Row="0" Grid.RowSpan="2"
+              IsVisible="{Binding ShowWalkInServicePicker}"
+              BackgroundColor="#80000000">
+            <Border Style="{StaticResource brd16_White}"
+                    Margin="24" Padding="16"
+                    VerticalOptions="Center">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="{Binding PendingWalkInOperator.DisplayName, StringFormat='Walk-in for {0}'}"
+                           Style="{StaticResource lbl18_Bold_TextDark}"/>
+                    <helpers:ServicePickerView
+                        IsSectionVisible="{Binding ShowWalkInServicePicker}"
+                        IsEmpty="{Binding IsWalkInServicesEmpty}"
+                        Services="{Binding WalkInServices}"
+                        SelectedService="{Binding SelectedWalkInService}"
+                        SelectCommand="{Binding SelectWalkInServiceCommand}"/>
+                    <controls:AlzowLoadingButton
+                        Text="Confirm"
+                        LoadingText="Adding…"
+                        Command="{Binding ConfirmAddWalkInCommand}"
+                        IsLoading="{Binding IsAddingWalkIn}"
+                        IsEnabled="{Binding SelectedWalkInService, Converter={StaticResource IsNotNullConverter}}"
+                        ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
     </Grid>
 
 </ContentPage>

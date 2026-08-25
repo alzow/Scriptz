@@ -16,12 +16,13 @@ public class QueueService : BaseService, IQueueService
     public Task<List<QueueEntryResponse>> GetActiveEntriesAsync(Guid businessId) =>
         ExecuteApiCallAsync(_api.GetActiveEntriesAsync($"eq.{businessId}"));
 
-    public Task AddWalkInAsync(Guid businessId, Guid? operatorId, string name) =>
+    public Task AddWalkInAsync(Guid businessId, Guid? operatorId, string name, Guid serviceId) =>
         ExecuteApiCallAsync(_api.JoinQueueAsync(new JoinQueueRequest
         {
             BusinessId = businessId,
             OperatorId = operatorId,
             CustomerName = name,
+            ServiceId = serviceId,
         }));
 
     public Task StartServingAsync(Guid entryId) =>
@@ -36,13 +37,14 @@ public class QueueService : BaseService, IQueueService
     public Task<List<QueueSummaryRow>> GetQueueSummaryAsync(Guid businessId) =>
         ExecuteApiCallAsync(_api.GetQueueSummaryAsync(new BusinessIdRequest { BusinessId = businessId }));
 
-    public Task<QueueEntryResponse> JoinQueueAsync(Guid businessId, Guid? operatorId, Guid customerId, string? customerName) =>
+    public Task<QueueEntryResponse> JoinQueueAsync(Guid businessId, Guid? operatorId, Guid customerId, string? customerName, Guid serviceId) =>
         ExecuteApiCallAsync(_api.JoinQueueAsync(new JoinQueueRequest
         {
             BusinessId = businessId,
             OperatorId = operatorId,
             CustomerId = customerId,
             CustomerName = customerName,
+            ServiceId = serviceId,
         }));
 
     public Task<QueueEntryResponse> CancelEntryAsync(Guid entryId) =>

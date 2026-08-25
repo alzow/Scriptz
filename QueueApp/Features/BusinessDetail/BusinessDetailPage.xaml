@@ -28,7 +28,7 @@
                 <helpers:LiveQueueSummaryView
                     IsVisible="{Binding IsInQueue, Converter={StaticResource InvertedBoolConverter}}"
                     QueueSummary="{Binding QueueSummary}"
-                    JoinCommand="{Binding JoinCommand}"/>
+                    JoinCommand="{Binding RequestJoinCommand}"/>
 
                 <!-- IN QUEUE: show position, not the summary list -->
                 <helpers:MyQueueStatusView
@@ -38,6 +38,24 @@
                     IsBeingServed="{Binding IsBeingServed}"
                     LeaveCommand="{Binding LeaveCommand}"
                     IsLeaving="{Binding IsLeaving}"/>
+
+                <!-- JOIN: required service picker, appears once "Join" is tapped for a given operator -->
+                <VerticalStackLayout Spacing="12" IsVisible="{Binding ShowQueueServicePicker}">
+                    <helpers:ServicePickerView
+                        IsSectionVisible="{Binding ShowQueueServicePicker}"
+                        IsEmpty="{Binding IsQueueServicesEmpty}"
+                        Services="{Binding QueueServices}"
+                        SelectedService="{Binding SelectedQueueService}"
+                        SelectCommand="{Binding SelectQueueServiceCommand}"/>
+
+                    <controls:AlzowLoadingButton
+                        Text="Confirm"
+                        LoadingText="Joining…"
+                        Command="{Binding ConfirmJoinCommand}"
+                        IsLoading="{Binding IsJoining}"
+                        IsEnabled="{Binding SelectedQueueService, Converter={StaticResource IsNotNullConverter}}"
+                        ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
+                </VerticalStackLayout>
 
             </VerticalStackLayout>
 
