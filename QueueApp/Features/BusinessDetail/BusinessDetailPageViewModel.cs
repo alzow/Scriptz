@@ -643,9 +643,15 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         SelectedOperatorChoice = null;
         SelectedServiceRow = null;
         SelectedDay = null;
-        SelectedSlot = null;
+
+        // DayChoices and the slot periods outlive a single run of the flow, so a second run has to
+        // clear their selected state too — otherwise a chip stays highlighted with nothing selected.
         foreach (var row in ServiceRows)
             row.IsSelected = false;
+        foreach (var day in DayChoices)
+            day.IsSelected = false;
+        _slotCache.Clear();
+        ClearSlots();
 
         BuildOperatorChoices();
 
@@ -891,8 +897,15 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 SelectedDay = null;
                 foreach (var day in DayChoices)
                     day.IsSelected = false;
+
+                // The cache is keyed by date alone, so it is only valid for one operator/service
+                // pair — both of these change which slots a date has, so it has to go.
+                _slotCache.Clear();
                 ClearSlots();
                 break;
+
+            // A different day is a different cache key, not a stale one: keep what's already
+            // fetched so stepping back to an earlier day doesn't re-hit the RPC.
             case FlowStep.Day:
                 ClearSlots();
                 break;
@@ -902,7 +915,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     private void ClearSlots()
     {
         SelectedSlot = null;
-        _slotCache.Clear();
         Morning = new SlotPeriod("MORNING", Array.Empty<SlotChoiceItem>(), "none");
         Afternoon = new SlotPeriod("AFTERNOON", Array.Empty<SlotChoiceItem>(), "none");
         Evening = new SlotPeriod("EVENING", Array.Empty<SlotChoiceItem>(), "none");

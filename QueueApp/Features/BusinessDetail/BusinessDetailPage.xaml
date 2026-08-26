@@ -1064,11 +1064,16 @@
                            LineBreakMode="TailTruncation"/>
                     <Label Text="{Binding FooterValue}" Style="{StaticResource lbl14_Bold_TextDark}"/>
                 </VerticalStackLayout>
+                <!-- BypassIsLoading: this button advances the step on most taps and only submits on
+                     the last one. Letting it set its own IsLoading would strand the spinner on every
+                     "Next", since nothing submits and nothing clears it — the view model owns the
+                     flag instead and raises it only around the actual submit. -->
                 <controls:AlzowLoadingButton Grid.Column="1"
                         Text="{Binding FooterCtaText}"
                         LoadingText="Sending…"
                         Command="{Binding NextCommand}"
                         IsLoading="{Binding IsSubmitting}"
+                        BypassIsLoading="True"
                         IsEnabled="{Binding IsFooterCtaEnabled}"
                         ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
             </Grid>
