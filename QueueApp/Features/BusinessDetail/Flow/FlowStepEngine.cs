@@ -18,16 +18,6 @@ public static class FlowStepEngine
         if (selectable.Count <= 1)
             return false;
 
-        // bookings.operator_id is NOT NULL, so there is no "any available" booking the way there is
-        // for a queue entry. With more than one resource free, picking correctly means "whichever
-        // has the earliest slot that fits" — the multi-resource slot union that is still deferred.
-        // Until that exists, ask, even where the business turned operator choice off: assigning by
-        // sort_order would show the customer one bay's availability while implying it is the shop's.
-        if (business.Mode == BookingMode)
-            return true;
-
-        // Spec calls this OperatorSelectionEnabled; the column that actually exists is
-        // businesses.allow_operator_choice, surfaced as BusinessResponse.AllowOperatorChoice.
         return business.AllowOperatorChoice;
     }
 
