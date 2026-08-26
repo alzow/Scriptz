@@ -15,7 +15,7 @@ public class StubQueueService : IQueueService
             .OrderBy(e => e.JoinedAt)
             .ToList());
 
-    public Task AddWalkInAsync(Guid businessId, Guid? operatorId, string name, Guid serviceId)
+    public Task AddWalkInAsync(Guid businessId, Guid? operatorId, string? name, Guid serviceId)
     {
         _entries.Add(new QueueEntryResponse
         {
@@ -42,13 +42,18 @@ public class StubQueueService : IQueueService
             throw new InvalidOperationException("this operator is already serving another customer");
 
         entry.Status = "serving";
+        entry.ServingAt = DateTime.UtcNow;
         return Task.CompletedTask;
     }
 
     public Task CompleteAsync(Guid entryId)
     {
         var entry = _entries.FirstOrDefault(e => e.Id == entryId);
-        if (entry != null) entry.Status = "completed";
+        if (entry != null)
+        {
+            entry.Status = "completed";
+            entry.DoneAt = DateTime.UtcNow;
+        }
         return Task.CompletedTask;
     }
 
@@ -173,4 +178,35 @@ public class StubQueueService : IQueueService
 
     public Task<List<VisitResponse>> GetMyVisitsAsync(Guid customerId)
         => Task.FromResult(new List<VisitResponse>());
+
+    public Task AssignEntryAsync(Guid entryId, Guid? operatorId)
+    {
+        var entry = _entries.FirstOrDefault(e => e.Id == entryId);
+        if (entry != null) entry.OperatorId = operatorId;
+        return Task.CompletedTask;
+    }
+
+    public Task MoveEntryToEndAsync(Guid entryId)
+    {
+        var entry = _entries.FirstOrDefault(e => e.Id == entryId);
+        if (entry != null) entry.JoinedAt = DateTime.UtcNow;
+        return Task.CompletedTask;
+    }
+
+    public Task ChangeEntryServiceAsync(Guid entryId, Guid serviceId)
+    {
+        var entry = _entries.FirstOrDefault(e => e.Id == entryId);
+        if (entry != null) entry.ServiceId = serviceId;
+        return Task.CompletedTask;
+    }
+
+    public Task<int> GetCompletedTodayCountAsync(Guid businessId)
+        => Task.FromResult(_entries.Count(e =>
+            e.BusinessId == businessId && e.Status is "done" or "completed"
+            && e.DoneAt >= DateTime.UtcNow.Date));
+
+    // Null on purpose: exercises the em-dash path the real function takes until an operator has
+    // three completed services on the books.
+    public Task<decimal?> GetOperatorAvgMinutesAsync(Guid operatorId)
+        => Task.FromResult<decimal?>(null);
 }

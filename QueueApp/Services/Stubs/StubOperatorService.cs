@@ -52,6 +52,13 @@ public class StubOperatorService : IOperatorService
         return Task.CompletedTask;
     }
 
+    public Task SetOperatorAvailableAsync(Guid id, bool isAvailable)
+    {
+        var op = _operators.FirstOrDefault(o => o.Id == id);
+        if (op != null) op.IsAvailable = isAvailable;
+        return Task.CompletedTask;
+    }
+
     private readonly List<OperatorAvailabilityResponse> _availability = new();
 
     public Task<List<OperatorAvailabilityResponse>> GetAvailabilityAsync(Guid operatorId)

@@ -45,6 +45,27 @@ public interface IQueueApi
     [Post("/rpc/business_queue_summary")]
     Task<List<QueueSummaryRow>> GetQueueSummaryAsync([Body] BusinessIdRequest request);
 
+    // Rolling completed-service average, used for the shop stats "Avg" tile. Returns null until the
+    // operator has enough history (the function carries a count(*) >= 3 guard), which the board
+    // renders as an em-dash rather than inventing a number.
+    [Post("/rpc/operator_avg_minutes")]
+    Task<decimal?> GetOperatorAvgMinutesAsync([Body] OperatorAvgRequest request);
+
+    // Direct column writes the queue engine has no RPC for: assigning an entry to (or back off) an
+    // operator, sending one to the back of the queue, and correcting the service on an existing
+    // entry. Permitted by the "owner or self manage" UPDATE policy on queue_entries.
+    [Patch("/queue_entries")]
+    Task UpdateEntryAsync([AliasAs("id")] string idEq, [Body] Dictionary<string, object?> patch);
+
+    // "Done today" for the shop stats. Both enum spellings are accepted because the app has used
+    // "completed" and "done" interchangeably; PostgREST ignores labels the enum doesn't define.
+    [Get("/queue_entries")]
+    Task<List<QueueEntryResponse>> GetCompletedSinceAsync(
+        [AliasAs("business_id")] string businessIdEq,
+        [AliasAs("done_at")] string doneAtGte,
+        [AliasAs("status")] string statusIn = "in.(done,completed)",
+        [AliasAs("select")] string select = "id");
+
     [Get("/visits?select=id,visited_at,business:businesses(id,name,category),operator:operators(display_name),service:services(name)&order=visited_at.desc")]
     Task<List<VisitResponse>> GetMyVisitsAsync([AliasAs("customer_id")] string customerIdEq);
 }

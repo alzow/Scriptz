@@ -180,4 +180,71 @@
         <Setter Property="FontSize" Value="40"/>
     </Style>
 
+    <!--
+        Operator board. Sizes come off the board design's type scale, which runs half-steps
+        (11.5, 13.5, 16.5) to keep body text legible at arm's length on a counter phone.
+    -->
+    <Style x:Key="lbl9_Regular_TextLight" TargetType="Label">
+        <Setter Property="FontSize" Value="9"/>
+        <Setter Property="TextColor" Value="{StaticResource TextMuted}"/>
+    </Style>
+    <Style x:Key="lbl11_Regular_TextLight" TargetType="Label">
+        <Setter Property="FontSize" Value="11.5"/>
+        <Setter Property="TextColor" Value="{StaticResource TextMuted}"/>
+    </Style>
+    <Style x:Key="lbl11_Regular_TextDark" TargetType="Label">
+        <Setter Property="FontSize" Value="11.5"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+    </Style>
+    <Style x:Key="lbl12_Bold_TextDark" TargetType="Label">
+        <Setter Property="FontSize" Value="12.5"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+    </Style>
+    <Style x:Key="lbl13_Bold_Green" TargetType="Label">
+        <Setter Property="FontSize" Value="13.5"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="TextColor" Value="{StaticResource Green}"/>
+    </Style>
+    <Style x:Key="lbl15_Bold_Purple" TargetType="Label">
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="FontFamily" Value="RobotoBlack"/>
+        <Setter Property="TextColor" Value="{StaticResource Purple}"/>
+    </Style>
+    <Style x:Key="lbl16_Bold_TextDark" TargetType="Label">
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontFamily" Value="RobotoBlack"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+    </Style>
+    <Style x:Key="lbl16_Bold_Green" TargetType="Label" BasedOn="{StaticResource lbl16_Bold_TextDark}">
+        <Setter Property="TextColor" Value="{StaticResource Green}"/>
+    </Style>
+    <Style x:Key="lbl16_Bold_TextMuted" TargetType="Label" BasedOn="{StaticResource lbl16_Bold_TextDark}">
+        <Setter Property="TextColor" Value="{StaticResource TextMuted}"/>
+    </Style>
+    <Style x:Key="lbl17_Bold_TextDark" TargetType="Label">
+        <Setter Property="FontSize" Value="17"/>
+        <Setter Property="FontFamily" Value="RobotoBlack"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+    </Style>
+    <Style x:Key="lbl12_Mono_TextPrimary" TargetType="Label">
+        <Setter Property="FontSize" Value="12.5"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+    </Style>
+    <Style x:Key="lbl16_Mono_TextPrimary" TargetType="Label">
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+    </Style>
+    <Style x:Key="lbl16_Mono_TextMuted" TargetType="Label" BasedOn="{StaticResource lbl16_Mono_TextPrimary}">
+        <Setter Property="TextColor" Value="{StaticResource TextMuted}"/>
+    </Style>
+    <!-- The elapsed timer. Green and steady at every duration: it never escalates. -->
+    <Style x:Key="lbl20_Mono_Green" TargetType="Label">
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="TextColor" Value="{StaticResource Green}"/>
+    </Style>
+
 </ResourceDictionary>

@@ -115,4 +115,70 @@
         </Setter>
     </Style>
 
+    <!-- Operator board -->
+    <Style x:Key="brd13_Raised" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceRaised}"/>
+        <Setter Property="StrokeThickness" Value="0"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="13"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- The now-serving card. Green edge, never a green fill — the fill belongs to Done. -->
+    <Style x:Key="brd14_Serving" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceRaised}"/>
+        <Setter Property="Stroke" Value="{StaticResource GreenDim}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="14"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--
+        The shared pool. Purple here means awaiting resolution, which is exactly what an unassigned
+        entry is, and this banner is the only place on the board that earns the colour. The stroke
+        is overridden at the use site: it goes to full purple once the oldest entry has sat past
+        BoardConstants.PoolStarvationMinutes.
+    -->
+    <Style x:Key="brd16_Pool" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="#12A45EFF"/>
+        <Setter Property="Stroke" Value="#4A3670"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="16"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Add walk-in: a ghost, because it is the least frequent action in the section. -->
+    <Style x:Key="brd13_Ghost" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="Stroke" Value="{StaticResource Line}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeDashArray" Value="4,3"/>
+        <Setter Property="StrokeDashOffset" Value="0"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="13"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Bottom sheet body: rounded at the top only, square where it meets the screen edge. -->
+    <Style x:Key="brd22_Sheet" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
+        <Setter Property="Stroke" Value="{StaticResource Line}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="22,22,0,0"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>
