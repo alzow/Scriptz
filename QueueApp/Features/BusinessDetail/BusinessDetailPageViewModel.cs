@@ -1067,6 +1067,21 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             OperatorChoices.Add(any);
             SelectedOperatorChoice = any;
         }
+        else if (IsBookingMode)
+        {
+            var any = new OperatorChoiceItem
+            {
+                OperatorId = null,
+                Name = "Any available",
+                Initials = "★",
+                SubLabel = "Whoever's free at that time",
+                IsAnyAvailable = true,
+                ShowFastestTag = false,
+                IsSelected = true,
+            };
+            OperatorChoices.Add(any);
+            SelectedOperatorChoice = any;
+        }
 
         foreach (var op in _selectableOperators)
         {
@@ -1100,8 +1115,11 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     {
         try
         {
-            if (SelectedOperatorChoice?.OperatorId is not { } operatorId || SelectedServiceRow is null)
+            if (SelectedOperatorChoice is null || SelectedServiceRow is null)
                 return;
+
+            var operatorId = SelectedOperatorChoice.OperatorId;
+            var isAny = SelectedOperatorChoice.IsAnyAvailable;
 
             if (DayChoices.Count == 0)
             {
@@ -1117,14 +1135,18 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 }
             }
 
-            // Counts are per operator, so the chip has to say whose. Until the multi-resource union
-            // lands, "7 free" at shop level is a number nothing can back.
-            DayFineprint = SelectedServiceRow.Service.EstMinutes >= 120
-                ? $"A {SelectedServiceRow.DurationText} job needs one unbroken block, so some days show fewer options than {SelectedOperatorChoice.Name} has slots."
-                : $"Counts are {SelectedOperatorChoice.Name}'s free slots, not the whole shop's.";
+            // Pooled counts are shop-wide (get_available_slots_any), so no "whose slots" caveat is
+            // needed there — only the single-operator path needs to say whose free time it's counting.
+            DayFineprint = isAny
+                ? SelectedServiceRow.Service.EstMinutes >= 120
+                    ? $"A {SelectedServiceRow.DurationText} job needs one unbroken block, so some days show fewer options."
+                    : "Counts are the shop's free slots across everyone."
+                : SelectedServiceRow.Service.EstMinutes >= 120
+                    ? $"A {SelectedServiceRow.DurationText} job needs one unbroken block, so some days show fewer options than {SelectedOperatorChoice.Name} has slots."
+                    : $"Counts are {SelectedOperatorChoice.Name}'s free slots, not the whole shop's.";
 
             var serviceId = SelectedServiceRow.Service.Id;
-            var key = (operatorId, serviceId);
+            var key = (operatorId ?? Guid.Empty, serviceId);
 
             if (_dayCountCache.TryGetValue(key, out var cached))
             {
@@ -1138,7 +1160,9 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 var dates = DayChoices.Select(d => d.Date).ToList();
                 var results = await Task.WhenAll(dates.Select(async date =>
                 {
-                    var slots = await _bookingService.GetAvailableSlotsAsync(operatorId, serviceId, date);
+                    var slots = isAny
+                        ? await _bookingService.GetAvailableSlotsAnyAsync(_businessId, serviceId, date)
+                        : await _bookingService.GetAvailableSlotsAsync(operatorId!.Value, serviceId, date);
                     return (date, count: slots.Count);
                 }));
 
@@ -1171,11 +1195,13 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
 
     public async Task LoadSlotsAsync()
     {
-        if (SelectedOperatorChoice?.OperatorId is not { } operatorId
+        if (SelectedOperatorChoice is null
             || SelectedServiceRow is null
             || SelectedDay is null)
             return;
 
+        var operatorId = SelectedOperatorChoice.OperatorId;
+        var isAny = SelectedOperatorChoice.IsAnyAvailable;
         var date = SelectedDay.Date;
 
         if (_slotCache.TryGetValue(date, out var cached))
@@ -1194,8 +1220,9 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         {
             await Task.Delay(250, token);
 
-            var slots = await _bookingService.GetAvailableSlotsAsync(
-                operatorId, SelectedServiceRow.Service.Id, date);
+            var slots = isAny
+                ? await _bookingService.GetAvailableSlotsAnyAsync(_businessId, SelectedServiceRow.Service.Id, date)
+                : await _bookingService.GetAvailableSlotsAsync(operatorId!.Value, SelectedServiceRow.Service.Id, date);
 
             if (token.IsCancellationRequested)
                 return;
@@ -1323,7 +1350,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         if (SelectedServiceRow is null || SelectedSlot is null)
             return;
 
-        if (SelectedOperatorChoice?.OperatorId is not { } operatorId)
+        if (SelectedOperatorChoice is null)
         {
             await HandleExceptionAsync(new InvalidOperationException(
                 "Pick who's doing the work before booking."));
@@ -1337,14 +1364,27 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             if (string.IsNullOrEmpty(userId))
                 throw new InvalidOperationException("No signed-in user id — should never happen post-splash-gate.");
 
-            await _bookingService.CreateBookingAsync(new CreateBookingRequest
+            if (SelectedOperatorChoice.IsAnyAvailable)
             {
-                BusinessId = _businessId,
-                OperatorId = operatorId,
-                ServiceId = SelectedServiceRow.Service.Id,
-                CustomerId = Guid.Parse(userId),
-                StartsAt = SelectedSlot.Slot.SlotStart,
-            });
+                await _bookingService.CreateBookingAnyAsync(new CreateBookingAnyRequest
+                {
+                    BusinessId = _businessId,
+                    ServiceId = SelectedServiceRow.Service.Id,
+                    CustomerId = Guid.Parse(userId),
+                    StartsAt = SelectedSlot.Slot.SlotStart,
+                });
+            }
+            else
+            {
+                await _bookingService.CreateBookingAsync(new CreateBookingRequest
+                {
+                    BusinessId = _businessId,
+                    OperatorId = SelectedOperatorChoice.OperatorId!.Value,
+                    ServiceId = SelectedServiceRow.Service.Id,
+                    CustomerId = Guid.Parse(userId),
+                    StartsAt = SelectedSlot.Slot.SlotStart,
+                });
+            }
 
             CloseFlow();
             await RefreshMyBookingsAsync();
