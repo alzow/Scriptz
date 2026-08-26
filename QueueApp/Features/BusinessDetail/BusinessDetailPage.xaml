@@ -783,15 +783,8 @@
                                     <Label Grid.Column="0" Text="Your turn about" Style="{StaticResource lbl13_Regular_TextMid}"/>
                                     <Label Grid.Column="1" Text="{Binding ReviewTurnText}" Style="{StaticResource lbl13_Mono_Green}"/>
                                 </Grid>
-                                <Grid ColumnDefinitions="*,Auto" Padding="0,11" IsVisible="{Binding ShowReviewLeaveRow}">
-                                    <Label Grid.Column="0" Text="Leave home at" Style="{StaticResource lbl13_Regular_TextMid}"/>
-                                    <Label Grid.Column="1" Text="{Binding ReviewLeaveText}" Style="{StaticResource lbl13_Mono_Green}"/>
-                                </Grid>
                             </VerticalStackLayout>
                         </Border>
-
-                        <Label Text="{Binding ReviewFineprint}" Margin="20,14,20,20"
-                               Style="{StaticResource lbl13_Regular_BrownLight}" FontSize="11"/>
                     </VerticalStackLayout>
                 </ScrollView>
 

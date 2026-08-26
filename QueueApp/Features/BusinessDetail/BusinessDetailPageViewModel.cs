@@ -242,9 +242,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     public string ReviewPriceText { get; set; } = string.Empty;
     public string ReviewPositionText { get; set; } = string.Empty;
     public string ReviewTurnText { get; set; } = string.Empty;
-    public string ReviewLeaveText { get; set; } = string.Empty;
-    public bool ShowReviewLeaveRow => !string.IsNullOrEmpty(ReviewLeaveText);
-    public string ReviewFineprint { get; set; } = string.Empty;
 
     #endregion
 
@@ -865,10 +862,10 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                     : $"Pick a {_labels.Noun.ToLowerInvariant()}, or take whoever's free first.";
                 break;
             case FlowStep.Service:
-                StepHeading = "What are you having?";
+                StepHeading = "What service do you need?";
                 StepSubheading = IsBookingMode
-                    ? "Sets how long a slot has to be to fit you."
-                    : "Sets how long the queue thinks you'll take.";
+                    ? "This helps us match the right appointment length."
+                    : "This helps us estimate how long you'll be in the queue.";
                 break;
             case FlowStep.Day:
                 StepHeading = "Which day?";
@@ -1280,19 +1277,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         var turnAt = LocalTime.Now.AddMinutes(waitMinutes);
         ReviewTurnText = turnAt.ToString("HH:mm");
 
-        if (_travelMinutes is { } travel)
-        {
-            ReviewLeaveText = turnAt.AddMinutes(-travel).ToString("HH:mm");
-            ReviewFineprint = $"Travel time is your saved {travel} min trip. Change it in Profile.";
-        }
-        else
-        {
-            // Without a travel value, leave-at would just be the ETA again — hide the row instead.
-            ReviewLeaveText = string.Empty;
-            ReviewFineprint = "Set your travel time in Profile to see when to leave.";
-        }
-
-        OnPropertyChanged(nameof(ShowReviewLeaveRow));
         OnPropertyChanged(nameof(ReviewOperatorLabel));
     }
 

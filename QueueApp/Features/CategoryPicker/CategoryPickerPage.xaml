@@ -82,7 +82,7 @@
 
                 <!-- Frequent -->
                 <Grid ColumnDefinitions="*,Auto" Margin="0,26,0,10" IsVisible="{Binding HasFrequentBusinesses}">
-                    <Label Grid.Column="0" Text="YOU GO HERE A LOT" Style="{StaticResource SectionTitle}"/>
+                    <Label Grid.Column="0" Text="FREQUENTLY VISITED" Style="{StaticResource SectionTitle}"/>
                 </Grid>
                 <helpers:FrequentBusinessListView
                         IsVisible="{Binding HasFrequentBusinesses}"
