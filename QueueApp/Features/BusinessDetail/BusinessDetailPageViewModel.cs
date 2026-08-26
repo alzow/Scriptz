@@ -30,20 +30,15 @@ namespace QueueApp.Features.BusinessDetail;
 
 public partial class BusinessDetailPageViewModel : BaseViewModel
 {
+    #region Constants
+
     // No column stores a customer's travel time, so it lives per-device rather than becoming a maps
     // call on every review step. Nothing writes this yet — Profile needs a field for it.
     public const string TravelMinutesStorageKey = "customer_travel_minutes";
 
-    private readonly IBusinessService _businessService;
-    private readonly IQueueService _queueService;
-    private readonly IOperatorService _operatorService;
-    private readonly IServiceOfferingsService _serviceOfferingsService;
-    private readonly IBookingService _bookingService;
-    private readonly IProfileService _profileService;
-    private readonly IAuthService _authService;
-    private readonly IQueueRealtimeService _realtimeService;
-    private readonly IQueuePopupService _popupService;
-    private readonly ILocationService _locationService;
+    #endregion
+
+    #region Properties and fields
 
     private readonly ITicketScheme _ticketScheme = new PositionTicketScheme();
     private readonly SemaphoreSlim _loadLock = new(1, 1);
@@ -63,6 +58,194 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     private string _slotsLeftTodayText = "—";
     private List<FlowStep> _steps = new();
     private CancellationTokenSource? _slotDebounce;
+
+    // Mode and page state
+
+    public BusinessResponse? Business { get; set; }
+    public bool IsLoading { get; set; }
+
+    public bool IsQueueMode => Business?.Mode == FlowStepEngine.QueueMode;
+    public bool IsBookingMode => Business?.Mode == FlowStepEngine.BookingMode;
+
+    // The three top-level states are mutually exclusive: exactly one of these renders at a time.
+    public bool IsShowingLanding => !IsFlowActive && !IsShowingConfirmation;
+    public bool IsShowingConfirmation => IsInQueue || ActiveBooking is not null;
+
+    // Landing — header
+
+    public string BusinessName => Business?.Name ?? string.Empty;
+    public string AddressLine => Business?.Address ?? Business?.Suburb ?? string.Empty;
+
+    public bool IsOpen { get; set; }
+    public string OpenPillText => IsOpen ? "OPEN" : "CLOSED";
+
+    // "WALK-IN QUEUE · MON–SAT 8:00–18:00". The hours half only appears when operator_availability
+    // actually has windows for this business.
+    public string ModeLine
+    {
+        get
+        {
+            var mode = IsBookingMode ? "APPOINTMENTS ONLY" : "WALK-IN QUEUE";
+            return _hours.HasData ? $"{mode} · {_hours.SummaryText}" : mode;
+        }
+    }
+
+    // Landing — live card
+
+    public string PrimaryStatValue { get; set; } = "—";
+    public string PrimaryStatLabel { get; set; } = "Now serving";
+    public string SecondaryStatValue { get; set; } = "—";
+    public string SecondaryStatLabel { get; set; } = "In queue";
+    public string TertiaryStatValue { get; set; } = "—";
+    public string TertiaryStatLabel { get; set; } = "Est. wait";
+
+    public string LiveCardTitle => IsBookingMode ? "NEXT AVAILABLE" : "LIVE QUEUE";
+    public string LiveCardStatus => IsBookingMode ? "Booking" : IsOpen ? "Live" : "Closed";
+    public bool ShowLiveDot => IsQueueMode && IsOpen;
+
+    public string LiveFootnote { get; set; } = string.Empty;
+
+    public string CtaText { get; set; } = string.Empty;
+    public bool IsCtaEnabled { get; set; }
+
+    // The card's CTA scrolls away; the sticky bar takes over. Never both at once — the page toggles
+    // this from the scroll position of the live card.
+    public bool IsStickyCtaVisible { get; set; }
+    public bool ShowStickyCta => IsStickyCtaVisible && IsShowingLanding;
+
+    // Landing — services, team, getting there
+
+    public ObservableCollection<ServiceChoiceItem> ServiceRows { get; } = new();
+    public bool HasServices => ServiceRows.Count > 0;
+    public string ServicesCountText => ServiceRows.Count > 0 ? $"All {ServiceRows.Count}" : string.Empty;
+
+    // The landing's service list sits inside the page ScrollView, so its CollectionView is sized to
+    // exactly its content — with nothing of its own left to scroll, the drag reaches the page.
+    // 50 is the row template's HeightRequest; the layout adds no item spacing.
+    public double ServicesListHeight => ServiceRows.Count * 50;
+
+    public ObservableCollection<TeamMemberItem> TeamMembers { get; } = new();
+    public bool HasTeam => TeamMembers.Count > 0;
+    public string TeamSectionTitle => _labels.SectionTitle;
+    public string TeamCountText { get; set; } = string.Empty;
+
+    public string DistanceText { get; set; } = string.Empty;
+    public bool HasDistance => !string.IsNullOrEmpty(DistanceText);
+
+    // Flow chrome
+
+    public bool IsFlowActive { get; set; }
+    public string FlowTitle => IsBookingMode ? "Book a slot" : "Join the queue";
+
+    public ObservableCollection<RailSegment> RailSegments { get; } = new();
+    public ObservableCollection<CrumbChip> Crumbs { get; } = new();
+    public bool HasCrumbs => Crumbs.Count > 0;
+
+    public string RailStepLabel { get; set; } = string.Empty;
+    public string RailCountText { get; set; } = string.Empty;
+
+    public string StepHeading { get; set; } = string.Empty;
+    public string StepSubheading { get; set; } = string.Empty;
+
+    public bool ShowOperatorStep { get; set; }
+    public bool ShowServiceStep { get; set; }
+    public bool ShowDayStep { get; set; }
+    public bool ShowTimeStep { get; set; }
+    public bool ShowReviewStep { get; set; }
+
+    public string FooterLabel { get; set; } = string.Empty;
+    public string FooterValue { get; set; } = string.Empty;
+    public string FooterCtaText { get; set; } = "Next";
+    public bool IsFooterCtaEnabled { get; set; }
+    public bool IsSubmitting { get; set; }
+
+    public int CurrentStepIndex { get; set; }
+
+    private FlowStep CurrentStep => _steps.Count > 0
+        ? _steps[Math.Clamp(CurrentStepIndex, 0, _steps.Count - 1)]
+        : FlowStep.Service;
+
+    // Flow selections
+
+    public ObservableCollection<OperatorChoiceItem> OperatorChoices { get; } = new();
+    public OperatorChoiceItem? SelectedOperatorChoice { get; set; }
+
+    public ServiceChoiceItem? SelectedServiceRow { get; set; }
+
+    public ObservableCollection<DayChoiceItem> DayChoices { get; } = new();
+    public DayChoiceItem? SelectedDay { get; set; }
+    public bool IsLoadingDays { get; set; }
+    public string DayFineprint { get; set; } = string.Empty;
+
+    public SlotPeriod Morning { get; set; } = new("MORNING", Array.Empty<SlotChoiceItem>(), "none");
+    public SlotPeriod Afternoon { get; set; } = new("AFTERNOON", Array.Empty<SlotChoiceItem>(), "none");
+    public SlotPeriod Evening { get; set; } = new("EVENING", Array.Empty<SlotChoiceItem>(), "none");
+    public SlotChoiceItem? SelectedSlot { get; set; }
+    public bool IsLoadingSlots { get; set; }
+
+    // Queue data
+
+    public ObservableCollection<QueueSummaryRow> QueueSummary { get; } = new();
+
+    // Queue confirmation
+
+    public MyQueueStatusResponse? MyStatus { get; set; }
+    public decimal? MyWaitMinutes { get; set; }
+    public bool IsInQueue => MyStatus is not null;
+    public bool IsBeingServed => MyStatus?.Status == "serving";
+    public bool IsLeaving { get; set; }
+
+    public string TicketHeadline { get; set; } = string.Empty;
+    public string TicketWaitText { get; set; } = string.Empty;
+    public string TicketTurnText { get; set; } = string.Empty;
+    public string TicketLeaveText { get; set; } = string.Empty;
+    public bool ShowTicketLeaveText => !string.IsNullOrEmpty(TicketLeaveText);
+    public string TicketTravelNote { get; set; } = string.Empty;
+    public RingDrawable TicketRing { get; set; } = new(0);
+    public ObservableCollection<TicketDot> TicketDots { get; } = new();
+
+    // Booking confirmation
+
+    public MyBookingSummaryResponse? ActiveBooking { get; set; }
+    public string BookingWhenText { get; set; } = string.Empty;
+    public string BookingEndsText { get; set; } = string.Empty;
+    public string BookingOperatorLabel => _labels.Noun;
+    public string BookingOperatorText { get; set; } = string.Empty;
+    public string BookingServiceText { get; set; } = string.Empty;
+    public string BookingPriceText { get; set; } = string.Empty;
+    public string BookingPendingBlurb { get; set; } = string.Empty;
+    public bool IsCancellingBooking { get; set; }
+
+    // Review step
+
+    public string ReviewOperatorLabel => _labels.Noun;
+    public string ReviewOperatorText { get; set; } = string.Empty;
+    public string ReviewServiceText { get; set; } = string.Empty;
+    public string ReviewPriceText { get; set; } = string.Empty;
+    public string ReviewPositionText { get; set; } = string.Empty;
+    public string ReviewTurnText { get; set; } = string.Empty;
+    public string ReviewLeaveText { get; set; } = string.Empty;
+    public bool ShowReviewLeaveRow => !string.IsNullOrEmpty(ReviewLeaveText);
+    public string ReviewFineprint { get; set; } = string.Empty;
+
+    #endregion
+
+    #region Services
+
+    private readonly IBusinessService _businessService;
+    private readonly IQueueService _queueService;
+    private readonly IOperatorService _operatorService;
+    private readonly IServiceOfferingsService _serviceOfferingsService;
+    private readonly IBookingService _bookingService;
+    private readonly IProfileService _profileService;
+    private readonly IAuthService _authService;
+    private readonly IQueueRealtimeService _realtimeService;
+    private readonly IQueuePopupService _popupService;
+    private readonly ILocationService _locationService;
+
+    #endregion
+
+    #region Constructor
 
     public BusinessDetailPageViewModel(
         INavigationService navigationService,
@@ -91,192 +274,9 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         _locationService = locationService;
     }
 
-    // Base HandleExceptionAsync only logs — surface real failures to the customer instead, most
-    // notably a pooled join/booking race ("all resources are currently busy", "that time was
-    // just taken") — those are normal operational states, not faults, and deserve to be seen.
-    protected override Task HandleExceptionAsync(Exception exception)
-    {
-        return _popupService.ShowAlertAsync("Couldn't do that", GetFriendlyErrorMessage(exception));
-    }
-
-    #region Mode and page state
-
-    public BusinessResponse? Business { get; set; }
-    public bool IsLoading { get; set; }
-
-    public bool IsQueueMode => Business?.Mode == FlowStepEngine.QueueMode;
-    public bool IsBookingMode => Business?.Mode == FlowStepEngine.BookingMode;
-
-    // The three top-level states are mutually exclusive: exactly one of these renders at a time.
-    public bool IsShowingLanding => !IsFlowActive && !IsShowingConfirmation;
-    public bool IsShowingConfirmation => IsInQueue || ActiveBooking is not null;
-
     #endregion
 
-    #region Landing — header
-
-    public string BusinessName => Business?.Name ?? string.Empty;
-    public string AddressLine => Business?.Address ?? Business?.Suburb ?? string.Empty;
-
-    public bool IsOpen { get; set; }
-    public string OpenPillText => IsOpen ? "OPEN" : "CLOSED";
-
-    // "WALK-IN QUEUE · MON–SAT 8:00–18:00". The hours half only appears when operator_availability
-    // actually has windows for this business.
-    public string ModeLine
-    {
-        get
-        {
-            var mode = IsBookingMode ? "APPOINTMENTS ONLY" : "WALK-IN QUEUE";
-            return _hours.HasData ? $"{mode} · {_hours.SummaryText}" : mode;
-        }
-    }
-
-    #endregion
-
-    #region Landing — live card
-
-    public string PrimaryStatValue { get; set; } = "—";
-    public string PrimaryStatLabel { get; set; } = "Now serving";
-    public string SecondaryStatValue { get; set; } = "—";
-    public string SecondaryStatLabel { get; set; } = "In queue";
-    public string TertiaryStatValue { get; set; } = "—";
-    public string TertiaryStatLabel { get; set; } = "Est. wait";
-
-    public string LiveCardTitle => IsBookingMode ? "NEXT AVAILABLE" : "LIVE QUEUE";
-    public string LiveCardStatus => IsBookingMode ? "Booking" : IsOpen ? "Live" : "Closed";
-    public bool ShowLiveDot => IsQueueMode && IsOpen;
-
-    public string LiveFootnote { get; set; } = string.Empty;
-
-    public string CtaText { get; set; } = string.Empty;
-    public bool IsCtaEnabled { get; set; }
-
-    // The card's CTA scrolls away; the sticky bar takes over. Never both at once — the page toggles
-    // this from the scroll position of the live card.
-    public bool IsStickyCtaVisible { get; set; }
-    public bool ShowStickyCta => IsStickyCtaVisible && IsShowingLanding;
-
-    #endregion
-
-    #region Landing — services, team, getting there
-
-    public ObservableCollection<ServiceChoiceItem> ServiceRows { get; } = new();
-    public bool HasServices => ServiceRows.Count > 0;
-    public string ServicesCountText => ServiceRows.Count > 0 ? $"All {ServiceRows.Count}" : string.Empty;
-
-    // The landing's service list sits inside the page ScrollView, so its CollectionView is sized to
-    // exactly its content — with nothing of its own left to scroll, the drag reaches the page.
-    // 50 is the row template's HeightRequest; the layout adds no item spacing.
-    public double ServicesListHeight => ServiceRows.Count * 50;
-
-    public ObservableCollection<TeamMemberItem> TeamMembers { get; } = new();
-    public bool HasTeam => TeamMembers.Count > 0;
-    public string TeamSectionTitle => _labels.SectionTitle;
-    public string TeamCountText { get; set; } = string.Empty;
-
-    public string DistanceText { get; set; } = string.Empty;
-    public bool HasDistance => !string.IsNullOrEmpty(DistanceText);
-
-    #endregion
-
-    #region Flow chrome
-
-    public bool IsFlowActive { get; set; }
-    public string FlowTitle => IsBookingMode ? "Book a slot" : "Join the queue";
-
-    public ObservableCollection<RailSegment> RailSegments { get; } = new();
-    public ObservableCollection<CrumbChip> Crumbs { get; } = new();
-    public bool HasCrumbs => Crumbs.Count > 0;
-
-    public string RailStepLabel { get; set; } = string.Empty;
-    public string RailCountText { get; set; } = string.Empty;
-
-    public string StepHeading { get; set; } = string.Empty;
-    public string StepSubheading { get; set; } = string.Empty;
-
-    public bool ShowOperatorStep { get; set; }
-    public bool ShowServiceStep { get; set; }
-    public bool ShowDayStep { get; set; }
-    public bool ShowTimeStep { get; set; }
-    public bool ShowReviewStep { get; set; }
-
-    public string FooterLabel { get; set; } = string.Empty;
-    public string FooterValue { get; set; } = string.Empty;
-    public string FooterCtaText { get; set; } = "Next";
-    public bool IsFooterCtaEnabled { get; set; }
-    public bool IsSubmitting { get; set; }
-
-    #endregion
-
-    #region Flow selections
-
-    public ObservableCollection<OperatorChoiceItem> OperatorChoices { get; } = new();
-    public OperatorChoiceItem? SelectedOperatorChoice { get; set; }
-
-    public ServiceChoiceItem? SelectedServiceRow { get; set; }
-
-    public ObservableCollection<DayChoiceItem> DayChoices { get; } = new();
-    public DayChoiceItem? SelectedDay { get; set; }
-    public bool IsLoadingDays { get; set; }
-    public string DayFineprint { get; set; } = string.Empty;
-
-    public SlotPeriod Morning { get; set; } = new("MORNING", Array.Empty<SlotChoiceItem>(), "none");
-    public SlotPeriod Afternoon { get; set; } = new("AFTERNOON", Array.Empty<SlotChoiceItem>(), "none");
-    public SlotPeriod Evening { get; set; } = new("EVENING", Array.Empty<SlotChoiceItem>(), "none");
-    public SlotChoiceItem? SelectedSlot { get; set; }
-    public bool IsLoadingSlots { get; set; }
-
-    #endregion
-
-    #region Queue confirmation
-
-    public MyQueueStatusResponse? MyStatus { get; set; }
-    public decimal? MyWaitMinutes { get; set; }
-    public bool IsInQueue => MyStatus is not null;
-    public bool IsBeingServed => MyStatus?.Status == "serving";
-    public bool IsLeaving { get; set; }
-
-    public string TicketHeadline { get; set; } = string.Empty;
-    public string TicketWaitText { get; set; } = string.Empty;
-    public string TicketTurnText { get; set; } = string.Empty;
-    public string TicketLeaveText { get; set; } = string.Empty;
-    public bool ShowTicketLeaveText => !string.IsNullOrEmpty(TicketLeaveText);
-    public string TicketTravelNote { get; set; } = string.Empty;
-    public RingDrawable TicketRing { get; set; } = new(0);
-    public ObservableCollection<TicketDot> TicketDots { get; } = new();
-
-    #endregion
-
-    #region Booking confirmation
-
-    public MyBookingSummaryResponse? ActiveBooking { get; set; }
-    public string BookingWhenText { get; set; } = string.Empty;
-    public string BookingEndsText { get; set; } = string.Empty;
-    public string BookingOperatorLabel => _labels.Noun;
-    public string BookingOperatorText { get; set; } = string.Empty;
-    public string BookingServiceText { get; set; } = string.Empty;
-    public string BookingPriceText { get; set; } = string.Empty;
-    public string BookingPendingBlurb { get; set; } = string.Empty;
-    public bool IsCancellingBooking { get; set; }
-
-    #endregion
-
-    #region Review step
-
-    public string ReviewOperatorLabel => _labels.Noun;
-    public string ReviewOperatorText { get; set; } = string.Empty;
-    public string ReviewServiceText { get; set; } = string.Empty;
-    public string ReviewPriceText { get; set; } = string.Empty;
-    public string ReviewPositionText { get; set; } = string.Empty;
-    public string ReviewTurnText { get; set; } = string.Empty;
-    public string ReviewLeaveText { get; set; } = string.Empty;
-    public bool ShowReviewLeaveRow => !string.IsNullOrEmpty(ReviewLeaveText);
-    public string ReviewFineprint { get; set; } = string.Empty;
-
-    #endregion
-
-    #region Load
+    #region Lifecycle
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
@@ -350,48 +350,101 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
 
     public override async Task OnDisappearingAsync()
     {
-        await base.OnDisappearingAsync();
-        await _realtimeService.UnsubscribeAsync();
+        try
+        {
+            await base.OnDisappearingAsync();
+            await _realtimeService.UnsubscribeAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
 
-    private Task OnRealtimeChangeAsync() =>
-        MainThread.InvokeOnMainThreadAsync(async () =>
-        {
-            if (IsQueueMode)
-            {
-                await RefreshQueueAsync();
-                await RefreshMyStatusAsync();
-            }
-            else
-            {
-                await RefreshBookingSlotStatsAsync();
-                await RefreshMyBookingsAsync();
-            }
+    // Android's hardware back has to mean the same thing as the on-screen one, or it pops the whole
+    // page from step three. Returns true when it consumed the press.
+    public bool TryHandleHardwareBack()
+    {
+        if (!IsFlowActive)
+            return false;
 
-            BuildTeam();
-            RefreshLandingCard();
+        FlowBack();
+        return true;
+    }
+
+    #endregion
+
+    #region Rest of functions
+
+    // Base HandleExceptionAsync only logs — surface real failures to the customer instead, most
+    // notably a pooled join/booking race ("all resources are currently busy", "that time was
+    // just taken") — those are normal operational states, not faults, and deserve to be seen.
+    protected override Task HandleExceptionAsync(Exception exception)
+    {
+        return _popupService.ShowAlertAsync("Couldn't do that", GetFriendlyErrorMessage(exception));
+    }
+
+    public async Task OnRealtimeChangeAsync() =>
+        await MainThread.InvokeOnMainThreadAsync(async () =>
+        {
+            try
+            {
+                if (IsQueueMode)
+                {
+                    await RefreshQueueAsync();
+                    await RefreshMyStatusAsync();
+                }
+                else
+                {
+                    await RefreshBookingSlotStatsAsync();
+                    await RefreshMyBookingsAsync();
+                }
+
+                BuildTeam();
+                RefreshLandingCard();
+            }
+            catch (Exception ex)
+            {
+                await HandleExceptionAsync(ex);
+            }
         });
 
-    private async Task<int?> ReadTravelMinutesAsync()
+    public async Task<int?> ReadTravelMinutesAsync()
     {
-        var stored = await SecureStorageService.GetAsync(TravelMinutesStorageKey);
-        return int.TryParse(stored, out var minutes) && minutes > 0 ? minutes : null;
+        try
+        {
+            var stored = await SecureStorageService.GetAsync(TravelMinutesStorageKey);
+            return int.TryParse(stored, out var minutes) && minutes > 0 ? minutes : null;
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+            return null;
+        }
     }
 
     // operator_availability is per operator, so the business's trading hours are the union across
     // the ones on the books. Fetched concurrently — a shop has a handful of operators, not hundreds.
-    private async Task<BusinessHours> LoadHoursAsync(IReadOnlyList<OperatorResponse> operators)
+    public async Task<BusinessHours> LoadHoursAsync(IReadOnlyList<OperatorResponse> operators)
     {
-        var active = operators.Where(o => o.IsActive).ToList();
-        if (active.Count == 0)
-            return BusinessHours.Unknown;
+        try
+        {
+            var active = operators.Where(o => o.IsActive).ToList();
+            if (active.Count == 0)
+                return BusinessHours.Unknown;
 
-        var windows = await Task.WhenAll(active.Select(o => _operatorService.GetAvailabilityAsync(o.Id)));
-        return BusinessHours.FromAvailability(windows.SelectMany(w => w));
+            var windows = await Task.WhenAll(active.Select(o => _operatorService.GetAvailabilityAsync(o.Id)));
+            return BusinessHours.FromAvailability(windows.SelectMany(w => w));
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+            return BusinessHours.Unknown;
+        }
     }
 
     // Presence is operators.is_available; an inactive operator isn't rendered at all.
-    private void BuildTeam()
+    public void BuildTeam()
     {
         TeamMembers.Clear();
 
@@ -428,28 +481,29 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         OnPropertyChanged(nameof(TeamSectionTitle));
     }
 
-    private async Task LoadDistanceAsync()
+    public async Task LoadDistanceAsync()
     {
-        if (Business?.Latitude is not { } lat || Business.Longitude is not { } lon)
-            return;
+        try
+        {
+            if (Business?.Latitude is not { } lat || Business.Longitude is not { } lon)
+                return;
 
-        var here = await _locationService.GetCachedLocationAsync();
-        if (here is null)
-            return;
+            var here = await _locationService.GetCachedLocationAsync();
+            if (here is null)
+                return;
 
-        var km = HaversineKm(here.Latitude, here.Longitude, lat, lon);
-        DistanceText = km < 1
-            ? $"{km * 1000:0} m away"
-            : $"{km:0.#} km away";
+            var km = HaversineKm(here.Latitude, here.Longitude, lat, lon);
+            DistanceText = km < 1
+                ? $"{km * 1000:0} m away"
+                : $"{km:0.#} km away";
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
 
-    #endregion
-
-    #region Queue data
-
-    public ObservableCollection<QueueSummaryRow> QueueSummary { get; } = new();
-
-    private async Task RefreshQueueAsync()
+    public async Task RefreshQueueAsync()
     {
         await _loadLock.WaitAsync();
         try
@@ -466,79 +520,100 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             var active = await _queueService.GetActiveEntriesAsync(_businessId);
             _servingCount = active.Count(e => e.Status == "serving");
         }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
         finally
         {
             _loadLock.Release();
         }
     }
 
-    private async Task RefreshMyStatusAsync()
+    public async Task RefreshMyStatusAsync()
     {
-        // my_queue_status is the right call here — my_active_queue_entry is the dashboard's, which
-        // doesn't know the business up front.
-        MyStatus = await _queueService.GetMyQueueStatusAsync(_businessId);
-        MyWaitMinutes = MyStatus is not null
-            ? await _queueService.GetEntryWaitMinutesAsync(MyStatus.EntryId)
-            : null;
+        try
+        {
+            // my_queue_status is the right call here — my_active_queue_entry is the dashboard's, which
+            // doesn't know the business up front.
+            MyStatus = await _queueService.GetMyQueueStatusAsync(_businessId);
+            MyWaitMinutes = MyStatus is not null
+                ? await _queueService.GetEntryWaitMinutesAsync(MyStatus.EntryId)
+                : null;
 
-        OnPropertyChanged(nameof(IsInQueue));
-        OnPropertyChanged(nameof(IsShowingConfirmation));
-        OnPropertyChanged(nameof(IsShowingLanding));
+            OnPropertyChanged(nameof(IsInQueue));
+            OnPropertyChanged(nameof(IsShowingConfirmation));
+            OnPropertyChanged(nameof(IsShowingLanding));
 
-        RefreshTicket();
+            RefreshTicket();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
 
     // get_available_slots_any unions across the business's resources, so the landing card's two slot
     // stats are genuinely shop-wide. They are measured against the shortest service — a slot that
     // fits nothing else still fits that one — which is why the day step, where a service is actually
     // chosen, goes back to the per-operator call.
-    private async Task RefreshBookingSlotStatsAsync()
+    public async Task RefreshBookingSlotStatsAsync()
     {
-        var shortest = ServiceRows.OrderBy(s => s.Service.EstMinutes).FirstOrDefault();
-        if (shortest is null)
-            return;
-
-        var today = LocalTime.Now.Date;
-        var todaysSlots = await _bookingService.GetAvailableSlotsAnyAsync(_businessId, shortest.Service.Id, today);
-        var remaining = todaysSlots.Where(s => s.SlotStart > DateTimeOffset.UtcNow).OrderBy(s => s.SlotStart).ToList();
-
-        _slotsLeftTodayText = remaining.Count.ToString();
-
-        if (remaining.Count > 0)
+        try
         {
-            _nextFreeSlotText = LocalTime.ToLocal(remaining[0].SlotStart).ToString("HH:mm");
-            return;
+            var shortest = ServiceRows.OrderBy(s => s.Service.EstMinutes).FirstOrDefault();
+            if (shortest is null)
+                return;
+
+            var today = LocalTime.Now.Date;
+            var todaysSlots = await _bookingService.GetAvailableSlotsAnyAsync(_businessId, shortest.Service.Id, today);
+            var remaining = todaysSlots.Where(s => s.SlotStart > DateTimeOffset.UtcNow).OrderBy(s => s.SlotStart).ToList();
+
+            _slotsLeftTodayText = remaining.Count.ToString();
+
+            if (remaining.Count > 0)
+            {
+                _nextFreeSlotText = LocalTime.ToLocal(remaining[0].SlotStart).ToString("HH:mm");
+                return;
+            }
+
+            var tomorrowsSlots = await _bookingService.GetAvailableSlotsAnyAsync(
+                _businessId, shortest.Service.Id, today.AddDays(1));
+            var next = tomorrowsSlots.OrderBy(s => s.SlotStart).FirstOrDefault();
+            _nextFreeSlotText = next is null ? "—" : LocalTime.ToLocal(next.SlotStart).ToString("HH:mm");
         }
-
-        var tomorrowsSlots = await _bookingService.GetAvailableSlotsAnyAsync(
-            _businessId, shortest.Service.Id, today.AddDays(1));
-        var next = tomorrowsSlots.OrderBy(s => s.SlotStart).FirstOrDefault();
-        _nextFreeSlotText = next is null ? "—" : LocalTime.ToLocal(next.SlotStart).ToString("HH:mm");
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
 
-    private async Task RefreshMyBookingsAsync()
+    public async Task RefreshMyBookingsAsync()
     {
-        var userId = await _authService.GetUserIdAsync();
-        if (string.IsNullOrEmpty(userId))
-            return;
+        try
+        {
+            var userId = await _authService.GetUserIdAsync();
+            if (string.IsNullOrEmpty(userId))
+                return;
 
-        var bookings = await _bookingService.GetMyBookingsAsync(_businessId, Guid.Parse(userId));
-        ActiveBooking = bookings
-            .Where(b => b.IsCancellable && b.EndsAt > DateTimeOffset.UtcNow)
-            .OrderBy(b => b.StartsAt)
-            .FirstOrDefault();
+            var bookings = await _bookingService.GetMyBookingsAsync(_businessId, Guid.Parse(userId));
+            ActiveBooking = bookings
+                .Where(b => b.IsCancellable && b.EndsAt > DateTimeOffset.UtcNow)
+                .OrderBy(b => b.StartsAt)
+                .FirstOrDefault();
 
-        OnPropertyChanged(nameof(IsShowingConfirmation));
-        OnPropertyChanged(nameof(IsShowingLanding));
+            OnPropertyChanged(nameof(IsShowingConfirmation));
+            OnPropertyChanged(nameof(IsShowingLanding));
 
-        RefreshBookingConfirmation();
+            RefreshBookingConfirmation();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
 
-    #endregion
-
-    #region Landing card
-
-    private void RefreshLandingCard()
+    public void RefreshLandingCard()
     {
         var now = LocalTime.Now;
 
@@ -564,7 +639,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         OnPropertyChanged(nameof(ModeLine));
     }
 
-    private void RefreshQueueCard()
+    public void RefreshQueueCard()
     {
         PrimaryStatLabel = "Now serving";
         SecondaryStatLabel = "In queue";
@@ -601,7 +676,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         IsCtaEnabled = ServiceRows.Count > 0;
     }
 
-    private void RefreshBookingCard()
+    public void RefreshBookingCard()
     {
         PrimaryStatLabel = "Next free slot";
         SecondaryStatLabel = "Left today";
@@ -628,12 +703,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         }
     }
 
-    #endregion
-
-    #region Flow — entry and navigation
-
     [RelayCommand]
-    private void StartFlow()
+    public void StartFlow()
     {
         if (Business is null || !IsCtaEnabled)
             return;
@@ -667,16 +738,10 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         ApplyStep();
     }
 
-    public int CurrentStepIndex { get; set; }
-
-    private FlowStep CurrentStep => _steps.Count > 0
-        ? _steps[Math.Clamp(CurrentStepIndex, 0, _steps.Count - 1)]
-        : FlowStep.Service;
-
     // Back on step 0 leaves the flow and clears it; anywhere else it steps back and keeps what was
     // already chosen.
     [RelayCommand]
-    private void FlowBack()
+    public void FlowBack()
     {
         if (CurrentStepIndex <= 0)
         {
@@ -688,18 +753,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         ApplyStep();
     }
 
-    // Android's hardware back has to mean the same thing as the on-screen one, or it pops the whole
-    // page from step three. Returns true when it consumed the press.
-    public bool TryHandleHardwareBack()
-    {
-        if (!IsFlowActive)
-            return false;
-
-        FlowBack();
-        return true;
-    }
-
-    private void CloseFlow()
+    public void CloseFlow()
     {
         IsFlowActive = false;
         ShowOperatorStep = ShowServiceStep = ShowDayStep = ShowTimeStep = ShowReviewStep = false;
@@ -709,7 +763,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task NextAsync()
+    public async Task NextAsync()
     {
         try
         {
@@ -725,6 +779,10 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             CurrentStepIndex++;
             ApplyStep();
         }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
         finally
         {
             IsSubmitting = false;
@@ -732,7 +790,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void JumpToCrumb(CrumbChip? chip)
+    public void JumpToCrumb(CrumbChip? chip)
     {
         if (chip is null)
             return;
@@ -745,7 +803,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         ApplyStep();
     }
 
-    private void ApplyStep()
+    public void ApplyStep()
     {
         var step = CurrentStep;
 
@@ -777,7 +835,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             _ = LoadSlotsAsync();
     }
 
-    private void ApplyStepCopy(FlowStep step)
+    public void ApplyStepCopy(FlowStep step)
     {
         switch (step)
         {
@@ -810,7 +868,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         }
     }
 
-    private void BuildCrumbs()
+    public void BuildCrumbs()
     {
         Crumbs.Clear();
 
@@ -832,7 +890,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         OnPropertyChanged(nameof(HasCrumbs));
     }
 
-    private void RefreshFooter()
+    public void RefreshFooter()
     {
         var isLast = CurrentStepIndex >= _steps.Count - 1;
 
@@ -872,7 +930,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             : "Next";
     }
 
-    private string BuildSlotRangeText()
+    public string BuildSlotRangeText()
     {
         if (SelectedSlot is null || SelectedDay is null)
             return "Pick a time";
@@ -882,12 +940,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         return $"{start:ddd d} · {start:HH:mm} – {end:HH:mm}";
     }
 
-    #endregion
-
-    #region Flow — selection and invalidation
-
     // Every downstream clear happens here. Nothing else sets a selection back to null.
-    private void InvalidateAfter(FlowStep changed)
+    public void InvalidateAfter(FlowStep changed)
     {
         switch (changed)
         {
@@ -912,7 +966,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         }
     }
 
-    private void ClearSlots()
+    public void ClearSlots()
     {
         SelectedSlot = null;
         Morning = new SlotPeriod("MORNING", Array.Empty<SlotChoiceItem>(), "none");
@@ -921,7 +975,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void SelectOperator(OperatorChoiceItem? item)
+    public void SelectOperator(OperatorChoiceItem? item)
     {
         if (item is null || ReferenceEquals(item, SelectedOperatorChoice))
             return;
@@ -935,7 +989,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void SelectService(ServiceChoiceItem? item)
+    public void SelectService(ServiceChoiceItem? item)
     {
         if (item is null || ReferenceEquals(item, SelectedServiceRow))
             return;
@@ -949,7 +1003,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void SelectDay(DayChoiceItem? item)
+    public void SelectDay(DayChoiceItem? item)
     {
         if (item is null || !item.IsSelectable || ReferenceEquals(item, SelectedDay))
             return;
@@ -963,7 +1017,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void SelectSlot(SlotChoiceItem? item)
+    public void SelectSlot(SlotChoiceItem? item)
     {
         if (item is null)
             return;
@@ -975,7 +1029,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         RefreshFooter();
     }
 
-    private void BuildOperatorChoices()
+    public void BuildOperatorChoices()
     {
         OperatorChoices.Clear();
 
@@ -1026,69 +1080,68 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         }
     }
 
-    #endregion
-
-    #region Booking — days and slots
-
-    private async Task LoadDayCountsAsync()
+    public async Task LoadDayCountsAsync()
     {
-        if (SelectedOperatorChoice?.OperatorId is not { } operatorId || SelectedServiceRow is null)
-            return;
-
-        if (DayChoices.Count == 0)
-        {
-            for (var i = 0; i < 14; i++)
-            {
-                var date = LocalTime.Now.Date.AddDays(i);
-                DayChoices.Add(new DayChoiceItem
-                {
-                    Date = date,
-                    DayOfWeekText = date.ToString("ddd").ToUpperInvariant(),
-                    DayNumberText = date.Day.ToString(),
-                });
-            }
-        }
-
-        // Counts are per operator, so the chip has to say whose. Until the multi-resource union
-        // lands, "7 free" at shop level is a number nothing can back.
-        DayFineprint = SelectedServiceRow.Service.EstMinutes >= 120
-            ? $"A {SelectedServiceRow.DurationText} job needs one unbroken block, so some days show fewer options than {SelectedOperatorChoice.Name} has slots."
-            : $"Counts are {SelectedOperatorChoice.Name}'s free slots, not the whole shop's.";
-
-        var serviceId = SelectedServiceRow.Service.Id;
-        var key = (operatorId, serviceId);
-
-        if (_dayCountCache.TryGetValue(key, out var cached))
-        {
-            ApplyDayCounts(cached);
-            return;
-        }
-
-        IsLoadingDays = true;
         try
         {
-            var dates = DayChoices.Select(d => d.Date).ToList();
-            var results = await Task.WhenAll(dates.Select(async date =>
-            {
-                var slots = await _bookingService.GetAvailableSlotsAsync(operatorId, serviceId, date);
-                return (date, count: slots.Count);
-            }));
+            if (SelectedOperatorChoice?.OperatorId is not { } operatorId || SelectedServiceRow is null)
+                return;
 
-            var counts = results.ToDictionary(r => r.date, r => r.count);
-            _dayCountCache[key] = counts;
-            ApplyDayCounts(counts);
+            if (DayChoices.Count == 0)
+            {
+                for (var i = 0; i < 14; i++)
+                {
+                    var date = LocalTime.Now.Date.AddDays(i);
+                    DayChoices.Add(new DayChoiceItem
+                    {
+                        Date = date,
+                        DayOfWeekText = date.ToString("ddd").ToUpperInvariant(),
+                        DayNumberText = date.Day.ToString(),
+                    });
+                }
+            }
+
+            // Counts are per operator, so the chip has to say whose. Until the multi-resource union
+            // lands, "7 free" at shop level is a number nothing can back.
+            DayFineprint = SelectedServiceRow.Service.EstMinutes >= 120
+                ? $"A {SelectedServiceRow.DurationText} job needs one unbroken block, so some days show fewer options than {SelectedOperatorChoice.Name} has slots."
+                : $"Counts are {SelectedOperatorChoice.Name}'s free slots, not the whole shop's.";
+
+            var serviceId = SelectedServiceRow.Service.Id;
+            var key = (operatorId, serviceId);
+
+            if (_dayCountCache.TryGetValue(key, out var cached))
+            {
+                ApplyDayCounts(cached);
+                return;
+            }
+
+            IsLoadingDays = true;
+            try
+            {
+                var dates = DayChoices.Select(d => d.Date).ToList();
+                var results = await Task.WhenAll(dates.Select(async date =>
+                {
+                    var slots = await _bookingService.GetAvailableSlotsAsync(operatorId, serviceId, date);
+                    return (date, count: slots.Count);
+                }));
+
+                var counts = results.ToDictionary(r => r.date, r => r.count);
+                _dayCountCache[key] = counts;
+                ApplyDayCounts(counts);
+            }
+            finally
+            {
+                IsLoadingDays = false;
+            }
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
         }
-        finally
-        {
-            IsLoadingDays = false;
-        }
     }
 
-    private void ApplyDayCounts(IReadOnlyDictionary<DateTime, int> counts)
+    public void ApplyDayCounts(IReadOnlyDictionary<DateTime, int> counts)
     {
         var operatorName = SelectedOperatorChoice?.Name ?? string.Empty;
 
@@ -1100,7 +1153,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         }
     }
 
-    private async Task LoadSlotsAsync()
+    public async Task LoadSlotsAsync()
     {
         if (SelectedOperatorChoice?.OperatorId is not { } operatorId
             || SelectedServiceRow is null
@@ -1149,7 +1202,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         }
     }
 
-    private void ApplySlots(IReadOnlyList<SlotResponse> slots)
+    public void ApplySlots(IReadOnlyList<SlotResponse> slots)
     {
         var items = slots
             .Select(s => new SlotChoiceItem
@@ -1168,7 +1221,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         RefreshFooter();
     }
 
-    private static List<SlotChoiceItem> InPeriod(IEnumerable<SlotChoiceItem> items, int fromHour, int toHour) =>
+    public static List<SlotChoiceItem> InPeriod(IEnumerable<SlotChoiceItem> items, int fromHour, int toHour) =>
         items.Where(i =>
         {
             var hour = LocalTime.ToLocal(i.Slot.SlotStart).Hour;
@@ -1177,7 +1230,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
 
     // An absent period needs explaining or it reads as a bug — a three-hour job at a shop that shuts
     // at 17:00 genuinely has no evening, and saying so is the difference between the two.
-    private string EmptyNote(int fromHour, int toHour)
+    public string EmptyNote(int fromHour, int toHour)
     {
         if (SelectedDay is null)
             return "none";
@@ -1188,11 +1241,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         return "none — nothing long enough left";
     }
 
-    #endregion
-
-    #region Review
-
-    private void RefreshReview()
+    public void RefreshReview()
     {
         if (SelectedServiceRow is null)
             return;
@@ -1228,13 +1277,9 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         OnPropertyChanged(nameof(ReviewOperatorLabel));
     }
 
-    #endregion
+    public Task SubmitAsync() => IsBookingMode ? SubmitBookingAsync() : SubmitJoinAsync();
 
-    #region Submit
-
-    private Task SubmitAsync() => IsBookingMode ? SubmitBookingAsync() : SubmitJoinAsync();
-
-    private async Task SubmitJoinAsync()
+    public async Task SubmitJoinAsync()
     {
         if (SelectedServiceRow is null)
             return;
@@ -1270,7 +1315,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         }
     }
 
-    private async Task SubmitBookingAsync()
+    public async Task SubmitBookingAsync()
     {
         if (SelectedServiceRow is null || SelectedSlot is null)
             return;
@@ -1321,11 +1366,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         }
     }
 
-    #endregion
-
-    #region Confirmation
-
-    private void RefreshTicket()
+    public void RefreshTicket()
     {
         TicketDots.Clear();
 
@@ -1375,7 +1416,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         OnPropertyChanged(nameof(IsBeingServed));
     }
 
-    private void RefreshBookingConfirmation()
+    public void RefreshBookingConfirmation()
     {
         if (ActiveBooking is null)
             return;
@@ -1398,7 +1439,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task LeaveQueueAsync()
+    public async Task LeaveQueueAsync()
     {
         if (MyStatus is null)
             return;
@@ -1428,7 +1469,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task CancelBookingAsync()
+    public async Task CancelBookingAsync()
     {
         if (ActiveBooking is null)
             return;
@@ -1455,7 +1496,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task OpenDirectionsAsync()
+    public async Task OpenDirectionsAsync()
     {
         if (Business is null)
             return;
@@ -1477,12 +1518,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         }
     }
 
-    #endregion
-
-    #region Navigation
-
     [RelayCommand]
-    private async Task GoBackAsync()
+    public async Task GoBackAsync()
     {
         try
         {
@@ -1509,11 +1546,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         }
     }
 
-    #endregion
-
-    #region Helpers
-
-    private static string Initials(string name)
+    public static string Initials(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             return "?";
@@ -1524,7 +1557,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             : $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
     }
 
-    private static string Ordinal(int value) => value switch
+    public static string Ordinal(int value) => value switch
     {
         11 or 12 or 13 => $"{value}th",
         _ when value % 10 == 1 => $"{value}st",
@@ -1533,7 +1566,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         _ => $"{value}th",
     };
 
-    private static double HaversineKm(double lat1, double lon1, double lat2, double lon2)
+    public static double HaversineKm(double lat1, double lon1, double lat2, double lon2)
     {
         const double earthRadiusKm = 6371;
         var dLat = (lat2 - lat1) * Math.PI / 180;

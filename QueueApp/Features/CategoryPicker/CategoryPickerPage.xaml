@@ -42,8 +42,7 @@
                         LeaveCommand="{Binding LeaveQueueCommand}"
                         IsLeaving="{Binding IsLeavingQueue}"/>
                 <helpers:IdleDiscoveryBandView Margin="0,16,0,0"
-                        IsVisible="{Binding HasActiveEntry, Converter={StaticResource InvertedBoolConverter}}"
-                        QuietestNowText="{Binding QuietestNowText}"/>
+                        IsVisible="{Binding HasActiveEntry, Converter={StaticResource InvertedBoolConverter}}"/>
 
                 <!-- Categories -->
                 <Label Text="BROWSE BY CATEGORY" Style="{StaticResource SectionTitle}" Margin="0,26,0,12"/>
