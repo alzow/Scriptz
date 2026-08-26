@@ -93,26 +93,14 @@ public class StubBookingService : IBookingService
         return Task.FromResult(booking ?? new BookingResponse { Id = bookingId, ProgressStatus = status });
     }
 
-    public Task<BookingResponse> CancelBookingAsync(Guid bookingId)
-    {
-        var booking = _bookings.First(b => b.Id == bookingId);
-        booking.Status = "cancelled";
-        return Task.FromResult(booking);
-    }
+    public Task<BookingResponse> CancelBookingAsync(Guid bookingId) =>
+        Task.FromResult(SetStatus(bookingId, BookingStatuses.Cancelled));
 
-    public Task<BookingResponse> ConfirmBookingAsync(Guid bookingId)
-    {
-        var booking = _bookings.First(b => b.Id == bookingId);
-        booking.Status = "confirmed";
-        return Task.FromResult(booking);
-    }
+    public Task<BookingResponse> ConfirmBookingAsync(Guid bookingId) =>
+        Task.FromResult(SetStatus(bookingId, BookingStatuses.Confirmed));
 
-    public Task<BookingResponse> CompleteBookingAsync(Guid bookingId)
-    {
-        var booking = _bookings.First(b => b.Id == bookingId);
-        booking.Status = "completed";
-        return Task.FromResult(booking);
-    }
+    public Task<BookingResponse> CompleteBookingAsync(Guid bookingId) =>
+        Task.FromResult(SetStatus(bookingId, BookingStatuses.Completed));
 
     public Task<List<MyBookingSummaryResponse>> GetMyBookingsAsync(Guid businessId, Guid customerId)
     {
@@ -134,23 +122,201 @@ public class StubBookingService : IBookingService
 
     public Task<List<AgendaBookingResponse>> GetAgendaBookingsAsync(Guid businessId, DateTime date)
     {
-        var dayStart = DateTime.SpecifyKind(date.Date, DateTimeKind.Utc);
-        var dayEnd = dayStart.AddDays(1);
-        var agenda = _bookings
-            .Where(b => b.BusinessId == businessId &&
-                        b.StartsAt.UtcDateTime >= dayStart && b.StartsAt.UtcDateTime < dayEnd)
-            .OrderBy(b => b.StartsAt)
-            .Select(b => new AgendaBookingResponse
-            {
-                Id = b.Id,
-                StartsAt = b.StartsAt,
-                EndsAt = b.EndsAt,
-                Status = b.Status,
-                ProgressStatus = b.ProgressStatus,
-            })
-            .ToList();
-        return Task.FromResult(agenda);
+        var from = new DateTimeOffset(date.Date, SastOffset);
+        return GetBookingsInRangeAsync(businessId, from, from.AddDays(1));
     }
+
+    public Task<List<AgendaBookingResponse>> GetBookingsInRangeAsync(
+        Guid businessId, DateTimeOffset from, DateTimeOffset until) =>
+        Task.FromResult(InRange(businessId, from, until));
+
+    public Task<List<AgendaBookingResponse>> GetPendingRequestsAsync(Guid businessId, DateTime fromDate, int days)
+    {
+        var from = new DateTimeOffset(fromDate.Date, SastOffset);
+        var pending = InRange(businessId, from, from.AddDays(days))
+            .Where(b => b.IsPending)
+            .OrderBy(b => b.CreatedAt)
+            .ToList();
+
+        return Task.FromResult(pending);
+    }
+
+    private List<AgendaBookingResponse> InRange(Guid businessId, DateTimeOffset from, DateTimeOffset until)
+    {
+        EnsureSeeded(businessId);
+
+        return _agenda
+            .Where(b => b.BusinessId == businessId && b.StartsAt >= from && b.StartsAt < until)
+            .Concat(_bookings
+                .Where(b => b.BusinessId == businessId && b.StartsAt >= from && b.StartsAt < until)
+                .Select(Project))
+            .OrderBy(b => b.StartsAt)
+            .ToList();
+    }
+
+    public Task<AgendaBookingResponse?> StartBookingAsync(Guid bookingId)
+    {
+        var booking = _agenda.FirstOrDefault(b => b.Id == bookingId);
+        if (booking is not null)
+        {
+            booking.Status = BookingStatuses.InProgress;
+            booking.StartedAt = DateTimeOffset.UtcNow;
+        }
+        else
+        {
+            SetStatus(bookingId, BookingStatuses.InProgress);
+        }
+
+        return Task.FromResult<AgendaBookingResponse?>(booking);
+    }
+
+    public Task<AgendaBookingResponse?> MarkBookingNoShowAsync(Guid bookingId)
+    {
+        var booking = _agenda.FirstOrDefault(b => b.Id == bookingId);
+        if (booking is not null) booking.Status = BookingStatuses.NoShow;
+        else SetStatus(bookingId, BookingStatuses.NoShow);
+
+        return Task.FromResult<AgendaBookingResponse?>(booking);
+    }
+
+    public Task<AgendaBookingResponse?> MoveBookingAsync(
+        Guid bookingId, Guid operatorId, DateTimeOffset startsAt, DateTimeOffset endsAt)
+    {
+        var booking = _agenda.FirstOrDefault(b => b.Id == bookingId);
+        if (booking is not null)
+        {
+            booking.OperatorId = operatorId;
+            booking.StartsAt = startsAt;
+            booking.EndsAt = endsAt;
+            booking.Operator = new AgendaOperatorRef { Id = operatorId, DisplayName = NameFor(operatorId) };
+        }
+        else
+        {
+            var customer = _bookings.FirstOrDefault(b => b.Id == bookingId);
+            if (customer is not null)
+            {
+                customer.OperatorId = operatorId;
+                customer.StartsAt = startsAt;
+                customer.EndsAt = endsAt;
+            }
+        }
+
+        return Task.FromResult<AgendaBookingResponse?>(booking);
+    }
+
+    public Task<AgendaBookingResponse?> CreateOperatorBookingAsync(CreateOperatorBookingRequest request)
+    {
+        var booking = new AgendaBookingResponse
+        {
+            Id = Guid.NewGuid(),
+            BusinessId = request.BusinessId,
+            OperatorId = request.OperatorId,
+            ServiceId = request.ServiceId,
+            StartsAt = request.StartsAt,
+            EndsAt = request.EndsAt,
+            Status = request.Status,
+            CreatedAt = DateTimeOffset.UtcNow,
+            Details = request.Details,
+            Operator = new AgendaOperatorRef { Id = request.OperatorId, DisplayName = NameFor(request.OperatorId) },
+            Service = new AgendaServiceRef
+            {
+                Id = request.ServiceId,
+                Name = "Booked in person",
+                EstMinutes = (int)(request.EndsAt - request.StartsAt).TotalMinutes,
+            },
+        };
+
+        _agenda.Add(booking);
+        return Task.FromResult<AgendaBookingResponse?>(booking);
+    }
+
+    private static string NameFor(Guid operatorId) =>
+        operatorId == StubOperatorService.FirstOperatorId ? "Ahmed"
+        : operatorId == StubOperatorService.SecondOperatorId ? "Yusuf"
+        : "Any available";
+
+    private static AgendaBookingResponse Project(BookingResponse booking) => new()
+    {
+        Id = booking.Id,
+        BusinessId = booking.BusinessId,
+        OperatorId = booking.OperatorId == Guid.Empty ? null : (Guid?)booking.OperatorId,
+        ServiceId = booking.ServiceId,
+        CustomerId = booking.CustomerId,
+        StartsAt = booking.StartsAt,
+        EndsAt = booking.EndsAt,
+        Status = booking.Status,
+        CreatedAt = booking.CreatedAt,
+        ProgressStatus = booking.ProgressStatus,
+        Operator = booking.OperatorId == Guid.Empty
+            ? null
+            : new AgendaOperatorRef { Id = booking.OperatorId, DisplayName = NameFor(booking.OperatorId) },
+    };
+
+    private BookingResponse SetStatus(Guid bookingId, string status)
+    {
+        var booking = _bookings.FirstOrDefault(b => b.Id == bookingId);
+        if (booking is not null)
+        {
+            booking.Status = status;
+            return booking;
+        }
+
+        var agendaBooking = _agenda.FirstOrDefault(b => b.Id == bookingId);
+        if (agendaBooking is not null)
+            agendaBooking.Status = status;
+
+        return new BookingResponse { Id = bookingId, Status = status };
+    }
+
+    // A day that looks like the real thing, so the agenda's rows, gaps, now line and in-chair card
+    // can all be seen without a Supabase project behind them.
+    private void EnsureSeeded(Guid businessId)
+    {
+        if (_seeded) return;
+        _seeded = true;
+
+        var today = DateTimeOffset.UtcNow.ToOffset(SastOffset).Date;
+
+        DateTimeOffset At(int hour, int minute) => new(today.AddHours(hour).AddMinutes(minute), SastOffset);
+
+        void Add(string name, int startHour, int startMinute, int minutes, int priceCents,
+                 string service, Guid operatorId, string status, int bookedHoursAgo)
+        {
+            _agenda.Add(new AgendaBookingResponse
+            {
+                Id = Guid.NewGuid(),
+                BusinessId = businessId,
+                OperatorId = operatorId,
+                ServiceId = Guid.NewGuid(),
+                StartsAt = At(startHour, startMinute),
+                EndsAt = At(startHour, startMinute).AddMinutes(minutes),
+                Status = status,
+                CreatedAt = DateTimeOffset.UtcNow.AddHours(-bookedHoursAgo),
+                Operator = new AgendaOperatorRef { Id = operatorId, DisplayName = NameFor(operatorId) },
+                Service = new AgendaServiceRef
+                {
+                    Id = Guid.NewGuid(),
+                    Name = service,
+                    PriceCents = priceCents,
+                    EstMinutes = minutes,
+                },
+                Details = new BookingDetails { CustomerName = name },
+            });
+        }
+
+        var one = StubOperatorService.FirstOperatorId;
+        var two = StubOperatorService.SecondOperatorId;
+
+        Add("Ahmed K.", 8, 0, 60, 95000, "Minor service", one, BookingStatuses.Completed, 48);
+        Add("Fatima P.", 9, 30, 45, 45000, "Brake check", two, BookingStatuses.Completed, 30);
+        Add("Sipho M.", 10, 30, 90, 240000, "Major service", two, BookingStatuses.Confirmed, 26);
+        Add("Naledi B.", 14, 0, 60, 95000, "Minor service", one, BookingStatuses.Confirmed, 50);
+        Add("Riaz D.", 15, 30, 60, 95000, "Minor service", one, BookingStatuses.Pending, 2);
+    }
+
+    private bool _seeded;
+    private readonly List<AgendaBookingResponse> _agenda = new();
+    private static readonly TimeSpan SastOffset = TimeSpan.FromHours(2);
 
     public Task<List<UpcomingBookingResponse>> GetMyUpcomingBookingsAsync(Guid customerId)
     {

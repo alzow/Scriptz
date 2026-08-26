@@ -44,6 +44,16 @@ public interface IOperatorApi
         [AliasAs("operator_id")] string operatorIdEq,
         [AliasAs("order")] string order = "starts_at.asc");
 
+    // Every block across a set of resources that overlaps a window — what the agenda needs to draw
+    // blocked ranges as rows, and what the requests banner checks a pending booking against.
+    // Filtered by an explicit operator id list rather than an embedded operators.business_id filter:
+    // the caller already holds the business's operators, and this keeps the query shape plain.
+    [Get("/availability_blocks")]
+    Task<List<AvailabilityBlockResponse>> GetAvailabilityBlocksForOperatorsAsync(
+        [AliasAs("operator_id")] string operatorIdIn,
+        [AliasAs("and")] string overlapFilter,
+        [AliasAs("order")] string order = "starts_at.asc");
+
     [Post("/availability_blocks")]
     Task<List<AvailabilityBlockResponse>> CreateAvailabilityBlockAsync([Body] CreateAvailabilityBlockRequest request);
 

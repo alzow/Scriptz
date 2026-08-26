@@ -52,13 +52,63 @@ public class BookingService : BaseService, IBookingService
 
     public Task<List<AgendaBookingResponse>> GetAgendaBookingsAsync(Guid businessId, DateTime date)
     {
-        var dayStart = new DateTimeOffset(date.Date, TimeSpan.FromHours(2));
-        var dayEnd = dayStart.AddDays(1);
-
-        var filter = $"(starts_at.gte.{dayStart:yyyy-MM-ddTHH:mm:sszzz},starts_at.lt.{dayEnd:yyyy-MM-ddTHH:mm:sszzz})";
-
-        return ExecuteApiCallAsync(_api.GetAgendaBookingsAsync($"eq.{businessId}", filter));
+        var dayStart = new DateTimeOffset(date.Date, SastOffset);
+        return ExecuteApiCallAsync(
+            _api.GetAgendaBookingsAsync($"eq.{businessId}", StartsWithinFilter(dayStart, dayStart.AddDays(1))));
     }
+
+    public Task<List<AgendaBookingResponse>> GetPendingRequestsAsync(Guid businessId, DateTime fromDate, int days)
+    {
+        var from = new DateTimeOffset(fromDate.Date, SastOffset);
+        return ExecuteApiCallAsync(
+            _api.GetPendingRequestsAsync($"eq.{businessId}", StartsWithinFilter(from, from.AddDays(days))));
+    }
+
+    // Same projection as the agenda, over an arbitrary span — what "blocking this range will strand
+    // these customers" needs when the range runs past the day being looked at. Deliberately
+    // unfiltered by status: `no_show` and `in_progress` may not exist in the booking_status enum
+    // yet, and PostgREST rejects the whole query for an enum label it can't parse.
+    public Task<List<AgendaBookingResponse>> GetBookingsInRangeAsync(
+        Guid businessId, DateTimeOffset from, DateTimeOffset until) =>
+        ExecuteApiCallAsync(_api.GetAgendaBookingsAsync($"eq.{businessId}", StartsWithinFilter(from, until)));
+
+    public Task<AgendaBookingResponse?> StartBookingAsync(Guid bookingId) =>
+        PatchAsync(bookingId, new UpdateBookingRequest
+        {
+            Status = BookingStatuses.InProgress,
+            StartedAt = DateTimeOffset.UtcNow,
+        });
+
+    public Task<AgendaBookingResponse?> MarkBookingNoShowAsync(Guid bookingId) =>
+        PatchAsync(bookingId, new UpdateBookingRequest { Status = BookingStatuses.NoShow });
+
+    public Task<AgendaBookingResponse?> MoveBookingAsync(
+        Guid bookingId, Guid operatorId, DateTimeOffset startsAt, DateTimeOffset endsAt) =>
+        PatchAsync(bookingId, new UpdateBookingRequest
+        {
+            OperatorId = operatorId,
+            StartsAt = startsAt,
+            EndsAt = endsAt,
+        });
+
+    public async Task<AgendaBookingResponse?> CreateOperatorBookingAsync(CreateOperatorBookingRequest request)
+    {
+        var rows = await ExecuteApiCallAsync(_api.CreateBookingRowAsync(request));
+        return rows.FirstOrDefault();
+    }
+
+    private async Task<AgendaBookingResponse?> PatchAsync(Guid bookingId, UpdateBookingRequest request)
+    {
+        var rows = await ExecuteApiCallAsync(_api.UpdateBookingAsync($"eq.{bookingId}", request));
+        return rows.FirstOrDefault();
+    }
+
+    // PostgREST needs both halves of a range in one `and=(…)` group — two separate starts_at query
+    // parameters would collide rather than intersect.
+    private static string StartsWithinFilter(DateTimeOffset from, DateTimeOffset until) =>
+        $"(starts_at.gte.{from:yyyy-MM-ddTHH:mm:sszzz},starts_at.lt.{until:yyyy-MM-ddTHH:mm:sszzz})";
+
+    private static readonly TimeSpan SastOffset = TimeSpan.FromHours(2);
 
     public Task<List<UpcomingBookingResponse>> GetMyUpcomingBookingsAsync(Guid customerId) =>
         ExecuteApiCallAsync(_api.GetMyUpcomingBookingsAsync($"eq.{customerId}"));

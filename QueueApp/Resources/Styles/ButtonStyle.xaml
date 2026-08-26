@@ -46,6 +46,33 @@
         <Setter Property="Padding" Value="14,10"/>
     </Style>
 
+    <!--
+        Outlined, neutral. Decline sits beside Confirm at equal weight — a genuine binary, not a
+        primary with an escape hatch — so it can't borrow Danger and can't be a second filled green.
+    -->
+    <Style x:Key="GhostButtonStyle" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="BorderColor" Value="{StaticResource Line}"/>
+        <Setter Property="BorderWidth" Value="1"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="FontSize" Value="14.5"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="14,10"/>
+    </Style>
+
+    <!-- Fill is an invitation, not the commit — outlined green so the now/next card keeps the one filled green. -->
+    <Style x:Key="OutlineGreenButtonStyle" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="BorderColor" Value="{StaticResource Green}"/>
+        <Setter Property="BorderWidth" Value="1.5"/>
+        <Setter Property="TextColor" Value="{StaticResource Green}"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="FontSize" Value="13.5"/>
+        <Setter Property="CornerRadius" Value="11"/>
+        <Setter Property="Padding" Value="16,8"/>
+    </Style>
+
     <Style x:Key="ToggleButtonStyle" TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
         <Style.Triggers>
             <Trigger TargetType="Button"
