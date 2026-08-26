@@ -6,8 +6,6 @@
              x:Name="Root"
              x:Class="QueueApp.Features.CategoryPicker.Helpers.LiveQueueHeroView">
 
-    <!-- The one loud card on the Browse dashboard — only rendered while the customer is
-         actually queued somewhere. IdleDiscoveryBandView takes its place otherwise. -->
     <Border Style="{StaticResource brd18_OrangePale}" Padding="0">
         <VerticalStackLayout Spacing="0">
 
@@ -15,7 +13,15 @@
             <Grid ColumnDefinitions="*,Auto" Padding="16,13,16,0">
                 <HorizontalStackLayout Grid.Column="0" Spacing="7">
                     <Ellipse Fill="{StaticResource Green}" WidthRequest="6" HeightRequest="6" VerticalOptions="Center"/>
-                    <Label Text="YOU'RE IN THE QUEUE" Style="{StaticResource SectionTitle}" TextColor="{StaticResource Green}"/>
+                    <Label Text="YOU'RE IN THE QUEUE" Style="{StaticResource SectionTitle}" TextColor="{StaticResource Green}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding ActiveEntry.IsBeingServed, Source={x:Reference Root}}"
+                                         Value="True">
+                                <Setter Property="Text" Value="BEING SERVED"/>
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
                 </HorizontalStackLayout>
                 <Label Grid.Column="1"
                        Text="{Binding ActiveEntry.BusinessName, Source={x:Reference Root}}"
@@ -36,7 +42,20 @@
                                HorizontalOptions="Center"
                                FontFamily="RobotoBold" FontSize="18"
                                TextColor="{StaticResource TextPrimary}"/>
-                        <Label Text="TO GO" Style="{StaticResource SectionTitle}" FontSize="8" HorizontalOptions="Center"/>
+                        <Label Text="TO GO" Style="{StaticResource SectionTitle}" FontSize="8" HorizontalOptions="Center">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label"
+                                             Binding="{Binding ActiveEntry.IsBeingServed, Source={x:Reference Root}}"
+                                             Value="True">
+                                    <Setter Property="IsVisible" Value="False"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Label"
+                                             Binding="{Binding Source={x:Reference CountdownLabel}, Path=Text}"
+                                             Value="GO">
+                                    <Setter Property="IsVisible" Value="False"/>
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
                     </VerticalStackLayout>
                 </Border>
 
@@ -87,13 +106,22 @@
                         Text="Directions"
                         Style="{StaticResource PrimaryButtonStyle}"
                         HeightRequest="42"
-                        Command="{Binding DirectionsCommand, Source={x:Reference Root}}"/>
+                        Command="{Binding DirectionsCommand, Source={x:Reference Root}}">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button"
+                                     Binding="{Binding ActiveEntry.IsBeingServed, Source={x:Reference Root}}"
+                                     Value="True">
+                            <Setter Property="Grid.ColumnSpan" Value="2"/>
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
                 <controls:AlzowLoadingButton Grid.Column="1"
                         Text="Leave queue"
                         LoadingText="Leaving…"
                         ButtonStyle="{StaticResource TertiaryButtonStyle}"
                         Command="{Binding LeaveCommand, Source={x:Reference Root}}"
-                        IsLoading="{Binding IsLeaving, Source={x:Reference Root}}"/>
+                        IsLoading="{Binding IsLeaving, Source={x:Reference Root}}"
+                        IsVisible="{Binding ActiveEntry.IsBeingServed, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}"/>
             </Grid>
         </VerticalStackLayout>
     </Border>
