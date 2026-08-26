@@ -9,7 +9,6 @@
              IconImageSource="icon_manage_business"
              x:Class="QueueApp.Features.OperatorQueue.OperatorQueuePage"
              x:DataType="vm:OperatorQueuePageViewModel"
-             BackgroundColor="{StaticResource DeepBackground}"
              Style="{StaticResource NavigationPageStyle}">
 
     <!--
@@ -18,323 +17,176 @@
         theoretical and reaching your own Done button costs a sideways swipe, forty times a day.
         Kanban is a wide-screen metaphor and doesn't survive the transfer.
 
-        The outer list is a CollectionView with sections as its items, so a shop with many barbers
-        recycles rather than realising every section at once.
+        The background belongs on this Grid rather than on the ContentPage. NavigationPageStyle has
+        TargetType NavigationPage, so it never paints a ContentPage at all — but painting the page
+        itself makes it draw edge-to-edge under the status bar, putting the shop name on top of the
+        clock. The other tabs paint their root layout; so does this one.
     -->
-    <CollectionView ItemsSource="{Binding Sections}">
+    <Grid BackgroundColor="{StaticResource DeepBackground}">
 
-        <CollectionView.Header>
-            <VerticalStackLayout Spacing="0">
+        <!--
+            The outer list is a CollectionView with sections as its items, so a shop with many
+            barbers recycles rather than realising every section at once.
+        -->
+        <CollectionView ItemsSource="{Binding Sections}">
 
-                <!-- Shop header -->
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="11" Padding="18,12,18,0">
-                    <HorizontalStackLayout Grid.Column="0" Spacing="10" VerticalOptions="Center">
-                        <Label Text="{Binding BusinessName}"
-                               Style="{StaticResource lbl24_Bold_TextDark}"
-                               VerticalOptions="Center"/>
-                        <Border BackgroundColor="#1F39FF7A" StrokeThickness="0"
-                                Padding="8,4" VerticalOptions="Center"
-                                IsVisible="{Binding IsLive}">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="7"/>
-                            </Border.StrokeShape>
-                            <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                                <Ellipse Fill="{StaticResource Green}" WidthRequest="6" HeightRequest="6"
-                                         VerticalOptions="Center"/>
-                                <Label Text="LIVE" Style="{StaticResource lbl9_Mono_Green}"
-                                       VerticalOptions="Center"/>
-                            </HorizontalStackLayout>
-                        </Border>
-                    </HorizontalStackLayout>
+            <CollectionView.Header>
+                <VerticalStackLayout Spacing="0">
 
-                    <Border Grid.Column="1" WidthRequest="40" HeightRequest="40"
-                            Style="{StaticResource brd12_White}">
-                        <Image Source="ic_settings" WidthRequest="20" HeightRequest="20"
-                               HorizontalOptions="Center" VerticalOptions="Center"/>
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding OpenSettingsCommand}"/>
-                        </Border.GestureRecognizers>
-                    </Border>
-                </Grid>
-
-                <!-- Shop stats. Avg is an em-dash until operator_avg_minutes has enough history. -->
-                <Border Style="{StaticResource brd14_White}" Margin="18,13,18,0" Padding="4,10">
-                    <Grid ColumnDefinitions="*,Auto,*,Auto,*,Auto,*">
-                        <VerticalStackLayout Grid.Column="0" Spacing="4" HorizontalOptions="Center">
-                            <Label Text="{Binding WaitingCountText}" Style="{StaticResource lbl16_Mono_TextPrimary}"
-                                   HorizontalOptions="Center"/>
-                            <Label Text="Waiting" Style="{StaticResource lbl9_Regular_TextLight}"
-                                   HorizontalOptions="Center"/>
-                        </VerticalStackLayout>
-                        <BoxView Grid.Column="1" WidthRequest="1" HeightRequest="22"
-                                 Color="{StaticResource Line}" VerticalOptions="Center"/>
-                        <VerticalStackLayout Grid.Column="2" Spacing="4" HorizontalOptions="Center">
-                            <Label Text="{Binding ServingCountText}" Style="{StaticResource lbl16_Mono_TextPrimary}"
-                                   HorizontalOptions="Center"/>
-                            <Label Text="Serving" Style="{StaticResource lbl9_Regular_TextLight}"
-                                   HorizontalOptions="Center"/>
-                        </VerticalStackLayout>
-                        <BoxView Grid.Column="3" WidthRequest="1" HeightRequest="22"
-                                 Color="{StaticResource Line}" VerticalOptions="Center"/>
-                        <VerticalStackLayout Grid.Column="4" Spacing="4" HorizontalOptions="Center">
-                            <Label Text="{Binding DoneTodayText}" Style="{StaticResource lbl16_Mono_TextPrimary}"
-                                   HorizontalOptions="Center"/>
-                            <Label Text="Done today" Style="{StaticResource lbl9_Regular_TextLight}"
-                                   HorizontalOptions="Center"/>
-                        </VerticalStackLayout>
-                        <BoxView Grid.Column="5" WidthRequest="1" HeightRequest="22"
-                                 Color="{StaticResource Line}" VerticalOptions="Center"/>
-                        <VerticalStackLayout Grid.Column="6" Spacing="4" HorizontalOptions="Center">
-                            <Label Text="{Binding AvgText}" Style="{StaticResource lbl16_Mono_TextMuted}"
-                                   HorizontalOptions="Center"/>
-                            <Label Text="Avg" Style="{StaticResource lbl9_Regular_TextLight}"
-                                   HorizontalOptions="Center"/>
-                        </VerticalStackLayout>
-                    </Grid>
-                </Border>
-
-                <!--
-                    Rendered, not yet wired. businesses.is_active delists the business entirely,
-                    which is a different thing from "nobody new can join right now" — there is no
-                    column behind a shop pause yet, so IsPaused is permanently false.
-                -->
-                <Border Margin="18,12,18,0" Padding="12,10"
-                        BackgroundColor="#12FF3B5C" Stroke="#5E2E3C" StrokeThickness="1"
-                        IsVisible="{Binding IsPaused}">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="13"/>
-                    </Border.StrokeShape>
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="9">
-                        <Label Grid.Column="0" Text="Queue paused — nobody new can join"
-                               Style="{StaticResource lbl12_Regular_TextLight}"
-                               VerticalOptions="Center"/>
-                        <Button Grid.Column="1" Text="Resume" HeightRequest="40"
-                                Style="{StaticResource btn12_Bold_Neutral}"/>
-                    </Grid>
-                </Border>
-
-                <!--
-                    The shared pool. A banner, not a column: as a column it was a peer of the
-                    barbers and sat in the path of every swipe while being neither a person nor a
-                    queue. Absent when empty — not an empty state.
-                -->
-                <Border Style="{StaticResource brd16_Pool}"
-                        Stroke="{Binding PoolStroke}"
-                        StrokeThickness="{Binding PoolStrokeThickness}"
-                        Margin="18,13,18,0"
-                        IsVisible="{Binding HasPool}">
-                    <VerticalStackLayout Spacing="0">
-
-                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="11"
-                              Padding="14,13" MinimumHeightRequest="60"
-                              BackgroundColor="Transparent">
-                            <Border Grid.Column="0" WidthRequest="38" HeightRequest="38"
-                                    BackgroundColor="#24A45EFF" StrokeThickness="0"
-                                    VerticalOptions="Center">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="12"/>
-                                </Border.StrokeShape>
-                                <Image Source="ic_users" WidthRequest="18" HeightRequest="18"
-                                       HorizontalOptions="Center" VerticalOptions="Center"/>
-                            </Border>
-
-                            <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
-                                <Label Text="{Binding PoolCountText}" Style="{StaticResource lbl15_Bold_Purple}"/>
-                                <!-- Starvation, made visible: nothing forces the oldest to be taken. -->
-                                <Label Text="{Binding PoolAgeText}" Style="{StaticResource lbl11_Regular_TextLight}"/>
-                            </VerticalStackLayout>
-
-                            <Image Grid.Column="2" Source="{Binding PoolChevron}"
-                                   WidthRequest="18" HeightRequest="18" Opacity="0.65"
+                    <!-- Shop header -->
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="11" Padding="18,12,18,0">
+                        <HorizontalStackLayout Grid.Column="0" Spacing="10" VerticalOptions="Center">
+                            <Label Text="{Binding BusinessName}"
+                                   Style="{StaticResource lbl24_Bold_TextDark}"
                                    VerticalOptions="Center"/>
+                            <Border BackgroundColor="#1F39FF7A" StrokeThickness="0"
+                                    Padding="8,4" VerticalOptions="Center"
+                                    IsVisible="{Binding IsLive}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="7"/>
+                                </Border.StrokeShape>
+                                <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
+                                    <Ellipse Fill="{StaticResource Green}" WidthRequest="6" HeightRequest="6"
+                                             VerticalOptions="Center"/>
+                                    <Label Text="LIVE" Style="{StaticResource lbl9_Mono_Green}"
+                                           VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </HorizontalStackLayout>
 
-                            <Grid.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding TogglePoolCommand}"/>
-                            </Grid.GestureRecognizers>
+                        <Border Grid.Column="1" WidthRequest="40" HeightRequest="40"
+                                Style="{StaticResource brd12_White}">
+                            <Image Source="ic_settings" WidthRequest="20" HeightRequest="20"
+                                   HorizontalOptions="Center" VerticalOptions="Center"/>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenSettingsCommand}"/>
+                            </Border.GestureRecognizers>
+                        </Border>
+                    </Grid>
+
+                    <!-- Shop stats. Avg is an em-dash until operator_avg_minutes has enough history. -->
+                    <Border Style="{StaticResource brd14_White}" Margin="18,13,18,0" Padding="4,10">
+                        <Grid ColumnDefinitions="*,Auto,*,Auto,*,Auto,*">
+                            <VerticalStackLayout Grid.Column="0" Spacing="4" HorizontalOptions="Center">
+                                <Label Text="{Binding WaitingCountText}" Style="{StaticResource lbl16_Mono_TextPrimary}"
+                                       HorizontalOptions="Center"/>
+                                <Label Text="Waiting" Style="{StaticResource lbl9_Regular_TextLight}"
+                                       HorizontalOptions="Center"/>
+                            </VerticalStackLayout>
+                            <BoxView Grid.Column="1" WidthRequest="1" HeightRequest="22"
+                                     Color="{StaticResource Line}" VerticalOptions="Center"/>
+                            <VerticalStackLayout Grid.Column="2" Spacing="4" HorizontalOptions="Center">
+                                <Label Text="{Binding ServingCountText}" Style="{StaticResource lbl16_Mono_TextPrimary}"
+                                       HorizontalOptions="Center"/>
+                                <Label Text="Serving" Style="{StaticResource lbl9_Regular_TextLight}"
+                                       HorizontalOptions="Center"/>
+                            </VerticalStackLayout>
+                            <BoxView Grid.Column="3" WidthRequest="1" HeightRequest="22"
+                                     Color="{StaticResource Line}" VerticalOptions="Center"/>
+                            <VerticalStackLayout Grid.Column="4" Spacing="4" HorizontalOptions="Center">
+                                <Label Text="{Binding DoneTodayText}" Style="{StaticResource lbl16_Mono_TextPrimary}"
+                                       HorizontalOptions="Center"/>
+                                <Label Text="Done today" Style="{StaticResource lbl9_Regular_TextLight}"
+                                       HorizontalOptions="Center"/>
+                            </VerticalStackLayout>
+                            <BoxView Grid.Column="5" WidthRequest="1" HeightRequest="22"
+                                     Color="{StaticResource Line}" VerticalOptions="Center"/>
+                            <VerticalStackLayout Grid.Column="6" Spacing="4" HorizontalOptions="Center">
+                                <Label Text="{Binding AvgText}" Style="{StaticResource lbl16_Mono_TextMuted}"
+                                       HorizontalOptions="Center"/>
+                                <Label Text="Avg" Style="{StaticResource lbl9_Regular_TextLight}"
+                                       HorizontalOptions="Center"/>
+                            </VerticalStackLayout>
                         </Grid>
+                    </Border>
 
-                        <VerticalStackLayout Spacing="0" Padding="12,0,12,12"
-                                             IsVisible="{Binding IsPoolExpanded}"
-                                             BindableLayout.ItemsSource="{Binding PoolRows}">
-                            <BindableLayout.ItemTemplate>
-                                <DataTemplate x:DataType="models:QueueRowItem">
-                                    <Border BackgroundColor="{StaticResource Surface}" StrokeThickness="0"
-                                            Padding="12,10" Margin="0,8,0,0" MinimumHeightRequest="62">
-                                        <Border.StrokeShape>
-                                            <RoundRectangle CornerRadius="13"/>
-                                        </Border.StrokeShape>
-                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="11">
-                                            <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
-                                                <Label Text="{Binding CustomerName}" Style="{StaticResource lbl14_Bold_TextDark}"/>
-                                                <Label Text="{Binding SubText}" Style="{StaticResource lbl11_Regular_TextLight}"/>
-                                            </VerticalStackLayout>
-                                            <Button Grid.Column="1" Text="Assign" HeightRequest="46"
-                                                    Style="{StaticResource btn14_Bold_PurpleOutline}"
-                                                    VerticalOptions="Center"
-                                                    IsEnabled="{Binding IsEnabled}"
-                                                    Command="{Binding BindingContext.AssignCommand, Source={x:Reference Root}}"
-                                                    CommandParameter="{Binding .}"/>
-                                        </Grid>
+                    <!--
+                        Rendered, not yet wired. businesses.is_active delists the business entirely,
+                        which is a different thing from "nobody new can join right now" — there is no
+                        column behind a shop pause yet, so IsPaused is permanently false.
+                    -->
+                    <Border Margin="18,12,18,0" Padding="12,10"
+                            BackgroundColor="#12FF3B5C" Stroke="#5E2E3C" StrokeThickness="1"
+                            IsVisible="{Binding IsPaused}">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="13"/>
+                        </Border.StrokeShape>
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="9">
+                            <Label Grid.Column="0" Text="Queue paused — nobody new can join"
+                                   Style="{StaticResource lbl12_Regular_TextLight}"
+                                   VerticalOptions="Center"/>
+                            <Button Grid.Column="1" Text="Resume" HeightRequest="40"
+                                    Style="{StaticResource btn12_Bold_Neutral}"/>
+                        </Grid>
+                    </Border>
 
-                                        <!--
-                                            Same as a section row: the rest of what can be done to
-                                            this customer is behind the sheet, not on the banner.
-                                        -->
-                                        <Border.GestureRecognizers>
-                                            <TapGestureRecognizer
-                                                Command="{Binding BindingContext.OpenRowActionsCommand, Source={x:Reference Root}}"
-                                                CommandParameter="{Binding .}"/>
-                                        </Border.GestureRecognizers>
-                                    </Border>
-                                </DataTemplate>
-                            </BindableLayout.ItemTemplate>
-                        </VerticalStackLayout>
+                    <!--
+                        The shared pool. A banner, not a column: as a column it was a peer of the
+                        barbers and sat in the path of every swipe while being neither a person nor a
+                        queue. Absent when empty — not an empty state.
+                    -->
+                    <Border Style="{StaticResource brd16_Pool}"
+                            Stroke="{Binding PoolStroke}"
+                            StrokeThickness="{Binding PoolStrokeThickness}"
+                            Margin="18,13,18,0"
+                            IsVisible="{Binding HasPool}">
+                        <VerticalStackLayout Spacing="0">
 
-                    </VerticalStackLayout>
-                </Border>
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="11"
+                                  Padding="14,13" MinimumHeightRequest="60"
+                                  BackgroundColor="Transparent">
+                                <Border Grid.Column="0" WidthRequest="38" HeightRequest="38"
+                                        BackgroundColor="#24A45EFF" StrokeThickness="0"
+                                        VerticalOptions="Center">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="12"/>
+                                    </Border.StrokeShape>
+                                    <Image Source="ic_users" WidthRequest="18" HeightRequest="18"
+                                           HorizontalOptions="Center" VerticalOptions="Center"/>
+                                </Border>
 
-            </VerticalStackLayout>
-        </CollectionView.Header>
-
-        <CollectionView.ItemTemplate>
-            <DataTemplate x:DataType="models:BoardSection">
-                <!--
-                    Padding lives on the three state layouts, not here: a collapsed row carries its
-                    own 12,11 and has to come out at 62px total, which it can't do if the section
-                    border adds another 12 around it.
-                -->
-                <Border Style="{StaticResource brd16_White}"
-                        Margin="18,12,18,0" Padding="0"
-                        Opacity="{Binding SectionOpacity}">
-                    <Grid>
-
-                        <!-- ── Expanded: serving, or has a queue ──────────────────── -->
-                        <VerticalStackLayout Spacing="0" Padding="12" IsVisible="{Binding IsExpanded}">
-
-                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="11" Padding="0,0,0,11">
-                                <helpers:AvatarView Grid.Column="0"
-                                                    Initials="{Binding Initials}"
-                                                    ShowDot="{Binding IsOnShift}"/>
                                 <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
-                                    <Label Text="{Binding Name}" Style="{StaticResource lbl16_Bold_TextDark}"/>
-                                    <Label Text="{Binding StatusText}"
-                                           TextColor="{Binding StatusColor}"
-                                           Style="{StaticResource lbl11_Regular_TextLight}"/>
+                                    <Label Text="{Binding PoolCountText}" Style="{StaticResource lbl15_Bold_Purple}"/>
+                                    <!-- Starvation, made visible: nothing forces the oldest to be taken. -->
+                                    <Label Text="{Binding PoolAgeText}" Style="{StaticResource lbl11_Regular_TextLight}"/>
                                 </VerticalStackLayout>
+
+                                <Image Grid.Column="2" Source="{Binding PoolChevron}"
+                                       WidthRequest="18" HeightRequest="18" Opacity="0.65"
+                                       VerticalOptions="Center"/>
+
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding TogglePoolCommand}"/>
+                                </Grid.GestureRecognizers>
                             </Grid>
 
-                            <BoxView HeightRequest="1" Color="{StaticResource Line}" Margin="0,0,0,11"/>
-
-                            <!-- ── Now serving ────────────────────────────────────── -->
-                            <Border Style="{StaticResource brd14_Serving}" Padding="13"
-                                    IsVisible="{Binding HasServing}">
-                                <!--
-                                    BindingContext is resolved against the section; the card's own
-                                    x:DataType goes one level in, so the compiler doesn't try to
-                                    find Serving on ServingCardItem itself.
-                                -->
-                                <ContentView BindingContext="{Binding Serving}">
-                                <VerticalStackLayout Spacing="0" x:DataType="models:ServingCardItem">
-
-                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                                        <VerticalStackLayout Grid.Column="0" Spacing="0">
-                                            <Label Text="NOW SERVING" Style="{StaticResource lbl9_Mono_Green}"
-                                                   Margin="0,0,0,6"/>
-                                            <Label Text="{Binding CustomerName}" Style="{StaticResource lbl17_Bold_TextDark}"/>
-                                            <Label Text="{Binding ServiceText}" Style="{StaticResource lbl12_Regular_TextLight}"
-                                                   Margin="0,4,0,0"/>
-                                        </VerticalStackLayout>
-
-                                        <!--
-                                            Counts up, not down. Honest when a cut overruns, and it
-                                            is what eventually trains operator_avg_minutes. It never
-                                            turns red: nagging a barber mid-haircut serves nobody.
-                                        -->
-                                        <VerticalStackLayout Grid.Column="1" Spacing="3" HorizontalOptions="End">
-                                            <Label Text="{Binding ElapsedText}" Style="{StaticResource lbl20_Mono_Green}"
-                                                   HorizontalOptions="End"/>
-                                            <Label Text="{Binding EstimateText}" Style="{StaticResource lbl9_Mono_TextFaint}"
-                                                   IsVisible="{Binding HasEstimate}"
-                                                   HorizontalOptions="End"/>
-                                        </VerticalStackLayout>
-                                    </Grid>
-
-                                    <!-- One tappable line, not an always-open input with a Save button. -->
-                                    <Border BackgroundColor="{StaticResource Surface}" StrokeThickness="0"
-                                            Padding="11,9" Margin="0,11,0,0" MinimumHeightRequest="44">
-                                        <Border.StrokeShape>
-                                            <RoundRectangle CornerRadius="10"/>
-                                        </Border.StrokeShape>
-                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="7">
-                                            <Image Grid.Column="0" Source="ic_edit" WidthRequest="14" HeightRequest="14"
-                                                   VerticalOptions="Center"/>
-                                            <Label Grid.Column="1" Text="{Binding NoteText}"
-                                                   Style="{StaticResource lbl11_Regular_TextLight}"
-                                                   VerticalOptions="Center"/>
-                                        </Grid>
-                                        <Border.GestureRecognizers>
-                                            <TapGestureRecognizer
-                                                Command="{Binding BindingContext.EditNoteCommand, Source={x:Reference Root}}"
-                                                CommandParameter="{Binding .}"/>
-                                        </Border.GestureRecognizers>
-                                    </Border>
-
-                                    <!--
-                                        The only filled green in the section, and the one action
-                                        pressed forty times a day. It does not auto-advance: the
-                                        barber taps Done, sweeps up, calls the next person, then
-                                        taps Serve.
-                                    -->
-                                    <Button Text="Done" HeightRequest="56" Margin="0,12,0,0"
-                                            Style="{StaticResource btn16_Bold_Green}"
-                                            IsEnabled="{Binding IsEnabled}"
-                                            Command="{Binding BindingContext.DoneCommand, Source={x:Reference Root}}"
-                                            CommandParameter="{Binding .}"/>
-
-                                </VerticalStackLayout>
-                                </ContentView>
-                            </Border>
-
-                            <!-- ── Waiting ────────────────────────────────────────── -->
-                            <VerticalStackLayout Spacing="0" BindableLayout.ItemsSource="{Binding Waiting}">
+                            <VerticalStackLayout Spacing="0" Padding="12,0,12,12"
+                                                 IsVisible="{Binding IsPoolExpanded}"
+                                                 BindableLayout.ItemsSource="{Binding PoolRows}">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate x:DataType="models:QueueRowItem">
-                                        <Border Style="{StaticResource brd13_Raised}"
-                                                Padding="10" Margin="0,9,0,0" MinimumHeightRequest="66">
-                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="11">
-                                                <Border Grid.Column="0" WidthRequest="26" HeightRequest="26"
-                                                        BackgroundColor="{StaticResource Surface}" StrokeThickness="0"
-                                                        VerticalOptions="Center"
-                                                        IsVisible="{Binding ShowPosition}">
-                                                    <Border.StrokeShape>
-                                                        <RoundRectangle CornerRadius="9"/>
-                                                    </Border.StrokeShape>
-                                                    <Label Text="{Binding PositionText}"
-                                                           Style="{StaticResource lbl11_Bold_TextMid}"
-                                                           HorizontalOptions="Center" VerticalOptions="Center"/>
-                                                </Border>
-
-                                                <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
-                                                    <Label Text="{Binding CustomerName}" Style="{StaticResource lbl15_Bold_TextDark}"/>
+                                        <Border BackgroundColor="{StaticResource Surface}" StrokeThickness="0"
+                                                Padding="12,10" Margin="0,8,0,0" MinimumHeightRequest="62">
+                                            <Border.StrokeShape>
+                                                <RoundRectangle CornerRadius="13"/>
+                                            </Border.StrokeShape>
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="11">
+                                                <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
+                                                    <Label Text="{Binding CustomerName}" Style="{StaticResource lbl14_Bold_TextDark}"/>
                                                     <Label Text="{Binding SubText}" Style="{StaticResource lbl11_Regular_TextLight}"/>
                                                 </VerticalStackLayout>
-
-                                                <!--
-                                                    Only the top row carries this. Everything else
-                                                    opens the actions sheet on tap — three live
-                                                    targets per row, one of them a red ✕ a thumb's
-                                                    width from Serve, is too much live surface on a
-                                                    screen tapped all day.
-                                                -->
-                                                <Button Grid.Column="2" Text="Serve" HeightRequest="46"
-                                                        Style="{StaticResource btn14_Bold_GreenOutline}"
+                                                <Button Grid.Column="1" Text="Assign" HeightRequest="46"
+                                                        Style="{StaticResource btn14_Bold_PurpleOutline}"
                                                         VerticalOptions="Center"
-                                                        IsVisible="{Binding ShowServe}"
-                                                        IsEnabled="{Binding IsServeEnabled}"
-                                                        Command="{Binding BindingContext.ServeCommand, Source={x:Reference Root}}"
+                                                        IsEnabled="{Binding IsEnabled}"
+                                                        Command="{Binding BindingContext.AssignCommand, Source={x:Reference Root}}"
                                                         CommandParameter="{Binding .}"/>
                                             </Grid>
 
+                                            <!--
+                                                Same as a section row: the rest of what can be done to
+                                                this customer is behind the sheet, not on the banner.
+                                            -->
                                             <Border.GestureRecognizers>
                                                 <TapGestureRecognizer
                                                     Command="{Binding BindingContext.OpenRowActionsCommand, Source={x:Reference Root}}"
@@ -345,78 +197,235 @@
                                 </BindableLayout.ItemTemplate>
                             </VerticalStackLayout>
 
-                            <!-- A ghost, not a filled green: the least frequent action in the section. -->
-                            <Border Style="{StaticResource brd13_Ghost}" Padding="14" Margin="0,9,0,0">
-                                <Label Text="+ Add walk-in" Style="{StaticResource lbl13_Bold_Green}"
-                                       HorizontalOptions="Center"/>
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer
-                                        Command="{Binding BindingContext.AddWalkInCommand, Source={x:Reference Root}}"
-                                        CommandParameter="{Binding .}"/>
-                                </Border.GestureRecognizers>
-                            </Border>
-
                         </VerticalStackLayout>
+                    </Border>
 
-                        <!-- ── Collapsed: on shift, nobody waiting, chair empty ───── -->
-                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="11"
-                              Padding="12,11" MinimumHeightRequest="62"
-                              IsVisible="{Binding IsCollapsed}">
-                            <helpers:AvatarView Grid.Column="0"
-                                                Initials="{Binding Initials}"
-                                                ShowDot="{Binding IsOnShift}"/>
-                            <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
-                                <Label Text="{Binding Name}" Style="{StaticResource lbl16_Bold_TextDark}"/>
-                                <Label Text="{Binding StatusText}"
-                                       TextColor="{Binding StatusColor}"
-                                       Style="{StaticResource lbl11_Regular_TextLight}"/>
+                </VerticalStackLayout>
+            </CollectionView.Header>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:BoardSection">
+                    <!--
+                        Padding lives on the three state layouts, not here: a collapsed row carries its
+                        own 12,11 and has to come out at 62px total, which it can't do if the section
+                        border adds another 12 around it.
+                    -->
+                    <Border Style="{StaticResource brd16_White}"
+                            Margin="18,12,18,0" Padding="0"
+                            Opacity="{Binding SectionOpacity}">
+                        <Grid>
+
+                            <!-- ── Expanded: serving, or has a queue ──────────────────── -->
+                            <VerticalStackLayout Spacing="0" Padding="12" IsVisible="{Binding IsExpanded}">
+
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="11" Padding="0,0,0,11">
+                                    <helpers:AvatarView Grid.Column="0"
+                                                        Initials="{Binding Initials}"
+                                                        ShowDot="{Binding IsOnShift}"/>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                        <Label Text="{Binding Name}" Style="{StaticResource lbl16_Bold_TextDark}"/>
+                                        <Label Text="{Binding StatusText}"
+                                               TextColor="{Binding StatusColor}"
+                                               Style="{StaticResource lbl11_Regular_TextLight}"/>
+                                    </VerticalStackLayout>
+                                </Grid>
+
+                                <BoxView HeightRequest="1" Color="{StaticResource Line}" Margin="0,0,0,11"/>
+
+                                <!-- ── Now serving ────────────────────────────────────── -->
+                                <Border Style="{StaticResource brd14_Serving}" Padding="13"
+                                        IsVisible="{Binding HasServing}">
+                                    <!--
+                                        BindingContext is resolved against the section; the card's own
+                                        x:DataType goes one level in, so the compiler doesn't try to
+                                        find Serving on ServingCardItem itself.
+                                    -->
+                                    <ContentView BindingContext="{Binding Serving}">
+                                    <VerticalStackLayout Spacing="0" x:DataType="models:ServingCardItem">
+
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                            <VerticalStackLayout Grid.Column="0" Spacing="0">
+                                                <Label Text="NOW SERVING" Style="{StaticResource lbl9_Mono_Green}"
+                                                       Margin="0,0,0,6"/>
+                                                <Label Text="{Binding CustomerName}" Style="{StaticResource lbl17_Bold_TextDark}"/>
+                                                <Label Text="{Binding ServiceText}" Style="{StaticResource lbl12_Regular_TextLight}"
+                                                       Margin="0,4,0,0"/>
+                                            </VerticalStackLayout>
+
+                                            <!--
+                                                Counts up, not down. Honest when a cut overruns, and it
+                                                is what eventually trains operator_avg_minutes. It never
+                                                turns red: nagging a barber mid-haircut serves nobody.
+                                            -->
+                                            <VerticalStackLayout Grid.Column="1" Spacing="3" HorizontalOptions="End">
+                                                <Label Text="{Binding ElapsedText}" Style="{StaticResource lbl20_Mono_Green}"
+                                                       HorizontalOptions="End"/>
+                                                <Label Text="{Binding EstimateText}" Style="{StaticResource lbl9_Mono_TextFaint}"
+                                                       IsVisible="{Binding HasEstimate}"
+                                                       HorizontalOptions="End"/>
+                                            </VerticalStackLayout>
+                                        </Grid>
+
+                                        <!-- One tappable line, not an always-open input with a Save button. -->
+                                        <Border BackgroundColor="{StaticResource Surface}" StrokeThickness="0"
+                                                Padding="11,9" Margin="0,11,0,0" MinimumHeightRequest="44">
+                                            <Border.StrokeShape>
+                                                <RoundRectangle CornerRadius="10"/>
+                                            </Border.StrokeShape>
+                                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="7">
+                                                <Image Grid.Column="0" Source="ic_edit" WidthRequest="14" HeightRequest="14"
+                                                       VerticalOptions="Center"/>
+                                                <Label Grid.Column="1" Text="{Binding NoteText}"
+                                                       Style="{StaticResource lbl11_Regular_TextLight}"
+                                                       VerticalOptions="Center"/>
+                                            </Grid>
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding BindingContext.EditNoteCommand, Source={x:Reference Root}}"
+                                                    CommandParameter="{Binding .}"/>
+                                            </Border.GestureRecognizers>
+                                        </Border>
+
+                                        <!--
+                                            The only filled green in the section, and the one action
+                                            pressed forty times a day. It does not auto-advance: the
+                                            barber taps Done, sweeps up, calls the next person, then
+                                            taps Serve.
+                                        -->
+                                        <Button Text="Done" HeightRequest="56" Margin="0,12,0,0"
+                                                Style="{StaticResource btn16_Bold_Green}"
+                                                IsEnabled="{Binding IsEnabled}"
+                                                Command="{Binding BindingContext.DoneCommand, Source={x:Reference Root}}"
+                                                CommandParameter="{Binding .}"/>
+
+                                    </VerticalStackLayout>
+                                    </ContentView>
+                                </Border>
+
+                                <!-- ── Waiting ────────────────────────────────────────── -->
+                                <VerticalStackLayout Spacing="0" BindableLayout.ItemsSource="{Binding Waiting}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="models:QueueRowItem">
+                                            <Border Style="{StaticResource brd13_Raised}"
+                                                    Padding="10" Margin="0,9,0,0" MinimumHeightRequest="66">
+                                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="11">
+                                                    <Border Grid.Column="0" WidthRequest="26" HeightRequest="26"
+                                                            BackgroundColor="{StaticResource Surface}" StrokeThickness="0"
+                                                            VerticalOptions="Center"
+                                                            IsVisible="{Binding ShowPosition}">
+                                                        <Border.StrokeShape>
+                                                            <RoundRectangle CornerRadius="9"/>
+                                                        </Border.StrokeShape>
+                                                        <Label Text="{Binding PositionText}"
+                                                               Style="{StaticResource lbl11_Bold_TextMid}"
+                                                               HorizontalOptions="Center" VerticalOptions="Center"/>
+                                                    </Border>
+
+                                                    <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                                        <Label Text="{Binding CustomerName}" Style="{StaticResource lbl15_Bold_TextDark}"/>
+                                                        <Label Text="{Binding SubText}" Style="{StaticResource lbl11_Regular_TextLight}"/>
+                                                    </VerticalStackLayout>
+
+                                                    <!--
+                                                        Only the top row carries this. Everything else
+                                                        opens the actions sheet on tap — three live
+                                                        targets per row, one of them a red ✕ a thumb's
+                                                        width from Serve, is too much live surface on a
+                                                        screen tapped all day.
+                                                    -->
+                                                    <Button Grid.Column="2" Text="Serve" HeightRequest="46"
+                                                            Style="{StaticResource btn14_Bold_GreenOutline}"
+                                                            VerticalOptions="Center"
+                                                            IsVisible="{Binding ShowServe}"
+                                                            IsEnabled="{Binding IsServeEnabled}"
+                                                            Command="{Binding BindingContext.ServeCommand, Source={x:Reference Root}}"
+                                                            CommandParameter="{Binding .}"/>
+                                                </Grid>
+
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding BindingContext.OpenRowActionsCommand, Source={x:Reference Root}}"
+                                                        CommandParameter="{Binding .}"/>
+                                                </Border.GestureRecognizers>
+                                            </Border>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+
+                                <!-- A ghost, not a filled green: the least frequent action in the section. -->
+                                <Border Style="{StaticResource brd13_Ghost}" Padding="14" Margin="0,9,0,0">
+                                    <Label Text="+ Add walk-in" Style="{StaticResource lbl13_Bold_Green}"
+                                           HorizontalOptions="Center"/>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding BindingContext.AddWalkInCommand, Source={x:Reference Root}}"
+                                            CommandParameter="{Binding .}"/>
+                                    </Border.GestureRecognizers>
+                                </Border>
+
                             </VerticalStackLayout>
-                            <Border Grid.Column="2" WidthRequest="44" HeightRequest="44"
-                                    Style="{StaticResource brd13_Ghost}" VerticalOptions="Center">
-                                <Image Source="ic_plus" WidthRequest="18" HeightRequest="18"
-                                       HorizontalOptions="Center" VerticalOptions="Center"/>
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer
-                                        Command="{Binding BindingContext.AddWalkInCommand, Source={x:Reference Root}}"
+
+                            <!-- ── Collapsed: on shift, nobody waiting, chair empty ───── -->
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="11"
+                                  Padding="12,11" MinimumHeightRequest="62"
+                                  IsVisible="{Binding IsCollapsed}">
+                                <helpers:AvatarView Grid.Column="0"
+                                                    Initials="{Binding Initials}"
+                                                    ShowDot="{Binding IsOnShift}"/>
+                                <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                    <Label Text="{Binding Name}" Style="{StaticResource lbl16_Bold_TextDark}"/>
+                                    <Label Text="{Binding StatusText}"
+                                           TextColor="{Binding StatusColor}"
+                                           Style="{StaticResource lbl11_Regular_TextLight}"/>
+                                </VerticalStackLayout>
+                                <Border Grid.Column="2" WidthRequest="44" HeightRequest="44"
+                                        Style="{StaticResource brd13_Ghost}" VerticalOptions="Center">
+                                    <Image Source="ic_plus" WidthRequest="18" HeightRequest="18"
+                                           HorizontalOptions="Center" VerticalOptions="Center"/>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding BindingContext.AddWalkInCommand, Source={x:Reference Root}}"
+                                            CommandParameter="{Binding .}"/>
+                                    </Border.GestureRecognizers>
+                                </Border>
+                            </Grid>
+
+                            <!-- ── Off shift ──────────────────────────────────────────── -->
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="11"
+                                  Padding="12,11" MinimumHeightRequest="62"
+                                  IsVisible="{Binding IsOffShift}">
+                                <helpers:AvatarView Grid.Column="0" Initials="{Binding Initials}"/>
+                                <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                    <Label Text="{Binding Name}" Style="{StaticResource lbl16_Bold_TextDark}"/>
+                                    <Label Text="{Binding StatusText}" Style="{StaticResource lbl11_Regular_TextLight}"/>
+                                </VerticalStackLayout>
+                                <Button Grid.Column="2" Text="On shift" HeightRequest="44"
+                                        Style="{StaticResource btn12_Bold_Neutral}"
+                                        VerticalOptions="Center"
+                                        IsEnabled="{Binding IsShiftToggleEnabled}"
+                                        Command="{Binding BindingContext.ToggleShiftCommand, Source={x:Reference Root}}"
                                         CommandParameter="{Binding .}"/>
-                                </Border.GestureRecognizers>
-                            </Border>
+                            </Grid>
+
                         </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
 
-                        <!-- ── Off shift ──────────────────────────────────────────── -->
-                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="11"
-                              Padding="12,11" MinimumHeightRequest="62"
-                              IsVisible="{Binding IsOffShift}">
-                            <helpers:AvatarView Grid.Column="0" Initials="{Binding Initials}"/>
-                            <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
-                                <Label Text="{Binding Name}" Style="{StaticResource lbl16_Bold_TextDark}"/>
-                                <Label Text="{Binding StatusText}" Style="{StaticResource lbl11_Regular_TextLight}"/>
-                            </VerticalStackLayout>
-                            <Button Grid.Column="2" Text="On shift" HeightRequest="44"
-                                    Style="{StaticResource btn12_Bold_Neutral}"
-                                    VerticalOptions="Center"
-                                    IsEnabled="{Binding IsShiftToggleEnabled}"
-                                    Command="{Binding BindingContext.ToggleShiftCommand, Source={x:Reference Root}}"
-                                    CommandParameter="{Binding .}"/>
-                        </Grid>
+            <CollectionView.Footer>
+                <VerticalStackLayout Spacing="0" Padding="0,0,0,24">
+                    <Border Style="{StaticResource brd13_Ghost}" Margin="18,22,18,0" Padding="18,26"
+                            IsVisible="{Binding IsQuiet}">
+                        <Label Text="{Binding QuietText}"
+                               Style="{StaticResource lbl12_Regular_TextLight}"
+                               HorizontalTextAlignment="Center"
+                               HorizontalOptions="Center"/>
+                    </Border>
+                </VerticalStackLayout>
+            </CollectionView.Footer>
 
-                    </Grid>
-                </Border>
-            </DataTemplate>
-        </CollectionView.ItemTemplate>
+        </CollectionView>
 
-        <CollectionView.Footer>
-            <VerticalStackLayout Spacing="0" Padding="0,0,0,24">
-                <Border Style="{StaticResource brd13_Ghost}" Margin="18,22,18,0" Padding="18,26"
-                        IsVisible="{Binding IsQuiet}">
-                    <Label Text="{Binding QuietText}"
-                           Style="{StaticResource lbl12_Regular_TextLight}"
-                           HorizontalTextAlignment="Center"
-                           HorizontalOptions="Center"/>
-                </Border>
-            </VerticalStackLayout>
-        </CollectionView.Footer>
-
-    </CollectionView>
+    </Grid>
 
 </ContentPage>
