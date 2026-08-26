@@ -195,6 +195,24 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     public bool IsBeingServed => MyStatus?.Status == "serving";
     public bool IsLeaving { get; set; }
 
+    public MyActiveQueueEntryResponse? ActiveQueueEntry => MyStatus is null
+        ? null
+        : new MyActiveQueueEntryResponse
+        {
+            EntryId = MyStatus.EntryId,
+            BusinessId = _businessId,
+            BusinessName = BusinessName,
+            BusinessLatitude = Business?.Latitude,
+            BusinessLongitude = Business?.Longitude,
+            OperatorId = MyStatus.OperatorId,
+            OperatorName = MyStatus.OperatorName,
+            Position = MyStatus.Position,
+            Status = MyStatus.Status,
+            JoinedAt = MyStatus.JoinedAt,
+            WaitMinutes = MyWaitMinutes,
+            ProgressStatus = MyStatus.ProgressStatus,
+        };
+
     public string TicketHeadline { get; set; } = string.Empty;
     public string TicketWaitText { get; set; } = string.Empty;
     public string TicketTurnText { get; set; } = string.Empty;
@@ -541,6 +559,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 ? await _queueService.GetEntryWaitMinutesAsync(MyStatus.EntryId)
                 : null;
 
+            OnPropertyChanged(nameof(ActiveQueueEntry));
             OnPropertyChanged(nameof(IsInQueue));
             OnPropertyChanged(nameof(IsShowingConfirmation));
             OnPropertyChanged(nameof(IsShowingLanding));
@@ -1451,6 +1470,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             MyStatus = null;
             MyWaitMinutes = null;
 
+            OnPropertyChanged(nameof(ActiveQueueEntry));
             OnPropertyChanged(nameof(IsInQueue));
             OnPropertyChanged(nameof(IsShowingConfirmation));
             OnPropertyChanged(nameof(IsShowingLanding));
