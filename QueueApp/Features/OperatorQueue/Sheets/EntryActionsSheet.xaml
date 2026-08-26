@@ -1,92 +1,88 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<popups:PopupPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-                  xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-                  xmlns:popups="clr-namespace:MPowerKit.Popups;assembly=MPowerKit.Popups"
-                  xmlns:sheets="clr-namespace:QueueApp.Features.OperatorQueue.Sheets"
-                  x:Name="Root"
-                  x:Class="QueueApp.Features.OperatorQueue.Sheets.EntryActionsSheet"
-                  x:DataType="sheets:EntryActionsSheet"
-                  CloseOnBackgroundClick="True"
-                  BackgroundColor="#B80A0D12">
+<sheets:BottomSheetPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                        xmlns:sheets="clr-namespace:QueueApp.Features.OperatorQueue.Sheets"
+                        x:Name="Root"
+                        x:Class="QueueApp.Features.OperatorQueue.Sheets.EntryActionsSheet"
+                        x:DataType="sheets:EntryActionsSheet">
 
     <!--
-        The sheet is capped at 88% of the screen and hugs its content below that, so a long list
-        scrolls inside the sheet rather than pushing its own header off the top.
+        This Border is the page Content on purpose: a wrapper that filled the page would put every
+        tap inside Content's bounds and stop the sheet dismissing on a background tap. See
+        BottomSheetPage.
     -->
-    <Grid RowDefinitions="0.12*,0.88*">
-        <Border Grid.Row="1" VerticalOptions="End"
-                Style="{StaticResource brd22_Sheet}" Padding="16,10,16,26">
-            <ScrollView>
-            <VerticalStackLayout Spacing="0">
+    <Border VerticalOptions="End"
+            Style="{StaticResource brd22_Sheet}" Padding="16,10,16,26">
+        <ScrollView>
+        <VerticalStackLayout Spacing="0">
 
-                <Border BackgroundColor="{StaticResource Line}" StrokeThickness="0"
-                        WidthRequest="38" HeightRequest="4" Margin="0,0,0,16"
-                        HorizontalOptions="Center">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="2"/>
-                    </Border.StrokeShape>
+            <Border BackgroundColor="{StaticResource Line}" StrokeThickness="0"
+                    WidthRequest="38" HeightRequest="4" Margin="0,0,0,16"
+                    HorizontalOptions="Center">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="2"/>
+                </Border.StrokeShape>
+            </Border>
+
+            <!--
+                No call affordance: profiles is self-read under RLS, so the shop has no way to
+                read a waiting customer's phone number. Flagged rather than faked.
+            -->
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="0,0,0,14">
+                <Border Grid.Column="0" WidthRequest="48" HeightRequest="48"
+                        BackgroundColor="{StaticResource SurfaceRaised}"
+                        Stroke="{StaticResource Line}" StrokeThickness="1"
+                        StrokeShape="Ellipse">
+                    <Label Text="{Binding Initials, Source={x:Reference Root}}"
+                           Style="{StaticResource lbl12_Mono_TextPrimary}"
+                           HorizontalOptions="Center" VerticalOptions="Center"/>
                 </Border>
 
-                <!--
-                    No call affordance: profiles is self-read under RLS, so the shop has no way to
-                    read a waiting customer's phone number. Flagged rather than faked.
-                -->
-                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="0,0,0,14">
-                    <Border Grid.Column="0" WidthRequest="48" HeightRequest="48"
-                            BackgroundColor="{StaticResource SurfaceRaised}"
-                            Stroke="{StaticResource Line}" StrokeThickness="1"
-                            StrokeShape="Ellipse">
-                        <Label Text="{Binding Initials, Source={x:Reference Root}}"
-                               Style="{StaticResource lbl12_Mono_TextPrimary}"
-                               HorizontalOptions="Center" VerticalOptions="Center"/>
-                    </Border>
+                <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                    <Label Text="{Binding CustomerName, Source={x:Reference Root}}"
+                           Style="{StaticResource lbl16_Bold_TextDark}"/>
+                    <Label Text="{Binding SubText, Source={x:Reference Root}}"
+                           Style="{StaticResource lbl11_Regular_TextLight}"/>
+                </VerticalStackLayout>
 
-                    <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
-                        <Label Text="{Binding CustomerName, Source={x:Reference Root}}"
-                               Style="{StaticResource lbl16_Bold_TextDark}"/>
-                        <Label Text="{Binding SubText, Source={x:Reference Root}}"
-                               Style="{StaticResource lbl11_Regular_TextLight}"/>
-                    </VerticalStackLayout>
+            </Grid>
 
-                </Grid>
+            <BoxView HeightRequest="1" Color="{StaticResource Line}" Margin="0,0,0,14"/>
 
-                <BoxView HeightRequest="1" Color="{StaticResource Line}" Margin="0,0,0,14"/>
+            <Button Text="Serve now"
+                    Style="{StaticResource btn15_Bold_SheetGo}"
+                    IsVisible="{Binding CanServe, Source={x:Reference Root}}"
+                    Clicked="OnServeClicked"/>
 
-                <Button Text="Serve now"
-                        Style="{StaticResource btn15_Bold_SheetGo}"
-                        IsVisible="{Binding CanServe, Source={x:Reference Root}}"
-                        Clicked="OnServeClicked"/>
+            <Button Text="Move to another barber" Margin="0,9,0,0"
+                    Style="{StaticResource btn15_Regular_SheetRow}"
+                    Clicked="OnMoveOperatorClicked"/>
 
-                <Button Text="Move to another barber" Margin="0,9,0,0"
-                        Style="{StaticResource btn15_Regular_SheetRow}"
-                        Clicked="OnMoveOperatorClicked"/>
+            <Button Text="Move to end of queue" Margin="0,9,0,0"
+                    Style="{StaticResource btn15_Regular_SheetRow}"
+                    IsVisible="{Binding CanReorder, Source={x:Reference Root}}"
+                    Clicked="OnMoveToEndClicked"/>
 
-                <Button Text="Move to end of queue" Margin="0,9,0,0"
-                        Style="{StaticResource btn15_Regular_SheetRow}"
-                        IsVisible="{Binding CanReorder, Source={x:Reference Root}}"
-                        Clicked="OnMoveToEndClicked"/>
+            <Button Text="Change service" Margin="0,9,0,0"
+                    Style="{StaticResource btn15_Regular_SheetRow}"
+                    Clicked="OnChangeServiceClicked"/>
 
-                <Button Text="Change service" Margin="0,9,0,0"
-                        Style="{StaticResource btn15_Regular_SheetRow}"
-                        Clicked="OnChangeServiceClicked"/>
+            <!--
+                Load-bearing. Nothing destructive may sit adjacent to a constructive action,
+                and nothing destructive may be a naked row on the board itself.
+            -->
+            <BoxView HeightRequest="1" Color="{StaticResource Line}" Margin="0,16,0,4"/>
 
-                <!--
-                    Load-bearing. Nothing destructive may sit adjacent to a constructive action,
-                    and nothing destructive may be a naked row on the board itself.
-                -->
-                <BoxView HeightRequest="1" Color="{StaticResource Line}" Margin="0,16,0,4"/>
+            <Button Text="Mark no-show" Margin="0,9,0,0"
+                    Style="{StaticResource btn15_Regular_SheetBad}"
+                    Clicked="OnNoShowClicked"/>
 
-                <Button Text="Mark no-show" Margin="0,9,0,0"
-                        Style="{StaticResource btn15_Regular_SheetBad}"
-                        Clicked="OnNoShowClicked"/>
+            <Button Text="Remove from queue" Margin="0,9,0,0"
+                    Style="{StaticResource btn15_Regular_SheetBad}"
+                    Clicked="OnRemoveClicked"/>
 
-                <Button Text="Remove from queue" Margin="0,9,0,0"
-                        Style="{StaticResource btn15_Regular_SheetBad}"
-                        Clicked="OnRemoveClicked"/>
+        </VerticalStackLayout>
+        </ScrollView>
+    </Border>
 
-            </VerticalStackLayout>
-            </ScrollView>
-        </Border>
-    </Grid>
-
-</popups:PopupPage>
+</sheets:BottomSheetPage>

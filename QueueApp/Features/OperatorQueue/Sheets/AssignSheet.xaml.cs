@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
-using MPowerKit.Popups;
 using QueueApp.Features.OperatorQueue.Models;
 using QueueApp.Services.Popup;
 
@@ -10,7 +9,7 @@ namespace QueueApp.Features.OperatorQueue.Sheets;
 // Where an unassigned customer gets a barber, and where an assigned one gets a different barber.
 // Targets arrive already sorted soonest-first with the first one tagged, and off-shift operators
 // are rendered disabled rather than hidden — a barber who is off shift is information.
-public partial class AssignSheet : PopupPage
+public partial class AssignSheet : BottomSheetPage
 {
     private readonly IQueuePopupService _popups;
     private readonly TaskCompletionSource<AssignSheetResult> _completion = new();

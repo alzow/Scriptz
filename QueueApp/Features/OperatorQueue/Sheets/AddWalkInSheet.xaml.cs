@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
-using MPowerKit.Popups;
 using QueueApp.Features.OperatorQueue.Models;
 using QueueApp.Services.Popup;
 
@@ -9,7 +8,7 @@ namespace QueueApp.Features.OperatorQueue.Sheets;
 
 // Adding somebody who walked in off the street. Shows what will happen — the position they land in
 // and roughly when their turn comes — before the operator commits to it.
-public partial class AddWalkInSheet : PopupPage
+public partial class AddWalkInSheet : BottomSheetPage
 {
     private readonly IQueuePopupService _popups;
     private readonly TaskCompletionSource<WalkInRequest?> _completion = new();

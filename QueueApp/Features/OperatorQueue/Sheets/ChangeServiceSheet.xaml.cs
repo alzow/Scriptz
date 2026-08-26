@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
-using MPowerKit.Popups;
 using QueueApp.Features.OperatorQueue.Models;
 using QueueApp.Services.Popup;
 
@@ -9,7 +8,7 @@ namespace QueueApp.Features.OperatorQueue.Sheets;
 
 // Correcting the service on an entry that's already in the queue. One tap commits — there's no
 // second confirm, because changing a service is cheap to undo by changing it again.
-public partial class ChangeServiceSheet : PopupPage
+public partial class ChangeServiceSheet : BottomSheetPage
 {
     private readonly IQueuePopupService _popups;
     private readonly TaskCompletionSource<Guid?> _completion = new();

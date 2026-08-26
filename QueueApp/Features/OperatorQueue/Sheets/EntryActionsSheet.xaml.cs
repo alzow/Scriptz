@@ -1,4 +1,3 @@
-using MPowerKit.Popups;
 using QueueApp.Features.OperatorQueue.Models;
 using QueueApp.Services.Popup;
 
@@ -7,7 +6,7 @@ namespace QueueApp.Features.OperatorQueue.Sheets;
 // Everything a row can do that isn't its one inline Serve. Rows on the board carry at most one
 // live target each; this is where the rest lives, with the two destructive actions kept below a
 // separator so neither can be reached by a slipped thumb aimed at Serve.
-public partial class EntryActionsSheet : PopupPage
+public partial class EntryActionsSheet : BottomSheetPage
 {
     private readonly IQueuePopupService _popups;
     private readonly TaskCompletionSource<EntryAction> _completion = new();
