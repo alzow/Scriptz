@@ -40,7 +40,6 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     public ServiceCategory? SelectedCategory { get; set; }
     public MyActiveQueueEntryResponse? ActiveEntry { get; set; }
     public bool IsLeavingQueue { get; set; }
-    public string? QuietestNowText { get; set; }
     public string LocationLabel { get; set; } = "Lenasia";
     public bool IsResolvingLocation { get; set; }
     public ObservableCollection<BrowseBusinessSummaryResponse> Businesses { get; } = new();
@@ -227,7 +226,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
 
             if (desiredKey == _subscribedScopeKey) return;
 
-            await _realtimeService.UnsubscribeAsync();
+            // await _realtimeService.UnsubscribeAsync(); //ReAdd later TODO messing up manage subscription
 
             if (ActiveEntry is not null)
             {
@@ -343,12 +342,6 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
             Businesses.Clear();
             foreach (var b in ordered)
                 Businesses.Add(b);
-
-            var quietest = _allBusinesses
-                .Where(b => b.WaitBucket is "go" or "wait")
-                .OrderBy(b => b.AvgWaitMinutes)
-                .FirstOrDefault();
-            QuietestNowText = quietest is not null ? $"{quietest.Name} · {quietest.AvgWaitMinutes:0} min" : null;
 
             OnPropertyChanged(nameof(IsBusinessesEmpty));
         }

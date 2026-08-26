@@ -42,8 +42,7 @@
                         LeaveCommand="{Binding LeaveQueueCommand}"
                         IsLeaving="{Binding IsLeavingQueue}"/>
                 <helpers:IdleDiscoveryBandView Margin="0,16,0,0"
-                        IsVisible="{Binding HasActiveEntry, Converter={StaticResource InvertedBoolConverter}}"
-                        QuietestNowText="{Binding QuietestNowText}"/>
+                        IsVisible="{Binding HasActiveEntry, Converter={StaticResource InvertedBoolConverter}}"/>
 
                 <!-- Categories -->
                 <Label Text="BROWSE BY CATEGORY" Style="{StaticResource SectionTitle}" Margin="0,26,0,12"/>
@@ -63,7 +62,7 @@
 
                 <!-- Nearby businesses -->
                 <Grid ColumnDefinitions="*,Auto" Margin="0,26,0,10">
-                    <Label Grid.Column="0" Text="OPEN NOW NEAR YOU" Style="{StaticResource SectionTitle}"/>
+                    <Label Grid.Column="0" Text="NEAR YOU" Style="{StaticResource SectionTitle}"/>
                     <Label Grid.Column="1" Text="See all" Style="{StaticResource lbl13_Bold_Orange}" FontSize="11">
                         <Label.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding SeeAllBusinessesCommand}"/>
@@ -83,7 +82,7 @@
 
                 <!-- Frequent -->
                 <Grid ColumnDefinitions="*,Auto" Margin="0,26,0,10" IsVisible="{Binding HasFrequentBusinesses}">
-                    <Label Grid.Column="0" Text="YOU GO HERE A LOT" Style="{StaticResource SectionTitle}"/>
+                    <Label Grid.Column="0" Text="FREQUENTLY VISITED" Style="{StaticResource SectionTitle}"/>
                 </Grid>
                 <helpers:FrequentBusinessListView
                         IsVisible="{Binding HasFrequentBusinesses}"

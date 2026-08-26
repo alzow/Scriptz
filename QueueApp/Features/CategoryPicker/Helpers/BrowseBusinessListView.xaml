@@ -39,31 +39,9 @@
                         </Border>
 
                         <VerticalStackLayout Grid.Column="1" Spacing="3">
-                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                <Label Grid.Column="0" Text="{Binding Name}"
-                                       Style="{StaticResource lbl15_Bold_TextDark}"
-                                       LineBreakMode="TailTruncation"/>
-                                <Border Grid.Column="1"
-                                        StrokeThickness="0"
-                                        Padding="8,4"
-                                        VerticalOptions="Center">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="7"/>
-                                    </Border.StrokeShape>
-                                    <Border.BackgroundColor>
-                                        <Binding Path="WaitBucket"
-                                                 Converter="{StaticResource WaitBucketToColorConverter}"
-                                                 ConverterParameter="#2139FF7A|#26A45EFF|#21FF3B5C|#252C39|#00000000|#00000000"/>
-                                    </Border.BackgroundColor>
-                                    <Label FontFamily="RobotoBold" FontSize="10" Text="{Binding PillText}">
-                                        <Label.TextColor>
-                                            <Binding Path="WaitBucket"
-                                                     Converter="{StaticResource WaitBucketToColorConverter}"
-                                                     ConverterParameter="#39FF7A|#A45EFF|#FF3B5C|#8A8F98|#565C68|#8A8F98"/>
-                                        </Label.TextColor>
-                                    </Label>
-                                </Border>
-                            </Grid>
+                            <Label Text="{Binding Name}"
+                                   Style="{StaticResource lbl15_Bold_TextDark}"
+                                   LineBreakMode="TailTruncation"/>
 
                             <Label Text="{Binding MetaText}" Style="{StaticResource lbl12_Regular_TextLight}"/>
 

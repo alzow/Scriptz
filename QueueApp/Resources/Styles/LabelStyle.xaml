@@ -15,6 +15,52 @@
         <Setter Property="TextColor" Value="{StaticResource TextMuted}"/>
     </Style>
 
+    <!--
+        Tracked "mono" lines. There is no monospace family in Resources/Fonts, so the look comes
+        from RobotoMedium plus letter spacing rather than a second typeface.
+    -->
+    <Style x:Key="lbl9_Mono_TextMuted" TargetType="Label">
+        <Setter Property="FontSize" Value="9"/>
+        <Setter Property="FontFamily" Value="RobotoMedium"/>
+        <Setter Property="TextColor" Value="{StaticResource TextMuted}"/>
+        <Setter Property="CharacterSpacing" Value="1.6"/>
+    </Style>
+    <Style x:Key="lbl9_Mono_TextFaint" TargetType="Label" BasedOn="{StaticResource lbl9_Mono_TextMuted}">
+        <Setter Property="TextColor" Value="{StaticResource TextFaint}"/>
+    </Style>
+    <Style x:Key="lbl9_Mono_Green" TargetType="Label" BasedOn="{StaticResource lbl9_Mono_TextMuted}">
+        <Setter Property="TextColor" Value="{StaticResource Green}"/>
+    </Style>
+    <Style x:Key="lbl10_Mono_TextMuted" TargetType="Label">
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontFamily" Value="RobotoMedium"/>
+        <Setter Property="TextColor" Value="{StaticResource TextMuted}"/>
+        <Setter Property="CharacterSpacing" Value="1.6"/>
+    </Style>
+    <Style x:Key="lbl10_Mono_TextFaint" TargetType="Label" BasedOn="{StaticResource lbl10_Mono_TextMuted}">
+        <Setter Property="TextColor" Value="{StaticResource TextFaint}"/>
+    </Style>
+    <Style x:Key="lbl10_Mono_Green" TargetType="Label" BasedOn="{StaticResource lbl10_Mono_TextMuted}">
+        <Setter Property="TextColor" Value="{StaticResource Green}"/>
+    </Style>
+    <Style x:Key="lbl10_Mono_Purple" TargetType="Label" BasedOn="{StaticResource lbl10_Mono_TextMuted}">
+        <Setter Property="TextColor" Value="{StaticResource Purple}"/>
+    </Style>
+    <Style x:Key="lbl13_Mono_TextPrimary" TargetType="Label">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontFamily" Value="RobotoMedium"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="CharacterSpacing" Value="0.6"/>
+    </Style>
+    <Style x:Key="lbl13_Mono_Green" TargetType="Label" BasedOn="{StaticResource lbl13_Mono_TextPrimary}">
+        <Setter Property="TextColor" Value="{StaticResource Green}"/>
+    </Style>
+    <Style x:Key="lbl22_Mono_TextPrimary" TargetType="Label">
+        <Setter Property="FontSize" Value="22"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+    </Style>
+
     <!-- 11 -->
     <Style x:Key="lbl11_Bold_TextMid" TargetType="Label" BasedOn="{StaticResource SectionTitle}"/>
     <Style x:Key="lbl11_Bold_White" TargetType="Label">
