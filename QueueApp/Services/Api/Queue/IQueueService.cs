@@ -23,6 +23,7 @@ public interface IQueueService
     Task AssignEntryAsync(Guid entryId, Guid? operatorId);
     Task MoveEntryToEndAsync(Guid entryId);
     Task ChangeEntryServiceAsync(Guid entryId, Guid serviceId);
-    Task<int> GetCompletedTodayCountAsync(Guid businessId);
-    Task<decimal?> GetOperatorAvgMinutesAsync(Guid operatorId);
+    // Today's completed visits, carrying serving_at/done_at so the caller can derive both the
+    // count and the average service time from one read.
+    Task<List<QueueEntryResponse>> GetCompletedTodayAsync(Guid businessId);
 }

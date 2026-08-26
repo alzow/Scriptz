@@ -200,13 +200,8 @@ public class StubQueueService : IQueueService
         return Task.CompletedTask;
     }
 
-    public Task<int> GetCompletedTodayCountAsync(Guid businessId)
-        => Task.FromResult(_entries.Count(e =>
-            e.BusinessId == businessId && e.Status is "done" or "completed"
-            && e.DoneAt >= DateTime.UtcNow.Date));
-
-    // Null on purpose: exercises the em-dash path the real function takes until an operator has
-    // three completed services on the books.
-    public Task<decimal?> GetOperatorAvgMinutesAsync(Guid operatorId)
-        => Task.FromResult<decimal?>(null);
+    public Task<List<QueueEntryResponse>> GetCompletedTodayAsync(Guid businessId)
+        => Task.FromResult(_entries
+            .Where(e => e.BusinessId == businessId && e.DoneAt >= DateTime.UtcNow.Date)
+            .ToList());
 }

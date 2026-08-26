@@ -13,6 +13,10 @@ public static class BoardConstants
     public const int TickIntervalSeconds = 1;
     public const int HeartbeatTicks = 120;
 
+    // Below this many completed visits the "Avg" tile stays an em-dash. Mirrors the count(*) >= 3
+    // guard inside operator_avg_minutes: fewer samples than this describe one haircut, not a shop.
+    public const int MinimumAverageSamples = 3;
+
     public const string EmDash = "—";
 
     // PostgREST hands timestamptz back as ISO-8601 with an offset, which System.Text.Json resolves

@@ -162,12 +162,12 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
             _entries = await _queueService.GetActiveEntriesAsync(_businessId);
             _summary = await _queueService.GetQueueSummaryAsync(_businessId);
 
-            var doneToday = await SafeDoneTodayAsync();
-            var avg = await SafeAverageMinutesAsync();
+            var completedToday = await SafeCompletedTodayAsync();
+            var avg = AverageServiceMinutes(completedToday);
 
             await MainThread.InvokeOnMainThreadAsync(() =>
             {
-                DoneTodayText = doneToday.ToString();
+                DoneTodayText = completedToday.Count.ToString();
                 AvgText = avg is null ? BoardConstants.EmDash : $"{avg.Value:0}m";
                 Rebuild();
             });
@@ -179,42 +179,39 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
     }
 
-    // The stats strip is decoration on top of a working board: a shop that hasn't run these
-    // functions yet, or an RPC that isn't deployed, must not take the queue down with it.
-    private async Task<int> SafeDoneTodayAsync()
+    // The stats strip is decoration on top of a working board: a read that fails must not take the
+    // queue down with it, so this degrades to zero done and an em-dash average.
+    private async Task<List<QueueEntryResponse>> SafeCompletedTodayAsync()
     {
         try
         {
-            return await _queueService.GetCompletedTodayCountAsync(_businessId);
+            return await _queueService.GetCompletedTodayAsync(_businessId);
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[Board] done-today unavailable: {ex.Message}");
-            return 0;
+            System.Diagnostics.Debug.WriteLine($"[Board] today's completions unavailable: {ex.Message}");
+            return new List<QueueEntryResponse>();
         }
     }
 
-    // Shop-level average across the operators on shift. operator_avg_minutes is per operator and
-    // already carries its own count(*) >= 3 guard, so operators without enough history simply
-    // don't contribute — and when none of them do, the tile stays an em-dash.
-    private async Task<decimal?> SafeAverageMinutesAsync()
+    // Mean time in the chair across today's completed visits, measured from the two timestamps the
+    // engine already writes. Deliberately not operator_avg_minutes: that function is per operator,
+    // there is no shop-level equivalent, and its actual parameter name doesn't match what the
+    // schema notes imply — calling it 404s once per operator on every load and every realtime
+    // event. Derived here from serving_at/done_at, which are verified columns, in the same single
+    // read that backs "Done today".
+    //
+    // The >= 3 floor mirrors the guard inside operator_avg_minutes: below that the number says
+    // more about one long haircut than about the shop, and an em-dash is the honest answer.
+    private static double? AverageServiceMinutes(List<QueueEntryResponse> completed)
     {
-        try
-        {
-            var onShift = _operators.Where(o => o.IsAvailable).ToList();
-            if (onShift.Count == 0)
-                return null;
+        var durations = completed
+            .Where(e => e.ServingAt is not null && e.DoneAt is not null)
+            .Select(e => (BoardConstants.AsUtc(e.DoneAt!.Value) - BoardConstants.AsUtc(e.ServingAt!.Value)).TotalMinutes)
+            .Where(minutes => minutes > 0)
+            .ToList();
 
-            var averages = await Task.WhenAll(onShift.Select(o => _queueService.GetOperatorAvgMinutesAsync(o.Id)));
-            var known = averages.Where(a => a.HasValue).Select(a => a!.Value).ToList();
-
-            return known.Count == 0 ? null : known.Average();
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"[Board] average unavailable: {ex.Message}");
-            return null;
-        }
+        return durations.Count < BoardConstants.MinimumAverageSamples ? null : durations.Average();
     }
 
     // ── Building the board ────────────────────────────────────────────────────

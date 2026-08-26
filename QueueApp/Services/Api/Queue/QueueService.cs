@@ -85,16 +85,12 @@ public class QueueService : BaseService, IQueueService
         ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
             new Dictionary<string, object?> { ["service_id"] = serviceId }));
 
-    // "Today" is the device's local day boundary — the shop reads this tile standing in its own
+    // "Today" is the device's local day boundary — the shop reads these tiles standing in its own
     // timezone, not UTC.
-    public async Task<int> GetCompletedTodayCountAsync(Guid businessId)
+    public Task<List<QueueEntryResponse>> GetCompletedTodayAsync(Guid businessId)
     {
         var since = DateTime.SpecifyKind(DateTime.Today, DateTimeKind.Local).ToUniversalTime();
-        var rows = await ExecuteApiCallAsync(_api.GetCompletedSinceAsync(
+        return ExecuteApiCallAsync(_api.GetCompletedSinceAsync(
             $"eq.{businessId}", $"gte.{since:yyyy-MM-ddTHH:mm:ssZ}"));
-        return rows.Count;
     }
-
-    public Task<decimal?> GetOperatorAvgMinutesAsync(Guid operatorId) =>
-        ExecuteApiCallAsync(_api.GetOperatorAvgMinutesAsync(new OperatorAvgRequest { OperatorId = operatorId }));
 }
