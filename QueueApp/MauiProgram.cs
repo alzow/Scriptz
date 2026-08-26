@@ -1,8 +1,14 @@
 using Microsoft.Extensions.Logging;
 using CommunityToolkit.Maui;
+using Microsoft.Maui.Handlers;
 using MPowerKit.Navigation;
 using MPowerKit.Popups;
 using SkiaSharp.Views.Maui.Controls.Hosting;
+#if ANDROID
+using Android.Graphics.Drawables;
+#elif IOS
+using UIKit;
+#endif
 
 namespace QueueApp;
 
@@ -34,6 +40,18 @@ public static class MauiProgram
                 fonts.AddFont("Roboto-BoldItalic.ttf", "RobotoBoldItalic");
                 fonts.AddFont("Roboto-Black.ttf", "RobotoBlack");
                 fonts.AddFont("Roboto-BlackItalic.ttf", "RobotoBlackItalic");
+            })
+            .ConfigureMauiHandlers(handlers =>
+            {
+                EntryHandler.Mapper.AppendToMapping("RemoveNativeBorder", (handler, view) =>
+                {
+#if ANDROID
+                    handler.PlatformView.Background = new ColorDrawable(Android.Graphics.Color.Transparent);
+                    handler.PlatformView.SetPadding(0, handler.PlatformView.PaddingTop, 0, handler.PlatformView.PaddingBottom);
+#elif IOS
+                    handler.PlatformView.BorderStyle = UITextBorderStyle.None;
+#endif
+                });
             });
 
 #if DEBUG
