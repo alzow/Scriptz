@@ -107,24 +107,38 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
 
     public override async Task OnAppearingAsync()
     {
-        await base.OnAppearingAsync();
+        try
+        {
+            await base.OnAppearingAsync();
 
-        await _realtimeService.SubscribeAsync("business_id", _businessId.ToString(),
-            async () => await MainThread.InvokeOnMainThreadAsync(LoadQueueAsync));
+            await _realtimeService.SubscribeAsync("business_id", _businessId.ToString(),
+                async () => await MainThread.InvokeOnMainThreadAsync(LoadQueueAsync));
 
-        StartTicking();
+            StartTicking();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
 
     public override async Task OnDisappearingAsync()
     {
-        await base.OnDisappearingAsync();
-        StopTicking();
-        await _realtimeService.UnsubscribeAsync();
+        try
+        {
+            await base.OnDisappearingAsync();
+            StopTicking();
+            await _realtimeService.UnsubscribeAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
 
     // ── Loading ───────────────────────────────────────────────────────────────
 
-    private async Task LoadQueueAsync()
+    public async Task LoadQueueAsync()
     {
         await _loadLock.WaitAsync();
         try
@@ -146,6 +160,10 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                 Rebuild();
             });
         }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
         finally
         {
             IsLoading = false;
@@ -153,7 +171,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
     }
 
-    private async Task<List<QueueEntryResponse>> SafeCompletedTodayAsync()
+    public async Task<List<QueueEntryResponse>> SafeCompletedTodayAsync()
     {
         try
         {
@@ -161,247 +179,334 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[Board] today's completions unavailable: {ex.Message}");
+            await HandleExceptionAsync(ex);
             return new List<QueueEntryResponse>();
         }
     }
 
-    private static double? AverageServiceMinutes(List<QueueEntryResponse> completed)
+    public double? AverageServiceMinutes(List<QueueEntryResponse> completed)
     {
-        var durations = completed
-            .Where(e => e.ServingAt is not null && e.DoneAt is not null)
-            .Select(e => (BoardConstants.AsUtc(e.DoneAt!.Value) - BoardConstants.AsUtc(e.ServingAt!.Value)).TotalMinutes)
-            .Where(minutes => minutes > 0)
-            .ToList();
+        try
+        {
+            var durations = completed
+                .Where(e => e.ServingAt is not null && e.DoneAt is not null)
+                .Select(e => (BoardConstants.AsUtc(e.DoneAt!.Value) - BoardConstants.AsUtc(e.ServingAt!.Value)).TotalMinutes)
+                .Where(minutes => minutes > 0)
+                .ToList();
 
-        return durations.Count < BoardConstants.MinimumAverageSamples ? null : durations.Average();
+            return durations.Count < BoardConstants.MinimumAverageSamples ? null : durations.Average();
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+            return null;
+        }
     }
 
     // ── Building the board ────────────────────────────────────────────────────
 
-    private void Rebuild()
+    public void Rebuild()
     {
-        Sections.Clear();
-
-        foreach (var op in _operators.OrderBy(o => o.SortOrder))
+        try
         {
-            var serving = _entries.FirstOrDefault(e => e.OperatorId == op.Id && e.Status == "serving");
-            var waiting = _entries
-                .Where(e => e.OperatorId == op.Id && e.Status == "waiting")
-                .OrderBy(e => e.JoinedAt)
-                .ToList();
+            Sections.Clear();
 
-            var section = BuildSection(op, serving, waiting);
-            Sections.Add(section);
+            foreach (var op in _operators.OrderBy(o => o.SortOrder))
+            {
+                var serving = _entries.FirstOrDefault(e => e.OperatorId == op.Id && e.Status == "serving");
+                var waiting = _entries
+                    .Where(e => e.OperatorId == op.Id && e.Status == "waiting")
+                    .OrderBy(e => e.JoinedAt)
+                    .ToList();
+
+                var section = BuildSection(op, serving, waiting);
+                Sections.Add(section);
+            }
+
+            RebuildPool();
+            RefreshStats();
+            RefreshTickText();
         }
-
-        RebuildPool();
-        RefreshStats();
-        RefreshTickText();
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
     }
 
-    private BoardSection BuildSection(OperatorResponse op, QueueEntryResponse? serving, List<QueueEntryResponse> waiting)
+    public BoardSection BuildSection(OperatorResponse op, QueueEntryResponse? serving, List<QueueEntryResponse> waiting)
     {
-        var onShift = op.IsAvailable;
-        var expanded = onShift && (serving is not null || waiting.Count > 0);
-
-        var section = new BoardSection
+        try
         {
-            OperatorId = op.Id,
-            Name = op.DisplayName,
-            Initials = InitialsOf(op.DisplayName),
-            SortOrder = op.SortOrder,
-            IsOnShift = onShift,
-            IsExpanded = expanded,
-            Serving = serving is null ? null : BuildServingCard(serving),
-            StatusText = StatusTextFor(onShift, serving is not null, waiting.Count),
-            StatusColor = waiting.Count > 0 ? BoardPalette.Ink : BoardPalette.Muted,
-        };
+            var onShift = op.IsAvailable;
+            var expanded = onShift && (serving is not null || waiting.Count > 0);
 
-        for (var i = 0; i < waiting.Count; i++)
+            var section = new BoardSection
+            {
+                OperatorId = op.Id,
+                Name = op.DisplayName,
+                Initials = InitialsOf(op.DisplayName),
+                SortOrder = op.SortOrder,
+                IsOnShift = onShift,
+                IsExpanded = expanded,
+                Serving = serving is null ? null : BuildServingCard(serving),
+                StatusText = StatusTextFor(onShift, serving is not null, waiting.Count),
+                StatusColor = waiting.Count > 0 ? BoardPalette.Ink : BoardPalette.Muted,
+            };
+
+            for (var i = 0; i < waiting.Count; i++)
+            {
+                var entry = waiting[i];
+                section.Waiting.Add(new QueueRowItem
+                {
+                    EntryId = entry.Id,
+                    OperatorId = entry.OperatorId,
+                    ServiceId = entry.ServiceId,
+                    CustomerName = DisplayNameOf(entry),
+                    Initials = InitialsOf(DisplayNameOf(entry)),
+                    ServiceName = ServiceNameOf(entry.ServiceId),
+                    JoinedAt = entry.JoinedAt,
+                    JoinedAtText = BoardConstants.AsUtc(entry.JoinedAt).ToLocalTime().ToString("HH:mm"),
+                    PositionText = (i + 1).ToString(),
+                    ShowPosition = true,
+                    ShowServe = i == 0,
+                    SubText = QueueRowItem.BuildSubText(
+                        ServiceNameOf(entry.ServiceId),
+                        MinutesSince(entry.JoinedAt)),
+                    SectionIsServing = serving is not null,
+                });
+            }
+
+            return section;
+        }
+        catch (Exception ex)
         {
-            var entry = waiting[i];
-            section.Waiting.Add(new QueueRowItem
+            _ = HandleExceptionAsync(ex);
+            return new BoardSection { OperatorId = op.Id, Name = op.DisplayName };
+        }
+    }
+
+    public ServingCardItem BuildServingCard(QueueEntryResponse entry)
+    {
+        try
+        {
+            var service = _services.FirstOrDefault(s => s.Id == entry.ServiceId);
+            var serviceText = service is null
+                ? string.Empty
+                : service.PriceCents.HasValue ? $"{service.Name} · {service.PriceDisplay}" : service.Name;
+
+            var card = new ServingCardItem
             {
                 EntryId = entry.Id,
                 OperatorId = entry.OperatorId,
                 ServiceId = entry.ServiceId,
                 CustomerName = DisplayNameOf(entry),
-                Initials = InitialsOf(DisplayNameOf(entry)),
-                ServiceName = ServiceNameOf(entry.ServiceId),
-                JoinedAt = entry.JoinedAt,
-                JoinedAtText = BoardConstants.AsUtc(entry.JoinedAt).ToLocalTime().ToString("HH:mm"),
-                PositionText = (i + 1).ToString(),
-                ShowPosition = true,
-                ShowServe = i == 0,
-                SubText = QueueRowItem.BuildSubText(
-                    ServiceNameOf(entry.ServiceId),
-                    MinutesSince(entry.JoinedAt)),
-                SectionIsServing = serving is not null,
-            });
+                ServiceText = serviceText,
+                ServingAt = entry.ServingAt ?? entry.JoinedAt,
+                EstimateText = service is null ? string.Empty : $"of ~{service.EstMinutes}m",
+                HasEstimate = service is not null,
+                NoteText = string.IsNullOrWhiteSpace(entry.ProgressStatus) ? "Add a note" : entry.ProgressStatus!,
+                HasNote = !string.IsNullOrWhiteSpace(entry.ProgressStatus),
+            };
+
+            card.RefreshElapsed();
+            return card;
         }
-
-        return section;
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+            return new ServingCardItem { EntryId = entry.Id };
+        }
     }
 
-    private ServingCardItem BuildServingCard(QueueEntryResponse entry)
+    public void RebuildPool()
     {
-        var service = _services.FirstOrDefault(s => s.Id == entry.ServiceId);
-        var serviceText = service is null
-            ? string.Empty
-            : service.PriceCents.HasValue ? $"{service.Name} · {service.PriceDisplay}" : service.Name;
-
-        var card = new ServingCardItem
+        try
         {
-            EntryId = entry.Id,
-            OperatorId = entry.OperatorId,
-            ServiceId = entry.ServiceId,
-            CustomerName = DisplayNameOf(entry),
-            ServiceText = serviceText,
-            ServingAt = entry.ServingAt ?? entry.JoinedAt,
-            EstimateText = service is null ? string.Empty : $"of ~{service.EstMinutes}m",
-            HasEstimate = service is not null,
-            NoteText = string.IsNullOrWhiteSpace(entry.ProgressStatus) ? "Add a note" : entry.ProgressStatus!,
-            HasNote = !string.IsNullOrWhiteSpace(entry.ProgressStatus),
-        };
+            PoolRows.Clear();
 
-        card.RefreshElapsed();
-        return card;
-    }
+            var unassigned = _entries
+                .Where(e => e.OperatorId is null)
+                .OrderBy(e => e.JoinedAt)
+                .ToList();
 
-    private void RebuildPool()
-    {
-        PoolRows.Clear();
-
-        var unassigned = _entries
-            .Where(e => e.OperatorId is null)
-            .OrderBy(e => e.JoinedAt)
-            .ToList();
-
-        foreach (var entry in unassigned)
-        {
-            var waited = MinutesSince(entry.JoinedAt);
-            PoolRows.Add(new QueueRowItem
+            foreach (var entry in unassigned)
             {
-                EntryId = entry.Id,
-                OperatorId = null,
-                ServiceId = entry.ServiceId,
-                CustomerName = DisplayNameOf(entry),
-                Initials = InitialsOf(DisplayNameOf(entry)),
-                ServiceName = ServiceNameOf(entry.ServiceId),
-                JoinedAt = entry.JoinedAt,
-                JoinedAtText = BoardConstants.AsUtc(entry.JoinedAt).ToLocalTime().ToString("HH:mm"),
-                ShowPosition = false,
-                ShowAssign = true,
-                SubText = QueueRowItem.BuildSubText(ServiceNameOf(entry.ServiceId), waited),
-            });
+                var waited = MinutesSince(entry.JoinedAt);
+                PoolRows.Add(new QueueRowItem
+                {
+                    EntryId = entry.Id,
+                    OperatorId = null,
+                    ServiceId = entry.ServiceId,
+                    CustomerName = DisplayNameOf(entry),
+                    Initials = InitialsOf(DisplayNameOf(entry)),
+                    ServiceName = ServiceNameOf(entry.ServiceId),
+                    JoinedAt = entry.JoinedAt,
+                    JoinedAtText = BoardConstants.AsUtc(entry.JoinedAt).ToLocalTime().ToString("HH:mm"),
+                    ShowPosition = false,
+                    ShowAssign = true,
+                    SubText = QueueRowItem.BuildSubText(ServiceNameOf(entry.ServiceId), waited),
+                });
+            }
+
+            var oldest = unassigned.Count == 0 ? 0 : MinutesSince(unassigned[0].JoinedAt);
+
+            PoolCountText = $"{PoolRows.Count} unassigned";
+            PoolAgeText = $"oldest waiting {oldest} min";
+            IsPoolUrgent = oldest >= BoardConstants.PoolStarvationMinutes;
+            OnPropertyChanged(nameof(PoolStroke));
+            OnPropertyChanged(nameof(PoolStrokeThickness));
+
+            if (PoolRows.Count == 0)
+                IsPoolExpanded = false;
+
+            OnPropertyChanged(nameof(HasPool));
+            OnPropertyChanged(nameof(PoolChevron));
         }
-
-        var oldest = unassigned.Count == 0 ? 0 : MinutesSince(unassigned[0].JoinedAt);
-
-        PoolCountText = $"{PoolRows.Count} unassigned";
-        PoolAgeText = $"oldest waiting {oldest} min";
-        IsPoolUrgent = oldest >= BoardConstants.PoolStarvationMinutes;
-        OnPropertyChanged(nameof(PoolStroke));
-        OnPropertyChanged(nameof(PoolStrokeThickness));
-
-        if (PoolRows.Count == 0)
-            IsPoolExpanded = false;
-
-        OnPropertyChanged(nameof(HasPool));
-        OnPropertyChanged(nameof(PoolChevron));
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
     }
 
-    private void RefreshStats()
+    public void RefreshStats()
     {
-        var waiting = _entries.Count(e => e.Status == "waiting");
-        var serving = _entries.Count(e => e.Status == "serving");
+        try
+        {
+            var waiting = _entries.Count(e => e.Status == "waiting");
+            var serving = _entries.Count(e => e.Status == "serving");
 
-        WaitingCountText = waiting.ToString();
-        ServingCountText = serving.ToString();
+            WaitingCountText = waiting.ToString();
+            ServingCountText = serving.ToString();
 
-        IsQuiet = waiting == 0 && serving == 0;
-        QuietText = $"Everyone's clear. {DoneTodayText} served today.";
+            IsQuiet = waiting == 0 && serving == 0;
+            QuietText = $"Everyone's clear. {DoneTodayText} served today.";
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
     }
 
     // ── The one page tick ─────────────────────────────────────────────────────
 
-    private void StartTicking()
+    public void StartTicking()
     {
-        _ = _businessService.HeartbeatAsync(_businessId);
-
-        _tickTimer = Application.Current!.Dispatcher.CreateTimer();
-        _tickTimer.Interval = TimeSpan.FromSeconds(BoardConstants.TickIntervalSeconds);
-        _tickTimer.Tick += OnTick;
-        _tickTimer.Start();
-    }
-
-    private void StopTicking()
-    {
-        if (_tickTimer is null)
-            return;
-
-        _tickTimer.Tick -= OnTick;
-        _tickTimer.Stop();
-        _tickTimer = null;
-        _ticks = 0;
-    }
-
-    private void OnTick(object? sender, EventArgs e)
-    {
-        RefreshTickText();
-
-        if (++_ticks % BoardConstants.HeartbeatTicks == 0)
+        try
+        {
             _ = _businessService.HeartbeatAsync(_businessId);
+
+            _tickTimer = Application.Current!.Dispatcher.CreateTimer();
+            _tickTimer.Interval = TimeSpan.FromSeconds(BoardConstants.TickIntervalSeconds);
+            _tickTimer.Tick += OnTick;
+            _tickTimer.Start();
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
     }
 
-    private void RefreshTickText()
+    public void StopTicking()
     {
-        foreach (var section in Sections)
+        try
         {
-            section.Serving?.RefreshElapsed();
+            if (_tickTimer is null)
+                return;
 
-            foreach (var row in section.Waiting)
-                row.RefreshWait();
+            _tickTimer.Tick -= OnTick;
+            _tickTimer.Stop();
+            _tickTimer = null;
+            _ticks = 0;
         }
-
-        foreach (var row in PoolRows)
-            row.RefreshWait();
-
-        if (PoolRows.Count == 0)
-            return;
-
-        var oldest = PoolRows.Max(r => r.WaitedMinutes);
-        var ageText = $"oldest waiting {oldest} min";
-        if (ageText != PoolAgeText)
-            PoolAgeText = ageText;
-
-        var urgent = oldest >= BoardConstants.PoolStarvationMinutes;
-        if (urgent != IsPoolUrgent)
+        catch (Exception ex)
         {
-            IsPoolUrgent = urgent;
-            OnPropertyChanged(nameof(PoolStroke));
-            OnPropertyChanged(nameof(PoolStrokeThickness));
+            _ = HandleExceptionAsync(ex);
+        }
+    }
+
+    public void OnTick(object? sender, EventArgs e)
+    {
+        try
+        {
+            RefreshTickText();
+
+            if (++_ticks % BoardConstants.HeartbeatTicks == 0)
+                _ = _businessService.HeartbeatAsync(_businessId);
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
+    }
+
+    public void RefreshTickText()
+    {
+        try
+        {
+            foreach (var section in Sections)
+            {
+                section.Serving?.RefreshElapsed();
+
+                foreach (var row in section.Waiting)
+                    row.RefreshWait();
+            }
+
+            foreach (var row in PoolRows)
+                row.RefreshWait();
+
+            if (PoolRows.Count == 0)
+                return;
+
+            var oldest = PoolRows.Max(r => r.WaitedMinutes);
+            var ageText = $"oldest waiting {oldest} min";
+            if (ageText != PoolAgeText)
+                PoolAgeText = ageText;
+
+            var urgent = oldest >= BoardConstants.PoolStarvationMinutes;
+            if (urgent != IsPoolUrgent)
+            {
+                IsPoolUrgent = urgent;
+                OnPropertyChanged(nameof(PoolStroke));
+                OnPropertyChanged(nameof(PoolStrokeThickness));
+            }
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
         }
     }
 
     // ── Commands ──────────────────────────────────────────────────────────────
 
     [RelayCommand]
-    private async Task OpenSettingsAsync()
+    public async Task OpenSettingsAsync()
     {
-        await NavigationService.NavigateAsync(NavigationPaths.BusinessSettingsPage);
+        try
+        {
+            await NavigationService.NavigateAsync(NavigationPaths.BusinessSettingsPage);
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
 
     [RelayCommand]
-    private void TogglePool()
+    public void TogglePool()
     {
-        IsPoolExpanded = !IsPoolExpanded;
-        OnPropertyChanged(nameof(PoolChevron));
+        try
+        {
+            IsPoolExpanded = !IsPoolExpanded;
+            OnPropertyChanged(nameof(PoolChevron));
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
     }
 
     [RelayCommand]
-    private async Task DoneAsync(ServingCardItem? card)
+    public async Task DoneAsync(ServingCardItem? card)
     {
         if (card is null || card.IsBusy)
             return;
@@ -423,7 +528,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task ServeAsync(QueueRowItem? row)
+    public async Task ServeAsync(QueueRowItem? row)
     {
         if (row is null || row.IsBusy)
             return;
@@ -449,39 +554,46 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task AssignAsync(QueueRowItem? row)
+    public async Task AssignAsync(QueueRowItem? row)
     {
-        if (row is null || row.IsBusy)
-            return;
-
-        if (_entries.All(e => e.Id != row.EntryId))
-            return;
-
-        var sheet = new AssignSheet(
-            _popupService,
-            row.CustomerName,
-            row.Initials,
-            $"{row.ServiceName} · any available · waiting {row.WaitedMinutes}m",
-            "WHO'S TAKING THIS ONE?",
-            showNoShow: true,
-            BuildAssignTargets(excludeOperatorId: null, includePoolOption: false));
-
-        await _popupService.ShowSheetAsync(sheet);
-        var result = await sheet.Completion;
-
-        if (result.MarkNoShow)
+        try
         {
-            await ConfirmNoShowAsync(row.EntryId, row.CustomerName);
-            return;
+            if (row is null || row.IsBusy)
+                return;
+
+            if (_entries.All(e => e.Id != row.EntryId))
+                return;
+
+            var sheet = new AssignSheet(
+                _popupService,
+                row.CustomerName,
+                row.Initials,
+                $"{row.ServiceName} · any available · waiting {row.WaitedMinutes}m",
+                "WHO'S TAKING THIS ONE?",
+                showNoShow: true,
+                BuildAssignTargets(excludeOperatorId: null, includePoolOption: false));
+
+            await _popupService.ShowSheetAsync(sheet);
+            var result = await sheet.Completion;
+
+            if (result.MarkNoShow)
+            {
+                await ConfirmNoShowAsync(row.EntryId, row.CustomerName);
+                return;
+            }
+
+            if (!result.Assigned)
+                return;
+
+            await AssignEntryAsync(row, result.OperatorId);
         }
-
-        if (!result.Assigned)
-            return;
-
-        await AssignEntryAsync(row, result.OperatorId);
+        catch (Exception ex)
+        {
+            await ReloadAfterFailureAsync(ex);
+        }
     }
 
-    private async Task AssignEntryAsync(QueueRowItem row, Guid? operatorId)
+    public async Task AssignEntryAsync(QueueRowItem row, Guid? operatorId)
     {
         row.IsBusy = true;
         try
@@ -500,72 +612,86 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task OpenRowActionsAsync(QueueRowItem? row)
+    public async Task OpenRowActionsAsync(QueueRowItem? row)
     {
-        if (row is null)
-            return;
-
-        var sectionIsServing = row.OperatorId is { } opId
-            && _entries.Any(e => e.OperatorId == opId && e.Status == "serving");
-
-        var sheet = new EntryActionsSheet(
-            _popupService,
-            row.CustomerName,
-            row.Initials,
-            $"{row.ServiceName} · joined {row.JoinedAtText} · waiting {row.WaitedMinutes}m",
-            canServe: row.OperatorId is not null && !sectionIsServing,
-            canReorder: true);
-
-        await _popupService.ShowSheetAsync(sheet);
-        var action = await sheet.Completion;
-
-        switch (action)
+        try
         {
-            case EntryAction.ServeNow:
-                await ServeAsync(row);
-                break;
+            if (row is null)
+                return;
 
-            case EntryAction.MoveToAnotherOperator:
-                await MoveToAnotherOperatorAsync(row);
-                break;
+            var sectionIsServing = row.OperatorId is { } opId
+                && _entries.Any(e => e.OperatorId == opId && e.Status == "serving");
 
-            case EntryAction.MoveToEndOfQueue:
-                await MoveToEndAsync(row);
-                break;
+            var sheet = new EntryActionsSheet(
+                _popupService,
+                row.CustomerName,
+                row.Initials,
+                $"{row.ServiceName} · joined {row.JoinedAtText} · waiting {row.WaitedMinutes}m",
+                canServe: row.OperatorId is not null && !sectionIsServing,
+                canReorder: true);
 
-            case EntryAction.ChangeService:
-                await ChangeServiceAsync(row);
-                break;
+            await _popupService.ShowSheetAsync(sheet);
+            var action = await sheet.Completion;
 
-            case EntryAction.MarkNoShow:
-                await ConfirmNoShowAsync(row.EntryId, row.CustomerName);
-                break;
+            switch (action)
+            {
+                case EntryAction.ServeNow:
+                    await ServeAsync(row);
+                    break;
 
-            case EntryAction.RemoveFromQueue:
-                await ConfirmRemoveAsync(row.EntryId, row.CustomerName);
-                break;
+                case EntryAction.MoveToAnotherOperator:
+                    await MoveToAnotherOperatorAsync(row);
+                    break;
+
+                case EntryAction.MoveToEndOfQueue:
+                    await MoveToEndAsync(row);
+                    break;
+
+                case EntryAction.ChangeService:
+                    await ChangeServiceAsync(row);
+                    break;
+
+                case EntryAction.MarkNoShow:
+                    await ConfirmNoShowAsync(row.EntryId, row.CustomerName);
+                    break;
+
+                case EntryAction.RemoveFromQueue:
+                    await ConfirmRemoveAsync(row.EntryId, row.CustomerName);
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            await ReloadAfterFailureAsync(ex);
         }
     }
 
-    private async Task MoveToAnotherOperatorAsync(QueueRowItem row)
+    public async Task MoveToAnotherOperatorAsync(QueueRowItem row)
     {
-        var sheet = new AssignSheet(
-            _popupService,
-            row.CustomerName,
-            row.Initials,
-            $"{row.ServiceName} · waiting {row.WaitedMinutes}m",
-            "MOVE TO",
-            showNoShow: false,
-            BuildAssignTargets(row.OperatorId, includePoolOption: row.OperatorId is not null));
+        try
+        {
+            var sheet = new AssignSheet(
+                _popupService,
+                row.CustomerName,
+                row.Initials,
+                $"{row.ServiceName} · waiting {row.WaitedMinutes}m",
+                "MOVE TO",
+                showNoShow: false,
+                BuildAssignTargets(row.OperatorId, includePoolOption: row.OperatorId is not null));
 
-        await _popupService.ShowSheetAsync(sheet);
-        var result = await sheet.Completion;
+            await _popupService.ShowSheetAsync(sheet);
+            var result = await sheet.Completion;
 
-        if (result.Assigned)
-            await AssignEntryAsync(row, result.OperatorId);
+            if (result.Assigned)
+                await AssignEntryAsync(row, result.OperatorId);
+        }
+        catch (Exception ex)
+        {
+            await ReloadAfterFailureAsync(ex);
+        }
     }
 
-    private async Task MoveToEndAsync(QueueRowItem row)
+    public async Task MoveToEndAsync(QueueRowItem row)
     {
         row.IsBusy = true;
         try
@@ -583,21 +709,21 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
     }
 
-    private async Task ChangeServiceAsync(QueueRowItem row)
+    public async Task ChangeServiceAsync(QueueRowItem row)
     {
-        var sheet = new ChangeServiceSheet(
-            _popupService,
-            $"Change service for {row.CustomerName}",
-            BuildServiceRows(row.ServiceId));
-
-        await _popupService.ShowSheetAsync(sheet);
-        var serviceId = await sheet.Completion;
-
-        if (serviceId is not { } chosen || chosen == row.ServiceId)
-            return;
-
         try
         {
+            var sheet = new ChangeServiceSheet(
+                _popupService,
+                $"Change service for {row.CustomerName}",
+                BuildServiceRows(row.ServiceId));
+
+            await _popupService.ShowSheetAsync(sheet);
+            var serviceId = await sheet.Completion;
+
+            if (serviceId is not { } chosen || chosen == row.ServiceId)
+                return;
+
             ApplyLocally(row.EntryId, e => e.ServiceId = chosen);
             await _queueService.ChangeEntryServiceAsync(row.EntryId, chosen);
         }
@@ -607,14 +733,14 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
     }
 
-    private async Task ConfirmNoShowAsync(Guid entryId, string customerName)
+    public async Task ConfirmNoShowAsync(Guid entryId, string customerName)
     {
-        var confirmed = await _popupService.ShowConfirmAsync("No-show", $"Mark {customerName} as a no-show?");
-        if (!confirmed)
-            return;
-
         try
         {
+            var confirmed = await _popupService.ShowConfirmAsync("No-show", $"Mark {customerName} as a no-show?");
+            if (!confirmed)
+                return;
+
             ApplyLocally(entryId, e => e.Status = "no_show");
             await _queueService.NoShowAsync(entryId);
         }
@@ -624,15 +750,15 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
     }
 
-    private async Task ConfirmRemoveAsync(Guid entryId, string customerName)
+    public async Task ConfirmRemoveAsync(Guid entryId, string customerName)
     {
-        var confirmed = await _popupService.ShowConfirmAsync(
-            "Remove from queue", $"Take {customerName} out of the queue?", "Remove", "Keep");
-        if (!confirmed)
-            return;
-
         try
         {
+            var confirmed = await _popupService.ShowConfirmAsync(
+                "Remove from queue", $"Take {customerName} out of the queue?", "Remove", "Keep");
+            if (!confirmed)
+                return;
+
             ApplyLocally(entryId, e => e.Status = "cancelled");
             await _queueService.CancelEntryAsync(entryId);
         }
@@ -643,26 +769,26 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task EditNoteAsync(ServingCardItem? card)
+    public async Task EditNoteAsync(ServingCardItem? card)
     {
-        if (card is null)
-            return;
-
-        var current = card.HasNote ? card.NoteText : string.Empty;
-        var note = await _popupService.ShowPromptAsync(
-            "Note", $"What's happening with {card.CustomerName}?", current,
-            placeholder: "Colour treatment — running long");
-
-        if (note is null)
-            return;
-
-        var trimmed = string.IsNullOrWhiteSpace(note) ? null : note.Trim();
-
-        card.HasNote = trimmed is not null;
-        card.NoteText = trimmed ?? "Add a note";
-
         try
         {
+            if (card is null)
+                return;
+
+            var current = card.HasNote ? card.NoteText : string.Empty;
+            var note = await _popupService.ShowPromptAsync(
+                "Note", $"What's happening with {card.CustomerName}?", current,
+                placeholder: "Colour treatment — running long");
+
+            if (note is null)
+                return;
+
+            var trimmed = string.IsNullOrWhiteSpace(note) ? null : note.Trim();
+
+            card.HasNote = trimmed is not null;
+            card.NoteText = trimmed ?? "Add a note";
+
             ApplyLocally(card.EntryId, e => e.ProgressStatus = trimmed);
             await _queueService.SetQueueProgressAsync(card.EntryId, trimmed);
         }
@@ -673,37 +799,37 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task AddWalkInAsync(BoardSection? section)
+    public async Task AddWalkInAsync(BoardSection? section)
     {
-        if (section is null)
-            return;
-
-        if (_services.Count == 0)
-        {
-            await _popupService.ShowAlertAsync(
-                "No services yet", "Add a service under Settings before adding a walk-in.");
-            return;
-        }
-
-        var summary = _summary.FirstOrDefault(r => r.OperatorId == section.OperatorId);
-        var ahead = section.Waiting.Count + (section.HasServing ? 1 : 0);
-
-        var sheet = new AddWalkInSheet(
-            _popupService,
-            $"Add to {section.Name}'s queue",
-            section.OperatorId,
-            ahead,
-            summary?.NewJoinWaitMinutes ?? 0,
-            BuildServiceRows(null));
-
-        await _popupService.ShowSheetAsync(sheet);
-        var request = await sheet.Completion;
-
-        if (request is null)
-            return;
-
         try
         {
+            if (section is null)
+                return;
+
+            if (_services.Count == 0)
+            {
+                await _popupService.ShowAlertAsync(
+                    "No services yet", "Add a service under Settings before adding a walk-in.");
+                return;
+            }
+
+            var summary = _summary.FirstOrDefault(r => r.OperatorId == section.OperatorId);
+            var ahead = section.Waiting.Count + (section.HasServing ? 1 : 0);
+
+            var sheet = new AddWalkInSheet(
+                _popupService,
+                $"Add to {section.Name}'s queue",
+                section.OperatorId,
+                ahead,
+                summary?.NewJoinWaitMinutes ?? 0,
+                BuildServiceRows(null));
+
+            await _popupService.ShowSheetAsync(sheet);
+            var request = await sheet.Completion;
+
+            if (request is null)
+                return;
+
             await _queueService.AddWalkInAsync(_businessId, request.OperatorId, request.Name, request.ServiceId);
             await LoadQueueAsync();
         }
@@ -714,7 +840,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task ToggleShiftAsync(BoardSection? section)
+    public async Task ToggleShiftAsync(BoardSection? section)
     {
         if (section is null || section.IsTogglingShift)
             return;
@@ -737,118 +863,197 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private void ApplyLocally(Guid entryId, Action<QueueEntryResponse> mutate)
+    public void ApplyLocally(Guid entryId, Action<QueueEntryResponse> mutate)
     {
-        var entry = _entries.FirstOrDefault(e => e.Id == entryId);
-        if (entry is null)
-            return;
-
-        mutate(entry);
-        _entries = _entries.Where(e => e.Status is "waiting" or "serving").ToList();
-        Rebuild();
-    }
-
-    private async Task ReloadAfterFailureAsync(Exception ex)
-    {
-        await LoadQueueAsync();
-        await HandleExceptionAsync(ex);
-    }
-
-    private List<AssignTargetItem> BuildAssignTargets(Guid? excludeOperatorId, bool includePoolOption)
-    {
-        var targets = new List<AssignTargetItem>();
-
-        foreach (var op in _operators)
+        try
         {
-            if (excludeOperatorId is { } excluded && op.Id == excluded)
-                continue;
+            var entry = _entries.FirstOrDefault(e => e.Id == entryId);
+            if (entry is null)
+                return;
 
-            var summary = _summary.FirstOrDefault(r => r.OperatorId == op.Id);
-            var wait = summary?.NewJoinWaitMinutes ?? 0;
-            var ahead = (summary?.WaitingCount ?? 0) + (summary?.ServingCount ?? 0);
-
-            targets.Add(new AssignTargetItem
-            {
-                OperatorId = op.Id,
-                Name = op.DisplayName,
-                Initials = InitialsOf(op.DisplayName),
-                SubLabel = !op.IsAvailable
-                    ? "Off shift"
-                    : wait <= 0
-                        ? "Free now · starts immediately"
-                        : $"{ahead} ahead · about {DateTime.Now.AddMinutes(wait):HH:mm}",
-                IsSelectable = op.IsAvailable,
-                ShowPresenceDot = op.IsAvailable,
-                SortWaitMinutes = op.IsAvailable ? wait : double.MaxValue,
-            });
+            mutate(entry);
+            _entries = _entries.Where(e => e.Status is "waiting" or "serving").ToList();
+            Rebuild();
         }
-
-        var ordered = targets.OrderBy(t => t.SortWaitMinutes).ThenBy(t => t.Name).ToList();
-
-        var soonest = ordered.FirstOrDefault(t => t.IsSelectable);
-        if (soonest is not null)
-            soonest.ShowSoonestTag = true;
-
-        if (includePoolOption)
+        catch (Exception ex)
         {
-            ordered.Insert(0, new AssignTargetItem
-            {
-                OperatorId = null,
-                Name = "Back to shared pool",
-                Initials = "★",
-                SubLabel = "Anyone can take them",
-                IsPool = true,
-                IsSelectable = true,
-            });
+            _ = HandleExceptionAsync(ex);
         }
-
-        return ordered;
     }
 
-    private List<ServiceChoiceRow> BuildServiceRows(Guid? selectedServiceId)
+    public async Task ReloadAfterFailureAsync(Exception ex)
     {
-        return _services
-            .OrderBy(s => s.SortOrder)
-            .Select(s => new ServiceChoiceRow
+        try
+        {
+            await LoadQueueAsync();
+            await HandleExceptionAsync(ex);
+        }
+        catch (Exception reloadEx)
+        {
+            _ = HandleExceptionAsync(reloadEx);
+        }
+    }
+
+    public List<AssignTargetItem> BuildAssignTargets(Guid? excludeOperatorId, bool includePoolOption)
+    {
+        try
+        {
+            var targets = new List<AssignTargetItem>();
+
+            foreach (var op in _operators)
             {
-                ServiceId = s.Id,
-                Name = s.Name,
-                MetaText = $"{s.EstMinutes} min · {s.PriceDisplay}",
-                EstMinutes = s.EstMinutes,
-                IsSelected = s.Id == selectedServiceId,
-            })
-            .ToList();
+                if (excludeOperatorId is { } excluded && op.Id == excluded)
+                    continue;
+
+                var summary = _summary.FirstOrDefault(r => r.OperatorId == op.Id);
+                var wait = summary?.NewJoinWaitMinutes ?? 0;
+                var ahead = (summary?.WaitingCount ?? 0) + (summary?.ServingCount ?? 0);
+
+                targets.Add(new AssignTargetItem
+                {
+                    OperatorId = op.Id,
+                    Name = op.DisplayName,
+                    Initials = InitialsOf(op.DisplayName),
+                    SubLabel = !op.IsAvailable
+                        ? "Off shift"
+                        : wait <= 0
+                            ? "Free now · starts immediately"
+                            : $"{ahead} ahead · about {DateTime.Now.AddMinutes(wait):HH:mm}",
+                    IsSelectable = op.IsAvailable,
+                    ShowPresenceDot = op.IsAvailable,
+                    SortWaitMinutes = op.IsAvailable ? wait : double.MaxValue,
+                });
+            }
+
+            var ordered = targets.OrderBy(t => t.SortWaitMinutes).ThenBy(t => t.Name).ToList();
+
+            var soonest = ordered.FirstOrDefault(t => t.IsSelectable);
+            if (soonest is not null)
+                soonest.ShowSoonestTag = true;
+
+            if (includePoolOption)
+            {
+                ordered.Insert(0, new AssignTargetItem
+                {
+                    OperatorId = null,
+                    Name = "Back to shared pool",
+                    Initials = "★",
+                    SubLabel = "Anyone can take them",
+                    IsPool = true,
+                    IsSelectable = true,
+                });
+            }
+
+            return ordered;
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+            return new List<AssignTargetItem>();
+        }
     }
 
-    private static string StatusTextFor(bool onShift, bool isServing, int waitingCount) => (onShift, isServing, waitingCount) switch
+    public List<ServiceChoiceRow> BuildServiceRows(Guid? selectedServiceId)
     {
-        (false, _, _) => "Off shift",
-        (true, true, 0) => "Serving · 0 waiting",
-        (true, true, 1) => "Serving · 1 waiting",
-        (true, true, var n) => $"Serving · {n} waiting",
-        (true, false, 0) => "Free · nobody waiting",
-        (true, false, 1) => "1 waiting",
-        (true, false, var n) => $"{n} waiting",
-    };
+        try
+        {
+            return _services
+                .OrderBy(s => s.SortOrder)
+                .Select(s => new ServiceChoiceRow
+                {
+                    ServiceId = s.Id,
+                    Name = s.Name,
+                    MetaText = $"{s.EstMinutes} min · {s.PriceDisplay}",
+                    EstMinutes = s.EstMinutes,
+                    IsSelected = s.Id == selectedServiceId,
+                })
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+            return new List<ServiceChoiceRow>();
+        }
+    }
 
-    private static string DisplayNameOf(QueueEntryResponse entry) =>
-        string.IsNullOrWhiteSpace(entry.CustomerName) ? "Walk-in" : entry.CustomerName!;
-
-    private string ServiceNameOf(Guid? serviceId) =>
-        _services.FirstOrDefault(s => s.Id == serviceId)?.Name ?? string.Empty;
-
-    private static int MinutesSince(DateTime timestamp) =>
-        (int)Math.Max(0, (DateTime.UtcNow - BoardConstants.AsUtc(timestamp)).TotalMinutes);
-
-    private static string InitialsOf(string name)
+    public string StatusTextFor(bool onShift, bool isServing, int waitingCount)
     {
-        if (string.IsNullOrWhiteSpace(name))
+        try
+        {
+            return (onShift, isServing, waitingCount) switch
+            {
+                (false, _, _) => "Off shift",
+                (true, true, 0) => "Serving · 0 waiting",
+                (true, true, 1) => "Serving · 1 waiting",
+                (true, true, var n) => $"Serving · {n} waiting",
+                (true, false, 0) => "Free · nobody waiting",
+                (true, false, 1) => "1 waiting",
+                (true, false, var n) => $"{n} waiting",
+            };
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+            return string.Empty;
+        }
+    }
+
+    public string DisplayNameOf(QueueEntryResponse entry)
+    {
+        try
+        {
+            return string.IsNullOrWhiteSpace(entry.CustomerName) ? "Walk-in" : entry.CustomerName!;
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+            return "Walk-in";
+        }
+    }
+
+    public string ServiceNameOf(Guid? serviceId)
+    {
+        try
+        {
+            return _services.FirstOrDefault(s => s.Id == serviceId)?.Name ?? string.Empty;
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+            return string.Empty;
+        }
+    }
+
+    public int MinutesSince(DateTime timestamp)
+    {
+        try
+        {
+            return (int)Math.Max(0, (DateTime.UtcNow - BoardConstants.AsUtc(timestamp)).TotalMinutes);
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+            return 0;
+        }
+    }
+
+    public string InitialsOf(string name)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return "?";
+
+            var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return parts.Length == 1
+                ? parts[0][..Math.Min(2, parts[0].Length)].ToUpperInvariant()
+                : $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
             return "?";
-
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return parts.Length == 1
-            ? parts[0][..Math.Min(2, parts[0].Length)].ToUpperInvariant()
-            : $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
+        }
     }
 
     protected override Task HandleExceptionAsync(Exception exception)
