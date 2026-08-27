@@ -860,12 +860,9 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
                 EndsAt = result.EndsAt,
                 Status = BookingStatuses.Confirmed,
                 Note = result.Note,
-                Details = new BookingDetails
-                {
-                    CustomerName = result.CustomerName,
-                    CustomerPhone = result.Phone,
-                    CreatedBy = "operator",
-                },
+                CustomerName = result.CustomerName,
+                CustomerPhone = result.Phone,
+                Details = new BookingDetails { CreatedBy = "operator" },
             });
 
             await RefreshAsync();

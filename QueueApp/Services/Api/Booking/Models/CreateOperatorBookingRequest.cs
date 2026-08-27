@@ -19,6 +19,12 @@ public class CreateOperatorBookingRequest
     // The shop created it, so there is nobody left to confirm with.
     [JsonPropertyName("status")] public string Status { get; set; } = BookingStatuses.Confirmed;
 
+    [JsonPropertyName("customer_name")] public string CustomerName { get; set; } = string.Empty;
+
+    [JsonPropertyName("customer_phone")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? CustomerPhone { get; set; }
+
     [JsonPropertyName("details")] public BookingDetails Details { get; set; } = new();
 
     [JsonPropertyName("note")]

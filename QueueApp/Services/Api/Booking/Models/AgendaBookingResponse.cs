@@ -75,6 +75,9 @@ public partial class AgendaBookingResponse : ObservableObject
     [JsonPropertyName("operator")] public AgendaOperatorRef? Operator { get; set; }
     [JsonPropertyName("service")] public AgendaServiceRef? Service { get; set; }
     [JsonPropertyName("customer")] public AgendaCustomerRef? Customer { get; set; }
+
+    [JsonPropertyName("customer_name")] public string? CustomerNameColumn { get; set; }
+    [JsonPropertyName("customer_phone")] public string? CustomerPhoneColumn { get; set; }
     [JsonPropertyName("details")] public BookingDetails? Details { get; set; }
     [JsonPropertyName("progress_status")] public string? ProgressStatus { get; set; }
 
@@ -108,11 +111,16 @@ public partial class AgendaBookingResponse : ObservableObject
 
     [JsonIgnore]
     public string CustomerName =>
-        Customer?.DisplayName
+        CustomerNameColumn
+        ?? Customer?.DisplayName
         ?? Details?.CustomerName
         ?? "Customer";
 
-    [JsonIgnore] public string? CustomerPhone => Customer?.Phone ?? Details?.CustomerPhone;
+    [JsonIgnore]
+    public string? CustomerPhone =>
+        CustomerPhoneColumn
+        ?? Customer?.Phone
+        ?? Details?.CustomerPhone;
     [JsonIgnore] public bool HasPhone => !string.IsNullOrWhiteSpace(CustomerPhone);
 
     [JsonIgnore] public DateTimeOffset LocalStart => StartsAt.ToOffset(LocalOffset);

@@ -5,9 +5,9 @@
 `BookingAgendaPage` was rebuilt to the agenda spec in this change. Everything on it works against the
 schema as `SUPABASE-SCHEMA-VERIFIED.md` describes it **except the things below**, which are listed
 in the order they hurt. Nothing here is speculative UI: the client already sends these calls, so
-applying §1 turns one refusing button into a working one, and applying §3 stops the operator seeing
-"Customer" where a name should be and gives them back the call button on bookings customers made
-themselves.
+applying §1 turns one refusing button into a working one, and §3 — decided and written out in full,
+including the read-policy tightening it depends on — stops the operator seeing "Customer" where a
+name should be and gives them back the call button on bookings customers made themselves.
 
 Four things turned out **not** to need SQL:
 
@@ -20,7 +20,9 @@ Four things turned out **not** to need SQL:
   column, which already exists, and `create_booking` / `create_booking_any` already accept it as
   `p_note`. Captured on the customer's review step and on the operator's add-booking sheet, and
   read back to the operator in the booking actions sheet.
-- **Cancellation reasons** live in `bookings.details` under `cancellation_reason`. `cancel_booking`
+- **Cancellation reasons** live in `bookings.details` under `cancellation_reason`, which stays a
+  jsonb key rather than becoming a column: unlike a name or a number, nothing queries or joins on
+  it. `cancel_booking`
   takes no reason, so the reason is PATCHed onto `details` first and the RPC called after. The
   PATCH replaces the whole jsonb value, so `BookingDetails.WithCancellationReason` carries the
   existing keys across.
@@ -84,61 +86,121 @@ alter table bookings add column if not exists started_at timestamptz;
 alter table bookings add column if not exists completed_at timestamptz;
 ```
 
-## 3. An operator cannot read their own customers' names or numbers
+## 3. An operator cannot read their own customers' names or numbers — **apply this**
 
-This one isn't in the spec's gap list and is the most visible thing still missing.
+`profiles` has exactly two policies, self read (`auth.uid() = id`) and self update, and `bookings`
+has no name or phone of its own. So the agenda's embedded `customer:profiles(display_name,phone)`
+returns nothing for any booking the shop didn't create itself, which is why every customer-made row
+reads "Customer" and why the call button on the booking actions sheet never appears on one.
 
-`profiles` has exactly two policies — self read (`auth.uid() = id`) and self update. `bookings` has
-no `customer_name` or `customer_phone` column, unlike `queue_entries`, which denormalises the name
-precisely so a business can see who is waiting. So the agenda's embedded
-`customer:profiles(display_name,phone)` returns nothing for every booking the shop didn't create
-itself, and two things follow:
+**Decision taken: denormalise onto `bookings`, the way `queue_entries` already does, and tighten
+that table's read policy in the same migration.** The client is already written for it — it reads
+`customer_name` / `customer_phone` first, then the profile embed, then the legacy `details` keys —
+so applying this needs no further code change.
 
-- **every customer-made row reads "Customer"**, and
-- **the call button on the booking actions sheet never appears** for a customer-made booking, only
-  for one the operator took over the phone.
+Run all four steps together. Step 4 is not optional: without it these columns are readable by every
+signed-in user, which is strictly worse than where the data started.
 
-Neither is a client bug. The client already reads both sources — `Customer?.Phone ?? Details?.
-CustomerPhone`, same for the name — so whichever fix below is applied, the agenda picks it up with
-no further code change.
+### 1. The columns
 
-Three ways out, and it's a genuine choice:
+```sql
+alter table bookings add column if not exists customer_name text;
+alter table bookings add column if not exists customer_phone text;
+```
 
-- **A — denormalise, like the queue does.**
+### 2. Backfill what already exists
 
-  ```sql
-  alter table bookings add column if not exists customer_name text;
-  alter table bookings add column if not exists customer_phone text;
-  ```
+```sql
+update bookings b
+set customer_name  = coalesce(b.customer_name,  p.display_name),
+    customer_phone = coalesce(b.customer_phone, p.phone)
+from profiles p
+where p.id = b.customer_id
+  and (b.customer_name is null or b.customer_phone is null);
 
-  and have `create_booking` / `create_booking_any` fill them from the customer's profile. This is
-  the smallest change and it matches what queue mode already does. Note what it means though:
-  `bookings` has `public read` with `qual = true` (§1b of the schema doc), so a phone number in a
-  `bookings` column is readable by **any signed-in user**, not just the business. Worth pairing with
-  tightening that read policy.
+-- Bookings the shop took by phone kept the name in details before this migration.
+update bookings
+set customer_name  = coalesce(customer_name,  details->>'customer_name'),
+    customer_phone = coalesce(customer_phone, details->>'customer_phone')
+where customer_id is null
+  and details is not null;
+```
 
-- **B — let a business read the profiles of people booked with it.**
+### 3. Keep them filled, without touching `create_booking`
 
-  ```sql
-  create policy "business reads booked customers" on profiles for select
-  using (exists (
-    select 1 from bookings
-    where bookings.customer_id = profiles.id
-      and is_business_owner(bookings.business_id)
-  ));
-  ```
+A trigger rather than an edit to `create_booking` / `create_booking_any`, because this repo has
+never had those functions' source (STEP-17-SUPABASE.md §3 makes the same point) and because a
+trigger also covers the operator's direct insert and anything added later.
 
-  Narrower in what it exposes — only the business the customer actually booked with sees them, and
-  the data stays in `profiles` where its own policy governs it. Wider in what it lets a business
-  query. This is the option that keeps a phone number out of a publicly-readable table.
+```sql
+create or replace function fill_booking_customer_snapshot()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.customer_id is not null then
+    select coalesce(new.customer_name, p.display_name),
+           coalesce(new.customer_phone, p.phone)
+      into new.customer_name, new.customer_phone
+    from profiles p
+    where p.id = new.customer_id;
+  end if;
 
-- **C — have the customer's own app copy name and phone into `details` at booking time.** Works
-  today with no migration, since a customer may update their own booking. **Not recommended**: it
-  writes a phone number into the same publicly-readable `bookings` row as A, without A's benefit of
-  being a real column the backend controls, and it puts the copy in the client where it can drift
-  from the profile.
+  return new;
+end;
+$$;
 
-B is the recommendation. A is fine if `bookings`' read policy is tightened at the same time.
+drop trigger if exists bookings_fill_customer_snapshot on bookings;
+
+create trigger bookings_fill_customer_snapshot
+before insert on bookings
+for each row execute function fill_booking_customer_snapshot();
+```
+
+`security definer` is what lets it read `profiles` past that table's self-read policy. It only ever
+reads the profile of the `customer_id` already on the row being inserted.
+
+It is a snapshot, not a live join: a customer who changes their number later does not change the
+number on a booking already made. That is usually what a business wants — the number they were given
+when the booking was taken — but it is a real difference from option B and worth knowing.
+
+### 4. Tighten the read policy — do not skip this
+
+`bookings` currently has `public read` with `qual = true` (§1b of the schema doc). Leaving that in
+place would publish every customer's phone number to every signed-in user.
+
+Find the policy's real name first, since this doc only knows it by description:
+
+```sql
+select policyname, cmd, qual from pg_policies
+where schemaname = 'public' and tablename = 'bookings';
+```
+
+Then replace the SELECT one:
+
+```sql
+drop policy "<the public read policy's name>" on bookings;
+
+create policy "owner or self read" on bookings for select
+using (is_business_owner(business_id) or auth.uid() = customer_id);
+```
+
+Every booking read the app makes is already scoped to one of those two: the agenda and the requests
+banner filter by `business_id` on a business the user owns, and the customer's upcoming, history and
+per-business lists filter by their own `customer_id`. Slot generation goes through
+`get_available_slots` / `get_available_slots_any`, which are `security definer` and unaffected by
+this. Nothing in the app reads a booking belonging to someone else.
+
+### Not chosen, and why
+
+- **A `profiles` SELECT policy for businesses** (`exists (select 1 from bookings where
+  bookings.customer_id = profiles.id and is_business_owner(bookings.business_id))`) keeps the phone
+  in `profiles` and stays live rather than snapshotted. Narrower exposure, but a wider read surface
+  on `profiles` and a join on every agenda row. Reasonable; not what was picked.
+- **Copying the details client-side at booking time** needs no migration but writes a phone number
+  into the same row with none of the backend control, and the copy drifts from the profile.
 
 ## 4. Decided while building, not a gap
 

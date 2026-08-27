@@ -209,6 +209,8 @@ public class StubBookingService : IBookingService
             Status = request.Status,
             CreatedAt = DateTimeOffset.UtcNow,
             Note = request.Note,
+            CustomerNameColumn = request.CustomerName,
+            CustomerPhoneColumn = request.CustomerPhone,
             Details = request.Details,
             Operator = new AgendaOperatorRef { Id = request.OperatorId, DisplayName = NameFor(request.OperatorId) },
             Service = new AgendaServiceRef
@@ -293,7 +295,7 @@ public class StubBookingService : IBookingService
                     PriceCents = priceCents,
                     EstMinutes = minutes,
                 },
-                Details = new BookingDetails { CustomerName = name },
+                CustomerNameColumn = name,
             });
         }
 
