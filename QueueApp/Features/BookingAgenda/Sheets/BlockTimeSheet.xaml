@@ -23,39 +23,6 @@
                            Style="{StaticResource lbl11_Regular_TextLight}"/>
                 </VerticalStackLayout>
 
-                <Label Text="HOW LONG" Style="{StaticResource lbl9_Mono_TextMuted}" Margin="0,16,0,9"/>
-                <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
-                    <HorizontalStackLayout Spacing="8"
-                                           BindableLayout.ItemsSource="{Binding Presets, Source={x:Reference Root}}">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="models:BlockPresetOption">
-                                <Border Style="{StaticResource brd11_Chip}"
-                                        MinimumHeightRequest="42" Padding="14,0">
-                                    <Border.Triggers>
-                                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                            <Setter Property="Stroke" Value="{StaticResource Green}"/>
-                                            <Setter Property="BackgroundColor" Value="{StaticResource GreenSelectedFill}"/>
-                                        </DataTrigger>
-                                    </Border.Triggers>
-                                    <Label Text="{Binding Label}" VerticalOptions="Center"
-                                           Style="{StaticResource lbl13_Regular_TextMid}">
-                                        <Label.Triggers>
-                                            <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
-                                                <Setter Property="TextColor" Value="{StaticResource Green}"/>
-                                            </DataTrigger>
-                                        </Label.Triggers>
-                                    </Label>
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer
-                                            Command="{Binding SelectPresetCommand, Source={x:Reference Root}}"
-                                            CommandParameter="{Binding .}"/>
-                                    </Border.GestureRecognizers>
-                                </Border>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </HorizontalStackLayout>
-                </ScrollView>
-
                 <Label Text="{Binding ResourceLabel, Source={x:Reference Root}}"
                        Style="{StaticResource lbl9_Mono_TextMuted}" Margin="0,16,0,9"/>
                 <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">

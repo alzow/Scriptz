@@ -27,6 +27,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     public ObservableCollection<BookingRequestItem> Requests { get; } = new();
     public ObservableCollection<BayFilterOption> BayFilters { get; } = new();
     public ObservableCollection<AgendaRow> Rows { get; } = new();
+    public bool HasRows => Rows.Count > 0;
 
     public string BusinessName { get; set; } = "Bookings";
     public bool IsLoading { get; set; }
@@ -325,6 +326,8 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
 
                 foreach (var row in rows)
                     Rows.Add(row);
+
+                OnPropertyChanged(nameof(HasRows));
 
                 UpdateStats(visible, rows);
                 UpdateCard(visible);
