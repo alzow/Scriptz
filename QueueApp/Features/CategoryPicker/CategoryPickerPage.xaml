@@ -14,7 +14,7 @@
     <RefreshView IsRefreshing="{Binding IsRefreshing}"
             Command="{Binding RefreshCommand}">
         <ScrollView>
-            <VerticalStackLayout Padding="20,16,20,28"
+            <VerticalStackLayout Padding="16"
                     Spacing="0">
 
                 <!-- Greeting + notifications -->
@@ -51,7 +51,7 @@
                 <!-- Categories -->
                 <!-- <Label Text="BROWSE BY CATEGORY" Style="{StaticResource SectionTitle}" Margin="0,26,0,12"/> -->
                 <helpers:CategoryCarouselView
-                    Margin="0,16,0,0"
+                    Margin="-16,16,-16,0"
                     Categories="{Binding Categories}"
                     SelectedCategory="{Binding SelectedCategory}"
                     SelectCommand="{Binding SelectCategoryCommand}"/>
