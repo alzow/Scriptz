@@ -25,7 +25,8 @@ public partial class BusinessDetailPage : ContentPage
         if (BindingContext is not BusinessDetailPageViewModel vm)
             return;
 
-        var shouldShow = e.ScrollY > LiveCard.Y + LiveCard.Height;
+        var anchor = LiveCard.AnchorView;
+        var shouldShow = e.ScrollY > anchor.Y + anchor.Height;
         if (shouldShow == _stickyShown)
             return;
 
