@@ -34,6 +34,7 @@
             <converters:ItemEqualsSelectedToColorConverter x:Key="ItemEqualsSelectedToColorConverter"/>
             <converters:ItemEqualsSelectedConverter x:Key="ItemEqualsSelectedConverter"/>
             <converters:WaitBucketToColorConverter x:Key="WaitBucketToColorConverter"/>
+            <converters:EdgeItemToMarginConverter x:Key="EdgeItemToMarginConverter"/>
 
         </ResourceDictionary>
     </Application.Resources>

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Linq;
 
 namespace QueueApp.Converters;
 
@@ -153,6 +154,31 @@ public class ItemEqualsSelectedConverter : IMultiValueConverter
     public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
     {
         return values is [var item, var selected, ..] && item is not null && Equals(item, selected);
+    }
+
+    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class EdgeItemToMarginConverter : IMultiValueConverter
+{
+    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+    {
+        double extra = 16;
+        if (parameter is string p && double.TryParse(p, out var parsed))
+            extra = parsed;
+
+        if (values is [var item, System.Collections.IEnumerable items, ..])
+        {
+            var list = items.Cast<object>().ToList();
+            var isFirst = list.Count > 0 && Equals(list[0], item);
+            var isLast = list.Count > 0 && Equals(list[^1], item);
+            return new Thickness(isFirst ? extra : 0, 0, isLast ? extra : 0, 0);
+        }
+
+        return new Thickness(0);
     }
 
     public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)

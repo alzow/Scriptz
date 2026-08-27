@@ -12,16 +12,16 @@
         <CollectionView.ItemsLayout>
             <LinearItemsLayout Orientation="Horizontal" ItemSpacing="14" SnapPointsType="None"/>
         </CollectionView.ItemsLayout>
-        <CollectionView.Header>
-            <BoxView WidthRequest="16" HeightRequest="1" Opacity="0" InputTransparent="True"/>
-        </CollectionView.Header>
-        <CollectionView.Footer>
-            <BoxView WidthRequest="16" HeightRequest="1" Opacity="0" InputTransparent="True"/>
-        </CollectionView.Footer>
         <CollectionView.ItemTemplate>
             <DataTemplate x:DataType="models:ServiceCategory">
                 <VerticalStackLayout Spacing="8" WidthRequest="64"
                                       Opacity="{Binding Available, Converter={StaticResource BoolToOpacityConverter}}">
+                    <VerticalStackLayout.Margin>
+                        <MultiBinding Converter="{StaticResource EdgeItemToMarginConverter}" ConverterParameter="16">
+                            <Binding Path="."/>
+                            <Binding Path="Categories" Source="{x:Reference Root}"/>
+                        </MultiBinding>
+                    </VerticalStackLayout.Margin>
                     <VerticalStackLayout.GestureRecognizers>
                         <TapGestureRecognizer
                             Command="{Binding SelectCommand, Source={x:Reference Root}}"
