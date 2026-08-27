@@ -28,7 +28,7 @@
         <!-- ========================================================================
              LANDING
              ======================================================================== -->
-        <ScrollView Grid.Row="1" x:Name="LandingScroll" IsVisible="{Binding IsShowingLanding}">
+        <ScrollView Grid.Row="1" IsVisible="{Binding IsShowingLanding}">
             <VerticalStackLayout Spacing="0" Padding="0,0,0,24">
 
                 <bdHelpers:LandingHeaderView
@@ -39,7 +39,7 @@
                         ModeLine="{Binding ModeLine}"
                         GoBackCommand="{Binding GoBackCommand}"/>
 
-                <bdHelpers:LiveCardView x:Name="LiveCard"
+                <bdHelpers:LiveCardView
                         IsBookingMode="{Binding IsBookingMode}"
                         IsOpen="{Binding IsOpen}"
                         LiveCardTitle="{Binding LiveCardTitle}"
@@ -173,24 +173,6 @@
         <!-- ========================================================================
              BOTTOM BARS — never more than one CTA on screen
              ======================================================================== -->
-
-        <!-- Sticky landing CTA, fades in once the live card scrolls away -->
-        <Border Grid.Row="2" x:Name="StickyCta" Padding="18,13,18,18" Opacity="0"
-                BackgroundColor="{StaticResource Surface}"
-                Stroke="{StaticResource Line}" StrokeThickness="0"
-                IsVisible="{Binding ShowStickyCta}">
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
-                    <Label Text="{Binding TertiaryStatLabel}" Style="{StaticResource lbl9_Mono_TextMuted}"/>
-                    <Label Text="{Binding TertiaryStatValue}" Style="{StaticResource lbl14_Bold_TextDark}"/>
-                </VerticalStackLayout>
-                <Button Grid.Column="1" Text="{Binding CtaText}"
-                        Command="{Binding StartFlowCommand}"
-                        IsEnabled="{Binding IsCtaEnabled}"
-                        MinimumWidthRequest="132" HeightRequest="44"
-                        Style="{StaticResource PrimaryButtonStyle}"/>
-            </Grid>
-        </Border>
 
         <!-- Flow footer -->
         <bdHelpers:FlowFooterBarView Grid.Row="2"

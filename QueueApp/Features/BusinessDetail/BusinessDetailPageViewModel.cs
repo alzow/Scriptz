@@ -108,11 +108,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     public string CtaText { get; set; } = string.Empty;
     public bool IsCtaEnabled { get; set; }
 
-    // The card's CTA scrolls away; the sticky bar takes over. Never both at once — the page toggles
-    // this from the scroll position of the live card.
-    public bool IsStickyCtaVisible { get; set; }
-    public bool ShowStickyCta => IsStickyCtaVisible && IsShowingLanding;
-
     // Landing — services, team, getting there
 
     public ObservableCollection<ServiceChoiceItem> ServiceRows { get; } = new();
@@ -748,7 +743,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
 
         CurrentStepIndex = 0;
         IsFlowActive = true;
-        IsStickyCtaVisible = false;
 
         OnPropertyChanged(nameof(IsShowingLanding));
         ApplyStep();

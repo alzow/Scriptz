@@ -139,10 +139,6 @@ public partial class LiveCardView : ContentView
         set => SetValue(StartFlowCommandProperty, value);
     }
 
-    // Exposed so the page can read scroll-fade math against the live card's on-screen position —
-    // a parent x:Reference cannot reach inside this ContentView's own template.
-    public View AnchorView => LiveCardBorder;
-
     public LiveCardView()
     {
         InitializeComponent();

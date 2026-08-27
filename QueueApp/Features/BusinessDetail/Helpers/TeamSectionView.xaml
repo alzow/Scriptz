@@ -14,42 +14,40 @@
                    Style="{StaticResource lbl9_Mono_TextMuted}"/>
         </Grid>
 
-        <CollectionView ItemsSource="{Binding TeamMembers, Source={x:Reference Root}}"
-                        HeightRequest="98"
-                        Margin="20,0">
-            <CollectionView.ItemsLayout>
-                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="10"/>
-            </CollectionView.ItemsLayout>
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="models:TeamMemberItem">
-                    <VerticalStackLayout WidthRequest="78" Spacing="0"
-                                         Opacity="{Binding RowOpacity}">
-                        <Grid WidthRequest="52" HeightRequest="52" HorizontalOptions="Center">
-                            <Border BackgroundColor="{StaticResource SurfaceRaised}"
-                                    Stroke="{StaticResource Line}" StrokeThickness="1"
-                                    WidthRequest="52" HeightRequest="52" Padding="0">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="26"/>
-                                </Border.StrokeShape>
-                                <Label Text="{Binding Initials}"
-                                       HorizontalOptions="Center" VerticalOptions="Center"
-                                       Style="{StaticResource lbl13_Mono_TextPrimary}"/>
-                            </Border>
-                            <Ellipse WidthRequest="11" HeightRequest="11"
-                                     Fill="{StaticResource Green}"
-                                     Stroke="{StaticResource DeepBackground}" StrokeThickness="2.5"
-                                     HorizontalOptions="End" VerticalOptions="End"
-                                     IsVisible="{Binding IsOnShift}"/>
-                        </Grid>
-                        <Label Text="{Binding Name}" HorizontalOptions="Center" Margin="0,8,0,0"
-                               Style="{StaticResource lbl12_Regular_Cream}"/>
-                        <Label Text="{Binding SubLabel}" HorizontalOptions="Center" Margin="0,2,0,0"
-                                IsVisible="{Binding ShowSubLabel}"
-                               Style="{StaticResource lbl12_Regular_TextLight}" FontSize="10"/>
-                    </VerticalStackLayout>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+        <ScrollView Orientation="Horizontal" Margin="20,0">
+            <HorizontalStackLayout Spacing="10"
+                                   BindableLayout.ItemsSource="{Binding TeamMembers, Source={x:Reference Root}}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="models:TeamMemberItem">
+                        <VerticalStackLayout WidthRequest="78" Spacing="0"
+                                             Opacity="{Binding RowOpacity}">
+                            <Grid WidthRequest="52" HeightRequest="52" HorizontalOptions="Center">
+                                <Border BackgroundColor="{StaticResource SurfaceRaised}"
+                                        Stroke="{StaticResource Line}" StrokeThickness="1"
+                                        WidthRequest="52" HeightRequest="52" Padding="0">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="26"/>
+                                    </Border.StrokeShape>
+                                    <Label Text="{Binding Initials}"
+                                           HorizontalOptions="Center" VerticalOptions="Center"
+                                           Style="{StaticResource lbl13_Mono_TextPrimary}"/>
+                                </Border>
+                                <Ellipse WidthRequest="11" HeightRequest="11"
+                                         Fill="{StaticResource Green}"
+                                         Stroke="{StaticResource DeepBackground}" StrokeThickness="2.5"
+                                         HorizontalOptions="End" VerticalOptions="End"
+                                         IsVisible="{Binding IsOnShift}"/>
+                            </Grid>
+                            <Label Text="{Binding Name}" HorizontalOptions="Center" Margin="0,8,0,0"
+                                   Style="{StaticResource lbl12_Regular_Cream}"/>
+                            <Label Text="{Binding SubLabel}" HorizontalOptions="Center" Margin="0,2,0,0"
+                                    IsVisible="{Binding ShowSubLabel}"
+                                   Style="{StaticResource lbl12_Regular_TextLight}" FontSize="10"/>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </HorizontalStackLayout>
+        </ScrollView>
 
     </VerticalStackLayout>
 
