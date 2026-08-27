@@ -1,10 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
-  <path d="M17 5 C17 5 22 12 22 16 A5 5 0 0 1 12 16 C12 12 17 5 17 5 Z" fill="none" stroke="#39FF7A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M32 3 C32 3 37 10 37 14 A5 5 0 0 1 27 14 C27 10 32 3 32 3 Z" fill="none" stroke="#39FF7A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M47 5 C47 5 52 12 52 16 A5 5 0 0 1 42 16 C42 12 47 5 47 5 Z" fill="none" stroke="#39FF7A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M20 32 L23.5 24.5 C24.2 23 25.6 22 27.3 22 L38 22 C39.8 22 41.3 23.1 41.9 24.8 L44 32" fill="none" stroke="#E2E9F5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M12 44 L12 36 C12 33.8 13.8 32 16 32 L48 32 C50.2 32 52 33.8 52 36 L52 44" fill="none" stroke="#E2E9F5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M12 44 L16.5 44 M25.5 44 L38.5 44 M47.5 44 L52 44" fill="none" stroke="#E2E9F5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="21" cy="44" r="4.5" fill="none" stroke="#E2E9F5" stroke-width="2.5"/>
-  <circle cx="43" cy="44" r="4.5" fill="none" stroke="#E2E9F5" stroke-width="2.5"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" fill="none">
+
+<path d="M26 6 C20 15.0 20 21 26 21 C32 21 32 15.0 26 6 Z" fill="#5FB8E8"/>
+<path d="M48 2 C41 12.2 41 19 48 19 C55 19 55 12.2 48 2 Z" fill="#3488C4"/>
+<path d="M70 6 C64 15.0 64 21 70 21 C76 21 76 15.0 70 6 Z" fill="#5FB8E8"/>
+<path d="M27 58L34 43C35.1 40.6 37.5 39 40.2 39H55.8C58.5 39 60.9 40.6 62 43L69 58H27Z" fill="#C43A18"/>
+<path d="M33 55L37.5 45H45V55H33Z" fill="#F7E3BC"/>
+<path d="M51 45H58.5L63 55H51V45Z" fill="#F7E3BC"/>
+<rect x="14" y="55" width="68" height="18" rx="7" fill="#F0562E"/>
+<rect x="60" y="55" width="22" height="18" rx="7" fill="#C43A18"/>
+<circle cx="30" cy="74" r="9" fill="#7E2B1A"/>
+<circle cx="66" cy="74" r="9" fill="#7E2B1A"/>
+<circle cx="30" cy="74" r="4" fill="#F7E3BC"/>
+<circle cx="66" cy="74" r="4" fill="#F7E3BC"/>
 </svg>

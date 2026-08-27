@@ -146,6 +146,21 @@ public class ItemEqualsSelectedToColorConverter : IMultiValueConverter
     }
 }
 
+// Compares the two bound values (item, currently-selected item) for equality and returns a bool —
+// used to drive scale/animation triggers for the selected item in a picker CollectionView.
+public class ItemEqualsSelectedConverter : IMultiValueConverter
+{
+    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+    {
+        return values is [var item, var selected, ..] && item is not null && Equals(item, selected);
+    }
+
+    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
 // Maps a BrowseBusinessSummaryResponse.WaitBucket string ("go"|"wait"|"busy"|"book"|"off"|"unknown")
 // to a color, keyed off a "|"-separated hex-color parameter matching that same order (6 entries).
 public class WaitBucketToColorConverter : IValueConverter
