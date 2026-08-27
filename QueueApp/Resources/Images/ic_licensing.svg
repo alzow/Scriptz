@@ -1,9 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
-  <path d="M6 22 L32 8 L58 22" fill="none" stroke="#E2E9F5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M9 22 L9 27 L55 27 L55 22" fill="none" stroke="#E2E9F5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M17 27 L17 47" fill="none" stroke="#E2E9F5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M26 27 L26 47" fill="none" stroke="#E2E9F5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M38 27 L38 47" fill="none" stroke="#E2E9F5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M47 27 L47 47" fill="none" stroke="#E2E9F5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <rect x="7" y="47" width="50" height="7" rx="2" fill="none" stroke="#39FF7A" stroke-width="2.5" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" fill="none">
+
+<path d="M45.6 8.6a5 5 0 0 1 4.8 0l32 18.3c2.6 1.5 1.5 5.5-1.5 5.5H15.1c-3 0-4.1-4-1.5-5.5l32-18.3Z" fill="#F0562E"/>
+<path d="M48 7.9a5 5 0 0 1 2.4.7l32 18.3c2.6 1.5 1.5 5.5-1.5 5.5H48V7.9Z" fill="#C43A18"/>
+<circle cx="48" cy="23" r="6" fill="#F5B93C"/>
+<rect x="15" y="32" width="66" height="8" rx="3" fill="#F7E3BC"/>
+  <rect x="21" y="38" width="11" height="30" fill="#F7E3BC"/>
+  <rect x="29" y="38" width="3" height="30" fill="#E4C692"/>
+  <rect x="35" y="38" width="11" height="30" fill="#F7E3BC"/>
+  <rect x="43" y="38" width="3" height="30" fill="#E4C692"/>
+  <rect x="49" y="38" width="11" height="30" fill="#F7E3BC"/>
+  <rect x="57" y="38" width="3" height="30" fill="#E4C692"/>
+  <rect x="63" y="38" width="11" height="30" fill="#F7E3BC"/>
+  <rect x="71" y="38" width="3" height="30" fill="#E4C692"/>
+  
+<rect x="15" y="66" width="66" height="9" rx="3" fill="#E4C692"/>
+<rect x="9" y="75" width="78" height="10" rx="4" fill="#F7E3BC"/>
+<path d="M48 75h35c2.2 0 4 1.8 4 4v2c0 2.2-1.8 4-4 4H48V75Z" fill="#E4C692"/>
 </svg>

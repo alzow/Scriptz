@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Name="Root"
+             VerticalOptions="Start"
+             x:Class="QueueApp.Features.BusinessDetail.Helpers.TopBarView">
+
+    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="20,14,20,6">
+
+        <Border Grid.Column="0" WidthRequest="36" HeightRequest="36" Padding="0"
+                BackgroundColor="{StaticResource Surface}"
+                Stroke="{StaticResource Line}" StrokeThickness="1">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="11"/>
+            </Border.StrokeShape>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding GoBackCommand, Source={x:Reference Root}}"/>
+            </Border.GestureRecognizers>
+            <Image Source="ic_chevron_left" WidthRequest="18" HeightRequest="18"
+                   HorizontalOptions="Center" VerticalOptions="Center"/>
+        </Border>
+
+        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+            <Label Text="{Binding FlowTitle, Source={x:Reference Root}}" Style="{StaticResource lbl15_Bold_TextDark}"
+                   IsVisible="{Binding IsFlowActive, Source={x:Reference Root}}"/>
+            <Label Text="{Binding TicketHeadline, Source={x:Reference Root}}" Style="{StaticResource lbl15_Bold_TextDark}"
+                   IsVisible="{Binding IsInQueue, Source={x:Reference Root}}"/>
+            <Label Text="Request sent" Style="{StaticResource lbl15_Bold_TextDark}"
+                   IsVisible="{Binding HasActiveBooking, Source={x:Reference Root}}"/>
+            <Label Text="{Binding BusinessName, Source={x:Reference Root}}" Style="{StaticResource lbl11_Bold_White}"
+                   TextColor="{StaticResource TextMuted}"/>
+        </VerticalStackLayout>
+    </Grid>
+
+</ContentView>

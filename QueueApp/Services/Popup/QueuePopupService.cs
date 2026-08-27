@@ -1,3 +1,4 @@
+using MPowerKit.Popups;
 using MPowerKit.Popups.Interfaces;
 
 namespace QueueApp.Services.Popup;
@@ -21,6 +22,14 @@ public class QueuePopupService : IQueuePopupService
         return await Application.Current!.MainPage!.DisplayAlert(title, message, accept, cancel);
     }
 
+    // Returns null when dismissed, which is distinct from "" — clearing a note is a real edit.
+    public async Task<string?> ShowPromptAsync(string title, string message, string? initialValue = null,
+        string accept = "Save", string cancel = "Cancel", string placeholder = "")
+    {
+        return await Application.Current!.MainPage!.DisplayPromptAsync(
+            title, message, accept, cancel, placeholder, initialValue: initialValue ?? string.Empty);
+    }
+
     public Task ShowLoadingAsync(string message = "Loading...")
     {
         return Task.CompletedTask;
@@ -29,5 +38,17 @@ public class QueuePopupService : IQueuePopupService
     public Task HideLoadingAsync()
     {
         return Task.CompletedTask;
+    }
+
+    public Task ShowSheetAsync(PopupPage sheet) => _popupService.ShowPopupAsync(sheet).AsTask();
+
+    // Tolerates a sheet that is already gone (dismissed by a background tap, then closed again by
+    // its own handler) rather than throwing out of a UI gesture.
+    public Task HideSheetAsync(PopupPage sheet)
+    {
+        if (sheet.IsClosing || !_popupService.PopupStack.Contains(sheet))
+            return Task.CompletedTask;
+
+        return _popupService.HidePopupAsync(sheet).AsTask();
     }
 }

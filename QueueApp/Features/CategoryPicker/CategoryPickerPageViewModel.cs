@@ -32,7 +32,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     private double? _customerLongitude;
     private string? _subscribedScopeKey;
     private readonly SemaphoreSlim _realtimeLock = new(1, 1);
-    public IReadOnlyList<ServiceCategory> Categories { get; } = CategoryCatalog.All;
+    public IReadOnlyList<ServiceCategory> Categories { get; } = CategoryCatalog.All.Where(c => c.Available).ToList();
     public string? CustomerDisplayName { get; set; }
     public bool IsLoading { get; set; }
     public bool IsRefreshing { get; set; }

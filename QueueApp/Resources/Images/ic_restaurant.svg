@@ -1,9 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
-  <circle cx="32" cy="32" r="14" fill="none" stroke="#E2E9F5" stroke-width="2.5"/>
-  <circle cx="32" cy="32" r="8" fill="none" stroke="#39FF7A" stroke-width="2.5"/>
-  <path d="M8 10 L8 22 C8 25.5 11 27 11 27 L11 54" fill="none" stroke="#E2E9F5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M14 10 L14 22 C14 25.5 11 27 11 27" fill="none" stroke="#E2E9F5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M11 10 L11 20" fill="none" stroke="#E2E9F5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M48.5 28 C48 18 50.5 11 53 8 C56.5 12 57.5 21 57 28 Z" fill="none" stroke="#E2E9F5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M53 28 L53 54" fill="none" stroke="#E2E9F5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" fill="none">
+
+<g transform="rotate(-6 18 50)" fill="#F5B93C">
+  <rect x="10" y="20" width="4.5" height="18" rx="2.2"/>
+  <rect x="16.2" y="20" width="4.5" height="18" rx="2.2"/>
+  <rect x="22.4" y="20" width="4.5" height="18" rx="2.2"/>
+  <rect x="10" y="33" width="17" height="12" rx="6"/>
+  <rect x="14" y="42" width="9" height="34" rx="4.5"/>
+</g>
+<g transform="rotate(6 78 50)">
+  <path d="M70 46V29c0-5 3-10 6.5-12 2.5 8 3.5 20 3.5 29H70Z" fill="#F5B93C"/>
+  <path d="M76.5 17c2.5 8 3.5 20 3.5 29h-3.5V17Z" fill="#E08E28"/>
+  <rect x="69" y="42" width="10" height="34" rx="5" fill="#F5B93C"/>
+  <path d="M75 42h4v34h-4V42Z" fill="#E08E28"/>
+</g>
+<circle cx="48" cy="27" r="6.5" fill="#F5B93C"/>
+<path d="M19 72a29 29 0 0 1 58 0H19Z" fill="#F0562E"/>
+<path d="M48 43a29 29 0 0 1 29 29H48V43Z" fill="#C43A18"/>
+<g transform="rotate(-38 34 57)"><rect x="27" y="53" width="15" height="6" rx="3" fill="#F7E3BC"/></g>
+<rect x="9" y="72" width="78" height="11" rx="5.5" fill="#F7E3BC"/>
+<path d="M48 72h33.5a5.5 5.5 0 0 1 0 11H48V72Z" fill="#E4C692"/>
 </svg>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:QueueApp.Features.BusinessDetail.Models"
+             x:Name="Root"
+             VerticalOptions="Start"
+             x:Class="QueueApp.Features.BusinessDetail.Helpers.ServicesListSectionView">
+
+    <VerticalStackLayout Spacing="0" IsVisible="{Binding HasServices, Source={x:Reference Root}}">
+
+        <Grid ColumnDefinitions="*,Auto" Padding="20,22,20,10">
+            <Label Grid.Column="0" Text="Services" Style="{StaticResource lbl15_Bold_TextDark}"/>
+            <Label Grid.Column="1" Text="{Binding ServicesCountText, Source={x:Reference Root}}" VerticalOptions="Center"
+                   Style="{StaticResource lbl9_Mono_TextMuted}"/>
+        </Grid>
+
+        <CollectionView ItemsSource="{Binding ServiceRows, Source={x:Reference Root}}"
+                        HeightRequest="{Binding ServicesListHeight, Source={x:Reference Root}}"
+                        Margin="20,0">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:ServiceChoiceItem">
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12"
+                          Padding="12" HeightRequest="50">
+                        <Label Grid.Column="0" Text="{Binding Name}" VerticalOptions="Center"
+                               Style="{StaticResource lbl14_Bold_TextDark}"/>
+                        <Label Grid.Column="1" Text="{Binding DurationText}" VerticalOptions="Center"
+                               Style="{StaticResource lbl12_Regular_TextLight}"/>
+                        <Label Grid.Column="2" Text="{Binding PriceText}" VerticalOptions="Center"
+                               Style="{StaticResource lbl13_Mono_TextPrimary}"/>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </VerticalStackLayout>
+
+</ContentView>

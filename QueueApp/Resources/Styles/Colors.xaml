@@ -18,6 +18,10 @@
     <Color x:Key="TextPrimary">#F2F4F7</Color>
     <Color x:Key="TextMuted">#8A8F98</Color>
     <Color x:Key="TextFaint">#565C68</Color>
+    <Color x:Key="PurpleBadgeFill">#24A45EFF</Color>
+    <Color x:Key="LiveBadgeFill">#1F39FF7A</Color>
+    <Color x:Key="SoonestBadgeFill">#2139FF7A</Color>
+    <Color x:Key="ScrimBackground">#B80A0D12</Color>
 
     <!-- Legacy aliases mapped to the dark design system -->
     <Color x:Key="Cream">#F2F4F7</Color>

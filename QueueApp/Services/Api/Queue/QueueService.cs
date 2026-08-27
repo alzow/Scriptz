@@ -16,7 +16,7 @@ public class QueueService : BaseService, IQueueService
     public Task<List<QueueEntryResponse>> GetActiveEntriesAsync(Guid businessId) =>
         ExecuteApiCallAsync(_api.GetActiveEntriesAsync($"eq.{businessId}"));
 
-    public Task AddWalkInAsync(Guid businessId, Guid? operatorId, string name, Guid serviceId) =>
+    public Task AddWalkInAsync(Guid businessId, Guid? operatorId, string? name, Guid serviceId) =>
         ExecuteApiCallAsync(_api.JoinQueueAsync(new JoinQueueRequest
         {
             BusinessId = businessId,
@@ -70,4 +70,27 @@ public class QueueService : BaseService, IQueueService
 
     public Task<List<VisitResponse>> GetMyVisitsAsync(Guid customerId) =>
         ExecuteApiCallAsync(_api.GetMyVisitsAsync($"eq.{customerId}"));
+
+    public Task AssignEntryAsync(Guid entryId, Guid? operatorId) =>
+        ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
+            new Dictionary<string, object?> { ["operator_id"] = operatorId }));
+
+    // Position within a queue is joined_at order, so "move to end" is a re-stamp rather than a
+    // separate ordering column. UTC because joined_at is timestamptz.
+    public Task MoveEntryToEndAsync(Guid entryId) =>
+        ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
+            new Dictionary<string, object?> { ["joined_at"] = DateTime.UtcNow }));
+
+    public Task ChangeEntryServiceAsync(Guid entryId, Guid serviceId) =>
+        ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
+            new Dictionary<string, object?> { ["service_id"] = serviceId }));
+
+    // "Today" is the device's local day boundary — the shop reads these tiles standing in its own
+    // timezone, not UTC.
+    public Task<List<QueueEntryResponse>> GetCompletedTodayAsync(Guid businessId)
+    {
+        var since = DateTime.SpecifyKind(DateTime.Today, DateTimeKind.Local).ToUniversalTime();
+        return ExecuteApiCallAsync(_api.GetCompletedSinceAsync(
+            $"eq.{businessId}", $"gte.{since:yyyy-MM-ddTHH:mm:ssZ}"));
+    }
 }
