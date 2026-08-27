@@ -7,7 +7,7 @@
              x:Class="QueueApp.Features.CategoryPicker.Helpers.CategoryCarouselView">
 
     <CollectionView ItemsSource="{Binding Categories, Source={x:Reference Root}}"
-                     HeightRequest="94"
+                     HeightRequest="80"
                      ItemsUpdatingScrollMode="KeepScrollOffset">
         <CollectionView.ItemsLayout>
             <LinearItemsLayout Orientation="Horizontal" ItemSpacing="14" SnapPointsType="None"/>
@@ -53,7 +53,7 @@
                             </DataTrigger>
                         </Image.Triggers>
                     </Image>
-                    <Label Text="{Binding Display}" Style="{StaticResource lbl11_Bold_TextMid}"
+                    <Label Text="{Binding Display}" Style="{StaticResource lbl11_Medium_White}"
                            HorizontalOptions="Center" HorizontalTextAlignment="Center"
                            LineBreakMode="TailTruncation"/>
                 </VerticalStackLayout>
