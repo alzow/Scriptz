@@ -33,6 +33,7 @@
             <converters:ActiveToLabelConverter x:Key="ActiveToLabelConverter"/>
             <converters:ItemEqualsSelectedToColorConverter x:Key="ItemEqualsSelectedToColorConverter"/>
             <converters:ItemEqualsSelectedConverter x:Key="ItemEqualsSelectedConverter"/>
+            <converters:ItemSelectionOpacityConverter x:Key="ItemSelectionOpacityConverter"/>
             <converters:WaitBucketToColorConverter x:Key="WaitBucketToColorConverter"/>
             <converters:EdgeItemToMarginConverter x:Key="EdgeItemToMarginConverter"/>
 

@@ -14,8 +14,13 @@
         </CollectionView.ItemsLayout>
         <CollectionView.ItemTemplate>
             <DataTemplate x:DataType="models:ServiceCategory">
-                <VerticalStackLayout Spacing="8" WidthRequest="64"
-                                      Opacity="{Binding Available, Converter={StaticResource BoolToOpacityConverter}}">
+                <VerticalStackLayout Spacing="8" WidthRequest="64">
+                    <VerticalStackLayout.Opacity>
+                        <MultiBinding Converter="{StaticResource ItemSelectionOpacityConverter}">
+                            <Binding Path="."/>
+                            <Binding Path="SelectedCategory" Source="{x:Reference Root}"/>
+                        </MultiBinding>
+                    </VerticalStackLayout.Opacity>
                     <VerticalStackLayout.Margin>
                         <MultiBinding Converter="{StaticResource EdgeItemToMarginConverter}" ConverterParameter="16">
                             <Binding Path="."/>

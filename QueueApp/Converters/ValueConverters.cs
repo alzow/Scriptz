@@ -162,6 +162,24 @@ public class ItemEqualsSelectedConverter : IMultiValueConverter
     }
 }
 
+// Full opacity when nothing is selected, or when this item is the selection; dimmed otherwise —
+// used to fade out the unselected siblings once a pick is made.
+public class ItemSelectionOpacityConverter : IMultiValueConverter
+{
+    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (values is not [var item, var selected, ..])
+            return 1.0;
+
+        return selected is null || Equals(item, selected) ? 1.0 : 0.4;
+    }
+
+    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
 public class EdgeItemToMarginConverter : IMultiValueConverter
 {
     public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
