@@ -238,6 +238,10 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     public string ReviewPositionText { get; set; } = string.Empty;
     public string ReviewTurnText { get; set; } = string.Empty;
 
+    // Free text the customer adds before committing — a registration, what is actually wrong.
+    // Stored in bookings.note, which create_booking already accepts as p_note.
+    public string BookingNote { get; set; } = string.Empty;
+
     #endregion
 
     #region Services
@@ -766,6 +770,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     public void CloseFlow()
     {
         IsFlowActive = false;
+        BookingNote = string.Empty;
         ShowOperatorStep = ShowServiceStep = ShowDayStep = ShowTimeStep = ShowReviewStep = false;
         Crumbs.Clear();
         OnPropertyChanged(nameof(HasCrumbs));
@@ -1278,6 +1283,9 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         return "none — nothing long enough left";
     }
 
+    public string? TrimmedBookingNote() =>
+        string.IsNullOrWhiteSpace(BookingNote) ? null : BookingNote.Trim();
+
     public void RefreshReview()
     {
         if (SelectedServiceRow is null)
@@ -1366,6 +1374,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                     ServiceId = SelectedServiceRow.Service.Id,
                     CustomerId = Guid.Parse(userId),
                     StartsAt = SelectedSlot.Slot.SlotStart,
+                    Note = TrimmedBookingNote(),
                 });
             }
             else
@@ -1377,6 +1386,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                     ServiceId = SelectedServiceRow.Service.Id,
                     CustomerId = Guid.Parse(userId),
                     StartsAt = SelectedSlot.Slot.SlotStart,
+                    Note = TrimmedBookingNote(),
                 });
             }
 

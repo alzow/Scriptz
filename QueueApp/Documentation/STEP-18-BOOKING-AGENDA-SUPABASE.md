@@ -3,32 +3,41 @@
 ## Read this first
 
 `BookingAgendaPage` was rebuilt to the agenda spec in this change. Everything on it works against the
-schema as `SUPABASE-SCHEMA-VERIFIED.md` describes it **except the three things below**, which are
-listed in the order they hurt. Nothing here is speculative UI: the client already sends these calls,
-so applying §1 turns two decorative buttons into working ones and applying §3 stops the operator
-seeing "Customer" where a name should be.
+schema as `SUPABASE-SCHEMA-VERIFIED.md` describes it **except the things below**, which are listed
+in the order they hurt. Nothing here is speculative UI: the client already sends these calls, so
+applying §1 turns one refusing button into a working one and applying §3 stops the operator seeing
+"Customer" where a name should be.
 
-Two things the spec worried about turned out **not** to need SQL:
+Four things turned out **not** to need SQL:
 
-- **Start, no-show and move** go through PostgREST `PATCH /bookings`, which the existing
-  `bookings` "owner or self manage" UPDATE policy already permits. No new RPC.
+- **No-show and move** go through PostgREST `PATCH /bookings`, which the existing `bookings`
+  "owner or self manage" UPDATE policy already permits. No new RPC.
 - **Operator-created bookings** go through `POST /bookings` with `status = 'confirmed'` and a null
   `customer_id`, which the existing insert policy already permits via `is_business_owner`.
   `create_booking` is the customer path and needs a real `customer_id` a phone booking hasn't got.
+- **Additional details** (vehicle registration, what's actually wrong) use the `bookings.note`
+  column, which already exists, and `create_booking` / `create_booking_any` already accept it as
+  `p_note`. Captured on the customer's review step and on the operator's add-booking sheet, and
+  read back to the operator in the booking actions sheet.
+- **Cancellation reasons** live in `bookings.details` under `cancellation_reason`. `cancel_booking`
+  takes no reason, so the reason is PATCHed onto `details` first and the RPC called after. The
+  PATCH replaces the whole jsonb value, so `BookingDetails.WithCancellationReason` carries the
+  existing keys across.
 
 ---
 
 ## 1. `booking_status` has nowhere to put a finished booking — **blocking**
 
 §1g of the schema doc confirms `booking_status` is a real enum but never captured its labels. Every
-label the app has ever sent is one of `pending` / `confirmed` / `cancelled` / `completed`. The agenda
-needs two more:
+label the app has ever sent is one of `pending` / `confirmed` / `cancelled` / `completed`. One more
+is needed, and one is now optional:
 
-- **`in_progress`** — the card offers `Done` and the sheet offers "They've arrived — start", and
-  without a value between confirmed and completed there is nowhere to record that someone is in the
-  chair right now.
 - **`no_show`** — the sheet offers "Didn't show up". Today the only honest place to put that is
-  `cancelled`, which loses the distinction that matters for the day's revenue figure.
+  `cancelled`, which loses the distinction that matters for the day's revenue figure. This is the
+  one that still blocks.
+- **`in_progress`** — no longer written by anything. The start action and the now/next card were
+  both removed rather than left decorative, so nothing depends on this value. The agenda still
+  *renders* an in-progress booking if the data ever carries one; it just never writes one.
 
 Run this first to see what's actually there:
 
@@ -42,36 +51,35 @@ order by e.enumsortorder;
 Then add whatever is missing:
 
 ```sql
-alter type booking_status add value if not exists 'in_progress';
 alter type booking_status add value if not exists 'no_show';
+-- Only needed if the start / in-chair flow is brought back:
+-- alter type booking_status add value if not exists 'in_progress';
 ```
 
 `add value` can't run inside a transaction block in older Postgres — run these as standalone
 statements if the migration tool wraps everything.
 
-**Until this is applied:** the `Done` and start actions PATCH a status Postgres will reject, and the
-error surfaces to the operator as a popup rather than failing silently. Nothing else on the page
-breaks — no query filters on either label, deliberately, because PostgREST rejects a whole query for
-an enum label it can't parse.
+**Until this is applied:** "Didn't show up" PATCHes a status Postgres will reject, and the error
+surfaces to the operator as a popup rather than failing silently. Cancel still works, and it is the
+only destructive action offered outside the booking window. Nothing else on the page breaks — no
+query filters on either label, deliberately, because PostgREST rejects a whole query for an enum
+label it can't parse.
 
-## 2. `bookings` has no "actually began" timestamp
+## 2. `bookings` has no "actually began" timestamp — no longer blocking
 
 `bookings.starts_at` is *scheduled*, not *began*. Queue mode has `queue_entries.serving_at`; booking
-mode has no equivalent, so `IN CHAIR NOW` can only count against the schedule — which is wrong from
-the moment someone starts late.
+mode has no equivalent.
+
+Nothing needs it any more. The elapsed counter it was for went with the now/next card, and the sheet
+now decides what to offer from the scheduled window instead: the customer update field and
+"Didn't show up" appear only while `now` is inside `[starts_at, ends_at)`, and "Mark as done" only
+once that window has opened. That is honest about scheduled time rather than pretending to know
+actual time.
+
+If the start flow comes back, this is what it needs:
 
 ```sql
 alter table bookings add column if not exists started_at timestamptz;
-```
-
-The agenda query selects `*` rather than a column list precisely so it keeps working before this
-lands and picks the column up by itself afterwards. `AgendaBookingResponse.IsInProgress` also treats
-"has a `started_at` and is still `confirmed`" as in progress, so this column alone makes the card
-work even if §1 is applied later.
-
-Worth considering alongside it, though nothing depends on it yet:
-
-```sql
 alter table bookings add column if not exists completed_at timestamptz;
 ```
 
@@ -111,6 +119,7 @@ A is the smaller change and matches what queue mode already does.
   the bookings a new block would strand. Widening the gist constraint to cover blocks would also
   make it impossible to block time over an existing booking at all, which is not what an operator
   wants when the bay floods.
-- **Declining sends no reason.** Ships degraded, as the spec anticipated. The customer gets a
-  rejection with no explanation. A three-option picker (fully booked / closed that day / other)
-  would need somewhere to put the reason — `bookings.note` is the obvious candidate.
+- **Declining and cancelling now both ask for a reason** and store it in `details`. The customer
+  sees it on their history row. It is a free-text prompt rather than the three-option picker the
+  spec floated, because the reasons that actually come up ("bay flooded", "parts didn't arrive")
+  don't fit three options.

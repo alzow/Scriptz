@@ -52,17 +52,6 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     public double RequestsStrokeThickness => IsRequestsUrgent ? 1.5 : 1;
     public string RequestsChevron => IsRequestsExpanded ? AgendaConstants.ChevronUp : AgendaConstants.ChevronDown;
 
-    public bool HasCard { get; set; }
-    public string CardKicker { get; set; } = string.Empty;
-    public string CardName { get; set; } = string.Empty;
-    public string CardSubtitle { get; set; } = string.Empty;
-    public string CardMeta { get; set; } = string.Empty;
-    public string CardTimerText { get; set; } = string.Empty;
-    public string CardTimerCaption { get; set; } = string.Empty;
-    public string CardActionText { get; set; } = string.Empty;
-    public bool IsCardBusy { get; set; }
-    public bool IsCardEnabled => !IsCardBusy;
-
     public string AgendaHeaderText { get; set; } = "REST OF TODAY";
 
     public bool IsClosedDay { get; set; }
@@ -86,7 +75,6 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     private List<AgendaBookingResponse> _dayBookings = new();
     private List<AvailabilityBlockResponse> _dayBlocks = new();
     private List<AvailabilityBlockResponse> _windowBlocks = new();
-    private AgendaBookingResponse? _cardBooking;
 
     private readonly IBusinessService _businessService;
     private readonly IBookingService _bookingService;
@@ -247,8 +235,8 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
 
             _windowBlocks = await _operatorService.GetAvailabilityBlocksAsync(
                 _operatorNames.Keys.ToList(),
-                BlockPresetOption.Midnight(today),
-                BlockPresetOption.Midnight(today.AddDays(AgendaConstants.DayStripLength)));
+                AgendaConstants.Midnight(today),
+                AgendaConstants.Midnight(today.AddDays(AgendaConstants.DayStripLength)));
 
             Requests.Clear();
 
@@ -290,7 +278,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         {
             IsLoading = true;
 
-            var dayStart = BlockPresetOption.Midnight(SelectedDate);
+            var dayStart = AgendaConstants.Midnight(SelectedDate);
             var dayEnd = dayStart.AddDays(1);
 
             _dayBookings = await _bookingService.GetAgendaBookingsAsync(_businessId, SelectedDate);
@@ -330,7 +318,6 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
                 OnPropertyChanged(nameof(HasRows));
 
                 UpdateStats(visible, rows);
-                UpdateCard(visible);
                 UpdateNowLine();
                 UpdateDayStates(visible, rows);
             });
@@ -395,87 +382,6 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         catch (Exception ex)
         {
             _ = HandleExceptionAsync(ex);
-        }
-    }
-
-    public void UpdateCard(IReadOnlyList<AgendaBookingResponse> bookings)
-    {
-        try
-        {
-            var now = LocalTime.ToLocal(DateTimeOffset.UtcNow);
-
-            _cardBooking = bookings.FirstOrDefault(b => b.IsInProgress)
-                ?? bookings
-                    .Where(b => !b.IsFinished && !b.IsInProgress && b.LocalEnd > now)
-                    .OrderBy(b => b.StartsAt)
-                    .FirstOrDefault();
-
-            HasCard = _cardBooking is not null;
-
-            if (_cardBooking is null)
-                return;
-
-            var resource = _cardBooking.Operator?.DisplayName;
-
-            CardName = _cardBooking.CustomerName;
-            CardSubtitle = resource is null
-                ? _cardBooking.ServiceName
-                : $"{_cardBooking.ServiceName} · {resource}";
-
-            if (_cardBooking.IsInProgress)
-            {
-                CardKicker = "IN CHAIR NOW";
-                CardMeta = $"Started {_cardBooking.ElapsedFrom:HH:mm} · due {_cardBooking.LocalEnd:HH:mm}";
-                CardTimerCaption = $"of ~{_cardBooking.ServiceMinutes}m";
-                CardActionText = "Done";
-            }
-            else
-            {
-                CardKicker = "NEXT UP";
-                CardMeta = $"{_cardBooking.LocalStart:ddd d} · {_cardBooking.TimeRangeDisplay}";
-                CardTimerCaption = "not arrived";
-                CardActionText = "Start early";
-            }
-
-            UpdateCardTimer();
-        }
-        catch (Exception ex)
-        {
-            _ = HandleExceptionAsync(ex);
-        }
-    }
-
-    public void UpdateCardTimer()
-    {
-        try
-        {
-            if (_cardBooking is null)
-                return;
-
-            var now = LocalTime.ToLocal(DateTimeOffset.UtcNow);
-
-            if (_cardBooking.IsInProgress)
-            {
-                var elapsed = now - _cardBooking.ElapsedFrom;
-
-                if (elapsed < TimeSpan.Zero)
-                    elapsed = TimeSpan.Zero;
-
-                CardTimerText = elapsed.TotalHours >= 1
-                    ? $"{(int)elapsed.TotalHours}:{elapsed.Minutes:00}:{elapsed.Seconds:00}"
-                    : $"{elapsed.Minutes:00}:{elapsed.Seconds:00}";
-
-                return;
-            }
-
-            var until = _cardBooking.LocalStart - now;
-
-            CardTimerText = until <= TimeSpan.Zero
-                ? "now"
-                : $"in {AgendaBookingResponse.FormatDuration(until)}";
-        }
-        catch (Exception)
-        {
         }
     }
 
@@ -584,7 +490,6 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
 
     public void OnTick(object? sender, EventArgs e)
     {
-        UpdateCardTimer();
         UpdateNowLine();
     }
 
@@ -681,7 +586,17 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         item.IsDeclining = true;
         try
         {
-            await _bookingService.CancelBookingAsync(item.Booking.Id);
+            var reason = await _popupService.ShowPromptAsync(
+                "Decline request",
+                $"Why can't {item.CustomerName}'s {item.Booking.TimeRangeDisplay} booking happen? They will see this.",
+                accept: "Decline",
+                cancel: "Keep it",
+                placeholder: "Fully booked, closed that day…");
+
+            if (reason is null)
+                return;
+
+            await CancelWithReasonAsync(item.Booking, reason);
             await RefreshAsync();
         }
         catch (Exception ex)
@@ -691,33 +606,6 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         finally
         {
             item.IsDeclining = false;
-        }
-    }
-
-    [RelayCommand]
-    public async Task CardActionAsync()
-    {
-        if (_cardBooking is null || IsCardBusy)
-            return;
-
-        var booking = _cardBooking;
-        IsCardBusy = true;
-        try
-        {
-            if (booking.IsInProgress)
-                await _bookingService.CompleteBookingAsync(booking.Id);
-            else
-                await _bookingService.StartBookingAsync(booking.Id);
-
-            await LoadDayAsync();
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
-        }
-        finally
-        {
-            IsCardBusy = false;
         }
     }
 
@@ -736,7 +624,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
                     break;
 
                 case AgendaRowKind.Gap:
-                    await OpenAddBookingAsync(row.Start, row.End);
+                    await OpenAddBookingAsync(row.Start);
                     break;
             }
         }
@@ -751,10 +639,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     {
         try
         {
-            if (row is null)
-                return;
-
-            await OpenAddBookingAsync(row.Start, row.End);
+            await OpenAddBookingAsync(row?.Start);
         }
         catch (Exception ex)
         {
@@ -767,17 +652,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     {
         try
         {
-            var gap = Rows.FirstOrDefault(r => r.IsGap);
-
-            if (gap is not null)
-            {
-                await OpenAddBookingAsync(gap.Start, gap.End);
-                return;
-            }
-
-            await OpenAddBookingAsync(
-                BlockPresetOption.Sast(SelectedDate, TimeSpan.FromHours(AgendaConstants.FallbackOpenHour)),
-                BlockPresetOption.Sast(SelectedDate, TimeSpan.FromHours(AgendaConstants.FallbackCloseHour)));
+            await OpenAddBookingAsync();
         }
         catch (Exception ex)
         {
@@ -849,11 +724,6 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
 
             switch (result.Action)
             {
-                case BookingAction.Start:
-                    await _bookingService.StartBookingAsync(booking.Id);
-                    await RefreshAsync();
-                    break;
-
                 case BookingAction.Complete:
                     await _bookingService.CompleteBookingAsync(booking.Id);
                     await RefreshAsync();
@@ -893,20 +763,32 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     {
         try
         {
-            var confirmed = await _popupService.ShowConfirmAsync(
+            var reason = await _popupService.ShowPromptAsync(
                 "Cancel booking",
-                $"Cancel {booking.CustomerName}'s {booking.TimeRangeDisplay} booking? They won't be told automatically.");
+                $"Why is {booking.CustomerName}'s {booking.TimeRangeDisplay} booking being cancelled? They will see this.",
+                accept: "Cancel booking",
+                cancel: "Keep it",
+                placeholder: "Bay flooded, parts didn't arrive…");
 
-            if (!confirmed)
+            if (reason is null)
                 return;
 
-            await _bookingService.CancelBookingAsync(booking.Id);
+            await CancelWithReasonAsync(booking, reason);
             await RefreshAsync();
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
         }
+    }
+
+    public async Task CancelWithReasonAsync(AgendaBookingResponse booking, string? reason)
+    {
+        if (!string.IsNullOrWhiteSpace(reason))
+            await _bookingService.SetCancellationReasonAsync(
+                booking.Id, BookingDetails.WithCancellationReason(booking.Details, reason));
+
+        await _bookingService.CancelBookingAsync(booking.Id);
     }
 
     public async Task OpenMoveBookingAsync(AgendaBookingResponse booking)
@@ -943,7 +825,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         }
     }
 
-    public async Task OpenAddBookingAsync(DateTimeOffset windowStart, DateTimeOffset windowEnd)
+    public async Task OpenAddBookingAsync(DateTimeOffset? preferredStart = null)
     {
         try
         {
@@ -956,9 +838,14 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
             }
 
             var sheet = new AddBookingSheet(
-                _popupService, windowStart, windowEnd, _services, _operators, _labels);
+                _popupService, _bookingService, _businessId, SelectedDate, _services, _operators, _labels)
+            {
+                PreferredStart = preferredStart,
+            };
 
             await _popupService.ShowSheetAsync(sheet);
+            await sheet.LoadSlotsAsync();
+
             var result = await sheet.Completion;
 
             if (!result.Confirmed || result.Service is null)
@@ -972,6 +859,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
                 StartsAt = result.StartsAt,
                 EndsAt = result.EndsAt,
                 Status = BookingStatuses.Confirmed,
+                Note = result.Note,
                 Details = new BookingDetails
                 {
                     CustomerName = result.CustomerName,

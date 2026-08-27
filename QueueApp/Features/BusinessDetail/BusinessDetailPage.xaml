@@ -139,7 +139,8 @@
                         ReviewServiceText="{Binding ReviewServiceText}"
                         ReviewPriceText="{Binding ReviewPriceText}"
                         ReviewPositionText="{Binding ReviewPositionText}"
-                        ReviewTurnText="{Binding ReviewTurnText}"/>
+                        ReviewTurnText="{Binding ReviewTurnText}"
+                        BookingNote="{Binding BookingNote}"/>
 
             </Grid>
         </Grid>

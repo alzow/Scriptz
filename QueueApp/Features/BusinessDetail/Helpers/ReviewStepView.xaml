@@ -40,6 +40,15 @@
                     </Grid>
                 </VerticalStackLayout>
             </Border>
+
+            <Label Text="ANYTHING THEY SHOULD KNOW — OPTIONAL"
+                   Style="{StaticResource lbl9_Mono_TextMuted}"
+                   Margin="20,18,20,8"/>
+            <Border Margin="20,0" Padding="10,4" Style="{StaticResource brd12_Cream}">
+                <Editor Text="{Binding BookingNote, Source={x:Reference Root}}"
+                        Placeholder="Registration, what's wrong, anything worth mentioning"
+                        Style="{StaticResource editor14_Sheet}"/>
+            </Border>
         </VerticalStackLayout>
     </ScrollView>
 

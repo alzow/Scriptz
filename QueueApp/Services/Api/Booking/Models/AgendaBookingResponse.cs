@@ -30,9 +30,34 @@ public class AgendaServiceRef
 // Documentation/STEP-18-BOOKING-AGENDA-SUPABASE.md §3.
 public class BookingDetails
 {
-    [JsonPropertyName("customer_name")] public string? CustomerName { get; set; }
-    [JsonPropertyName("customer_phone")] public string? CustomerPhone { get; set; }
-    [JsonPropertyName("created_by")] public string? CreatedBy { get; set; }
+    [JsonPropertyName("customer_name")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? CustomerName { get; set; }
+
+    [JsonPropertyName("customer_phone")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? CustomerPhone { get; set; }
+
+    [JsonPropertyName("created_by")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? CreatedBy { get; set; }
+
+    // Why the business called it off. bookings has no column for this, but details is jsonb and the
+    // owner-update policy already covers writing it, so no migration is needed to give the customer
+    // a reason instead of a silent disappearance.
+    [JsonPropertyName("cancellation_reason")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? CancellationReason { get; set; }
+
+    // A PATCH replaces the whole jsonb value, so anything already in there has to be carried across
+    // or it is silently dropped.
+    public static BookingDetails WithCancellationReason(BookingDetails? existing, string? reason) => new()
+    {
+        CustomerName = existing?.CustomerName,
+        CustomerPhone = existing?.CustomerPhone,
+        CreatedBy = existing?.CreatedBy,
+        CancellationReason = string.IsNullOrWhiteSpace(reason) ? null : reason.Trim(),
+    };
 }
 
 public partial class AgendaBookingResponse : ObservableObject
@@ -52,6 +77,11 @@ public partial class AgendaBookingResponse : ObservableObject
     [JsonPropertyName("details")] public BookingDetails? Details { get; set; }
     [JsonPropertyName("progress_status")] public string? ProgressStatus { get; set; }
 
+    // Whatever the customer (or the operator taking the call) wrote about this booking — a vehicle
+    // registration, what's actually wrong with the car. The bookings.note column already exists and
+    // create_booking already accepts it as p_note.
+    [JsonPropertyName("note")] public string? Note { get; set; }
+
     // When the work actually began, as opposed to when it was scheduled to. Queue mode has
     // serving_at; bookings has no equivalent column yet, so this stays null on today's schema and
     // the elapsed counter falls back to counting against the schedule. Selected via `*`, never by
@@ -61,11 +91,13 @@ public partial class AgendaBookingResponse : ObservableObject
     [JsonIgnore] public bool IsConfirming { get; set; }
     [JsonIgnore] public bool IsCompleting { get; set; }
     [JsonIgnore] public bool IsCancelling { get; set; }
-    [JsonIgnore] public bool IsStarting { get; set; }
     [JsonIgnore] public bool IsMarkingNoShow { get; set; }
     [JsonIgnore] public bool IsSavingProgress { get; set; }
 
     [JsonIgnore] public bool HasProgress => !string.IsNullOrWhiteSpace(ProgressStatus);
+    [JsonIgnore] public bool HasNote => !string.IsNullOrWhiteSpace(Note);
+    [JsonIgnore] public string? CancellationReason => Details?.CancellationReason;
+    [JsonIgnore] public bool HasCancellationReason => !string.IsNullOrWhiteSpace(CancellationReason);
 
     [JsonIgnore] public string OperatorName => Operator?.DisplayName ?? "Any available";
     [JsonIgnore] public string ServiceName => Service?.Name ?? "";
@@ -110,9 +142,13 @@ public partial class AgendaBookingResponse : ObservableObject
 
     [JsonIgnore] public bool IsFinished => IsCompleted || IsCancelled || IsNoShow;
 
+    [JsonIgnore] public bool IsWithinWindow => DateTimeOffset.UtcNow >= StartsAt && DateTimeOffset.UtcNow < EndsAt;
+    [JsonIgnore] public bool HasWindowPassed => DateTimeOffset.UtcNow >= EndsAt;
+
     [JsonIgnore] public bool CanConfirm => IsPending;
-    [JsonIgnore] public bool CanStart => (IsPending || IsConfirmed) && !IsInProgress;
-    [JsonIgnore] public bool CanComplete => IsInProgress || IsConfirmed || IsPending;
+    [JsonIgnore] public bool CanComplete => !IsFinished && (IsWithinWindow || HasWindowPassed);
+    [JsonIgnore] public bool CanMarkNoShow => !IsFinished && IsWithinWindow;
+    [JsonIgnore] public bool CanUpdateCustomer => !IsFinished && IsWithinWindow;
     [JsonIgnore] public bool CanCancel => !IsFinished;
 
     [JsonIgnore] public DateTimeOffset ElapsedFrom => (StartedAt ?? StartsAt).ToOffset(LocalOffset);

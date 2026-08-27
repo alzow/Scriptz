@@ -154,27 +154,19 @@ public class StubBookingService : IBookingService
             .ToList();
     }
 
-    public Task<AgendaBookingResponse?> StartBookingAsync(Guid bookingId)
-    {
-        var booking = _agenda.FirstOrDefault(b => b.Id == bookingId);
-        if (booking is not null)
-        {
-            booking.Status = BookingStatuses.InProgress;
-            booking.StartedAt = DateTimeOffset.UtcNow;
-        }
-        else
-        {
-            SetStatus(bookingId, BookingStatuses.InProgress);
-        }
-
-        return Task.FromResult<AgendaBookingResponse?>(booking);
-    }
-
     public Task<AgendaBookingResponse?> MarkBookingNoShowAsync(Guid bookingId)
     {
         var booking = _agenda.FirstOrDefault(b => b.Id == bookingId);
         if (booking is not null) booking.Status = BookingStatuses.NoShow;
         else SetStatus(bookingId, BookingStatuses.NoShow);
+
+        return Task.FromResult<AgendaBookingResponse?>(booking);
+    }
+
+    public Task<AgendaBookingResponse?> SetCancellationReasonAsync(Guid bookingId, BookingDetails details)
+    {
+        var booking = _agenda.FirstOrDefault(b => b.Id == bookingId);
+        if (booking is not null) booking.Details = details;
 
         return Task.FromResult<AgendaBookingResponse?>(booking);
     }
@@ -216,6 +208,7 @@ public class StubBookingService : IBookingService
             EndsAt = request.EndsAt,
             Status = request.Status,
             CreatedAt = DateTimeOffset.UtcNow,
+            Note = request.Note,
             Details = request.Details,
             Operator = new AgendaOperatorRef { Id = request.OperatorId, DisplayName = NameFor(request.OperatorId) },
             Service = new AgendaServiceRef

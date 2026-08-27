@@ -69,6 +69,17 @@
                         Margin="0,0,0,14"/>
 
                 <Border Style="{StaticResource brd13_Raised}"
+                        Padding="13,12"
+                        Margin="0,0,0,9"
+                        IsVisible="{Binding HasNote, Source={x:Reference Root}}">
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="ADDITIONAL DETAILS" Style="{StaticResource lbl9_Mono_TextMuted}"/>
+                        <Label Text="{Binding NoteText, Source={x:Reference Root}}"
+                               Style="{StaticResource lbl12_Regular_TextMuted}"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource brd13_Raised}"
                         Padding="13,4">
                     <VerticalStackLayout Spacing="0">
                         <Grid ColumnDefinitions="*,Auto"
@@ -101,28 +112,33 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <Grid ColumnDefinitions="*,Auto"
-                        ColumnSpacing="8"
-                        Margin="0,12,0,0">
-                    <Border Grid.Column="0"
-                            Style="{StaticResource brd12_Cream}"
-                            Padding="4,0">
-                        <Entry Text="{Binding ProgressStatus, Source={x:Reference Root}}"
-                               Placeholder="What's happening? (optional)"
-                               Style="{StaticResource entry14_Sheet}"/>
-                    </Border>
-                    <Button Grid.Column="1"
-                            Text="Save"
-                            HeightRequest="52"
-                            Style="{StaticResource btn14_Bold_Neutral}"
-                            Clicked="OnSaveProgressClicked"/>
-                </Grid>
+                <VerticalStackLayout Spacing="0"
+                                     IsVisible="{Binding CanUpdateCustomer, Source={x:Reference Root}}">
+                    <Label Text="UPDATE THE CUSTOMER"
+                           Style="{StaticResource lbl9_Mono_TextMuted}"
+                           Margin="0,14,0,8"/>
+                    <Grid ColumnDefinitions="*,Auto"
+                            ColumnSpacing="8">
+                        <Border Grid.Column="0"
+                                Style="{StaticResource brd12_Cream}"
+                                Padding="4,0">
+                            <Entry Text="{Binding ProgressStatus, Source={x:Reference Root}}"
+                                   Placeholder="What's happening? (optional)"
+                                   Style="{StaticResource entry14_Sheet}"/>
+                        </Border>
+                        <Button Grid.Column="1"
+                                Text="Save"
+                                HeightRequest="52"
+                                Style="{StaticResource btn14_Bold_Neutral}"
+                                Clicked="OnSaveProgressClicked"/>
+                    </Grid>
+                </VerticalStackLayout>
 
-                <Button Text="{Binding PrimaryActionText, Source={x:Reference Root}}"
+                <Button Text="Mark as done"
                         Margin="0,12,0,0"
                         Style="{StaticResource btn15_Bold_SheetGo}"
-                        IsVisible="{Binding HasPrimary, Source={x:Reference Root}}"
-                        Clicked="OnPrimaryClicked"/>
+                        IsVisible="{Binding CanComplete, Source={x:Reference Root}}"
+                        Clicked="OnCompleteClicked"/>
 
                 <Button Text="Move to another time"
                         Margin="0,9,0,0"

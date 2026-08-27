@@ -1,4 +1,5 @@
 using Microsoft.Maui.Controls.Shapes;
+using QueueApp.Features.BusinessDetail.Flow;
 
 namespace QueueApp.Features.BookingAgenda.Models;
 
@@ -26,4 +27,9 @@ public static class AgendaConstants
     public const string EmDash = "—";
 
     public static DoubleCollection Dashed() => new() { 4, 3 };
+
+    public static DateTimeOffset Sast(DateTime date, TimeSpan time) =>
+        new(DateTime.SpecifyKind(date.Date.Add(time), DateTimeKind.Unspecified), LocalTime.Offset);
+
+    public static DateTimeOffset Midnight(DateTime date) => Sast(date, TimeSpan.Zero);
 }

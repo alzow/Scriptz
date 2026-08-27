@@ -40,4 +40,13 @@
         <Setter Property="Format" Value="HH:mm"/>
     </Style>
 
+    <Style x:Key="editor14_Sheet" TargetType="Editor">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="PlaceholderColor" Value="{StaticResource TextFaint}"/>
+        <Setter Property="FontSize" Value="14.5"/>
+        <Setter Property="HeightRequest" Value="90"/>
+        <Setter Property="AutoSize" Value="TextChanges"/>
+    </Style>
+
 </ResourceDictionary>

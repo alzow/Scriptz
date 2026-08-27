@@ -10,10 +10,6 @@ public class UpdateBookingRequest
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Status { get; set; }
 
-    [JsonPropertyName("started_at")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public DateTimeOffset? StartedAt { get; set; }
-
     [JsonPropertyName("operator_id")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Guid? OperatorId { get; set; }
@@ -25,4 +21,8 @@ public class UpdateBookingRequest
     [JsonPropertyName("ends_at")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public DateTimeOffset? EndsAt { get; set; }
+
+    [JsonPropertyName("details")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public BookingDetails? Details { get; set; }
 }

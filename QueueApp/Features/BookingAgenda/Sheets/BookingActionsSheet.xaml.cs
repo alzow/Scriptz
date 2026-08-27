@@ -13,7 +13,6 @@ public partial class BookingActionsSheet : BottomSheetPage
     private readonly IQueuePopupService _popups;
     private readonly TaskCompletionSource<BookingActionResult> _completion = new();
     private readonly string? _phone;
-    private readonly bool _isInProgress;
 
     public string CustomerName { get; }
     public string Initials { get; }
@@ -21,11 +20,13 @@ public partial class BookingActionsSheet : BottomSheetPage
     public string ServiceName { get; }
     public string PriceText { get; }
     public string BookedAgoText { get; }
-    public string PrimaryActionText { get; }
-    public bool HasPrimary { get; }
+    public string NoteText { get; }
+    public bool HasNote { get; }
     public bool HasPhone { get; }
-    public bool CanCancel { get; }
+    public bool CanComplete { get; }
     public bool CanMarkNoShow { get; }
+    public bool CanUpdateCustomer { get; }
+    public bool CanCancel { get; }
     public string ProgressStatus { get; set; }
 
     public ObservableCollection<MoveTargetOption> MoveTargets { get; } = new();
@@ -34,7 +35,7 @@ public partial class BookingActionsSheet : BottomSheetPage
     public Task<BookingActionResult> Completion => _completion.Task;
 
     public BookingActionsSheet()
-        : this(null!, null!, Array.Empty<OperatorResponse>())
+        : this(null!, null!, [])
     {
     }
 
@@ -51,15 +52,15 @@ public partial class BookingActionsSheet : BottomSheetPage
         ServiceName = booking?.ServiceName ?? string.Empty;
         PriceText = booking is not null && booking.PriceText.Length > 0 ? booking.PriceText : "No price set";
         BookedAgoText = DescribeBooked(booking?.CreatedAt ?? default);
-        HasPrimary = booking is not null && (booking.CanStart || booking.IsInProgress);
-        PrimaryActionText = booking?.IsInProgress == true
-            ? "They're finished — done"
-            : "They've arrived — start";
-        CanCancel = booking?.CanCancel ?? false;
-        CanMarkNoShow = booking is not null && !booking.IsFinished;
+        NoteText = booking?.Note ?? string.Empty;
+        HasNote = booking?.HasNote ?? false;
         ProgressStatus = booking?.ProgressStatus ?? string.Empty;
 
-        _isInProgress = booking?.IsInProgress ?? false;
+        CanComplete = booking?.CanComplete ?? false;
+        CanMarkNoShow = booking?.CanMarkNoShow ?? false;
+        CanUpdateCustomer = booking?.CanUpdateCustomer ?? false;
+        CanCancel = booking?.CanCancel ?? false;
+
         _phone = booking?.CustomerPhone;
         HasPhone = booking?.HasPhone ?? false;
 
@@ -102,8 +103,8 @@ public partial class BookingActionsSheet : BottomSheetPage
         return days == 1 ? "Yesterday" : $"{days} days ago";
     }
 
-    private void OnPrimaryClicked(object? sender, EventArgs e) =>
-        Close(new BookingActionResult(_isInProgress ? BookingAction.Complete : BookingAction.Start));
+    private void OnCompleteClicked(object? sender, EventArgs e) =>
+        Close(new BookingActionResult(BookingAction.Complete));
 
     private void OnMoveTimeClicked(object? sender, EventArgs e) =>
         Close(new BookingActionResult(BookingAction.MoveToAnotherTime));

@@ -23,6 +23,10 @@ public partial class ReviewStepView : ContentView
     public static readonly BindableProperty ReviewTurnTextProperty = BindableProperty.Create(
         nameof(ReviewTurnText), typeof(string), typeof(ReviewStepView), string.Empty);
 
+    public static readonly BindableProperty BookingNoteProperty = BindableProperty.Create(
+        nameof(BookingNote), typeof(string), typeof(ReviewStepView), string.Empty,
+        defaultBindingMode: BindingMode.TwoWay);
+
     public bool ShowReviewStep
     {
         get => (bool)GetValue(ShowReviewStepProperty);
@@ -57,6 +61,12 @@ public partial class ReviewStepView : ContentView
     {
         get => (string)GetValue(ReviewPositionTextProperty);
         set => SetValue(ReviewPositionTextProperty, value);
+    }
+
+    public string BookingNote
+    {
+        get => (string)GetValue(BookingNoteProperty);
+        set => SetValue(BookingNoteProperty, value);
     }
 
     public string ReviewTurnText

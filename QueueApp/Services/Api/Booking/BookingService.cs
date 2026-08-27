@@ -72,15 +72,13 @@ public class BookingService : BaseService, IBookingService
         Guid businessId, DateTimeOffset from, DateTimeOffset until) =>
         ExecuteApiCallAsync(_api.GetAgendaBookingsAsync($"eq.{businessId}", StartsWithinFilter(from, until)));
 
-    public Task<AgendaBookingResponse?> StartBookingAsync(Guid bookingId) =>
-        PatchAsync(bookingId, new UpdateBookingRequest
-        {
-            Status = BookingStatuses.InProgress,
-            StartedAt = DateTimeOffset.UtcNow,
-        });
-
     public Task<AgendaBookingResponse?> MarkBookingNoShowAsync(Guid bookingId) =>
         PatchAsync(bookingId, new UpdateBookingRequest { Status = BookingStatuses.NoShow });
+
+    // Written before cancel_booking runs, because that RPC takes no reason and the details jsonb is
+    // the only place to put one without a migration.
+    public Task<AgendaBookingResponse?> SetCancellationReasonAsync(Guid bookingId, BookingDetails details) =>
+        PatchAsync(bookingId, new UpdateBookingRequest { Details = details });
 
     public Task<AgendaBookingResponse?> MoveBookingAsync(
         Guid bookingId, Guid operatorId, DateTimeOffset startsAt, DateTimeOffset endsAt) =>

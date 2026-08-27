@@ -14,7 +14,8 @@ public sealed record AddBookingResult(
     ServiceResponse? Service = null,
     Guid OperatorId = default,
     DateTimeOffset StartsAt = default,
-    DateTimeOffset EndsAt = default);
+    DateTimeOffset EndsAt = default,
+    string? Note = null);
 
 public sealed record MoveBookingResult(
     bool Confirmed,

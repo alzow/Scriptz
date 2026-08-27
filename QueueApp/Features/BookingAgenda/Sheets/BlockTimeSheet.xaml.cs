@@ -14,7 +14,6 @@ public partial class BlockTimeSheet : BottomSheetPage
 {
     private readonly IQueuePopupService _popups;
     private readonly TaskCompletionSource<BlockTimeResult> _completion = new();
-    private readonly DateTime _day;
 
     private IReadOnlyList<AgendaBookingResponse> _knownBookings;
 
@@ -26,10 +25,8 @@ public partial class BlockTimeSheet : BottomSheetPage
     public string DayText { get; }
     public string ResourceLabel { get; }
 
-    public ObservableCollection<BlockPresetOption> Presets { get; } = new();
     public ObservableCollection<BayFilterOption> Resources { get; } = new();
 
-    public ICommand SelectPresetCommand { get; }
     public ICommand ToggleResourceCommand { get; }
 
     public string Reason { get; set; } = string.Empty;
@@ -40,8 +37,8 @@ public partial class BlockTimeSheet : BottomSheetPage
 
     public Task<BlockTimeResult> Completion => _completion.Task;
 
-    public DateTimeOffset From => BlockPresetOption.Sast(FromDate, FromTime);
-    public DateTimeOffset Until => BlockPresetOption.Sast(UntilDate, UntilTime);
+    public DateTimeOffset From => AgendaConstants.Sast(FromDate, FromTime);
+    public DateTimeOffset Until => AgendaConstants.Sast(UntilDate, UntilTime);
 
     public DateTime FromDate
     {
@@ -104,7 +101,6 @@ public partial class BlockTimeSheet : BottomSheetPage
         IReadOnlyList<AgendaBookingResponse> knownBookings)
     {
         _popups = popups;
-        _day = day;
         _knownBookings = knownBookings;
 
         DayText = day.ToString("ddd d MMM");
@@ -118,15 +114,11 @@ public partial class BlockTimeSheet : BottomSheetPage
                 IsSelected = true,
             });
 
-        foreach (var preset in BlockPresetOption.BuildAll())
-            Presets.Add(preset);
-
         _fromDate = day.Date;
         _untilDate = day.Date;
         _fromTime = new TimeSpan(AgendaConstants.FallbackOpenHour, 0, 0);
         _untilTime = new TimeSpan(AgendaConstants.FallbackCloseHour, 0, 0);
 
-        SelectPresetCommand = new RelayCommand<BlockPresetOption>(SelectPreset);
         ToggleResourceCommand = new RelayCommand<BayFilterOption>(ToggleResource);
 
         InitializeComponent();
@@ -136,35 +128,6 @@ public partial class BlockTimeSheet : BottomSheetPage
     {
         base.OnDisappearing();
         _completion.TrySetResult(new BlockTimeResult(false));
-    }
-
-    public void SelectPreset(BlockPresetOption? preset)
-    {
-        try
-        {
-            if (preset is null)
-                return;
-
-            foreach (var option in Presets)
-                option.IsSelected = ReferenceEquals(option, preset);
-
-            var (start, end) = preset.Resolve(_day);
-
-            _fromDate = start.Date;
-            _fromTime = start.TimeOfDay;
-            _untilDate = end.Date;
-            _untilTime = end.TimeOfDay;
-
-            OnPropertyChanged(nameof(FromDate));
-            OnPropertyChanged(nameof(FromTime));
-            OnPropertyChanged(nameof(UntilDate));
-            OnPropertyChanged(nameof(UntilTime));
-
-            _ = RecalculateAsync();
-        }
-        catch (Exception)
-        {
-        }
     }
 
     public void ToggleResource(BayFilterOption? resource)
