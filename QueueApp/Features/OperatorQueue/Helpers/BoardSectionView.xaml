@@ -4,13 +4,15 @@
              xmlns:models="clr-namespace:QueueApp.Features.OperatorQueue.Models"
              xmlns:helpers="clr-namespace:QueueApp.Features.OperatorQueue.Helpers"
              x:Name="Root"
+             VerticalOptions="Start"
              x:DataType="models:BoardSection"
              x:Class="QueueApp.Features.OperatorQueue.Helpers.BoardSectionView">
 
     <Border Style="{StaticResource brd16_White}"
             Margin="18,12,18,0" Padding="0"
+            VerticalOptions="Start"
             Opacity="{Binding SectionOpacity}">
-        <Grid>
+        <Grid VerticalOptions="Start">
 
             <VerticalStackLayout Spacing="0" Padding="12" IsVisible="{Binding IsExpanded}">
 
@@ -138,7 +140,6 @@
                   Padding="12,11" MinimumHeightRequest="62"
                   IsVisible="{Binding IsCollapsed}">
                 <helpers:AvatarView Grid.Column="0"
-                                    xmlns:helpers="clr-namespace:QueueApp.Features.OperatorQueue.Helpers"
                                     Initials="{Binding Initials}"
                                     ShowDot="{Binding IsOnShift}"/>
                 <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
@@ -163,7 +164,6 @@
                   Padding="12,11" MinimumHeightRequest="62"
                   IsVisible="{Binding IsOffShift}">
                 <helpers:AvatarView Grid.Column="0"
-                                    xmlns:helpers="clr-namespace:QueueApp.Features.OperatorQueue.Helpers"
                                     Initials="{Binding Initials}"/>
                 <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
                     <Label Text="{Binding Name}" Style="{StaticResource lbl16_Bold_TextDark}"/>

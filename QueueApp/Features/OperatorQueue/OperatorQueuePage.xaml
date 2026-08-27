@@ -25,27 +25,23 @@
                                       DoneTodayText="{Binding DoneTodayText}"
                                       AvgText="{Binding AvgText}"/>
 
+            <helpers:PoolBannerView IsVisible="{Binding HasPool}"
+                                    PoolStroke="{Binding PoolStroke}"
+                                    PoolStrokeThickness="{Binding PoolStrokeThickness}"
+                                    HasPool="{Binding HasPool}"
+                                    PoolCountText="{Binding PoolCountText}"
+                                    PoolAgeText="{Binding PoolAgeText}"
+                                    PoolChevron="{Binding PoolChevron}"
+                                    IsPoolExpanded="{Binding IsPoolExpanded}"
+                                    PoolRows="{Binding PoolRows}"
+                                    TogglePoolCommand="{Binding TogglePoolCommand}"
+                                    AssignCommand="{Binding AssignCommand}"
+                                    OpenRowActionsCommand="{Binding OpenRowActionsCommand}"/>
+
         </VerticalStackLayout>
 
-        <CollectionView Grid.Row="1" ItemsSource="{Binding Sections}">
-
-            <CollectionView.Header>
-                <VerticalStackLayout Spacing="0">
-
-                    <helpers:PoolBannerView PoolStroke="{Binding PoolStroke}"
-                                            PoolStrokeThickness="{Binding PoolStrokeThickness}"
-                                            HasPool="{Binding HasPool}"
-                                            PoolCountText="{Binding PoolCountText}"
-                                            PoolAgeText="{Binding PoolAgeText}"
-                                            PoolChevron="{Binding PoolChevron}"
-                                            IsPoolExpanded="{Binding IsPoolExpanded}"
-                                            PoolRows="{Binding PoolRows}"
-                                            TogglePoolCommand="{Binding TogglePoolCommand}"
-                                            AssignCommand="{Binding AssignCommand}"
-                                            OpenRowActionsCommand="{Binding OpenRowActionsCommand}"/>
-
-                </VerticalStackLayout>
-            </CollectionView.Header>
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Sections}"
+                        VerticalOptions="Start">
 
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:BoardSection">
