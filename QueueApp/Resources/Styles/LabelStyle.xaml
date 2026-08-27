@@ -68,6 +68,11 @@
         <Setter Property="FontFamily" Value="RobotoBold"/>
         <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
     </Style>
+    <Style x:Key="lbl11_Medium_White" TargetType="Label">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontFamily" Value="RobotoMedium"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+    </Style>
 
     <!-- 12 -->
     <Style x:Key="lbl12_Regular_TextLight" TargetType="Label">

@@ -39,22 +39,14 @@
                                   ReturnType="Search"/>
 
                 <!-- Live queue hero, or the quiet idle band -->
-                <helpers:LiveQueueHeroView Margin="0,16,0,16"
+                <helpers:LiveQueueHeroView Margin="0,16,0,0"
                                            IsVisible="{Binding HasActiveEntry}"
                                            ActiveEntry="{Binding ActiveEntry}"
                                            DirectionsCommand="{Binding OpenDirectionsCommand}"
                                            LeaveCommand="{Binding LeaveQueueCommand}"
                                            IsLeaving="{Binding IsLeavingQueue}"/>
-                <helpers:IdleDiscoveryBandView Margin="0,16,0,16"
+                <helpers:IdleDiscoveryBandView Margin="0,16,0,0"
                                                IsVisible="{Binding HasActiveEntry, Converter={StaticResource InvertedBoolConverter}}"/>
-
-                <!-- Categories -->
-                <!-- <Label Text="BROWSE BY CATEGORY" Style="{StaticResource SectionTitle}" Margin="0,26,0,12"/> -->
-                <helpers:CategoryCarouselView
-                    Margin="-16,16,-16,0"
-                    Categories="{Binding Categories}"
-                    SelectedCategory="{Binding SelectedCategory}"
-                    SelectCommand="{Binding SelectCategoryCommand}"/>
 
                 <!-- Upcoming bookings -->
                 <Grid ColumnDefinitions="*,Auto"
@@ -68,6 +60,14 @@
                     IsVisible="{Binding HasUpcomingBookings}"
                     Items="{Binding UpcomingBookings}"
                     CancelCommand="{Binding CancelBookingCommand}"/>
+
+                <!-- Categories -->
+                <!-- <Label Text="BROWSE BY CATEGORY" Style="{StaticResource SectionTitle}" Margin="0,26,0,12"/> -->
+                <helpers:CategoryCarouselView
+                    Margin="-16,16,-16,0"
+                    Categories="{Binding Categories}"
+                    SelectedCategory="{Binding SelectedCategory}"
+                    SelectCommand="{Binding SelectCategoryCommand}"/>
 
                 <!-- Nearby businesses -->
                 <Grid ColumnDefinitions="*,Auto"
