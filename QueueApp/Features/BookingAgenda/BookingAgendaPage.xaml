@@ -12,9 +12,9 @@
              Style="{StaticResource NavigationPageStyle}">
 
     <Grid BackgroundColor="{StaticResource DeepBackground}"
-          RowDefinitions="Auto,*">
+            RowDefinitions="Auto,*,Auto">
 
-        <VerticalStackLayout Grid.Row="0" Spacing="0">
+        <VerticalStackLayout Grid.Row="0" Spacing="0" ZIndex="1">
 
             <helpers:AgendaHeaderView BusinessName="{Binding BusinessName}"
                                       IsOpenNow="{Binding IsOpenNow}"
@@ -32,6 +32,7 @@
                                         ResourceCountLabel="{Binding ResourceCountLabel}"/>
 
             <helpers:RequestsBannerView HasRequests="{Binding HasRequests}"
+                                        IsVisible="{Binding HasRequests}"
                                         IsRequestsExpanded="{Binding IsRequestsExpanded}"
                                         RequestsCountText="{Binding RequestsCountText}"
                                         RequestsAgeText="{Binding RequestsAgeText}"
@@ -43,27 +44,18 @@
                                         ConfirmRequestCommand="{Binding ConfirmRequestCommand}"
                                         DeclineRequestCommand="{Binding DeclineRequestCommand}"/>
 
-            <helpers:BayFilterBarView Filters="{Binding BayFilters}"
+            <helpers:BayFilterBarView HeightRequest="54"
+                                      Filters="{Binding BayFilters}"
                                       SelectFilterCommand="{Binding SelectBayCommand}"/>
 
-            <helpers:NowNextCardView HasCard="{Binding HasCard}"
-                                     CardKicker="{Binding CardKicker}"
-                                     CardName="{Binding CardName}"
-                                     CardSubtitle="{Binding CardSubtitle}"
-                                     CardMeta="{Binding CardMeta}"
-                                     CardTimerText="{Binding CardTimerText}"
-                                     CardTimerCaption="{Binding CardTimerCaption}"
-                                     CardActionText="{Binding CardActionText}"
-                                     IsCardEnabled="{Binding IsCardEnabled}"
-                                     CardActionCommand="{Binding CardActionCommand}"/>
-
+          
             <Label Text="{Binding AgendaHeaderText}" Margin="18,22,18,6"
                    Style="{StaticResource lbl9_Mono_TextFaint}"/>
 
         </VerticalStackLayout>
 
         <CollectionView Grid.Row="1" ItemsSource="{Binding Rows}"
-                        VerticalOptions="Start">
+                VerticalOptions="Fill" ZIndex="0">
 
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:AgendaRow">
@@ -73,16 +65,16 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
 
-            <CollectionView.Footer>
-                <helpers:AgendaFooterView IsClosedDay="{Binding IsClosedDay}"
-                                          ClosedDayText="{Binding ClosedDayText}"
-                                          IsQuietDay="{Binding IsQuietDay}"
-                                          QuietDayText="{Binding QuietDayText}"
-                                          AddBookingCommand="{Binding AddBookingCommand}"
-                                          BlockTimeCommand="{Binding BlockTimeCommand}"/>
-            </CollectionView.Footer>
-
         </CollectionView>
+
+        <helpers:AgendaFooterView Grid.Row="2"
+                                  IsClosedDay="{Binding IsClosedDay}"
+                                  ClosedDayText="{Binding ClosedDayText}"
+                                  IsQuietDay="{Binding IsQuietDay}"
+                                  QuietDayText="{Binding QuietDayText}"
+                                  AddBookingCommand="{Binding AddBookingCommand}"
+                                  BlockTimeCommand="{Binding BlockTimeCommand}"
+                                  ZIndex="2"/>
 
     </Grid>
 
