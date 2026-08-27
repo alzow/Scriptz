@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Linq;
 
 namespace QueueApp.Converters;
 
@@ -138,6 +139,64 @@ public class ItemEqualsSelectedToColorConverter : IMultiValueConverter
             }
         }
         return Colors.Transparent;
+    }
+
+    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+// Compares the two bound values (item, currently-selected item) for equality and returns a bool —
+// used to drive scale/animation triggers for the selected item in a picker CollectionView.
+public class ItemEqualsSelectedConverter : IMultiValueConverter
+{
+    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+    {
+        return values is [var item, var selected, ..] && item is not null && Equals(item, selected);
+    }
+
+    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+// Full opacity when nothing is selected, or when this item is the selection; dimmed otherwise —
+// used to fade out the unselected siblings once a pick is made.
+public class ItemSelectionOpacityConverter : IMultiValueConverter
+{
+    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (values is not [var item, var selected, ..])
+            return 1.0;
+
+        return selected is null || Equals(item, selected) ? 1.0 : 0.4;
+    }
+
+    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class EdgeItemToMarginConverter : IMultiValueConverter
+{
+    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+    {
+        double extra = 16;
+        if (parameter is string p && double.TryParse(p, out var parsed))
+            extra = parsed;
+
+        if (values is [var item, System.Collections.IEnumerable items, ..])
+        {
+            var list = items.Cast<object>().ToList();
+            var isFirst = list.Count > 0 && Equals(list[0], item);
+            var isLast = list.Count > 0 && Equals(list[^1], item);
+            return new Thickness(isFirst ? extra : 0, 0, isLast ? extra : 0, 0);
+        }
+
+        return new Thickness(0);
     }
 
     public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)

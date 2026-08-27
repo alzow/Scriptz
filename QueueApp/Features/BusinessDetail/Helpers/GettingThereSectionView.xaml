@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Name="Root"
+             VerticalOptions="Start"
+             x:Class="QueueApp.Features.BusinessDetail.Helpers.GettingThereSectionView">
+
+    <VerticalStackLayout Spacing="0">
+
+        <Label Text="Getting there" Style="{StaticResource lbl15_Bold_TextDark}" Padding="20,22,20,10"/>
+
+        <Border Margin="20,0" Padding="13"
+                BackgroundColor="{StaticResource Surface}"
+                Stroke="{StaticResource Line}" StrokeThickness="1">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="15"/>
+            </Border.StrokeShape>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding OpenDirectionsCommand, Source={x:Reference Root}}"/>
+            </Border.GestureRecognizers>
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                <Border Grid.Column="0" WidthRequest="42" HeightRequest="42" Padding="0"
+                        BackgroundColor="{StaticResource SurfaceRaised}"
+                        Stroke="{StaticResource Line}" StrokeThickness="1">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="13"/>
+                    </Border.StrokeShape>
+                    <Image Source="ic_pin" WidthRequest="19" HeightRequest="19"
+                           HorizontalOptions="Center" VerticalOptions="Center"/>
+                </Border>
+                <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                    <Label Text="{Binding AddressLine, Source={x:Reference Root}}" Style="{StaticResource lbl14_Bold_TextDark}"/>
+                    <Label Text="{Binding DistanceText, Source={x:Reference Root}}" Style="{StaticResource lbl12_Regular_TextLight}"
+                           IsVisible="{Binding HasDistance, Source={x:Reference Root}}"/>
+                </VerticalStackLayout>
+                <Image Grid.Column="2" Source="ic_chevron_right" WidthRequest="16" HeightRequest="16"
+                       VerticalOptions="Center"/>
+            </Grid>
+        </Border>
+
+    </VerticalStackLayout>
+
+</ContentView>

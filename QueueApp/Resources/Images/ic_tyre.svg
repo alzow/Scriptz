@@ -1,10 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
-  <circle cx="32" cy="32" r="21" fill="none" stroke="#E2E9F5" stroke-width="4"/>
-  <circle cx="32" cy="32" r="12.5" fill="none" stroke="#E2E9F5" stroke-width="2.5"/>
-  <path d="M32 27 L32 21" fill="none" stroke="#39FF7A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M36.76 30.45 L42.46 28.6" fill="none" stroke="#39FF7A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M34.94 36.05 L38.47 40.9" fill="none" stroke="#39FF7A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M29.06 36.05 L25.53 40.9" fill="none" stroke="#39FF7A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M27.24 30.45 L21.54 28.6" fill="none" stroke="#39FF7A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="32" cy="32" r="3.5" fill="#39FF7A"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" fill="none">
+
+<path fill-rule="evenodd" clip-rule="evenodd" d="M48 6 a42 42 0 1 0 0.01 0 Z M48 23 a25 25 0 1 1 -0.01 0 Z" fill="#7E2B1A"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M48 11 a37 37 0 1 0 0.01 0 Z M48 18 a30 30 0 1 1 -0.01 0 Z" fill="#9A4030"/>
+  <g transform="rotate(0 48 48)"><rect x="74" y="44.5" width="9" height="7" rx="2" fill="#7E2B1A"/></g>
+  <g transform="rotate(36 48 48)"><rect x="74" y="44.5" width="9" height="7" rx="2" fill="#7E2B1A"/></g>
+  <g transform="rotate(72 48 48)"><rect x="74" y="44.5" width="9" height="7" rx="2" fill="#7E2B1A"/></g>
+  <g transform="rotate(108 48 48)"><rect x="74" y="44.5" width="9" height="7" rx="2" fill="#7E2B1A"/></g>
+  <g transform="rotate(144 48 48)"><rect x="74" y="44.5" width="9" height="7" rx="2" fill="#7E2B1A"/></g>
+  <g transform="rotate(180 48 48)"><rect x="74" y="44.5" width="9" height="7" rx="2" fill="#7E2B1A"/></g>
+  <g transform="rotate(216 48 48)"><rect x="74" y="44.5" width="9" height="7" rx="2" fill="#7E2B1A"/></g>
+  <g transform="rotate(252 48 48)"><rect x="74" y="44.5" width="9" height="7" rx="2" fill="#7E2B1A"/></g>
+  <g transform="rotate(288 48 48)"><rect x="74" y="44.5" width="9" height="7" rx="2" fill="#7E2B1A"/></g>
+  <g transform="rotate(324 48 48)"><rect x="74" y="44.5" width="9" height="7" rx="2" fill="#7E2B1A"/></g>
+  
+<circle cx="48" cy="48" r="25" fill="#F7E3BC"/>
+<g fill="#F5B93C">
+  <g transform="rotate(0 48 48)"><rect x="44" y="26" width="8" height="18" rx="4"/></g>
+  <g transform="rotate(72 48 48)"><rect x="44" y="26" width="8" height="18" rx="4"/></g>
+  <g transform="rotate(144 48 48)"><rect x="44" y="26" width="8" height="18" rx="4"/></g>
+  <g transform="rotate(216 48 48)"><rect x="44" y="26" width="8" height="18" rx="4"/></g>
+  <g transform="rotate(288 48 48)"><rect x="44" y="26" width="8" height="18" rx="4"/></g>
+</g>
+<circle cx="48" cy="48" r="10" fill="#F0562E"/>
+<circle cx="48" cy="48" r="4" fill="#F7E3BC"/>
 </svg>

@@ -121,4 +121,75 @@
         <Setter Property="CornerRadius" Value="14"/>
     </Style>
 
+    <!--
+        Operator board. One filled green per section, and it is always whatever completes the
+        customer in the chair — so Done is the only style here with a green fill. Serve and Assign
+        are outlines, and Add walk-in is a ghost, because they are secondary to it.
+    -->
+    <Style x:Key="btn16_Bold_Green" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+        <Setter Property="FontSize" Value="16.5"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="16,0"/>
+    </Style>
+
+    <Style x:Key="btn14_Bold_GreenOutline" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="BorderColor" Value="{StaticResource Green}"/>
+        <Setter Property="BorderWidth" Value="1.5"/>
+        <Setter Property="TextColor" Value="{StaticResource Green}"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="20,0"/>
+    </Style>
+
+    <Style x:Key="btn14_Bold_PurpleOutline" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="BorderColor" Value="{StaticResource Purple}"/>
+        <Setter Property="BorderWidth" Value="1.5"/>
+        <Setter Property="TextColor" Value="{StaticResource Purple}"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="18,0"/>
+    </Style>
+
+    <Style x:Key="btn12_Bold_Neutral" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="BorderColor" Value="{StaticResource Line}"/>
+        <Setter Property="BorderWidth" Value="1"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="FontSize" Value="12.5"/>
+        <Setter Property="CornerRadius" Value="11"/>
+        <Setter Property="Padding" Value="14,0"/>
+    </Style>
+
+    <!--
+        Sheet rows. 56px minimum and left-aligned, so the label reads as a list item rather than a
+        control. The two red ones only ever appear below the sheet's separator.
+    -->
+    <Style x:Key="btn15_Regular_SheetRow" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceRaised}"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="FontFamily" Value="RobotoMedium"/>
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="CornerRadius" Value="13"/>
+        <Setter Property="Padding" Value="16,0"/>
+        <Setter Property="HeightRequest" Value="56"/>
+        <Setter Property="HorizontalOptions" Value="Fill"/>
+        <Setter Property="ContentLayout" Value="Left,12"/>
+    </Style>
+
+    <Style x:Key="btn15_Bold_SheetGo" TargetType="Button" BasedOn="{StaticResource btn15_Regular_SheetRow}">
+        <Setter Property="BackgroundColor" Value="{StaticResource Green}"/>
+        <Setter Property="TextColor" Value="{StaticResource DeepBackground}"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+    </Style>
+
+    <Style x:Key="btn15_Regular_SheetBad" TargetType="Button" BasedOn="{StaticResource btn15_Regular_SheetRow}">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="TextColor" Value="{StaticResource Danger}"/>
+    </Style>
+
 </ResourceDictionary>

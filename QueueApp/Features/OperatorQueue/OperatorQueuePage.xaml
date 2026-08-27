@@ -2,10 +2,8 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.OperatorQueue"
-             xmlns:responses="clr-namespace:QueueApp.Services.Api.Queue.Models"
-             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
-             xmlns:helpers="clr-namespace:QueueApp.Features.BusinessDetail.Helpers"
-             xmlns:queueEntry="clr-namespace:QueueApp.Shared.Templates.QueueEntry"
+             xmlns:models="clr-namespace:QueueApp.Features.OperatorQueue.Models"
+             xmlns:helpers="clr-namespace:QueueApp.Features.OperatorQueue.Helpers"
              x:Name="Root"
              Title="Manage"
              IconImageSource="icon_manage_business"
@@ -13,179 +11,64 @@
              x:DataType="vm:OperatorQueuePageViewModel"
              Style="{StaticResource NavigationPageStyle}">
 
-    <Grid RowDefinitions="Auto,*">
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="16,16,16,0">
-            <Label Grid.Column="0"
-                   Text="{Binding BusinessName}"
-                   Style="{StaticResource lbl24_Bold_TextDark}"
-                   VerticalOptions="Center"/>
-            <Image Grid.Column="1"
-                   Source="ic_settings"
-                   WidthRequest="24" HeightRequest="24"
-                   VerticalOptions="Center">
-                <Image.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding OpenSettingsCommand}"/>
-                </Image.GestureRecognizers>
-            </Image>
-        </Grid>
+    <Grid BackgroundColor="{StaticResource DeepBackground}"
+          RowDefinitions="Auto,*">
 
-        <ScrollView Grid.Row="1" Orientation="Horizontal" Padding="16">
-            <CollectionView ItemsSource="{Binding Columns}"
-                             ItemsLayout="HorizontalList">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="vm:OperatorColumn">
-                        <Border x:Name="ColumnRoot"
-                                Style="{StaticResource brd16_White}"
-                                Margin="8" Padding="16" WidthRequest="300"
-                                HeightRequest="600">
-                            <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="12">
+        <VerticalStackLayout Grid.Row="0" Spacing="0">
 
-                                <Label Grid.Row="0"
-                                       Text="{Binding Operator.DisplayName}"
-                                       Style="{StaticResource lbl20_Bold_TextDark}"/>
-                                <Label Grid.Row="1"
-                                       Text="{Binding Waiting.Count, StringFormat='{0} waiting'}"
-                                       Style="{StaticResource lbl13_Bold_Orange}"/>
+            <helpers:ShopHeaderView BusinessName="{Binding BusinessName}"
+                                    IsLive="{Binding IsLive}"
+                                    OpenSettingsCommand="{Binding OpenSettingsCommand}"/>
 
-                                <controls:AlzowLoadingButton Grid.Row="2"
-                                        Text="+ Add walk-in"
-                                        Margin="0" HeightRequest="56"
-                                        Command="{Binding BindingContext.RequestAddWalkInCommand, Source={x:Reference Root}}"
-                                        CommandParameter="{Binding Operator}"
-                                        ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
+            <helpers:ShopStatsBarView WaitingCountText="{Binding WaitingCountText}"
+                                      ServingCountText="{Binding ServingCountText}"
+                                      DoneTodayText="{Binding DoneTodayText}"
+                                      AvgText="{Binding AvgText}"/>
 
-                                <!-- NOW SERVING -->
-                                <Border Grid.Row="3"
-                                        Style="{StaticResource brd12_Cream}"
-                                        Padding="12"
-                                        IsVisible="{Binding Serving, Converter={StaticResource IsNotNullConverter}}">
-                                    <VerticalStackLayout Spacing="10">
-                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
-                                            <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
-                                                <Label Text="Now serving" Style="{StaticResource lbl13_Bold_Orange}"/>
-                                                <Label Text="{Binding Serving.CustomerName}" Style="{StaticResource lbl16_Regular_TextDark}"/>
-                                            </VerticalStackLayout>
-                                            <controls:AlzowLoadingButton Grid.Column="1" Text="Done"
-                                                    LoadingText="Completing…"
-                                                    Margin="0" HeightRequest="44"
-                                                    Command="{Binding BindingContext.DoneCommand, Source={x:Reference Root}}"
-                                                    CommandParameter="{Binding Serving}"
-                                                    IsLoading="{Binding Serving.IsCompleting}"
-                                                ButtonStyle="{StaticResource SecondaryButtonStyle}"/>
-                                            <controls:AlzowLoadingButton Grid.Column="2" Text="✕"
-                                                    Margin="0" HeightRequest="44"
-                                                    Command="{Binding BindingContext.NoShowCommand, Source={x:Reference Root}}"
-                                                    CommandParameter="{Binding Serving}"
-                                                    IsLoading="{Binding Serving.IsMarkingNoShow}"
-                                                    ButtonStyle="{StaticResource DangerButtonStyle}"/>
-                                        </Grid>
+            <helpers:PoolBannerView IsVisible="{Binding HasPool}"
+                                    PoolStroke="{Binding PoolStroke}"
+                                    PoolStrokeThickness="{Binding PoolStrokeThickness}"
+                                    HasPool="{Binding HasPool}"
+                                    PoolCountText="{Binding PoolCountText}"
+                                    PoolAgeText="{Binding PoolAgeText}"
+                                    PoolChevron="{Binding PoolChevron}"
+                                    IsPoolExpanded="{Binding IsPoolExpanded}"
+                                    PoolRows="{Binding PoolRows}"
+                                    TogglePoolCommand="{Binding TogglePoolCommand}"
+                                    AssignCommand="{Binding AssignCommand}"
+                                    OpenRowActionsCommand="{Binding OpenRowActionsCommand}"/>
 
-                                        <!-- Optional, quiet — never blocks Done -->
-                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
-                                            <queueEntry:QueueEntry Grid.Column="0"
-                                                    Text="{Binding Serving.ProgressStatus}"
-                                                    Placeholder="What's happening? (optional)"/>
-                                            <controls:AlzowLoadingButton Grid.Column="1" Text="Save"
-                                                    LoadingText="Saving…"
-                                                    Margin="0" HeightRequest="44"
-                                                    Command="{Binding BindingContext.SaveProgressCommand, Source={x:Reference Root}}"
-                                                    CommandParameter="{Binding Serving}"
-                                                    IsLoading="{Binding Serving.IsSavingProgress}"
-                                                    ButtonStyle="{StaticResource TertiaryButtonStyle}"/>
-                                        </Grid>
-                                    </VerticalStackLayout>
-                                </Border>
+        </VerticalStackLayout>
 
-                                <CollectionView Grid.Row="4" ItemsSource="{Binding Waiting}">
-                                    <CollectionView.ItemTemplate>
-                                        <DataTemplate x:DataType="responses:QueueEntryResponse">
-                                            <Border Style="{StaticResource brd12_Cream}"
-                                                    Padding="12" Margin="0,4">
-                                                <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="6">
-                                                    <Label Grid.Column="0"
-                                                           Text="{Binding CustomerName}"
-                                                           VerticalOptions="Center"
-                                                           Style="{StaticResource lbl16_Regular_TextDark}"/>
-                                                    <controls:AlzowLoadingButton Grid.Column="1" Text="Serve"
-                                                            LoadingText="Serving…"
-                                                            Margin="0" HeightRequest="44"
-                                                            Command="{Binding BindingContext.ServeCommand, Source={x:Reference Root}}"
-                                                            CommandParameter="{Binding .}"
-                                                            IsLoading="{Binding IsServing}"
-                                                            IsEnabled="{Binding BindingContext.Serving, Source={x:Reference ColumnRoot}, Converter={StaticResource IsNullConverter}}"
-                                                            ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
-                                                    <controls:AlzowLoadingButton Grid.Column="2" Text="Done"
-                                                            LoadingText="Completing…"
-                                                            Margin="0" HeightRequest="44"
-                                                            Command="{Binding BindingContext.DoneCommand, Source={x:Reference Root}}"
-                                                            CommandParameter="{Binding .}"
-                                                            IsLoading="{Binding IsCompleting}"
-                                                            ButtonStyle="{StaticResource SecondaryButtonStyle}"/>
-                                                    <controls:AlzowLoadingButton Grid.Column="3" Text="✕"
-                                                            Margin="0" HeightRequest="44"
-                                                            Command="{Binding BindingContext.NoShowCommand, Source={x:Reference Root}}"
-                                                            CommandParameter="{Binding .}"
-                                                            IsLoading="{Binding IsMarkingNoShow}"
-                                                            ButtonStyle="{StaticResource DangerButtonStyle}"/>
-                                                </Grid>
-                                            </Border>
-                                        </DataTemplate>
-                                    </CollectionView.ItemTemplate>
-                                </CollectionView>
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Sections}"
+                        VerticalOptions="Start">
 
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </ScrollView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:BoardSection">
+                    <helpers:BoardSectionView
+                        EditNoteCommand="{Binding BindingContext.EditNoteCommand, Source={x:Reference Root}}"
+                        DoneCommand="{Binding BindingContext.DoneCommand, Source={x:Reference Root}}"
+                        ServeCommand="{Binding BindingContext.ServeCommand, Source={x:Reference Root}}"
+                        OpenRowActionsCommand="{Binding BindingContext.OpenRowActionsCommand, Source={x:Reference Root}}"
+                        AddWalkInCommand="{Binding BindingContext.AddWalkInCommand, Source={x:Reference Root}}"
+                        ToggleShiftCommand="{Binding BindingContext.ToggleShiftCommand, Source={x:Reference Root}}"/>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
 
-        <!-- TODO USE SKELETONS INSTEAD -->
-        <!-- <Grid Grid.Row="0" Grid.RowSpan="2" IsVisible="{Binding IsLoading}" BackgroundColor="#80000000">
-            <ActivityIndicator IsRunning="{Binding IsLoading}"
-                               Color="{StaticResource Orange}"
-                               VerticalOptions="Center"
-                               HorizontalOptions="Center"
-                               Scale="1.5"/>
-        </Grid> -->
-
-        <Border Grid.Row="0" Grid.RowSpan="2"
-                IsVisible="{Binding IsEmpty}"
-                StrokeThickness="0"
-                BackgroundColor="Transparent"
-                Padding="24"
-                VerticalOptions="Center"
-                HorizontalOptions="Center">
-            <Label Text="No customers waiting"
-                   Style="{StaticResource lbl18_Bold_TextDark}"/>
-        </Border>
-
-        <!-- Required service picker for a staff-added walk-in — appears once "+ Add walk-in" is tapped -->
-        <Grid Grid.Row="0" Grid.RowSpan="2"
-              IsVisible="{Binding ShowWalkInServicePicker}"
-              BackgroundColor="#80000000">
-            <Border Style="{StaticResource brd16_White}"
-                    Margin="24" Padding="16"
-                    VerticalOptions="Center">
-                <VerticalStackLayout Spacing="12">
-                    <Label Text="{Binding PendingWalkInOperator.DisplayName, StringFormat='Walk-in for {0}'}"
-                           Style="{StaticResource lbl18_Bold_TextDark}"/>
-                    <helpers:ServicePickerView
-                        IsSectionVisible="{Binding ShowWalkInServicePicker}"
-                        IsEmpty="{Binding IsWalkInServicesEmpty}"
-                        Services="{Binding WalkInServices}"
-                        SelectedService="{Binding SelectedWalkInService}"
-                        SelectCommand="{Binding SelectWalkInServiceCommand}"/>
-                    <controls:AlzowLoadingButton
-                        Text="Confirm"
-                        LoadingText="Adding…"
-                        Command="{Binding ConfirmAddWalkInCommand}"
-                        IsLoading="{Binding IsAddingWalkIn}"
-                        IsEnabled="{Binding SelectedWalkInService, Converter={StaticResource IsNotNullConverter}}"
-                        ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
+            <CollectionView.Footer>
+                <VerticalStackLayout Spacing="0" Padding="0,0,0,24">
+                    <Border Style="{StaticResource brd13_Ghost}" Margin="18,22,18,0" Padding="18,26"
+                            IsVisible="{Binding IsQuiet}">
+                        <Label Text="{Binding QuietText}"
+                               Style="{StaticResource lbl12_Regular_TextLight}"
+                               HorizontalTextAlignment="Center"
+                               HorizontalOptions="Center"/>
+                    </Border>
                 </VerticalStackLayout>
-            </Border>
-        </Grid>
+            </CollectionView.Footer>
+
+        </CollectionView>
+
     </Grid>
 
 </ContentPage>

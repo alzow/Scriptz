@@ -28,6 +28,9 @@ public interface IOperatorApi
     [Patch("/operators")]
     Task SetOperatorActiveAsync([AliasAs("id")] string idEq, [Body] SetOperatorActiveRequest request);
 
+    [Patch("/operators")]
+    Task SetOperatorAvailableAsync([AliasAs("id")] string idEq, [Body] SetOperatorAvailableRequest request);
+
     [Get("/operator_availability")]
     Task<List<OperatorAvailabilityResponse>> GetAvailabilityAsync(
         [AliasAs("operator_id")] string operatorIdEq,

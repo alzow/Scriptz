@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<sheets:BottomSheetPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                        xmlns:sheets="clr-namespace:QueueApp.Features.OperatorQueue.Sheets"
+                        x:Name="Root"
+                        x:Class="QueueApp.Features.OperatorQueue.Sheets.EntryActionsSheet"
+                        x:DataType="sheets:EntryActionsSheet">
+
+    <Border VerticalOptions="End"
+            Style="{StaticResource brd22_Sheet}" Padding="16,10,16,26">
+        <ScrollView>
+        <VerticalStackLayout Spacing="0">
+
+            <Border BackgroundColor="{StaticResource Line}" StrokeThickness="0"
+                    WidthRequest="38" HeightRequest="4" Margin="0,0,0,16"
+                    HorizontalOptions="Center">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="2"/>
+                </Border.StrokeShape>
+            </Border>
+
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="0,0,0,14">
+                <Border Grid.Column="0" WidthRequest="48" HeightRequest="48"
+                        BackgroundColor="{StaticResource SurfaceRaised}"
+                        Stroke="{StaticResource Line}" StrokeThickness="1"
+                        StrokeShape="Ellipse">
+                    <Label Text="{Binding Initials, Source={x:Reference Root}}"
+                           Style="{StaticResource lbl12_Mono_TextPrimary}"
+                           HorizontalOptions="Center" VerticalOptions="Center"/>
+                </Border>
+
+                <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                    <Label Text="{Binding CustomerName, Source={x:Reference Root}}"
+                           Style="{StaticResource lbl16_Bold_TextDark}"/>
+                    <Label Text="{Binding SubText, Source={x:Reference Root}}"
+                           Style="{StaticResource lbl11_Regular_TextLight}"/>
+                </VerticalStackLayout>
+
+            </Grid>
+
+            <BoxView HeightRequest="1" Color="{StaticResource Line}" Margin="0,0,0,14"/>
+
+            <Button Text="Serve now"
+                    Style="{StaticResource btn15_Bold_SheetGo}"
+                    IsVisible="{Binding CanServe, Source={x:Reference Root}}"
+                    Clicked="OnServeClicked"/>
+
+            <Button Text="Move to another barber" Margin="0,9,0,0"
+                    Style="{StaticResource btn15_Regular_SheetRow}"
+                    Clicked="OnMoveOperatorClicked"/>
+
+            <Button Text="Move to end of queue" Margin="0,9,0,0"
+                    Style="{StaticResource btn15_Regular_SheetRow}"
+                    IsVisible="{Binding CanReorder, Source={x:Reference Root}}"
+                    Clicked="OnMoveToEndClicked"/>
+
+            <Button Text="Change service" Margin="0,9,0,0"
+                    Style="{StaticResource btn15_Regular_SheetRow}"
+                    Clicked="OnChangeServiceClicked"/>
+
+            <BoxView HeightRequest="1" Color="{StaticResource Line}" Margin="0,16,0,4"/>
+
+            <Button Text="Mark no-show" Margin="0,9,0,0"
+                    Style="{StaticResource btn15_Regular_SheetBad}"
+                    Clicked="OnNoShowClicked"/>
+
+            <Button Text="Remove from queue" Margin="0,9,0,0"
+                    Style="{StaticResource btn15_Regular_SheetBad}"
+                    Clicked="OnRemoveClicked"/>
+
+        </VerticalStackLayout>
+        </ScrollView>
+    </Border>
+
+</sheets:BottomSheetPage>

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:QueueApp.Features.OperatorQueue.Models"
+             xmlns:helpers="clr-namespace:QueueApp.Features.OperatorQueue.Helpers"
+             x:Name="Root"
+             VerticalOptions="Start"
+             x:DataType="models:BoardSection"
+             x:Class="QueueApp.Features.OperatorQueue.Helpers.BoardSectionView">
+
+    <Border Style="{StaticResource brd16_White}"
+            Margin="18,12,18,0" Padding="0"
+            VerticalOptions="Start"
+            Opacity="{Binding SectionOpacity}">
+        <Grid VerticalOptions="Start">
+
+            <VerticalStackLayout Spacing="0" Padding="12" IsVisible="{Binding IsExpanded}">
+
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="11" Padding="0,0,0,11">
+                    <helpers:AvatarView Grid.Column="0"
+                                        Initials="{Binding Initials}"
+                                        ShowDot="{Binding IsOnShift}"/>
+                    <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                        <Label Text="{Binding Name}" Style="{StaticResource lbl16_Bold_TextDark}"/>
+                        <Label Text="{Binding StatusText}"
+                               TextColor="{Binding StatusColor}"
+                               Style="{StaticResource lbl11_Regular_TextLight}"/>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <BoxView HeightRequest="1" Color="{StaticResource Line}" Margin="0,0,0,11"/>
+
+                <Border Style="{StaticResource brd14_Serving}" Padding="13"
+                        IsVisible="{Binding HasServing}">
+                    <ContentView BindingContext="{Binding Serving}">
+                    <VerticalStackLayout Spacing="0" x:DataType="models:ServingCardItem">
+
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" Spacing="0">
+                                <Label Text="NOW SERVING" Style="{StaticResource lbl9_Mono_Green}"
+                                       Margin="0,0,0,6"/>
+                                <Label Text="{Binding CustomerName}" Style="{StaticResource lbl17_Bold_TextDark}"/>
+                                <Label Text="{Binding ServiceText}" Style="{StaticResource lbl12_Regular_TextLight}"
+                                       Margin="0,4,0,0"/>
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Grid.Column="1" Spacing="3" HorizontalOptions="End">
+                                <Label Text="{Binding ElapsedText}" Style="{StaticResource lbl20_Mono_Green}"
+                                       HorizontalOptions="End"/>
+                                <Label Text="{Binding EstimateText}" Style="{StaticResource lbl9_Mono_TextFaint}"
+                                       IsVisible="{Binding HasEstimate}"
+                                       HorizontalOptions="End"/>
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <Border BackgroundColor="{StaticResource Surface}" StrokeThickness="0"
+                                Padding="11,9" Margin="0,11,0,0" MinimumHeightRequest="44">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10"/>
+                            </Border.StrokeShape>
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="7">
+                                <Image Grid.Column="0" Source="ic_edit" WidthRequest="14" HeightRequest="14"
+                                       VerticalOptions="Center"/>
+                                <Label Grid.Column="1" Text="{Binding NoteText}"
+                                       Style="{StaticResource lbl11_Regular_TextLight}"
+                                       VerticalOptions="Center"/>
+                            </Grid>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding EditNoteCommand, Source={x:Reference Root}}"
+                                    CommandParameter="{Binding .}"/>
+                            </Border.GestureRecognizers>
+                        </Border>
+
+                        <Button Text="Done" HeightRequest="56" Margin="0,12,0,0"
+                                Style="{StaticResource btn16_Bold_Green}"
+                                IsEnabled="{Binding IsEnabled}"
+                                Command="{Binding DoneCommand, Source={x:Reference Root}}"
+                                CommandParameter="{Binding .}"/>
+
+                    </VerticalStackLayout>
+                    </ContentView>
+                </Border>
+
+                <VerticalStackLayout Spacing="0" BindableLayout.ItemsSource="{Binding Waiting}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:QueueRowItem">
+                            <Border Style="{StaticResource brd13_Raised}"
+                                    Padding="10" Margin="0,9,0,0" MinimumHeightRequest="66">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="11">
+                                    <Border Grid.Column="0" WidthRequest="26" HeightRequest="26"
+                                            BackgroundColor="{StaticResource Surface}" StrokeThickness="0"
+                                            VerticalOptions="Center"
+                                            IsVisible="{Binding ShowPosition}">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="9"/>
+                                        </Border.StrokeShape>
+                                        <Label Text="{Binding PositionText}"
+                                               Style="{StaticResource lbl11_Bold_TextMid}"
+                                               HorizontalOptions="Center" VerticalOptions="Center"/>
+                                    </Border>
+
+                                    <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                        <Label Text="{Binding CustomerName}" Style="{StaticResource lbl15_Bold_TextDark}"/>
+                                        <Label Text="{Binding SubText}" Style="{StaticResource lbl11_Regular_TextLight}"/>
+                                    </VerticalStackLayout>
+
+                                    <Button Grid.Column="2" Text="Serve" HeightRequest="46"
+                                            Style="{StaticResource btn14_Bold_GreenOutline}"
+                                            VerticalOptions="Center"
+                                            IsVisible="{Binding ShowServe}"
+                                            IsEnabled="{Binding IsServeEnabled}"
+                                            Command="{Binding ServeCommand, Source={x:Reference Root}}"
+                                            CommandParameter="{Binding .}"/>
+                                </Grid>
+
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding OpenRowActionsCommand, Source={x:Reference Root}}"
+                                        CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <Border Style="{StaticResource brd13_Ghost}" Padding="14" Margin="0,9,0,0">
+                    <Label Text="+ Add walk-in" Style="{StaticResource lbl13_Bold_Green}"
+                           HorizontalOptions="Center"/>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Command="{Binding AddWalkInCommand, Source={x:Reference Root}}"
+                            CommandParameter="{Binding .}"/>
+                    </Border.GestureRecognizers>
+                </Border>
+
+            </VerticalStackLayout>
+
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="11"
+                  Padding="12,11" MinimumHeightRequest="62"
+                  IsVisible="{Binding IsCollapsed}">
+                <helpers:AvatarView Grid.Column="0"
+                                    Initials="{Binding Initials}"
+                                    ShowDot="{Binding IsOnShift}"/>
+                <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                    <Label Text="{Binding Name}" Style="{StaticResource lbl16_Bold_TextDark}"/>
+                    <Label Text="{Binding StatusText}"
+                           TextColor="{Binding StatusColor}"
+                           Style="{StaticResource lbl11_Regular_TextLight}"/>
+                </VerticalStackLayout>
+                <Border Grid.Column="2" WidthRequest="44" HeightRequest="44"
+                        Style="{StaticResource brd13_Ghost}" VerticalOptions="Center">
+                    <Image Source="ic_plus" WidthRequest="18" HeightRequest="18"
+                           HorizontalOptions="Center" VerticalOptions="Center"/>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Command="{Binding AddWalkInCommand, Source={x:Reference Root}}"
+                            CommandParameter="{Binding .}"/>
+                    </Border.GestureRecognizers>
+                </Border>
+            </Grid>
+
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="11"
+                  Padding="12,11" MinimumHeightRequest="62"
+                  IsVisible="{Binding IsOffShift}">
+                <helpers:AvatarView Grid.Column="0"
+                                    Initials="{Binding Initials}"/>
+                <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                    <Label Text="{Binding Name}" Style="{StaticResource lbl16_Bold_TextDark}"/>
+                    <Label Text="{Binding StatusText}" Style="{StaticResource lbl11_Regular_TextLight}"/>
+                </VerticalStackLayout>
+                <Button Grid.Column="2" Text="On shift" HeightRequest="44"
+                        Style="{StaticResource btn12_Bold_Neutral}"
+                        VerticalOptions="Center"
+                        IsEnabled="{Binding IsShiftToggleEnabled}"
+                        Command="{Binding ToggleShiftCommand, Source={x:Reference Root}}"
+                        CommandParameter="{Binding .}"/>
+            </Grid>
+
+        </Grid>
+    </Border>
+
+</ContentView>
