@@ -6,11 +6,6 @@
              VerticalOptions="Start"
              x:Class="QueueApp.Features.OperatorQueue.Helpers.PoolBannerView">
 
-    <!--
-        The shared pool. A banner, not a column: as a column it was a peer of the barbers and sat
-        in the path of every swipe while being neither a person nor a queue. Absent when empty —
-        not an empty state.
-    -->
     <Border Style="{StaticResource brd16_Pool}"
             Stroke="{Binding PoolStroke, Source={x:Reference Root}}"
             StrokeThickness="{Binding PoolStrokeThickness, Source={x:Reference Root}}"
@@ -22,7 +17,7 @@
                   Padding="14,13" MinimumHeightRequest="60"
                   BackgroundColor="Transparent">
                 <Border Grid.Column="0" WidthRequest="38" HeightRequest="38"
-                        BackgroundColor="#24A45EFF" StrokeThickness="0"
+                        BackgroundColor="{StaticResource PurpleBadgeFill}" StrokeThickness="0"
                         VerticalOptions="Center">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="12"/>
@@ -33,7 +28,6 @@
 
                 <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
                     <Label Text="{Binding PoolCountText, Source={x:Reference Root}}" Style="{StaticResource lbl15_Bold_Purple}"/>
-                    <!-- Starvation, made visible: nothing forces the oldest to be taken. -->
                     <Label Text="{Binding PoolAgeText, Source={x:Reference Root}}" Style="{StaticResource lbl11_Regular_TextLight}"/>
                 </VerticalStackLayout>
 
@@ -69,10 +63,6 @@
                                         CommandParameter="{Binding .}"/>
                             </Grid>
 
-                            <!--
-                                Same as a section row: the rest of what can be done to this
-                                customer is behind the sheet, not on the banner.
-                            -->
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer
                                     Command="{Binding OpenRowActionsCommand, Source={x:Reference Root}}"

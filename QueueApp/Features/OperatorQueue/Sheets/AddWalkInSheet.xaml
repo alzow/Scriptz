@@ -8,11 +8,6 @@
                         x:Class="QueueApp.Features.OperatorQueue.Sheets.AddWalkInSheet"
                         x:DataType="sheets:AddWalkInSheet">
 
-    <!--
-        This Border is the page Content on purpose: a wrapper that filled the page would put every
-        tap inside Content's bounds and stop the sheet dismissing on a background tap. See
-        BottomSheetPage.
-    -->
     <Border VerticalOptions="End"
             Style="{StaticResource brd22_Sheet}" Padding="16,10,16,26">
         <ScrollView>
@@ -26,17 +21,11 @@
                     </Border.StrokeShape>
                 </Border>
 
-                <!-- Names whose queue this joins, so a shared phone can't add to the wrong one. -->
                 <Label Text="{Binding TitleText, Source={x:Reference Root}}"
                        Style="{StaticResource lbl18_Bold_TextDark}"/>
 
                 <BoxView HeightRequest="1" Color="{StaticResource Line}" Margin="0,14"/>
 
-                <!--
-                    Optional. queue_entries.customer_name is nullable text, and leaving this
-                    blank leaves it null — the board shows "Walk-in" for a nameless entry
-                    rather than the name being written as one.
-                -->
                 <queueEntry:QueueEntry Text="{Binding CustomerName, Source={x:Reference Root}, Mode=TwoWay}"
                                        Placeholder="Name (optional)"
                                        MaxLength="60"/>
@@ -80,7 +69,6 @@
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
 
-                <!-- The outcome, before committing to it. -->
                 <Border Style="{StaticResource brd13_Raised}" Padding="13" Margin="0,8,0,0"
                         IsVisible="{Binding HasOutcome, Source={x:Reference Root}}">
                     <VerticalStackLayout Spacing="4">
@@ -91,10 +79,6 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <!--
-                    A walk-in has no customer_id, so there is no push and no realtime for them.
-                    Say so, or the operator will assume the app told them.
-                -->
                 <Label Text="They won't get a notification — give them a rough time out loud."
                        Style="{StaticResource lbl11_Regular_TextLight}"
                        Margin="2,12,2,0"/>

@@ -5,7 +5,6 @@
              VerticalOptions="Start"
              x:Class="QueueApp.Features.OperatorQueue.Helpers.ShopStatsBarView">
 
-    <!-- Avg is an em-dash until operator_avg_minutes has enough history. -->
     <Border Style="{StaticResource brd14_White}" Margin="18,13,18,0" Padding="4,10">
         <Grid ColumnDefinitions="*,Auto,*,Auto,*,Auto,*">
             <VerticalStackLayout Grid.Column="0" Spacing="4" HorizontalOptions="Center">

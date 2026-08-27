@@ -18,24 +18,35 @@ using QueueApp.Services.Storage;
 
 namespace QueueApp.Features.OperatorQueue;
 
-// The shop board. One phone, on a counter, picked up by whoever's hands are free.
-//
-// Everything here is a client-side grouping of one stream: _entries is the board's source of
-// truth, Rebuild() derives the sections and the pool from it, and every mutation updates _entries
-// first so the screen moves on the tap rather than on the round trip. The realtime event that
-// follows re-reads and rebuilds, which is also what puts the board right if a call failed.
 public partial class OperatorQueuePageViewModel : BaseViewModel
 {
-    private readonly IQueueService _queueService;
-    private readonly IBusinessService _businessService;
-    private readonly IOperatorService _operatorService;
-    private readonly IServiceOfferingsService _serviceOfferingsService;
-    private readonly IQueueRealtimeService _realtimeService;
-    private readonly IQueuePopupService _popupService;
+    public ObservableCollection<BoardSection> Sections { get; } = new();
+    public ObservableCollection<QueueRowItem> PoolRows { get; } = new();
+
+    public string BusinessName { get; set; } = "Queue";
+    public bool IsLoading { get; set; }
+
+    public string WaitingCountText { get; set; } = "0";
+    public string ServingCountText { get; set; } = "0";
+    public string DoneTodayText { get; set; } = "0";
+    public string AvgText { get; set; } = BoardConstants.EmDash;
+
+    public bool HasPool => PoolRows.Count > 0;
+    public bool IsPoolExpanded { get; set; }
+    public string PoolCountText { get; set; } = string.Empty;
+    public string PoolAgeText { get; set; } = string.Empty;
+    public bool IsPoolUrgent { get; set; }
+    public Brush PoolStroke => IsPoolUrgent ? BoardPalette.PurpleStroke : BoardPalette.PurpleDimStroke;
+    public double PoolStrokeThickness => IsPoolUrgent ? 1.5 : 1;
+    public string PoolChevron => IsPoolExpanded ? "ic_chevron_up" : "ic_chevron_down";
+
+    public bool IsQuiet { get; set; }
+    public string QuietText { get; set; } = string.Empty;
+
+    public bool IsLive => true;
+
     private readonly SemaphoreSlim _loadLock = new(1, 1);
 
-    // One timer for the whole page. Not one per section — five sections would otherwise mean five
-    // timers ticking five times a second between them.
     private IDispatcherTimer? _tickTimer;
     private int _ticks;
 
@@ -45,44 +56,12 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     private List<QueueEntryResponse> _entries = new();
     private List<QueueSummaryRow> _summary = new();
 
-    public ObservableCollection<BoardSection> Sections { get; } = new();
-    public ObservableCollection<QueueRowItem> PoolRows { get; } = new();
-
-    public string BusinessName { get; set; } = "Queue";
-    public bool IsLoading { get; set; }
-
-    // ── Shop stats ────────────────────────────────────────────────────────────
-    public string WaitingCountText { get; set; } = "0";
-    public string ServingCountText { get; set; } = "0";
-    public string DoneTodayText { get; set; } = "0";
-
-    // Em-dash rather than an invented number: operator_avg_minutes returns null until an operator
-    // has enough completed services behind them, and a made-up average is worse than no average.
-    public string AvgText { get; set; } = BoardConstants.EmDash;
-
-    // ── Shared pool ───────────────────────────────────────────────────────────
-    public bool HasPool => PoolRows.Count > 0;
-    public bool IsPoolExpanded { get; set; }
-    public string PoolCountText { get; set; } = string.Empty;
-    public string PoolAgeText { get; set; } = string.Empty;
-
-    // Past the starvation threshold the banner border goes to full purple. Nothing forces anyone
-    // to take from the pool — a customer chose "any available" because it promised the shortest
-    // wait and can sit there while both barbers work their own lists. This readout is the minimum
-    // honest response to that.
-    public bool IsPoolUrgent { get; set; }
-
-    // Precomputed rather than run through a converter, so the banner's border is a plain property
-    // read. Full purple past the threshold; the dim edge below it.
-    public Brush PoolStroke => IsPoolUrgent ? BoardPalette.PurpleStroke : BoardPalette.PurpleDimStroke;
-    public double PoolStrokeThickness => IsPoolUrgent ? 1.5 : 1;
-    public string PoolChevron => IsPoolExpanded ? "ic_chevron_up" : "ic_chevron_down";
-
-    // ── Quiet / paused ────────────────────────────────────────────────────────
-    public bool IsQuiet { get; set; }
-    public string QuietText { get; set; } = string.Empty;
-
-    public bool IsLive => true;
+    private readonly IQueueService _queueService;
+    private readonly IBusinessService _businessService;
+    private readonly IOperatorService _operatorService;
+    private readonly IServiceOfferingsService _serviceOfferingsService;
+    private readonly IQueueRealtimeService _realtimeService;
+    private readonly IQueuePopupService _popupService;
 
     public OperatorQueuePageViewModel(
         INavigationService navigationService,
@@ -102,6 +81,8 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         _realtimeService = realtimeService;
         _popupService = popupService;
     }
+
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
@@ -128,9 +109,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     {
         await base.OnAppearingAsync();
 
-        // One subscription for the page, scoped to business_id. Every section — the pool included
-        // — is a grouping of this one stream, so there is nothing to subscribe per operator.
-        // The table goes through the parameterised argument rather than being hardcoded here.
         await _realtimeService.SubscribeAsync("business_id", _businessId.ToString(),
             async () => await MainThread.InvokeOnMainThreadAsync(LoadQueueAsync));
 
@@ -175,8 +153,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
     }
 
-    // The stats strip is decoration on top of a working board: a read that fails must not take the
-    // queue down with it, so this degrades to zero done and an em-dash average.
     private async Task<List<QueueEntryResponse>> SafeCompletedTodayAsync()
     {
         try
@@ -190,15 +166,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
     }
 
-    // Mean time in the chair across today's completed visits, measured from the two timestamps the
-    // engine already writes. Deliberately not operator_avg_minutes: that function is per operator,
-    // there is no shop-level equivalent, and its actual parameter name doesn't match what the
-    // schema notes imply — calling it 404s once per operator on every load and every realtime
-    // event. Derived here from serving_at/done_at, which are verified columns, in the same single
-    // read that backs "Done today".
-    //
-    // The >= 3 floor mirrors the guard inside operator_avg_minutes: below that the number says
-    // more about one long haircut than about the shop, and an em-dash is the honest answer.
     private static double? AverageServiceMinutes(List<QueueEntryResponse> completed)
     {
         var durations = completed
@@ -212,8 +179,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
 
     // ── Building the board ────────────────────────────────────────────────────
 
-    // Operators render in sort_order regardless of state — only heights move. Not by busyness, not
-    // by urgency, not by who's serving. A barber should never have to look for himself.
     private void Rebuild()
     {
         Sections.Clear();
@@ -250,8 +215,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
             IsExpanded = expanded,
             Serving = serving is null ? null : BuildServingCard(serving),
             StatusText = StatusTextFor(onShift, serving is not null, waiting.Count),
-            // Ink when somebody is waiting, muted when nobody is. Never purple — purple on this
-            // screen belongs to the unassigned pool and nothing else.
             StatusColor = waiting.Count > 0 ? BoardPalette.Ink : BoardPalette.Muted,
         };
 
@@ -270,8 +233,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                 JoinedAtText = BoardConstants.AsUtc(entry.JoinedAt).ToLocalTime().ToString("HH:mm"),
                 PositionText = (i + 1).ToString(),
                 ShowPosition = true,
-                // Only the top row carries an inline Serve. Everything below it opens the sheet,
-                // which is where anything destructive lives.
                 ShowServe = i == 0,
                 SubText = QueueRowItem.BuildSubText(
                     ServiceNameOf(entry.ServiceId),
@@ -297,8 +258,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
             ServiceId = entry.ServiceId,
             CustomerName = DisplayNameOf(entry),
             ServiceText = serviceText,
-            // Falls back to joined_at when serving_at hasn't come back yet, so the card always has
-            // a timer rather than a blank where one should be.
             ServingAt = entry.ServingAt ?? entry.JoinedAt,
             EstimateText = service is null ? string.Empty : $"of ~{service.EstMinutes}m",
             HasEstimate = service is not null,
@@ -310,8 +269,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         return card;
     }
 
-    // The pool is a banner, not a column: it isn't a peer of the barbers, it's an exception to be
-    // cleared. Absent when empty — not an empty state.
     private void RebuildPool()
     {
         PoolRows.Clear();
@@ -394,13 +351,10 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     {
         RefreshTickText();
 
-        // The presence heartbeat rides the same timer rather than running one of its own.
         if (++_ticks % BoardConstants.HeartbeatTicks == 0)
             _ = _businessService.HeartbeatAsync(_businessId);
     }
 
-    // Only touches text that has actually changed — the items guard their own setters, so a card
-    // whose minute hasn't turned over doesn't re-notify and doesn't re-layout.
     private void RefreshTickText()
     {
         foreach (var section in Sections)
@@ -446,9 +400,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         OnPropertyChanged(nameof(PoolChevron));
     }
 
-    // Done is the only filled green on the board, and it is the action pressed forty times a day.
-    // It deliberately does not auto-advance: on a shared counter phone the next customer usually
-    // isn't in the chair yet, and auto-starting would run the clock on someone standing outside.
     [RelayCommand]
     private async Task DoneAsync(ServingCardItem? card)
     {
@@ -497,15 +448,12 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
     }
 
-    // Assigning and serving are different acts. This sets operator_id and stops there — with a
-    // shared counter phone the app cannot know who's holding it, which is why the sheet asks.
     [RelayCommand]
     private async Task AssignAsync(QueueRowItem? row)
     {
         if (row is null || row.IsBusy)
             return;
 
-        // The row may have been rebuilt out from under this tap by a realtime event.
         if (_entries.All(e => e.Id != row.EntryId))
             return;
 
@@ -599,8 +547,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
     }
 
-    // Offers the shared pool as a destination when the entry isn't already in it: sending one back
-    // to operator_id = null is a real move, not an accident, so it has to be offered.
     private async Task MoveToAnotherOperatorAsync(QueueRowItem row)
     {
         var sheet = new AssignSheet(
@@ -661,8 +607,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
     }
 
-    // Both destructive actions confirm, and both are reachable only from inside a sheet. Neither
-    // has an undo: a mis-tap ejects someone who has physically stood there for fourteen minutes.
     private async Task ConfirmNoShowAsync(Guid entryId, string customerName)
     {
         var confirmed = await _popupService.ShowConfirmAsync("No-show", $"Mark {customerName} as a no-show?");
@@ -698,8 +642,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
     }
 
-    // One tappable line rather than an always-open input with its own Save button — the note is an
-    // occasional action and shouldn't spend a third of the serving card on being available.
     [RelayCommand]
     private async Task EditNoteAsync(ServingCardItem? card)
     {
@@ -781,9 +723,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         try
         {
             await _operatorService.SetOperatorAvailableAsync(section.OperatorId, !section.IsOnShift);
-
-            // operators isn't on the realtime subscription — that stream is queue_entries — so a
-            // shift change has to pull the board rather than wait to be told.
             await LoadQueueAsync();
         }
         catch (Exception ex)
@@ -798,9 +737,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    // Optimistic write against the board's own copy of the stream, then an immediate rebuild, so
-    // the screen moves on the tap. The realtime event that follows the real call re-reads and
-    // overwrites this — including when the call failed and the optimism was wrong.
     private void ApplyLocally(Guid entryId, Action<QueueEntryResponse> mutate)
     {
         var entry = _entries.FirstOrDefault(e => e.Id == entryId);
@@ -847,8 +783,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
             });
         }
 
-        // Soonest first — this sheet is the one place on the board where ordering by availability
-        // is the point, because the question it asks is who can take the customer first.
         var ordered = targets.OrderBy(t => t.SortWaitMinutes).ThenBy(t => t.Name).ToList();
 
         var soonest = ordered.FirstOrDefault(t => t.IsSelectable);
@@ -897,8 +831,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         (true, false, var n) => $"{n} waiting",
     };
 
-    // A walk-in with no name stays null in the database; the fallback lives here, at display time,
-    // so a name that was given is the name that shows.
     private static string DisplayNameOf(QueueEntryResponse entry) =>
         string.IsNullOrWhiteSpace(entry.CustomerName) ? "Walk-in" : entry.CustomerName!;
 
@@ -919,9 +851,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
             : $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
     }
 
-    // Base HandleExceptionAsync only logs — this screen already has a popup service on hand, so use
-    // it to surface real failures, most notably start_serving's "all resources are currently busy"
-    // on a pooled business at capacity. That's a normal operational state for staff, not a fault.
     protected override Task HandleExceptionAsync(Exception exception)
     {
         return _popupService.ShowAlertAsync("Couldn't do that", GetFriendlyErrorMessage(exception));

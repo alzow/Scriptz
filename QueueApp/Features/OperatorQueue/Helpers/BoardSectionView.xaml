@@ -7,17 +7,11 @@
              x:DataType="models:BoardSection"
              x:Class="QueueApp.Features.OperatorQueue.Helpers.BoardSectionView">
 
-    <!--
-        Padding lives on the three state layouts, not here: a collapsed row carries its own 12,11
-        and has to come out at 62px total, which it can't do if the section border adds another
-        12 around it.
-    -->
     <Border Style="{StaticResource brd16_White}"
             Margin="18,12,18,0" Padding="0"
             Opacity="{Binding SectionOpacity}">
         <Grid>
 
-            <!-- ── Expanded: serving, or has a queue ──────────────────── -->
             <VerticalStackLayout Spacing="0" Padding="12" IsVisible="{Binding IsExpanded}">
 
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="11" Padding="0,0,0,11">
@@ -34,14 +28,8 @@
 
                 <BoxView HeightRequest="1" Color="{StaticResource Line}" Margin="0,0,0,11"/>
 
-                <!-- ── Now serving ────────────────────────────────────── -->
                 <Border Style="{StaticResource brd14_Serving}" Padding="13"
                         IsVisible="{Binding HasServing}">
-                    <!--
-                        BindingContext is resolved against the section; the card's own x:DataType
-                        goes one level in, so the compiler doesn't try to find Serving on
-                        ServingCardItem itself.
-                    -->
                     <ContentView BindingContext="{Binding Serving}">
                     <VerticalStackLayout Spacing="0" x:DataType="models:ServingCardItem">
 
@@ -54,11 +42,6 @@
                                        Margin="0,4,0,0"/>
                             </VerticalStackLayout>
 
-                            <!--
-                                Counts up, not down. Honest when a cut overruns, and it is what
-                                eventually trains operator_avg_minutes. It never turns red:
-                                nagging a barber mid-haircut serves nobody.
-                            -->
                             <VerticalStackLayout Grid.Column="1" Spacing="3" HorizontalOptions="End">
                                 <Label Text="{Binding ElapsedText}" Style="{StaticResource lbl20_Mono_Green}"
                                        HorizontalOptions="End"/>
@@ -68,7 +51,6 @@
                             </VerticalStackLayout>
                         </Grid>
 
-                        <!-- One tappable line, not an always-open input with a Save button. -->
                         <Border BackgroundColor="{StaticResource Surface}" StrokeThickness="0"
                                 Padding="11,9" Margin="0,11,0,0" MinimumHeightRequest="44">
                             <Border.StrokeShape>
@@ -88,11 +70,6 @@
                             </Border.GestureRecognizers>
                         </Border>
 
-                        <!--
-                            The only filled green in the section, and the one action pressed
-                            forty times a day. It does not auto-advance: the barber taps Done,
-                            sweeps up, calls the next person, then taps Serve.
-                        -->
                         <Button Text="Done" HeightRequest="56" Margin="0,12,0,0"
                                 Style="{StaticResource btn16_Bold_Green}"
                                 IsEnabled="{Binding IsEnabled}"
@@ -103,7 +80,6 @@
                     </ContentView>
                 </Border>
 
-                <!-- ── Waiting ────────────────────────────────────────── -->
                 <VerticalStackLayout Spacing="0" BindableLayout.ItemsSource="{Binding Waiting}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="models:QueueRowItem">
@@ -127,12 +103,6 @@
                                         <Label Text="{Binding SubText}" Style="{StaticResource lbl11_Regular_TextLight}"/>
                                     </VerticalStackLayout>
 
-                                    <!--
-                                        Only the top row carries this. Everything else opens the
-                                        actions sheet on tap — three live targets per row, one of
-                                        them a red ✕ a thumb's width from Serve, is too much live
-                                        surface on a screen tapped all day.
-                                    -->
                                     <Button Grid.Column="2" Text="Serve" HeightRequest="46"
                                             Style="{StaticResource btn14_Bold_GreenOutline}"
                                             VerticalOptions="Center"
@@ -152,7 +122,6 @@
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
 
-                <!-- A ghost, not a filled green: the least frequent action in the section. -->
                 <Border Style="{StaticResource brd13_Ghost}" Padding="14" Margin="0,9,0,0">
                     <Label Text="+ Add walk-in" Style="{StaticResource lbl13_Bold_Green}"
                            HorizontalOptions="Center"/>
@@ -165,7 +134,6 @@
 
             </VerticalStackLayout>
 
-            <!-- ── Collapsed: on shift, nobody waiting, chair empty ───── -->
             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="11"
                   Padding="12,11" MinimumHeightRequest="62"
                   IsVisible="{Binding IsCollapsed}">
@@ -191,7 +159,6 @@
                 </Border>
             </Grid>
 
-            <!-- ── Off shift ──────────────────────────────────────────── -->
             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="11"
                   Padding="12,11" MinimumHeightRequest="62"
                   IsVisible="{Binding IsOffShift}">

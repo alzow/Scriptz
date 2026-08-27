@@ -3,9 +3,6 @@ using QueueApp.Services.Popup;
 
 namespace QueueApp.Features.OperatorQueue.Sheets;
 
-// Everything a row can do that isn't its one inline Serve. Rows on the board carry at most one
-// live target each; this is where the rest lives, with the two destructive actions kept below a
-// separator so neither can be reached by a slipped thumb aimed at Serve.
 public partial class EntryActionsSheet : BottomSheetPage
 {
     private readonly IQueuePopupService _popups;
@@ -19,8 +16,6 @@ public partial class EntryActionsSheet : BottomSheetPage
 
     public Task<EntryAction> Completion => _completion.Task;
 
-    // Parameterless ctor so the assembly-wide page scan in NavigationStartup can register the type
-    // without needing to construct it. Sheets are always created directly, never navigated to.
     public EntryActionsSheet() : this(null!, string.Empty, string.Empty, string.Empty, false, false)
     {
     }
@@ -43,9 +38,6 @@ public partial class EntryActionsSheet : BottomSheetPage
         InitializeComponent();
     }
 
-    // Covers every way out that isn't one of the buttons below — a background tap, or the sheet
-    // being torn down while it's open. TrySetResult, because the buttons close the sheet
-    // themselves and will already have set a result by the time this runs.
     protected override void OnDisappearing()
     {
         base.OnDisappearing();

@@ -6,8 +6,6 @@ using QueueApp.Services.Popup;
 
 namespace QueueApp.Features.OperatorQueue.Sheets;
 
-// Correcting the service on an entry that's already in the queue. One tap commits — there's no
-// second confirm, because changing a service is cheap to undo by changing it again.
 public partial class ChangeServiceSheet : BottomSheetPage
 {
     private readonly IQueuePopupService _popups;
@@ -19,7 +17,6 @@ public partial class ChangeServiceSheet : BottomSheetPage
 
     public Task<Guid?> Completion => _completion.Task;
 
-    // Parameterless ctor so the assembly-wide page scan in NavigationStartup can register the type.
     public ChangeServiceSheet() : this(null!, string.Empty, [])
     {
     }

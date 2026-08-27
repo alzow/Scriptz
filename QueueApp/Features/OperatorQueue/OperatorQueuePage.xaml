@@ -14,7 +14,6 @@
     <Grid BackgroundColor="{StaticResource DeepBackground}"
           RowDefinitions="Auto,*">
 
-        <!-- Pinned: shop identity, live counts, and the paused notice never scroll away. -->
         <VerticalStackLayout Grid.Row="0" Spacing="0">
 
             <helpers:ShopHeaderView BusinessName="{Binding BusinessName}"
@@ -28,10 +27,6 @@
 
         </VerticalStackLayout>
 
-        <!--
-            The scrolling list is a CollectionView with sections as its items, so a shop with many
-            barbers recycles rather than realising every section at once.
-        -->
         <CollectionView Grid.Row="1" ItemsSource="{Binding Sections}">
 
             <CollectionView.Header>

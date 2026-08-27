@@ -4,11 +4,6 @@
              x:Name="Root"
              x:Class="QueueApp.Features.OperatorQueue.Helpers.AvatarView">
 
-    <!--
-        Avatars stay neutral. Identity is not a status, so presence is carried by the dot and the
-        section's own opacity rather than by tinting the circle. The dot is a sibling of the
-        border rather than a child, because a Border clips its content to its own shape.
-    -->
     <Grid HorizontalOptions="Start" VerticalOptions="Center">
         <Border BackgroundColor="{StaticResource SurfaceRaised}"
                 Stroke="{StaticResource Line}"

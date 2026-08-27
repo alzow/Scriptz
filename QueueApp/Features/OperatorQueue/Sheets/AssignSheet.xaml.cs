@@ -6,9 +6,6 @@ using QueueApp.Services.Popup;
 
 namespace QueueApp.Features.OperatorQueue.Sheets;
 
-// Where an unassigned customer gets a barber, and where an assigned one gets a different barber.
-// Targets arrive already sorted soonest-first with the first one tagged, and off-shift operators
-// are rendered disabled rather than hidden — a barber who is off shift is information.
 public partial class AssignSheet : BottomSheetPage
 {
     private readonly IQueuePopupService _popups;
@@ -24,7 +21,6 @@ public partial class AssignSheet : BottomSheetPage
 
     public Task<AssignSheetResult> Completion => _completion.Task;
 
-    // Parameterless ctor so the assembly-wide page scan in NavigationStartup can register the type.
     public AssignSheet() : this(null!, string.Empty, string.Empty, string.Empty, string.Empty, false, [])
     {
     }

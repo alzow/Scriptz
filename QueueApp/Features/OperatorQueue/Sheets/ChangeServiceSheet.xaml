@@ -7,11 +7,6 @@
                         x:Class="QueueApp.Features.OperatorQueue.Sheets.ChangeServiceSheet"
                         x:DataType="sheets:ChangeServiceSheet">
 
-    <!--
-        This Border is the page Content on purpose: a wrapper that filled the page would put every
-        tap inside Content's bounds and stop the sheet dismissing on a background tap. See
-        BottomSheetPage.
-    -->
     <Border VerticalOptions="End"
             Style="{StaticResource brd22_Sheet}" Padding="16,10,16,26">
         <ScrollView>

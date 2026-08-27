@@ -10,7 +10,7 @@
             <Label Text="{Binding BusinessName, Source={x:Reference Root}}"
                    Style="{StaticResource lbl24_Bold_TextDark}"
                    VerticalOptions="Center"/>
-            <Border BackgroundColor="#1F39FF7A" StrokeThickness="0"
+            <Border BackgroundColor="{StaticResource LiveBadgeFill}" StrokeThickness="0"
                     Padding="8,4" VerticalOptions="Center"
                     IsVisible="{Binding IsLive, Source={x:Reference Root}}">
                 <Border.StrokeShape>
