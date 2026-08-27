@@ -23,6 +23,15 @@ public partial class ReviewStepView : ContentView
     public static readonly BindableProperty ReviewTurnTextProperty = BindableProperty.Create(
         nameof(ReviewTurnText), typeof(string), typeof(ReviewStepView), string.Empty);
 
+    public static readonly BindableProperty ReviewWhenTextProperty = BindableProperty.Create(
+        nameof(ReviewWhenText), typeof(string), typeof(ReviewStepView), string.Empty);
+
+    public static readonly BindableProperty ShowReviewWhenProperty = BindableProperty.Create(
+        nameof(ShowReviewWhen), typeof(bool), typeof(ReviewStepView), false);
+
+    public static readonly BindableProperty ShowReviewQueueLinesProperty = BindableProperty.Create(
+        nameof(ShowReviewQueueLines), typeof(bool), typeof(ReviewStepView), true);
+
     public static readonly BindableProperty BookingNoteProperty = BindableProperty.Create(
         nameof(BookingNote), typeof(string), typeof(ReviewStepView), string.Empty,
         defaultBindingMode: BindingMode.TwoWay);
@@ -61,6 +70,24 @@ public partial class ReviewStepView : ContentView
     {
         get => (string)GetValue(ReviewPositionTextProperty);
         set => SetValue(ReviewPositionTextProperty, value);
+    }
+
+    public string ReviewWhenText
+    {
+        get => (string)GetValue(ReviewWhenTextProperty);
+        set => SetValue(ReviewWhenTextProperty, value);
+    }
+
+    public bool ShowReviewWhen
+    {
+        get => (bool)GetValue(ShowReviewWhenProperty);
+        set => SetValue(ShowReviewWhenProperty, value);
+    }
+
+    public bool ShowReviewQueueLines
+    {
+        get => (bool)GetValue(ShowReviewQueueLinesProperty);
+        set => SetValue(ShowReviewQueueLinesProperty, value);
     }
 
     public string BookingNote

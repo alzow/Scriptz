@@ -35,10 +35,10 @@ public static class FlowStepEngine
             steps.Add(FlowStep.Day);
             steps.Add(FlowStep.Time);
         }
-        else
-        {
-            steps.Add(FlowStep.Review);
-        }
+
+        // Both modes end on Review. Booking mode used to commit straight off the Time step, which
+        // left nowhere to show what was about to be requested or to say anything about it.
+        steps.Add(FlowStep.Review);
 
         return steps;
     }

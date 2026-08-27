@@ -140,6 +140,9 @@
                         ReviewPriceText="{Binding ReviewPriceText}"
                         ReviewPositionText="{Binding ReviewPositionText}"
                         ReviewTurnText="{Binding ReviewTurnText}"
+                        ReviewWhenText="{Binding ReviewWhenText}"
+                        ShowReviewWhen="{Binding ShowReviewWhen}"
+                        ShowReviewQueueLines="{Binding ShowReviewQueueLines}"
                         BookingNote="{Binding BookingNote}"/>
 
             </Grid>

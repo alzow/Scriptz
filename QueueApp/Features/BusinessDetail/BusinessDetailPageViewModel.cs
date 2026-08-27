@@ -237,6 +237,9 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     public string ReviewPriceText { get; set; } = string.Empty;
     public string ReviewPositionText { get; set; } = string.Empty;
     public string ReviewTurnText { get; set; } = string.Empty;
+    public string ReviewWhenText { get; set; } = string.Empty;
+    public bool ShowReviewWhen => IsBookingMode;
+    public bool ShowReviewQueueLines => !IsBookingMode;
 
     // Free text the customer adds before committing — a registration, what is actually wrong.
     // Stored in bookings.note, which create_booking already accepts as p_note.
@@ -877,8 +880,10 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                     : $"{SelectedServiceRow.Name} runs {SelectedServiceRow.DurationText}. Times shown can fit it.";
                 break;
             default:
-                StepHeading = "Ready to join?";
-                StepSubheading = "You can leave the queue any time.";
+                StepHeading = IsBookingMode ? "Ready to request?" : "Ready to join?";
+                StepSubheading = IsBookingMode
+                    ? "The shop confirms this before it's final. You can cancel any time."
+                    : "You can leave the queue any time.";
                 break;
         }
     }
@@ -934,9 +939,11 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 IsFooterCtaEnabled = SelectedSlot is not null;
                 break;
             default:
-                FooterLabel = "Joining as";
-                FooterValue = ReviewPositionText;
-                IsFooterCtaEnabled = SelectedServiceRow is not null;
+                FooterLabel = IsBookingMode ? "Requesting" : "Joining as";
+                FooterValue = IsBookingMode ? BuildSlotRangeText() : ReviewPositionText;
+                IsFooterCtaEnabled = IsBookingMode
+                    ? SelectedServiceRow is not null && SelectedSlot is not null
+                    : SelectedServiceRow is not null;
                 break;
         }
 
@@ -1294,6 +1301,16 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         ReviewOperatorText = SelectedOperatorChoice?.Name ?? "Any available";
         ReviewServiceText = $"{SelectedServiceRow.Name} · {SelectedServiceRow.DurationText}";
         ReviewPriceText = SelectedServiceRow.PriceText;
+
+        OnPropertyChanged(nameof(ShowReviewWhen));
+        OnPropertyChanged(nameof(ShowReviewQueueLines));
+
+        if (IsBookingMode)
+        {
+            ReviewWhenText = BuildSlotRangeText();
+            OnPropertyChanged(nameof(ReviewOperatorLabel));
+            return;
+        }
 
         var row = SelectedOperatorChoice?.OperatorId is { } operatorId
             ? QueueSummary.FirstOrDefault(r => r.OperatorId == operatorId)
