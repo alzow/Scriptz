@@ -5,8 +5,9 @@
 `BookingAgendaPage` was rebuilt to the agenda spec in this change. Everything on it works against the
 schema as `SUPABASE-SCHEMA-VERIFIED.md` describes it **except the things below**, which are listed
 in the order they hurt. Nothing here is speculative UI: the client already sends these calls, so
-applying §1 turns one refusing button into a working one and applying §3 stops the operator seeing
-"Customer" where a name should be.
+applying §1 turns one refusing button into a working one, and applying §3 stops the operator seeing
+"Customer" where a name should be and gives them back the call button on bookings customers made
+themselves.
 
 Four things turned out **not** to need SQL:
 
@@ -83,31 +84,61 @@ alter table bookings add column if not exists started_at timestamptz;
 alter table bookings add column if not exists completed_at timestamptz;
 ```
 
-## 3. An operator cannot read their own customers' names
+## 3. An operator cannot read their own customers' names or numbers
 
-This one isn't in the spec's gap list and is worth a decision before launch.
+This one isn't in the spec's gap list and is the most visible thing still missing.
 
 `profiles` has exactly two policies — self read (`auth.uid() = id`) and self update. `bookings` has
-no `customer_name` column, unlike `queue_entries`, which denormalises it precisely so a business can
-see who is waiting. So the agenda's embedded `customer:profiles(display_name)` returns null for
-every booking the shop didn't create itself, and **every row reads "Customer"**.
+no `customer_name` or `customer_phone` column, unlike `queue_entries`, which denormalises the name
+precisely so a business can see who is waiting. So the agenda's embedded
+`customer:profiles(display_name,phone)` returns nothing for every booking the shop didn't create
+itself, and two things follow:
 
-The agenda mitigates what it can: bookings the operator took over the phone carry the name in
-`details`, which the owner can always read. Bookings customers made through the app cannot be
-mitigated client-side.
+- **every customer-made row reads "Customer"**, and
+- **the call button on the booking actions sheet never appears** for a customer-made booking, only
+  for one the operator took over the phone.
 
-Two ways out, and they're a genuine choice rather than a fix to apply blind — the same "public read"
-question §1b of the schema doc raises, pointing the other way:
+Neither is a client bug. The client already reads both sources — `Customer?.Phone ?? Details?.
+CustomerPhone`, same for the name — so whichever fix below is applied, the agenda picks it up with
+no further code change.
 
-- **A — denormalise, like the queue does.** `alter table bookings add column customer_name text;` and
-  have `create_booking` fill it from the customer's profile. Nothing new becomes readable that
-  `queue_entries` doesn't already expose, and the agenda needs no policy change.
-- **B — let a business read the profiles of people booked with it.** A `profiles` SELECT policy along
-  the lines of `exists (select 1 from bookings where bookings.customer_id = profiles.id and
-  is_business_owner(bookings.business_id))`. Narrower in what it exposes, wider in what it lets a
-  business query.
+Three ways out, and it's a genuine choice:
 
-A is the smaller change and matches what queue mode already does.
+- **A — denormalise, like the queue does.**
+
+  ```sql
+  alter table bookings add column if not exists customer_name text;
+  alter table bookings add column if not exists customer_phone text;
+  ```
+
+  and have `create_booking` / `create_booking_any` fill them from the customer's profile. This is
+  the smallest change and it matches what queue mode already does. Note what it means though:
+  `bookings` has `public read` with `qual = true` (§1b of the schema doc), so a phone number in a
+  `bookings` column is readable by **any signed-in user**, not just the business. Worth pairing with
+  tightening that read policy.
+
+- **B — let a business read the profiles of people booked with it.**
+
+  ```sql
+  create policy "business reads booked customers" on profiles for select
+  using (exists (
+    select 1 from bookings
+    where bookings.customer_id = profiles.id
+      and is_business_owner(bookings.business_id)
+  ));
+  ```
+
+  Narrower in what it exposes — only the business the customer actually booked with sees them, and
+  the data stays in `profiles` where its own policy governs it. Wider in what it lets a business
+  query. This is the option that keeps a phone number out of a publicly-readable table.
+
+- **C — have the customer's own app copy name and phone into `details` at booking time.** Works
+  today with no migration, since a customer may update their own booking. **Not recommended**: it
+  writes a phone number into the same publicly-readable `bookings` row as A, without A's benefit of
+  being a real column the backend controls, and it puts the copy in the client where it can drift
+  from the profile.
+
+B is the recommendation. A is fine if `bookings`' read policy is tightened at the same time.
 
 ## 4. Decided while building, not a gap
 

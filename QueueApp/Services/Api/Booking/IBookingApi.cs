@@ -41,14 +41,14 @@ public interface IBookingApi
     // (see Documentation/STEP-18-BOOKING-AGENDA-SUPABASE.md), and naming a column PostgREST can't
     // find fails the whole query with a 400. With `*` the agenda keeps working today and picks the
     // column up by itself the moment the migration lands.
-    [Get("/bookings?select=*,operator:operators(id,display_name),service:services(id,name,price_cents,est_minutes),customer:profiles(display_name)&order=starts_at.asc")]
+    [Get("/bookings?select=*,operator:operators(id,display_name),service:services(id,name,price_cents,est_minutes),customer:profiles(display_name,phone)&order=starts_at.asc")]
     Task<List<AgendaBookingResponse>> GetAgendaBookingsAsync(
         [AliasAs("business_id")] string businessId,
         [AliasAs("and")] string dateRangeFilter);
 
     // Every request still waiting on the operator across the whole day strip, not just the day
     // being looked at — otherwise Thursday's request stays invisible until Thursday.
-    [Get("/bookings?select=*,operator:operators(id,display_name),service:services(id,name,price_cents,est_minutes),customer:profiles(display_name)&status=eq.pending&order=created_at.asc")]
+    [Get("/bookings?select=*,operator:operators(id,display_name),service:services(id,name,price_cents,est_minutes),customer:profiles(display_name,phone)&status=eq.pending&order=created_at.asc")]
     Task<List<AgendaBookingResponse>> GetPendingRequestsAsync(
         [AliasAs("business_id")] string businessId,
         [AliasAs("and")] string dateRangeFilter);

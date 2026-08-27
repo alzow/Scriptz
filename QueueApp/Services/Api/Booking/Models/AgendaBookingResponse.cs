@@ -7,6 +7,7 @@ namespace QueueApp.Services.Api.Booking.Models;
 public class AgendaCustomerRef
 {
     [JsonPropertyName("display_name")] public string? DisplayName { get; set; }
+    [JsonPropertyName("phone")] public string? Phone { get; set; }
 }
 
 public class AgendaOperatorRef
@@ -111,7 +112,7 @@ public partial class AgendaBookingResponse : ObservableObject
         ?? Details?.CustomerName
         ?? "Customer";
 
-    [JsonIgnore] public string? CustomerPhone => Details?.CustomerPhone;
+    [JsonIgnore] public string? CustomerPhone => Customer?.Phone ?? Details?.CustomerPhone;
     [JsonIgnore] public bool HasPhone => !string.IsNullOrWhiteSpace(CustomerPhone);
 
     [JsonIgnore] public DateTimeOffset LocalStart => StartsAt.ToOffset(LocalOffset);
