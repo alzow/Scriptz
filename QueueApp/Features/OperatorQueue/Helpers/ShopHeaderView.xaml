@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Name="Root"
+             VerticalOptions="Start"
+             x:Class="QueueApp.Features.OperatorQueue.Helpers.ShopHeaderView">
+
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="11" Padding="18,12,18,0">
+        <HorizontalStackLayout Grid.Column="0" Spacing="10" VerticalOptions="Center">
+            <Label Text="{Binding BusinessName, Source={x:Reference Root}}"
+                   Style="{StaticResource lbl24_Bold_TextDark}"
+                   VerticalOptions="Center"/>
+            <Border BackgroundColor="#1F39FF7A" StrokeThickness="0"
+                    Padding="8,4" VerticalOptions="Center"
+                    IsVisible="{Binding IsLive, Source={x:Reference Root}}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="7"/>
+                </Border.StrokeShape>
+                <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
+                    <Ellipse Fill="{StaticResource Green}" WidthRequest="6" HeightRequest="6"
+                             VerticalOptions="Center"/>
+                    <Label Text="LIVE" Style="{StaticResource lbl9_Mono_Green}"
+                           VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+            </Border>
+        </HorizontalStackLayout>
+
+        <Border Grid.Column="1" WidthRequest="40" HeightRequest="40"
+                Style="{StaticResource brd12_White}">
+            <Image Source="ic_settings" WidthRequest="20" HeightRequest="20"
+                   HorizontalOptions="Center" VerticalOptions="Center"/>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding OpenSettingsCommand, Source={x:Reference Root}}"/>
+            </Border.GestureRecognizers>
+        </Border>
+    </Grid>
+
+</ContentView>

@@ -82,11 +82,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     public bool IsQuiet { get; set; }
     public string QuietText { get; set; } = string.Empty;
 
-    // Rendered, deliberately not wired. There is no column behind a shop pause: businesses.is_active
-    // delists the business entirely, which is a different thing from "nobody new can join right
-    // now". Flagged in the spec's open items; when a real column lands, this is the binding.
-    public bool IsPaused => false;
-    public bool IsLive => !IsPaused;
+    public bool IsLive => true;
 
     public OperatorQueuePageViewModel(
         INavigationService navigationService,
