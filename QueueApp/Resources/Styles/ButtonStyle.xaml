@@ -192,4 +192,10 @@
         <Setter Property="TextColor" Value="{StaticResource Danger}"/>
     </Style>
 
+    <Style x:Key="btn14_Bold_Neutral" TargetType="Button" BasedOn="{StaticResource btn12_Bold_Neutral}">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="16,0"/>
+    </Style>
+
 </ResourceDictionary>

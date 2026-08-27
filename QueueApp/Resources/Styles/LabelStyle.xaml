@@ -247,4 +247,39 @@
         <Setter Property="TextColor" Value="{StaticResource Green}"/>
     </Style>
 
+    <Style x:Key="lbl11_Regular_TextFaint" TargetType="Label">
+        <Setter Property="FontSize" Value="11.5"/>
+        <Setter Property="TextColor" Value="{StaticResource TextFaint}"/>
+        <Setter Property="LineHeight" Value="1.45"/>
+    </Style>
+
+    <Style x:Key="lbl12_Regular_TextMuted" TargetType="Label">
+        <Setter Property="FontSize" Value="12.5"/>
+        <Setter Property="TextColor" Value="{StaticResource TextMuted}"/>
+        <Setter Property="LineHeight" Value="1.45"/>
+    </Style>
+
+    <Style x:Key="lbl11_Mono_Tag" TargetType="Label">
+        <Setter Property="FontSize" Value="11.5"/>
+        <Setter Property="FontFamily" Value="RobotoMedium"/>
+        <Setter Property="CharacterSpacing" Value="1.2"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+    </Style>
+
+    <Style x:Key="lbl18_Mono_TextPrimary" TargetType="Label">
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+    </Style>
+
+    <Style x:Key="lbl18_Mono_Green" TargetType="Label" BasedOn="{StaticResource lbl18_Mono_TextPrimary}">
+        <Setter Property="TextColor" Value="{StaticResource Green}"/>
+    </Style>
+
+    <Style x:Key="lbl14_Bold_Row" TargetType="Label">
+        <Setter Property="FontSize" Value="14.5"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+    </Style>
+
 </ResourceDictionary>

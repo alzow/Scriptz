@@ -1,8 +1,5 @@
-namespace QueueApp.Features.BookingAgenda;
+namespace QueueApp.Features.BookingAgenda.Models;
 
-// The same values as Resources/Styles/Colors.xaml, in code because every row's colours are worked
-// out once at map time rather than by a converter running per binding on a recycled cell (spec §11).
-// If Colors.xaml moves, these move with it.
 public static class AgendaPalette
 {
     public static readonly Color Surface = Color.FromArgb("#1C222D");
@@ -17,10 +14,11 @@ public static class AgendaPalette
     public static readonly Color PurpleBorder = Color.FromArgb("#4A3670");
     public static readonly Color PurpleTint = Color.FromArgb("#29A45EFF");
 
-    public static readonly Color Ink = Color.FromArgb("#E2E9F5");
-    public static readonly Color Muted = Color.FromArgb("#7C8899");
-    public static readonly Color Dim = Color.FromArgb("#5D6879");
-    public static readonly Color OnGreen = Color.FromArgb("#0E1219");
+    public static readonly Color Ink = Color.FromArgb("#F2F4F7");
+    public static readonly Color Muted = Color.FromArgb("#8A8F98");
+    public static readonly Color Dim = Color.FromArgb("#565C68");
+    public static readonly Color OnGreen = Color.FromArgb("#141821");
 
-    public static readonly Color Transparent = Colors.Transparent;
+    public static readonly Brush PurpleStroke = new SolidColorBrush(Purple);
+    public static readonly Brush PurpleDimStroke = new SolidColorBrush(PurpleBorder);
 }

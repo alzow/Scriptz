@@ -12,4 +12,32 @@
         <Setter Property="HeightRequest"
                 Value="60"/>
     </Style>
+    <Style x:Key="entry14_Sheet" TargetType="Entry">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="PlaceholderColor" Value="{StaticResource TextFaint}"/>
+        <Setter Property="FontSize" Value="14.5"/>
+        <Setter Property="HeightRequest" Value="52"/>
+    </Style>
+
+    <Style x:Key="entry13_SheetMono" TargetType="Entry" BasedOn="{StaticResource entry14_Sheet}">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontFamily" Value="RobotoMedium"/>
+    </Style>
+
+    <Style x:Key="picker14_Sheet" TargetType="DatePicker">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="FontSize" Value="14.5"/>
+        <Setter Property="Format" Value="ddd d MMM"/>
+    </Style>
+
+    <Style x:Key="timepicker13_Sheet" TargetType="TimePicker">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="FontFamily" Value="RobotoMedium"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Format" Value="HH:mm"/>
+    </Style>
+
 </ResourceDictionary>

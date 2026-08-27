@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:QueueApp.Features.BookingAgenda.Models"
+             x:Name="Root"
+             VerticalOptions="Start"
+             x:Class="QueueApp.Features.BookingAgenda.Helpers.BayFilterBarView">
+
+    <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never" Margin="0,14,0,0">
+        <HorizontalStackLayout Spacing="8" Padding="18,0"
+                               BindableLayout.ItemsSource="{Binding Filters, Source={x:Reference Root}}">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate x:DataType="models:BayFilterOption">
+                    <Border Style="{StaticResource brd11_Chip}"
+                            MinimumHeightRequest="40" Padding="15,0">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                <Setter Property="Stroke" Value="{StaticResource Green}"/>
+                                <Setter Property="BackgroundColor" Value="{StaticResource GreenSelectedFill}"/>
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Label Text="{Binding Label}" VerticalOptions="Center"
+                               Style="{StaticResource lbl13_Regular_TextMid}">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="TextColor" Value="{StaticResource Green}"/>
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding SelectFilterCommand, Source={x:Reference Root}}"
+                                CommandParameter="{Binding .}"/>
+                        </Border.GestureRecognizers>
+                    </Border>
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </HorizontalStackLayout>
+    </ScrollView>
+
+</ContentView>

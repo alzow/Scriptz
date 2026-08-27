@@ -1,67 +1,53 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<popups:PopupPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-                  xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-                  xmlns:popups="clr-namespace:MPowerKit.Popups;assembly=MPowerKit.Popups"
-                  xmlns:sheets="clr-namespace:QueueApp.Features.BookingAgenda.Sheets"
-                  xmlns:vm="clr-namespace:QueueApp.Features.BookingAgenda"
-                  xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
-                  x:Name="SheetRoot"
-                  x:Class="QueueApp.Features.BookingAgenda.Sheets.BlockTimeSheet"
-                  x:DataType="sheets:BlockTimeSheetViewModel"
-                  BackgroundColor="#B80A0D12"
-                  CloseOnBackgroundClick="False"
-                  BackgroundClickedCommand="{Binding DismissCommand}">
+<bottomsheet:BottomSheetPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                             xmlns:bottomsheet="clr-namespace:QueueApp.Shared.Templates.BottomSheet"
+                             xmlns:sheets="clr-namespace:QueueApp.Features.BookingAgenda.Sheets"
+                             xmlns:models="clr-namespace:QueueApp.Features.BookingAgenda.Models"
+                             x:Name="Root"
+                             x:Class="QueueApp.Features.BookingAgenda.Sheets.BlockTimeSheet"
+                             x:DataType="sheets:BlockTimeSheet">
 
-    <Border VerticalOptions="End" Padding="16,10,16,26"
-            BackgroundColor="{StaticResource Surface}"
-            Stroke="{StaticResource Line}" StrokeThickness="1">
-        <Border.StrokeShape>
-            <RoundRectangle CornerRadius="22,22,0,0"/>
-        </Border.StrokeShape>
-
+    <Border VerticalOptions="End" Style="{StaticResource brd22_Sheet}" Padding="16,10,16,26">
         <ScrollView>
             <VerticalStackLayout Spacing="0">
 
-                <BoxView WidthRequest="38" HeightRequest="4" CornerRadius="2"
-                         Color="{StaticResource Line}" HorizontalOptions="Center" Margin="0,0,0,16"/>
+                <Border Style="{StaticResource brd6_Tag}"
+                        BackgroundColor="{StaticResource Line}"
+                        WidthRequest="38" HeightRequest="4" Margin="0,0,0,16"
+                        HorizontalOptions="Center"/>
 
                 <VerticalStackLayout Spacing="3">
-                    <Label Text="Block time"
-                           FontFamily="RobotoBlack" FontSize="16.5"
-                           TextColor="{StaticResource TextPrimary}"/>
-                    <Label Text="{Binding DayText}"
-                           Style="{StaticResource lbl13_Regular_TextMid}" FontSize="11.5"/>
+                    <Label Text="Block time" Style="{StaticResource lbl16_Bold_TextDark}"/>
+                    <Label Text="{Binding DayText, Source={x:Reference Root}}"
+                           Style="{StaticResource lbl11_Regular_TextLight}"/>
                 </VerticalStackLayout>
 
                 <Label Text="HOW LONG" Style="{StaticResource lbl9_Mono_TextMuted}" Margin="0,16,0,9"/>
                 <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
-                    <HorizontalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Presets}">
+                    <HorizontalStackLayout Spacing="8"
+                                           BindableLayout.ItemsSource="{Binding Presets, Source={x:Reference Root}}">
                         <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="sheets:BlockPresetOption">
-                                <Border MinimumHeightRequest="42" Padding="14,0"
-                                        BackgroundColor="{StaticResource SurfaceRaised}"
-                                        Stroke="Transparent" StrokeThickness="1">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="11"/>
-                                    </Border.StrokeShape>
+                            <DataTemplate x:DataType="models:BlockPresetOption">
+                                <Border Style="{StaticResource brd11_Chip}"
+                                        MinimumHeightRequest="42" Padding="14,0">
                                     <Border.Triggers>
                                         <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
                                             <Setter Property="Stroke" Value="{StaticResource Green}"/>
                                             <Setter Property="BackgroundColor" Value="{StaticResource GreenSelectedFill}"/>
                                         </DataTrigger>
                                     </Border.Triggers>
-                                    <Label Text="{Binding Label}" VerticalOptions="Center" FontSize="13"
-                                           TextColor="{StaticResource TextMuted}">
+                                    <Label Text="{Binding Label}" VerticalOptions="Center"
+                                           Style="{StaticResource lbl13_Regular_TextMid}">
                                         <Label.Triggers>
                                             <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
                                                 <Setter Property="TextColor" Value="{StaticResource Green}"/>
-                                                <Setter Property="FontFamily" Value="RobotoBold"/>
                                             </DataTrigger>
                                         </Label.Triggers>
                                     </Label>
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer
-                                            Command="{Binding BindingContext.SelectPresetCommand, Source={x:Reference SheetRoot}}"
+                                            Command="{Binding SelectPresetCommand, Source={x:Reference Root}}"
                                             CommandParameter="{Binding .}"/>
                                     </Border.GestureRecognizers>
                                 </Border>
@@ -70,35 +56,32 @@
                     </HorizontalStackLayout>
                 </ScrollView>
 
-                <Label Text="{Binding ResourceLabel}" Style="{StaticResource lbl9_Mono_TextMuted}" Margin="0,16,0,9"/>
+                <Label Text="{Binding ResourceLabel, Source={x:Reference Root}}"
+                       Style="{StaticResource lbl9_Mono_TextMuted}" Margin="0,16,0,9"/>
                 <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
-                    <HorizontalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Resources}">
+                    <HorizontalStackLayout Spacing="8"
+                                           BindableLayout.ItemsSource="{Binding Resources, Source={x:Reference Root}}">
                         <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="vm:BayFilterOption">
-                                <Border MinimumHeightRequest="42" Padding="14,0"
-                                        BackgroundColor="{StaticResource SurfaceRaised}"
-                                        Stroke="Transparent" StrokeThickness="1">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="11"/>
-                                    </Border.StrokeShape>
+                            <DataTemplate x:DataType="models:BayFilterOption">
+                                <Border Style="{StaticResource brd11_Chip}"
+                                        MinimumHeightRequest="42" Padding="14,0">
                                     <Border.Triggers>
                                         <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
                                             <Setter Property="Stroke" Value="{StaticResource Green}"/>
                                             <Setter Property="BackgroundColor" Value="{StaticResource GreenSelectedFill}"/>
                                         </DataTrigger>
                                     </Border.Triggers>
-                                    <Label Text="{Binding Label}" VerticalOptions="Center" FontSize="13"
-                                           TextColor="{StaticResource TextMuted}">
+                                    <Label Text="{Binding Label}" VerticalOptions="Center"
+                                           Style="{StaticResource lbl13_Regular_TextMid}">
                                         <Label.Triggers>
                                             <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
                                                 <Setter Property="TextColor" Value="{StaticResource Green}"/>
-                                                <Setter Property="FontFamily" Value="RobotoBold"/>
                                             </DataTrigger>
                                         </Label.Triggers>
                                     </Label>
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer
-                                            Command="{Binding BindingContext.ToggleResourceCommand, Source={x:Reference SheetRoot}}"
+                                            Command="{Binding ToggleResourceCommand, Source={x:Reference Root}}"
                                             CommandParameter="{Binding .}"/>
                                     </Border.GestureRecognizers>
                                 </Border>
@@ -110,68 +93,46 @@
                 <Label Text="FROM" Style="{StaticResource lbl9_Mono_TextMuted}" Margin="0,16,0,8"/>
                 <Border Style="{StaticResource brd12_Cream}" Padding="10,4">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                        <DatePicker Grid.Column="0" Date="{Binding FromDate}"
-                                    Format="ddd d MMM" FontSize="14.5"
-                                    TextColor="{StaticResource TextPrimary}"
-                                    BackgroundColor="Transparent"/>
-                        <TimePicker Grid.Column="1" Time="{Binding FromTime}"
-                                    Format="HH:mm" FontSize="13" FontFamily="RobotoMedium"
-                                    TextColor="{StaticResource TextPrimary}"
-                                    BackgroundColor="Transparent"/>
+                        <DatePicker Grid.Column="0" Date="{Binding FromDate, Source={x:Reference Root}}"
+                                    Style="{StaticResource picker14_Sheet}"/>
+                        <TimePicker Grid.Column="1" Time="{Binding FromTime, Source={x:Reference Root}}"
+                                    Style="{StaticResource timepicker13_Sheet}"/>
                     </Grid>
                 </Border>
 
                 <Label Text="UNTIL" Style="{StaticResource lbl9_Mono_TextMuted}" Margin="0,16,0,8"/>
                 <Border Style="{StaticResource brd12_Cream}" Padding="10,4">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                        <DatePicker Grid.Column="0" Date="{Binding UntilDate}"
-                                    Format="ddd d MMM" FontSize="14.5"
-                                    TextColor="{StaticResource TextPrimary}"
-                                    BackgroundColor="Transparent"/>
-                        <TimePicker Grid.Column="1" Time="{Binding UntilTime}"
-                                    Format="HH:mm" FontSize="13" FontFamily="RobotoMedium"
-                                    TextColor="{StaticResource TextPrimary}"
-                                    BackgroundColor="Transparent"/>
+                        <DatePicker Grid.Column="0" Date="{Binding UntilDate, Source={x:Reference Root}}"
+                                    Style="{StaticResource picker14_Sheet}"/>
+                        <TimePicker Grid.Column="1" Time="{Binding UntilTime, Source={x:Reference Root}}"
+                                    Style="{StaticResource timepicker13_Sheet}"/>
                     </Grid>
                 </Border>
 
                 <Label Text="REASON — OPTIONAL" Style="{StaticResource lbl9_Mono_TextMuted}" Margin="0,16,0,8"/>
                 <Border Style="{StaticResource brd12_Cream}" Padding="4,0">
-                    <Entry Text="{Binding Reason}" Placeholder="Parts delivery"
-                           HeightRequest="52" FontSize="14.5"
-                           TextColor="{StaticResource TextPrimary}"
-                           PlaceholderColor="{StaticResource TextFaint}"
-                           BackgroundColor="Transparent"/>
+                    <Entry Text="{Binding Reason, Source={x:Reference Root}}"
+                           Placeholder="Parts delivery"
+                           Style="{StaticResource entry14_Sheet}"/>
                 </Border>
 
-                <!--
-                    The warning is the important part. Blocking does not cancel existing bookings —
-                    without this line an operator assumes the app handled it and two people arrive
-                    to a closed bay.
-                -->
-                <Border IsVisible="{Binding HasWarning}" Margin="0,16,0,0" Padding="13,12"
-                        BackgroundColor="{StaticResource RedPale}"
-                        Stroke="{StaticResource DangerDim}" StrokeThickness="1">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="13"/>
-                    </Border.StrokeShape>
+                <Border Style="{StaticResource brd13_Warning}" Margin="0,16,0,0" Padding="13,12"
+                        IsVisible="{Binding HasWarning, Source={x:Reference Root}}">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                         <Image Grid.Column="0" Source="ic_alert" WidthRequest="16" HeightRequest="16"
                                VerticalOptions="Start" Margin="0,2,0,0"/>
-                        <Label Grid.Column="1" Text="{Binding WarningText}"
-                               FontSize="11.5" LineHeight="1.4"
-                               TextColor="{StaticResource TextMuted}"/>
+                        <Label Grid.Column="1" Text="{Binding WarningText, Source={x:Reference Root}}"
+                               Style="{StaticResource lbl12_Regular_TextMuted}"/>
                     </Grid>
                 </Border>
 
-                <controls:AlzowLoadingButton
-                        Text="Block this time" LoadingText="Blocking…"
-                        Margin="0,18,0,0" HeightRequest="56"
-                        Command="{Binding SubmitCommand}"
-                        IsLoading="{Binding IsSaving}"
-                        IsEnabled="{Binding CanSubmit}"
-                        ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
+                <Button Text="Block this time" Margin="0,18,0,0"
+                        Style="{StaticResource btn15_Bold_SheetGo}"
+                        Clicked="OnSubmitClicked"/>
+
             </VerticalStackLayout>
         </ScrollView>
     </Border>
-</popups:PopupPage>
+
+</bottomsheet:BottomSheetPage>

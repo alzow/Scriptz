@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Name="Root"
+             VerticalOptions="Start"
+             x:Class="QueueApp.Features.BookingAgenda.Helpers.AgendaFooterView">
+
+    <VerticalStackLayout Spacing="0" Padding="0,0,0,28">
+
+        <Border Style="{StaticResource brd13_Ghost}" Margin="18,16,18,0" Padding="18,26"
+                IsVisible="{Binding IsClosedDay, Source={x:Reference Root}}">
+            <Label Text="{Binding ClosedDayText, Source={x:Reference Root}}"
+                   Style="{StaticResource lbl12_Regular_TextMuted}"
+                   HorizontalTextAlignment="Center" HorizontalOptions="Center"/>
+        </Border>
+
+        <Border Style="{StaticResource brd13_Ghost}" Margin="18,16,18,0" Padding="18,26"
+                IsVisible="{Binding IsQuietDay, Source={x:Reference Root}}">
+            <Label Text="{Binding QuietDayText, Source={x:Reference Root}}"
+                   Style="{StaticResource lbl12_Regular_TextMuted}"
+                   HorizontalTextAlignment="Center" HorizontalOptions="Center"/>
+        </Border>
+
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="9" Margin="18,16,18,0">
+            <Button Grid.Column="0" Text="Add a booking" HeightRequest="48"
+                    Style="{StaticResource btn14_Bold_Neutral}"
+                    Command="{Binding AddBookingCommand, Source={x:Reference Root}}"/>
+            <Button Grid.Column="1" Text="Block time" HeightRequest="48"
+                    Style="{StaticResource btn14_Bold_Neutral}"
+                    Command="{Binding BlockTimeCommand, Source={x:Reference Root}}"/>
+        </Grid>
+
+    </VerticalStackLayout>
+
+</ContentView>

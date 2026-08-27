@@ -1,6 +1,6 @@
 using MPowerKit.Popups;
 
-namespace QueueApp.Features.OperatorQueue.Sheets;
+namespace QueueApp.Shared.Templates.BottomSheet;
 
 public abstract class BottomSheetPage : PopupPage
 {

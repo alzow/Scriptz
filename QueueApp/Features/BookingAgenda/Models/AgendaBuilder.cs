@@ -1,46 +1,28 @@
 using Microsoft.Maui.Controls.Shapes;
+using QueueApp.Features.BusinessDetail.Flow;
 using QueueApp.Services.Api.Booking.Models;
 using QueueApp.Services.Api.Operator.Models;
 
-namespace QueueApp.Features.BookingAgenda;
+namespace QueueApp.Features.BookingAgenda.Models;
 
 public sealed record AgendaBuildRequest
 {
     public required IReadOnlyList<AgendaBookingResponse> Bookings { get; init; }
     public required IReadOnlyList<AvailabilityBlockResponse> Blocks { get; init; }
-
-    // What the slot engine says is sellable on this day — get_available_slots_any for the whole
-    // business, or get_available_slots for one resource when a filter chip is on. Gaps are carved
-    // out of this rather than recalculated from trading hours (spec §5).
     public required IReadOnlyList<SlotResponse> FreeSlots { get; init; }
-
     public required IReadOnlyDictionary<Guid, string> OperatorNames { get; init; }
     public required int ActiveOperatorCount { get; init; }
     public required string ResourcePluralNoun { get; init; }
-
-    // No gap shorter than the shortest thing the shop sells: a ten-minute sliver nobody could book
-    // into is noise on a list read at arm's length.
     public required int ShortestServiceMinutes { get; init; }
-
     public required DateTimeOffset Now { get; init; }
 }
 
-// Turns a day's bookings, blocks and free windows into the single chronological list the agenda
-// renders. Pure and synchronous so the page can run it off the UI thread once per day load.
 public static class AgendaBuilder
 {
-    private static readonly TimeSpan SastOffset = TimeSpan.FromHours(2);
-    // A fresh instance per row rather than one shared collection: StrokeDashArray is an
-    // observable collection the Border attaches to, and one instance bound into every dashed row on
-    // the list is a shared mutable it has no reason to be.
-    private static DoubleCollection Dashed() => new() { 4, 3 };
-
     public static List<AgendaRow> Build(AgendaBuildRequest request)
     {
         var rows = new List<AgendaRow>();
 
-        // A cancelled booking is not on the diary any more; a no-show stays, dimmed, because the
-        // operator waited for that person and may still want the hour accounted for.
         var live = request.Bookings
             .Where(b => !b.IsCancelled)
             .OrderBy(b => b.StartsAt)
@@ -50,44 +32,39 @@ public static class AgendaBuilder
             rows.Add(BookingRow(booking, request.Now));
 
         var blockRanges = new List<(DateTimeOffset Start, DateTimeOffset End)>();
-        foreach (var block in BlockRows(request, blockRanges))
-            rows.Add(block);
+        rows.AddRange(BlockRows(request, blockRanges));
 
         var occupied = live
             .Select(b => (Start: b.LocalStart, End: b.LocalEnd))
             .Concat(blockRanges)
             .ToList();
 
-        foreach (var gap in GapRows(request, occupied))
-            rows.Add(gap);
+        rows.AddRange(GapRows(request, occupied));
 
         rows.Sort(CompareRows);
         return rows;
     }
 
-    // Booking first when two rows start at the same minute: a named customer outranks a description
-    // of empty time.
-    private static int CompareRows(AgendaRow left, AgendaRow right)
+    public static int CompareRows(AgendaRow left, AgendaRow right)
     {
         var byStart = left.Start.CompareTo(right.Start);
         return byStart != 0 ? byStart : left.Kind.CompareTo(right.Kind);
     }
 
-    private static AgendaRow BookingRow(AgendaBookingResponse booking, DateTimeOffset now)
+    public static AgendaRow BookingRow(AgendaBookingResponse booking, DateTimeOffset now)
     {
         var subtitleParts = new List<string>(2);
         if (booking.ServiceName.Length > 0) subtitleParts.Add(booking.ServiceName);
         if (booking.PriceText.Length > 0) subtitleParts.Add(booking.PriceText);
 
-        // Confirmed and upcoming is the baseline: green bar, solid border, nothing dimmed.
         var bar = AgendaPalette.Green;
         var background = AgendaPalette.Surface;
         var stroke = AgendaPalette.Line;
         var tagInk = AgendaPalette.Ink;
-        var tagFill = AgendaPalette.Transparent;
+        var tagFill = Colors.Transparent;
         var opacity = 1d;
         DoubleCollection? dash = null;
-        var tag = "";
+        var tag = string.Empty;
 
         if (booking.IsInProgress)
         {
@@ -101,18 +78,16 @@ public static class AgendaBuilder
         {
             bar = AgendaPalette.Purple;
             stroke = AgendaPalette.PurpleBorder;
-            dash = Dashed();
+            dash = AgendaConstants.Dashed();
             tag = "PENDING";
             tagInk = AgendaPalette.Purple;
             tagFill = AgendaPalette.PurpleTint;
         }
         else if (booking.IsFinished || booking.LocalEnd <= now)
         {
-            // Past counts as done for reading purposes even when nothing marked it so — which is
-            // most of them until booking_status grows a `completed` value (see §14 of the spec and
-            // Documentation/STEP-18-BOOKING-AGENDA-SUPABASE.md).
             bar = AgendaPalette.Dim;
-            opacity = 0.62;
+            opacity = AgendaConstants.FinishedRowOpacity;
+
             if (booking.IsNoShow)
             {
                 tag = "NO SHOW";
@@ -131,7 +106,7 @@ public static class AgendaBuilder
             DurationText = booking.DurationText,
             Title = booking.CustomerName,
             Subtitle = string.Join(" · ", subtitleParts),
-            BayText = booking.Operator?.DisplayName.ToUpperInvariant() ?? "",
+            BayText = booking.Operator?.DisplayName.ToUpperInvariant() ?? string.Empty,
             TagText = tag,
             TagTextColor = tagInk,
             TagBackgroundColor = tagFill,
@@ -143,22 +118,20 @@ public static class AgendaBuilder
         };
     }
 
-    // Blocks are stored one row per resource, so a shop that closes both bays for lunch has two
-    // rows covering the same half hour. Collapsed back into one line, because that is what happened.
-    private static List<AgendaRow> BlockRows(
+    public static List<AgendaRow> BlockRows(
         AgendaBuildRequest request,
         List<(DateTimeOffset Start, DateTimeOffset End)> collectedRanges)
     {
         var rows = new List<AgendaRow>();
 
         var groups = request.Blocks
-            .GroupBy(b => (b.StartsAt, b.EndsAt, Reason: b.Reason ?? ""))
+            .GroupBy(b => (b.StartsAt, b.EndsAt, Reason: b.Reason ?? string.Empty))
             .OrderBy(g => g.Key.StartsAt);
 
         foreach (var group in groups)
         {
-            var start = group.Key.StartsAt.ToOffset(SastOffset);
-            var end = group.Key.EndsAt.ToOffset(SastOffset);
+            var start = LocalTime.ToLocal(group.Key.StartsAt);
+            var end = LocalTime.ToLocal(group.Key.EndsAt);
             collectedRanges.Add((start, end));
 
             var affected = group
@@ -168,7 +141,9 @@ public static class AgendaBuilder
                 .ToList();
 
             var who = affected.Count >= request.ActiveOperatorCount && request.ActiveOperatorCount > 0
-                ? (request.ActiveOperatorCount == 2 ? $"Both {request.ResourcePluralNoun}" : $"All {request.ResourcePluralNoun}")
+                ? request.ActiveOperatorCount == 2
+                    ? $"Both {request.ResourcePluralNoun}"
+                    : $"All {request.ResourcePluralNoun}"
                 : string.Join(", ", affected!);
 
             var duration = AgendaBookingResponse.FormatDuration(end - start);
@@ -183,28 +158,24 @@ public static class AgendaBuilder
                 Subtitle = who.Length > 0 ? $"{who} blocked · {duration}" : $"Blocked · {duration}",
                 BarColor = AgendaPalette.Dim,
                 RowBackgroundColor = AgendaPalette.SurfaceRaised,
-                RowStrokeColor = AgendaPalette.Transparent,
-                TitleColor = AgendaPalette.Ink,
-                RowOpacity = 0.72,
+                RowStrokeColor = Colors.Transparent,
+                RowOpacity = AgendaConstants.BlockedRowOpacity,
             });
         }
 
         return rows;
     }
 
-    private static IEnumerable<AgendaRow> GapRows(
+    public static List<AgendaRow> GapRows(
         AgendaBuildRequest request,
         List<(DateTimeOffset Start, DateTimeOffset End)> occupied)
     {
+        var rows = new List<AgendaRow>();
+
         var sellable = Merge(request.FreeSlots.Select(s =>
-            (s.SlotStart.ToOffset(SastOffset), s.SlotEnd.ToOffset(SastOffset))));
+            (LocalTime.ToLocal(s.SlotStart), LocalTime.ToLocal(s.SlotEnd))));
 
-        // The pooled slot engine reports a window as free while any one resource is free, so a
-        // window can overlap a booking that has the other bay. Cutting the booked and blocked
-        // ranges out is what keeps a gap row meaning "nothing on" rather than sitting on top of a
-        // customer's name.
         var idle = Subtract(sellable, Merge(occupied));
-
         var floor = TimeSpan.FromMinutes(Math.Max(1, request.ShortestServiceMinutes));
 
         foreach (var (start, end) in idle)
@@ -212,7 +183,7 @@ public static class AgendaBuilder
             if (end - start < floor)
                 continue;
 
-            yield return new AgendaRow
+            rows.Add(new AgendaRow
             {
                 Kind = AgendaRowKind.Gap,
                 Start = start,
@@ -221,12 +192,14 @@ public static class AgendaBuilder
                 Title = $"{AgendaBookingResponse.FormatDuration(end - start)} free",
                 Subtitle = "Nothing booked",
                 BarColor = AgendaPalette.Line,
-                RowBackgroundColor = AgendaPalette.Transparent,
+                RowBackgroundColor = Colors.Transparent,
                 RowStrokeColor = AgendaPalette.Line,
-                RowStrokeDash = Dashed(),
+                RowStrokeDash = AgendaConstants.Dashed(),
                 TitleColor = AgendaPalette.Muted,
-            };
+            });
         }
+
+        return rows;
     }
 
     public static List<(DateTimeOffset Start, DateTimeOffset End)> Merge(
@@ -241,6 +214,7 @@ public static class AgendaBuilder
             {
                 if (range.End > merged[^1].End)
                     merged[^1] = (merged[^1].Start, range.End);
+
                 continue;
             }
 
