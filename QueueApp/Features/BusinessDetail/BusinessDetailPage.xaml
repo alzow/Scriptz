@@ -28,54 +28,58 @@
         <!-- ========================================================================
              LANDING
              ======================================================================== -->
-        <ScrollView Grid.Row="1" IsVisible="{Binding IsShowingLanding}">
-            <VerticalStackLayout Spacing="0" Padding="0,0,0,24">
+        <Grid Grid.Row="1" RowDefinitions="Auto,*" IsVisible="{Binding IsShowingLanding}">
 
-                <bdHelpers:LandingHeaderView
-                        BusinessName="{Binding BusinessName}"
-                        IsOpen="{Binding IsOpen}"
-                        OpenPillText="{Binding OpenPillText}"
-                        AddressLine="{Binding AddressLine}"
-                        ModeLine="{Binding ModeLine}"
-                        GoBackCommand="{Binding GoBackCommand}"/>
+            <bdHelpers:LandingHeaderView Grid.Row="0"
+                    BusinessName="{Binding BusinessName}"
+                    IsOpen="{Binding IsOpen}"
+                    OpenPillText="{Binding OpenPillText}"
+                    AddressLine="{Binding AddressLine}"
+                    ModeLine="{Binding ModeLine}"
+                    GoBackCommand="{Binding GoBackCommand}"/>
 
-                <bdHelpers:LiveCardView
-                        IsBookingMode="{Binding IsBookingMode}"
-                        IsOpen="{Binding IsOpen}"
-                        LiveCardTitle="{Binding LiveCardTitle}"
-                        LiveCardStatus="{Binding LiveCardStatus}"
-                        ShowLiveDot="{Binding ShowLiveDot}"
-                        PrimaryStatValue="{Binding PrimaryStatValue}"
-                        PrimaryStatLabel="{Binding PrimaryStatLabel}"
-                        SecondaryStatValue="{Binding SecondaryStatValue}"
-                        SecondaryStatLabel="{Binding SecondaryStatLabel}"
-                        TertiaryStatValue="{Binding TertiaryStatValue}"
-                        TertiaryStatLabel="{Binding TertiaryStatLabel}"
-                        CtaText="{Binding CtaText}"
-                        IsCtaEnabled="{Binding IsCtaEnabled}"
-                        LiveFootnote="{Binding LiveFootnote}"
-                        StartFlowCommand="{Binding StartFlowCommand}"/>
+            <ScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="0" Padding="0,0,0,24">
 
-                <bdHelpers:ServicesListSectionView
-                        HasServices="{Binding HasServices}"
-                        ServicesCountText="{Binding ServicesCountText}"
-                        ServiceRows="{Binding ServiceRows}"
-                        ServicesListHeight="{Binding ServicesListHeight}"/>
+                    <bdHelpers:LiveCardView
+                            IsBookingMode="{Binding IsBookingMode}"
+                            IsOpen="{Binding IsOpen}"
+                            LiveCardTitle="{Binding LiveCardTitle}"
+                            LiveCardStatus="{Binding LiveCardStatus}"
+                            ShowLiveDot="{Binding ShowLiveDot}"
+                            PrimaryStatValue="{Binding PrimaryStatValue}"
+                            PrimaryStatLabel="{Binding PrimaryStatLabel}"
+                            SecondaryStatValue="{Binding SecondaryStatValue}"
+                            SecondaryStatLabel="{Binding SecondaryStatLabel}"
+                            TertiaryStatValue="{Binding TertiaryStatValue}"
+                            TertiaryStatLabel="{Binding TertiaryStatLabel}"
+                            CtaText="{Binding CtaText}"
+                            IsCtaEnabled="{Binding IsCtaEnabled}"
+                            LiveFootnote="{Binding LiveFootnote}"
+                            StartFlowCommand="{Binding StartFlowCommand}"/>
 
-                <bdHelpers:TeamSectionView
-                        HasTeam="{Binding HasTeam}"
-                        TeamSectionTitle="{Binding TeamSectionTitle}"
-                        TeamCountText="{Binding TeamCountText}"
-                        TeamMembers="{Binding TeamMembers}"/>
+                    <bdHelpers:ServicesListSectionView
+                            HasServices="{Binding HasServices}"
+                            ServicesCountText="{Binding ServicesCountText}"
+                            ServiceRows="{Binding ServiceRows}"
+                            ServicesListHeight="{Binding ServicesListHeight}"/>
 
-                <bdHelpers:GettingThereSectionView
-                        AddressLine="{Binding AddressLine}"
-                        DistanceText="{Binding DistanceText}"
-                        HasDistance="{Binding HasDistance}"
-                        OpenDirectionsCommand="{Binding OpenDirectionsCommand}"/>
+                    <bdHelpers:TeamSectionView
+                            HasTeam="{Binding HasTeam}"
+                            TeamSectionTitle="{Binding TeamSectionTitle}"
+                            TeamCountText="{Binding TeamCountText}"
+                            TeamMembers="{Binding TeamMembers}"/>
 
-            </VerticalStackLayout>
-        </ScrollView>
+                    <bdHelpers:GettingThereSectionView
+                            AddressLine="{Binding AddressLine}"
+                            DistanceText="{Binding DistanceText}"
+                            HasDistance="{Binding HasDistance}"
+                            OpenDirectionsCommand="{Binding OpenDirectionsCommand}"/>
+
+                </VerticalStackLayout>
+            </ScrollView>
+
+        </Grid>
 
         <!-- ========================================================================
              STEP FLOW — inline takeover, no page push
