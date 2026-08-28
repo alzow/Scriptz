@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:QueueApp.Shared.Domain.Models"
              x:Name="Root"
-             x:Class="QueueApp.Features.BusinessDetail.Helpers.OperatorStepView">
+             x:Class="QueueApp.Features.Flow.Helpers.OperatorStepView">
 
     <CollectionView ItemsSource="{Binding OperatorChoices, Source={x:Reference Root}}"
                     IsVisible="{Binding ShowOperatorStep, Source={x:Reference Root}}"

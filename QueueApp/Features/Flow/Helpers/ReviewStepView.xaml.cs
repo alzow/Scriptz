@@ -1,4 +1,4 @@
-namespace QueueApp.Features.BusinessDetail.Helpers;
+namespace QueueApp.Features.Flow.Helpers;
 
 public partial class ReviewStepView : ContentView
 {

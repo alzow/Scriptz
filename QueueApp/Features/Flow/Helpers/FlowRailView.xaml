@@ -4,7 +4,7 @@
              xmlns:models="clr-namespace:QueueApp.Shared.Domain.Models"
              x:Name="Root"
              VerticalOptions="Start"
-             x:Class="QueueApp.Features.BusinessDetail.Helpers.FlowRailView">
+             x:Class="QueueApp.Features.Flow.Helpers.FlowRailView">
 
     <VerticalStackLayout Spacing="0">
 

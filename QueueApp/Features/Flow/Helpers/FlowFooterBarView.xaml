@@ -4,7 +4,7 @@
              xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
              x:Name="Root"
              VerticalOptions="Start"
-             x:Class="QueueApp.Features.BusinessDetail.Helpers.FlowFooterBarView">
+             x:Class="QueueApp.Features.Flow.Helpers.FlowFooterBarView">
 
     <Border Padding="18,13,18,18"
             BackgroundColor="{StaticResource Surface}"

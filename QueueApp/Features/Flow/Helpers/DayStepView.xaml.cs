@@ -2,7 +2,7 @@ using System.Collections;
 using System.Windows.Input;
 using QueueApp.Shared.Domain.Models;
 
-namespace QueueApp.Features.BusinessDetail.Helpers;
+namespace QueueApp.Features.Flow.Helpers;
 
 public partial class DayStepView : ContentView
 {

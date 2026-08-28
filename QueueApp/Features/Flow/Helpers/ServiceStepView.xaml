@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:QueueApp.Shared.Domain.Models"
              x:Name="Root"
-             x:Class="QueueApp.Features.BusinessDetail.Helpers.ServiceStepView">
+             x:Class="QueueApp.Features.Flow.Helpers.ServiceStepView">
 
     <CollectionView ItemsSource="{Binding ServiceRows, Source={x:Reference Root}}"
                     IsVisible="{Binding ShowServiceStep, Source={x:Reference Root}}"

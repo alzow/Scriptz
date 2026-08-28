@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:QueueApp.Features.Confirmation"
+             xmlns:helpers="clr-namespace:QueueApp.Features.Confirmation.Helpers"
+             xmlns:browse="clr-namespace:QueueApp.Features.CategoryPicker.Helpers"
+             xmlns:bdHelpers="clr-namespace:QueueApp.Features.BusinessDetail.Helpers"
+             x:Name="Root"
+             x:Class="QueueApp.Features.Confirmation.ConfirmationPage"
+             x:DataType="vm:ConfirmationPageViewModel"
+             Style="{StaticResource NavigationPageStyle}">
+
+    <Grid BackgroundColor="{StaticResource DeepBackground}"
+          RowDefinitions="Auto,*">
+
+        <bdHelpers:TopBarView Grid.Row="0"
+                FlowTitle="{Binding TicketHeadline}"
+                IsFlowActive="True"
+                TicketHeadline="{Binding TicketHeadline}"
+                IsInQueue="{Binding IsInQueue}"
+                HasActiveBooking="{Binding IsShowingBooking}"
+                BusinessName="{Binding BusinessName}"
+                GoBackCommand="{Binding DoneCommand}"/>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="0" Padding="0,0,0,24">
+
+                <browse:LiveQueueHeroView Margin="16"
+                        IsVisible="{Binding IsShowingTicket}"
+                        ActiveEntry="{Binding ActiveQueueEntry}"
+                        DirectionsCommand="{Binding OpenDirectionsCommand}"
+                        LeaveCommand="{Binding LeaveQueueCommand}"
+                        IsLeaving="{Binding IsLeaving}"/>
+
+                <helpers:BookingPendingSectionView
+                        HasActiveBooking="{Binding IsShowingBooking}"
+                        BookingPendingBlurb="{Binding BookingPendingBlurb}"
+                        BookingWhenText="{Binding BookingWhenText}"
+                        BookingEndsText="{Binding BookingEndsText}"
+                        BookingOperatorLabel="{Binding BookingOperatorLabel}"
+                        BookingOperatorText="{Binding BookingOperatorText}"
+                        BookingServiceText="{Binding BookingServiceText}"
+                        BookingPriceText="{Binding BookingPriceText}"
+                        BookingStatusLabel="{Binding ActiveBooking.StatusLabel}"
+                        IsCancellingBooking="{Binding IsCancellingBooking}"
+                        CancelBookingCommand="{Binding CancelBookingCommand}"/>
+
+                <Border Style="{StaticResource brd13_Ghost}" Margin="18,16,18,0" Padding="18,26"
+                        IsVisible="{Binding HasNothing}">
+                    <Label Text="Nothing active here right now."
+                           Style="{StaticResource lbl12_Regular_TextMuted}"
+                           HorizontalTextAlignment="Center" HorizontalOptions="Center"/>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <ActivityIndicator Grid.Row="1" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                           Color="{StaticResource Green}"
+                           HorizontalOptions="Center" VerticalOptions="Center"/>
+
+    </Grid>
+
+</ContentPage>

@@ -39,6 +39,9 @@ public static class NavigationPaths
     // ── Browse (customer-facing) ───────────────────────────────────────────────
     public const string BusinessListPage     = "BusinessListPage";
     public const string BusinessDetailPage   = "BusinessDetailPage";
+    public const string BookingFlowPage      = "BookingFlowPage";
+    public const string QueueFlowPage        = "QueueFlowPage";
+    public const string ConfirmationPage     = "ConfirmationPage";
 
     // ── Main tabbed shell ──────────────────────────────────────────────────────
     public const string MainTabbedPage       = "MainTabbedPage";

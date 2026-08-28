@@ -4,7 +4,7 @@
              xmlns:models="clr-namespace:QueueApp.Shared.Domain.Models"
              x:Name="Root"
              VerticalOptions="Start"
-             x:Class="QueueApp.Features.BusinessDetail.Helpers.SlotPeriodView">
+             x:Class="QueueApp.Features.Flow.Helpers.SlotPeriodView">
 
     <VerticalStackLayout Spacing="0">
 

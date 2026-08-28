@@ -1,6 +1,6 @@
 using System.Windows.Input;
 
-namespace QueueApp.Features.BusinessDetail.Helpers;
+namespace QueueApp.Features.Flow.Helpers;
 
 public partial class FlowFooterBarView : ContentView
 {

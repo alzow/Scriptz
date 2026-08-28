@@ -35,17 +35,9 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     // No column stores a customer's travel time, so it lives per-device rather than becoming a maps
     // call on every review step. Nothing writes this yet — Profile needs a field for it.
     public const string TravelMinutesStorageKey = "customer_travel_minutes";
-
     #endregion
-
     #region Properties and fields
-
-    private readonly ITicketScheme _ticketScheme = new PositionTicketScheme();
     private readonly SemaphoreSlim _loadLock = new(1, 1);
-
-    private readonly Dictionary<(Guid OperatorId, Guid ServiceId), Dictionary<DateTime, int>> _dayCountCache = new();
-    private readonly Dictionary<DateTime, List<SlotResponse>> _slotCache = new();
-
     private Guid _businessId;
     private bool _openedFromTabs;
     private int? _travelMinutes;
@@ -56,26 +48,20 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     private int _servingCount;
     private string _nextFreeSlotText = "—";
     private string _slotsLeftTodayText = "—";
-    private List<FlowStep> _steps = new();
-    private CancellationTokenSource? _slotDebounce;
-
-    // Mode and page state
-
     public BusinessResponse? Business { get; set; }
     public bool IsLoading { get; set; }
-
     public bool IsQueueMode => Business?.Mode == FlowStepEngine.QueueMode;
     public bool IsBookingMode => Business?.Mode == FlowStepEngine.BookingMode;
 
     // The three top-level states are mutually exclusive: exactly one of these renders at a time.
-    public bool IsShowingLanding => !IsFlowActive && !IsShowingConfirmation;
-    public bool IsShowingConfirmation => IsInQueue || ActiveBooking is not null;
+    // A live ticket or a booking awaiting confirmation is a strip on the landing that taps
+    // through to ConfirmationPage, which owns the detail.
+    public bool HasSomethingActive => IsInQueue || ActiveBooking is not null;
+    public string ActiveStripText => IsInQueue ? "You're in the queue" : "Your booking is with the shop";
 
     // Landing — header
-
     public string BusinessName => Business?.Name ?? string.Empty;
     public string AddressLine => Business?.Address ?? Business?.Suburb ?? string.Empty;
-
     public bool IsOpen { get; set; }
     public string OpenPillText => IsOpen ? "OPEN" : "CLOSED";
 
@@ -91,25 +77,20 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     }
 
     // Landing — live card
-
     public string PrimaryStatValue { get; set; } = "—";
     public string PrimaryStatLabel { get; set; } = "Now serving";
     public string SecondaryStatValue { get; set; } = "—";
     public string SecondaryStatLabel { get; set; } = "In queue";
     public string TertiaryStatValue { get; set; } = "—";
     public string TertiaryStatLabel { get; set; } = "Est. wait";
-
     public string LiveCardTitle => IsBookingMode ? "NEXT AVAILABLE" : "LIVE QUEUE";
     public string LiveCardStatus => IsBookingMode ? "Booking" : IsOpen ? "Live" : "Closed";
     public bool ShowLiveDot => IsQueueMode && IsOpen;
-
     public string LiveFootnote { get; set; } = string.Empty;
-
     public string CtaText { get; set; } = string.Empty;
     public bool IsCtaEnabled { get; set; }
 
     // Landing — services, team, getting there
-
     public ObservableCollection<ServiceChoiceItem> ServiceRows { get; } = new();
     public bool HasServices => ServiceRows.Count > 0;
     public string ServicesCountText => ServiceRows.Count > 0 ? $"All {ServiceRows.Count}" : string.Empty;
@@ -118,78 +99,22 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     // exactly its content — with nothing of its own left to scroll, the drag reaches the page.
     // 50 is the row template's HeightRequest; the layout adds no item spacing.
     public double ServicesListHeight => ServiceRows.Count * 50;
-
     public ObservableCollection<TeamMemberItem> TeamMembers { get; } = new();
     public bool HasTeam => TeamMembers.Count > 0;
     public string TeamSectionTitle => _labels.SectionTitle;
     public string TeamCountText { get; set; } = string.Empty;
-
     public string DistanceText { get; set; } = string.Empty;
     public bool HasDistance => !string.IsNullOrEmpty(DistanceText);
 
     // Flow chrome
-
-    public bool IsFlowActive { get; set; }
-    public string FlowTitle => IsBookingMode ? "Book a slot" : "Join the queue";
-
-    public ObservableCollection<RailSegment> RailSegments { get; } = new();
-    public ObservableCollection<CrumbChip> Crumbs { get; } = new();
-    public bool HasCrumbs => Crumbs.Count > 0;
-
-    public string RailStepLabel { get; set; } = string.Empty;
-    public string RailCountText { get; set; } = string.Empty;
-
-    public string StepHeading { get; set; } = string.Empty;
-    public string StepSubheading { get; set; } = string.Empty;
-
-    public bool ShowOperatorStep { get; set; }
-    public bool ShowServiceStep { get; set; }
-    public bool ShowDayStep { get; set; }
-    public bool ShowTimeStep { get; set; }
-    public bool ShowReviewStep { get; set; }
-
-    public string FooterLabel { get; set; } = string.Empty;
-    public string FooterValue { get; set; } = string.Empty;
-    public string FooterCtaText { get; set; } = "Next";
-    public bool IsFooterCtaEnabled { get; set; }
-    public bool IsSubmitting { get; set; }
-
-    public int CurrentStepIndex { get; set; }
-
-    private FlowStep CurrentStep => _steps.Count > 0
-        ? _steps[Math.Clamp(CurrentStepIndex, 0, _steps.Count - 1)]
-        : FlowStep.Service;
-
-    // Flow selections
-
-    public ObservableCollection<OperatorChoiceItem> OperatorChoices { get; } = new();
-    public OperatorChoiceItem? SelectedOperatorChoice { get; set; }
-
-    public ServiceChoiceItem? SelectedServiceRow { get; set; }
-
-    public ObservableCollection<DayChoiceItem> DayChoices { get; } = new();
-    public DayChoiceItem? SelectedDay { get; set; }
-    public bool IsLoadingDays { get; set; }
-    public string DayFineprint { get; set; } = string.Empty;
-
-    public SlotPeriod Morning { get; set; } = new("MORNING", Array.Empty<SlotChoiceItem>(), "none");
-    public SlotPeriod Afternoon { get; set; } = new("AFTERNOON", Array.Empty<SlotChoiceItem>(), "none");
-    public SlotPeriod Evening { get; set; } = new("EVENING", Array.Empty<SlotChoiceItem>(), "none");
-    public SlotChoiceItem? SelectedSlot { get; set; }
-    public bool IsLoadingSlots { get; set; }
-
-    // Queue data
-
     public ObservableCollection<QueueSummaryRow> QueueSummary { get; } = new();
 
     // Queue confirmation
-
     public MyQueueStatusResponse? MyStatus { get; set; }
     public decimal? MyWaitMinutes { get; set; }
     public bool IsInQueue => MyStatus is not null;
     public bool IsBeingServed => MyStatus?.Status == "serving";
     public bool IsLeaving { get; set; }
-
     public MyActiveQueueEntryResponse? ActiveQueueEntry => MyStatus is null
         ? null
         : new MyActiveQueueEntryResponse
@@ -207,48 +132,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             WaitMinutes = MyWaitMinutes,
             ProgressStatus = MyStatus.ProgressStatus,
         };
-
-    public string TicketHeadline { get; set; } = string.Empty;
-    public string TicketWaitText { get; set; } = string.Empty;
-    public string TicketTurnText { get; set; } = string.Empty;
-    public string TicketLeaveText { get; set; } = string.Empty;
-    public bool ShowTicketLeaveText => !string.IsNullOrEmpty(TicketLeaveText);
-    public string TicketTravelNote { get; set; } = string.Empty;
-    public RingDrawable TicketRing { get; set; } = new(0);
-    public ObservableCollection<TicketDot> TicketDots { get; } = new();
-
-    // Booking confirmation
-
-    public MyBookingSummaryResponse? ActiveBooking { get; set; }
-    public string BookingWhenText { get; set; } = string.Empty;
-    public string BookingEndsText { get; set; } = string.Empty;
-    public string BookingOperatorLabel => _labels.Noun;
-    public string BookingOperatorText { get; set; } = string.Empty;
-    public string BookingServiceText { get; set; } = string.Empty;
-    public string BookingPriceText { get; set; } = string.Empty;
-    public string BookingPendingBlurb { get; set; } = string.Empty;
-    public bool IsCancellingBooking { get; set; }
-
-    // Review step
-
-    public string ReviewOperatorLabel => _labels.Noun;
-    public string ReviewOperatorText { get; set; } = string.Empty;
-    public string ReviewServiceText { get; set; } = string.Empty;
-    public string ReviewPriceText { get; set; } = string.Empty;
-    public string ReviewPositionText { get; set; } = string.Empty;
-    public string ReviewTurnText { get; set; } = string.Empty;
-    public string ReviewWhenText { get; set; } = string.Empty;
-    public bool ShowReviewWhen => IsBookingMode;
-    public bool ShowReviewQueueLines => !IsBookingMode;
-
-    // Free text the customer adds before committing — a registration, what is actually wrong.
-    // Stored in bookings.note, which create_booking already accepts as p_note.
-    public string BookingNote { get; set; } = string.Empty;
-
     #endregion
-
     #region Services
-
     private readonly IBusinessService _businessService;
     private readonly IQueueService _queueService;
     private readonly IOperatorService _operatorService;
@@ -259,11 +144,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     private readonly IQueueRealtimeService _realtimeService;
     private readonly IQueuePopupService _popupService;
     private readonly ILocationService _locationService;
-
     #endregion
-
     #region Constructor
-
     public BusinessDetailPageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
@@ -290,11 +172,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         _popupService = popupService;
         _locationService = locationService;
     }
-
     #endregion
-
     #region Lifecycle
-
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
         try
@@ -364,7 +243,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             IsLoading = false;
         }
     }
-
     public override async Task OnDisappearingAsync()
     {
         try
@@ -378,20 +256,42 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         }
     }
 
-    // Android's hardware back has to mean the same thing as the on-screen one, or it pops the whole
-    // page from step three. Returns true when it consumed the press.
-    public bool TryHandleHardwareBack()
-    {
-        if (!IsFlowActive)
-            return false;
+    #endregion
+    #region Rest of functions
 
-        FlowBack();
-        return true;
+    [RelayCommand]
+    public async Task StartFlowAsync()
+    {
+        try
+        {
+            if (Business is null || !IsCtaEnabled)
+                return;
+
+            await NavigationService.NavigateAsync(
+                IsBookingMode ? NavigationPaths.BookingFlowPage : NavigationPaths.QueueFlowPage,
+                new NavigationParameters { { NavigationKeys.BusinessId, _businessId } });
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
 
-    #endregion
+    [RelayCommand]
+    public async Task OpenConfirmationAsync()
+    {
+        try
+        {
+            await NavigationService.NavigateAsync(
+                NavigationPaths.ConfirmationPage,
+                new NavigationParameters { { NavigationKeys.BusinessId, _businessId } });
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
 
-    #region Rest of functions
 
     // Base HandleExceptionAsync only logs — surface real failures to the customer instead, most
     // notably a pooled join/booking race ("all resources are currently busy", "that time was
@@ -400,7 +300,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     {
         return _popupService.ShowAlertAsync("Couldn't do that", GetFriendlyErrorMessage(exception));
     }
-
     public async Task OnRealtimeChangeAsync() =>
         await MainThread.InvokeOnMainThreadAsync(async () =>
         {
@@ -425,7 +324,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 await HandleExceptionAsync(ex);
             }
         });
-
     public async Task<int?> ReadTravelMinutesAsync()
     {
         try
@@ -497,7 +395,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         OnPropertyChanged(nameof(HasTeam));
         OnPropertyChanged(nameof(TeamSectionTitle));
     }
-
     public async Task LoadDistanceAsync()
     {
         try
@@ -519,7 +416,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             await HandleExceptionAsync(ex);
         }
     }
-
     public async Task RefreshQueueAsync()
     {
         await _loadLock.WaitAsync();
@@ -546,7 +442,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             _loadLock.Release();
         }
     }
-
     public async Task RefreshMyStatusAsync()
     {
         try
@@ -560,10 +455,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
 
             OnPropertyChanged(nameof(ActiveQueueEntry));
             OnPropertyChanged(nameof(IsInQueue));
-            OnPropertyChanged(nameof(IsShowingConfirmation));
-            OnPropertyChanged(nameof(IsShowingLanding));
-
-            RefreshTicket();
+            OnPropertyChanged(nameof(HasSomethingActive));
+            OnPropertyChanged(nameof(ActiveStripText));
         }
         catch (Exception ex)
         {
@@ -605,7 +498,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             await HandleExceptionAsync(ex);
         }
     }
-
     public async Task RefreshMyBookingsAsync()
     {
         try
@@ -620,17 +512,14 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 .OrderBy(b => b.StartsAt)
                 .FirstOrDefault();
 
-            OnPropertyChanged(nameof(IsShowingConfirmation));
-            OnPropertyChanged(nameof(IsShowingLanding));
-
-            RefreshBookingConfirmation();
+            OnPropertyChanged(nameof(HasSomethingActive));
+            OnPropertyChanged(nameof(ActiveStripText));
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
         }
     }
-
     public void RefreshLandingCard()
     {
         var now = LocalTime.Now;
@@ -656,7 +545,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         OnPropertyChanged(nameof(ShowLiveDot));
         OnPropertyChanged(nameof(ModeLine));
     }
-
     public void RefreshQueueCard()
     {
         PrimaryStatLabel = "Now serving";
@@ -693,7 +581,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         CtaText = "Join queue";
         IsCtaEnabled = ServiceRows.Count > 0;
     }
-
     public void RefreshBookingCard()
     {
         PrimaryStatLabel = "Next free slot";
@@ -720,846 +607,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             IsCtaEnabled = true;
         }
     }
-
-    [RelayCommand]
-    public void StartFlow()
-    {
-        if (Business is null || !IsCtaEnabled)
-            return;
-
-        _steps = FlowStepEngine.BuildSteps(Business, _selectableOperators);
-
-        SelectedOperatorChoice = null;
-        SelectedServiceRow = null;
-        SelectedDay = null;
-
-        // DayChoices and the slot periods outlive a single run of the flow, so a second run has to
-        // clear their selected state too — otherwise a chip stays highlighted with nothing selected.
-        foreach (var row in ServiceRows)
-            row.IsSelected = false;
-        foreach (var day in DayChoices)
-            day.IsSelected = false;
-        _slotCache.Clear();
-        ClearSlots();
-
-        BuildOperatorChoices();
-
-        // Where the operator step doesn't run, the value it would have produced still has to exist.
-        if (!_steps.Contains(FlowStep.Operator))
-            SelectedOperatorChoice = OperatorChoices.FirstOrDefault();
-
-        CurrentStepIndex = 0;
-        IsFlowActive = true;
-
-        OnPropertyChanged(nameof(IsShowingLanding));
-        ApplyStep();
-    }
-
-    // Back on step 0 leaves the flow and clears it; anywhere else it steps back and keeps what was
-    // already chosen.
-    [RelayCommand]
-    public void FlowBack()
-    {
-        if (CurrentStepIndex <= 0)
-        {
-            CloseFlow();
-            return;
-        }
-
-        CurrentStepIndex--;
-        ApplyStep();
-    }
-
-    public void CloseFlow()
-    {
-        IsFlowActive = false;
-        BookingNote = string.Empty;
-        ShowOperatorStep = ShowServiceStep = ShowDayStep = ShowTimeStep = ShowReviewStep = false;
-        Crumbs.Clear();
-        OnPropertyChanged(nameof(HasCrumbs));
-        OnPropertyChanged(nameof(IsShowingLanding));
-    }
-
-    [RelayCommand]
-    public async Task NextAsync()
-    {
-        try
-        {
-            if (!IsFooterCtaEnabled)
-                return;
-
-            if (CurrentStepIndex >= _steps.Count - 1)
-            {
-                await SubmitAsync();
-                return;
-            }
-
-            CurrentStepIndex++;
-            ApplyStep();
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
-        }
-        finally
-        {
-            IsSubmitting = false;
-        }
-    }
-
-    [RelayCommand]
-    public void JumpToCrumb(CrumbChip? chip)
-    {
-        if (chip is null)
-            return;
-
-        var index = _steps.IndexOf(chip.Step);
-        if (index < 0)
-            return;
-
-        CurrentStepIndex = index;
-        ApplyStep();
-    }
-
-    public void ApplyStep()
-    {
-        var step = CurrentStep;
-
-        ShowOperatorStep = step == FlowStep.Operator;
-        ShowServiceStep = step == FlowStep.Service;
-        ShowDayStep = step == FlowStep.Day;
-        ShowTimeStep = step == FlowStep.Time;
-        ShowReviewStep = step == FlowStep.Review;
-
-        RailStepLabel = FlowStepEngine.RailLabel(step, _labels.Noun);
-        RailCountText = $"{CurrentStepIndex + 1}/{_steps.Count}";
-
-        RailSegments.Clear();
-        for (var i = 0; i < _steps.Count; i++)
-            RailSegments.Add(new RailSegment { IsDone = i < CurrentStepIndex, IsCurrent = i == CurrentStepIndex });
-
-        BuildCrumbs();
-        ApplyStepCopy(step);
-
-        // The review step's footer quotes the position this computes, so it has to run first.
-        if (step == FlowStep.Review)
-            RefreshReview();
-
-        RefreshFooter();
-
-        if (step == FlowStep.Day)
-            _ = LoadDayCountsAsync();
-        else if (step == FlowStep.Time)
-            _ = LoadSlotsAsync();
-    }
-
-    public void ApplyStepCopy(FlowStep step)
-    {
-        switch (step)
-        {
-            case FlowStep.Operator:
-                StepHeading = _labels.StepHeading;
-                StepSubheading = IsBookingMode
-                    ? $"Availability is per {_labels.Noun.ToLowerInvariant()}, so this decides which times you'll see."
-                    : $"Pick a {_labels.Noun.ToLowerInvariant()}, or take whoever's free first.";
-                break;
-            case FlowStep.Service:
-                StepHeading = "What service do you need?";
-                StepSubheading = IsBookingMode
-                    ? "This helps us match the right appointment length."
-                    : "This helps us estimate how long you'll be in the queue.";
-                break;
-            case FlowStep.Day:
-                StepHeading = "Which day?";
-                StepSubheading = "Next 14 days. Greyed days are fully booked.";
-                break;
-            case FlowStep.Time:
-                StepHeading = "Pick a time";
-                StepSubheading = SelectedServiceRow is null
-                    ? string.Empty
-                    : $"{SelectedServiceRow.Name} runs {SelectedServiceRow.DurationText}. Times shown can fit it.";
-                break;
-            default:
-                StepHeading = IsBookingMode ? "Ready to request?" : "Ready to join?";
-                StepSubheading = IsBookingMode
-                    ? "The shop confirms this before it's final. You can cancel any time."
-                    : "You can leave the queue any time.";
-                break;
-        }
-    }
-
-    public void BuildCrumbs()
-    {
-        Crumbs.Clear();
-
-        for (var i = 0; i < CurrentStepIndex; i++)
-        {
-            var text = _steps[i] switch
-            {
-                FlowStep.Operator => SelectedOperatorChoice?.Name,
-                FlowStep.Service => SelectedServiceRow?.Name,
-                FlowStep.Day => SelectedDay is null ? null : $"{SelectedDay.DayOfWeekText} {SelectedDay.DayNumberText}",
-                FlowStep.Time => SelectedSlot?.TimeText,
-                _ => null,
-            };
-
-            if (!string.IsNullOrEmpty(text))
-                Crumbs.Add(new CrumbChip { Step = _steps[i], Text = text });
-        }
-
-        OnPropertyChanged(nameof(HasCrumbs));
-    }
-
-    public void RefreshFooter()
-    {
-        var isLast = CurrentStepIndex >= _steps.Count - 1;
-
-        switch (CurrentStep)
-        {
-            case FlowStep.Operator:
-                FooterLabel = "Selected";
-                FooterValue = SelectedOperatorChoice?.Name ?? "Nothing yet";
-                IsFooterCtaEnabled = SelectedOperatorChoice is not null;
-                break;
-            case FlowStep.Service:
-                FooterLabel = SelectedServiceRow is null
-                    ? "Pick a service"
-                    : $"{SelectedServiceRow.Name} · {SelectedServiceRow.DurationText}";
-                FooterValue = SelectedServiceRow?.PriceText ?? string.Empty;
-                IsFooterCtaEnabled = SelectedServiceRow is not null;
-                break;
-            case FlowStep.Day:
-                FooterLabel = SelectedDay is null ? "Pick a day" : SelectedDay.Date.ToString("ddd d MMM");
-                FooterValue = SelectedDay?.FreeText ?? string.Empty;
-                IsFooterCtaEnabled = SelectedDay is not null;
-                break;
-            case FlowStep.Time:
-                FooterLabel = BuildSlotRangeText();
-                FooterValue = SelectedServiceRow?.PriceText ?? string.Empty;
-                IsFooterCtaEnabled = SelectedSlot is not null;
-                break;
-            default:
-                FooterLabel = IsBookingMode ? "Requesting" : "Joining as";
-                FooterValue = IsBookingMode ? BuildSlotRangeText() : ReviewPositionText;
-                IsFooterCtaEnabled = IsBookingMode
-                    ? SelectedServiceRow is not null && SelectedSlot is not null
-                    : SelectedServiceRow is not null;
-                break;
-        }
-
-        FooterCtaText = isLast
-            ? IsBookingMode ? "Request booking" : "Join queue"
-            : "Next";
-    }
-
-    public string BuildSlotRangeText()
-    {
-        if (SelectedSlot is null || SelectedDay is null)
-            return "Pick a time";
-
-        var start = LocalTime.ToLocal(SelectedSlot.Slot.SlotStart);
-        var end = LocalTime.ToLocal(SelectedSlot.Slot.SlotEnd);
-        return $"{start:ddd d} · {start:HH:mm} – {end:HH:mm}";
-    }
-
-    // Every downstream clear happens here. Nothing else sets a selection back to null.
-    public void InvalidateAfter(FlowStep changed)
-    {
-        switch (changed)
-        {
-            // Availability is per operator; services are per business, so they survive.
-            case FlowStep.Operator:
-            case FlowStep.Service:
-                SelectedDay = null;
-                foreach (var day in DayChoices)
-                    day.IsSelected = false;
-
-                // The cache is keyed by date alone, so it is only valid for one operator/service
-                // pair — both of these change which slots a date has, so it has to go.
-                _slotCache.Clear();
-                ClearSlots();
-                break;
-
-            // A different day is a different cache key, not a stale one: keep what's already
-            // fetched so stepping back to an earlier day doesn't re-hit the RPC.
-            case FlowStep.Day:
-                ClearSlots();
-                break;
-        }
-    }
-
-    public void ClearSlots()
-    {
-        SelectedSlot = null;
-        Morning = new SlotPeriod("MORNING", Array.Empty<SlotChoiceItem>(), "none");
-        Afternoon = new SlotPeriod("AFTERNOON", Array.Empty<SlotChoiceItem>(), "none");
-        Evening = new SlotPeriod("EVENING", Array.Empty<SlotChoiceItem>(), "none");
-    }
-
-    [RelayCommand]
-    public void SelectOperator(OperatorChoiceItem? item)
-    {
-        if (item is null || ReferenceEquals(item, SelectedOperatorChoice))
-            return;
-
-        foreach (var choice in OperatorChoices)
-            choice.IsSelected = ReferenceEquals(choice, item);
-
-        SelectedOperatorChoice = item;
-        InvalidateAfter(FlowStep.Operator);
-        RefreshFooter();
-    }
-
-    [RelayCommand]
-    public void SelectService(ServiceChoiceItem? item)
-    {
-        if (item is null || ReferenceEquals(item, SelectedServiceRow))
-            return;
-
-        foreach (var row in ServiceRows)
-            row.IsSelected = ReferenceEquals(row, item);
-
-        SelectedServiceRow = item;
-        InvalidateAfter(FlowStep.Service);
-        RefreshFooter();
-    }
-
-    [RelayCommand]
-    public void SelectDay(DayChoiceItem? item)
-    {
-        if (item is null || !item.IsSelectable || ReferenceEquals(item, SelectedDay))
-            return;
-
-        foreach (var day in DayChoices)
-            day.IsSelected = ReferenceEquals(day, item);
-
-        SelectedDay = item;
-        InvalidateAfter(FlowStep.Day);
-        RefreshFooter();
-    }
-
-    [RelayCommand]
-    public void SelectSlot(SlotChoiceItem? item)
-    {
-        if (item is null)
-            return;
-
-        foreach (var slot in Morning.Slots.Concat(Afternoon.Slots).Concat(Evening.Slots))
-            slot.IsSelected = ReferenceEquals(slot, item);
-
-        SelectedSlot = item;
-        RefreshFooter();
-    }
-
-    public void BuildOperatorChoices()
-    {
-        OperatorChoices.Clear();
-
-        // queue_entries.operator_id is nullable, so "any available" is a real first-class choice
-        // here — pinned, tagged, and selected by default so the common path is one tap.
-        if (IsQueueMode)
-        {
-            var fastest = QueueSummary.Count > 0 ? QueueSummary.Min(r => r.NewJoinWaitMinutes) : 0;
-            var any = new OperatorChoiceItem
-            {
-                OperatorId = null,
-                Name = "Any available",
-                Initials = "★",
-                SubLabel = $"Shortest wait · about {fastest:0} min",
-                IsAnyAvailable = true,
-                ShowFastestTag = true,
-                IsSelected = true,
-            };
-            OperatorChoices.Add(any);
-            SelectedOperatorChoice = any;
-        }
-        else if (IsBookingMode)
-        {
-            var any = new OperatorChoiceItem
-            {
-                OperatorId = null,
-                Name = "Any available",
-                Initials = "★",
-                SubLabel = "Whoever's free at that time",
-                IsAnyAvailable = true,
-                ShowFastestTag = false,
-                IsSelected = true,
-            };
-            OperatorChoices.Add(any);
-            SelectedOperatorChoice = any;
-        }
-
-        foreach (var op in _selectableOperators)
-        {
-            var summary = QueueSummary.FirstOrDefault(r => r.OperatorId == op.Id);
-            var subLabel = IsBookingMode
-                ? "Tap to see their times"
-                : summary is null
-                    ? "Free now · about 0 min"
-                    : (summary.WaitingCount, summary.ServingCount) switch
-                    {
-                        (0, 0) => $"Free now · about {summary.NewJoinWaitMinutes:0} min",
-                        (var waiting, 0) => $"{waiting} waiting · about {summary.NewJoinWaitMinutes:0} min",
-                        (0, var serving) => $"{serving} being served · about {summary.NewJoinWaitMinutes:0} min",
-                        (var waiting, var serving) =>
-                            $"{waiting} waiting · {serving} being served · about {summary.NewJoinWaitMinutes:0} min",
-                    };
-
-            OperatorChoices.Add(new OperatorChoiceItem
-            {
-                OperatorId = op.Id,
-                Name = op.DisplayName,
-                Initials = Initials(op.DisplayName),
-                SubLabel = subLabel,
-                IsAnyAvailable = false,
-                ShowFastestTag = false,
-            });
-        }
-    }
-
-    public async Task LoadDayCountsAsync()
-    {
-        try
-        {
-            if (SelectedOperatorChoice is null || SelectedServiceRow is null)
-                return;
-
-            var operatorId = SelectedOperatorChoice.OperatorId;
-            var isAny = SelectedOperatorChoice.IsAnyAvailable;
-
-            if (DayChoices.Count == 0)
-            {
-                for (var i = 0; i < 14; i++)
-                {
-                    var date = LocalTime.Now.Date.AddDays(i);
-                    DayChoices.Add(new DayChoiceItem
-                    {
-                        Date = date,
-                        DayOfWeekText = date.ToString("ddd").ToUpperInvariant(),
-                        DayNumberText = date.Day.ToString(),
-                    });
-                }
-            }
-
-            // Pooled counts are shop-wide (get_available_slots_any), so no "whose slots" caveat is
-            // needed there — only the single-operator path needs to say whose free time it's counting.
-            DayFineprint = isAny
-                ? SelectedServiceRow.Service.EstMinutes >= 120
-                    ? $"A {SelectedServiceRow.DurationText} job needs one unbroken block, so some days show fewer options."
-                    : "Counts are the shop's free slots across everyone."
-                : SelectedServiceRow.Service.EstMinutes >= 120
-                    ? $"A {SelectedServiceRow.DurationText} job needs one unbroken block, so some days show fewer options than {SelectedOperatorChoice.Name} has slots."
-                    : $"Counts are {SelectedOperatorChoice.Name}'s free slots, not the whole shop's.";
-
-            var serviceId = SelectedServiceRow.Service.Id;
-            var key = (operatorId ?? Guid.Empty, serviceId);
-
-            if (_dayCountCache.TryGetValue(key, out var cached))
-            {
-                ApplyDayCounts(cached);
-                return;
-            }
-
-            IsLoadingDays = true;
-            try
-            {
-                var dates = DayChoices.Select(d => d.Date).ToList();
-                var results = await Task.WhenAll(dates.Select(async date =>
-                {
-                    var slots = isAny
-                        ? await _bookingService.GetAvailableSlotsAnyAsync(_businessId, serviceId, date)
-                        : await _bookingService.GetAvailableSlotsAsync(operatorId!.Value, serviceId, date);
-                    return (date, count: slots.Count);
-                }));
-
-                var counts = results.ToDictionary(r => r.date, r => r.count);
-                _dayCountCache[key] = counts;
-                ApplyDayCounts(counts);
-            }
-            finally
-            {
-                IsLoadingDays = false;
-            }
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
-        }
-    }
-
-    public void ApplyDayCounts(IReadOnlyDictionary<DateTime, int> counts)
-    {
-        var operatorName = SelectedOperatorChoice?.Name ?? string.Empty;
-
-        foreach (var day in DayChoices)
-        {
-            var count = counts.TryGetValue(day.Date, out var value) ? value : 0;
-            day.IsFull = count == 0;
-            day.FreeText = count == 0 ? "full" : $"{count} free · {operatorName}";
-        }
-    }
-
-    public async Task LoadSlotsAsync()
-    {
-        if (SelectedOperatorChoice is null
-            || SelectedServiceRow is null
-            || SelectedDay is null)
-            return;
-
-        var operatorId = SelectedOperatorChoice.OperatorId;
-        var isAny = SelectedOperatorChoice.IsAnyAvailable;
-        var date = SelectedDay.Date;
-
-        if (_slotCache.TryGetValue(date, out var cached))
-        {
-            ApplySlots(cached);
-            return;
-        }
-
-        // Debounced: flicking along the day strip shouldn't fire an RPC per chip.
-        _slotDebounce?.Cancel();
-        _slotDebounce = new CancellationTokenSource();
-        var token = _slotDebounce.Token;
-
-        IsLoadingSlots = true;
-        try
-        {
-            await Task.Delay(250, token);
-
-            var slots = isAny
-                ? await _bookingService.GetAvailableSlotsAnyAsync(_businessId, SelectedServiceRow.Service.Id, date)
-                : await _bookingService.GetAvailableSlotsAsync(operatorId!.Value, SelectedServiceRow.Service.Id, date);
-
-            if (token.IsCancellationRequested)
-                return;
-
-            _slotCache[date] = slots;
-            ApplySlots(slots);
-        }
-        catch (TaskCanceledException)
-        {
-            // Superseded by a newer day selection.
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
-        }
-        finally
-        {
-            if (!token.IsCancellationRequested)
-                IsLoadingSlots = false;
-        }
-    }
-
-    public void ApplySlots(IReadOnlyList<SlotResponse> slots)
-    {
-        var items = slots
-            .Select(s => new SlotChoiceItem
-            {
-                Slot = s,
-                TimeText = LocalTime.ToLocal(s.SlotStart).ToString("HH:mm"),
-            })
-            .OrderBy(s => s.Slot.SlotStart)
-            .ToList();
-
-        Morning = new SlotPeriod("MORNING", InPeriod(items, 0, 12), EmptyNote(0, 12));
-        Afternoon = new SlotPeriod("AFTERNOON", InPeriod(items, 12, 17), EmptyNote(12, 17));
-        Evening = new SlotPeriod("EVENING", InPeriod(items, 17, 24), EmptyNote(17, 24));
-
-        SelectedSlot = null;
-        RefreshFooter();
-    }
-
-    public static List<SlotChoiceItem> InPeriod(IEnumerable<SlotChoiceItem> items, int fromHour, int toHour) =>
-        items.Where(i =>
-        {
-            var hour = LocalTime.ToLocal(i.Slot.SlotStart).Hour;
-            return hour >= fromHour && hour < toHour;
-        }).ToList();
-
-    // An absent period needs explaining or it reads as a bug — a three-hour job at a shop that shuts
-    // at 17:00 genuinely has no evening, and saying so is the difference between the two.
-    public string EmptyNote(int fromHour, int toHour)
-    {
-        if (SelectedDay is null)
-            return "none";
-
-        if (_hours.ClosingTimeOn(SelectedDay.Date) is { } closing && closing.TotalHours <= fromHour)
-            return $"none — shop closes {BusinessHours.FormatClock(closing)}";
-
-        return "none — nothing long enough left";
-    }
-
-    public string? TrimmedBookingNote() =>
-        string.IsNullOrWhiteSpace(BookingNote) ? null : BookingNote.Trim();
-
-    public void RefreshReview()
-    {
-        if (SelectedServiceRow is null)
-            return;
-
-        ReviewOperatorText = SelectedOperatorChoice?.Name ?? "Any available";
-        ReviewServiceText = $"{SelectedServiceRow.Name} · {SelectedServiceRow.DurationText}";
-        ReviewPriceText = SelectedServiceRow.PriceText;
-
-        OnPropertyChanged(nameof(ShowReviewWhen));
-        OnPropertyChanged(nameof(ShowReviewQueueLines));
-
-        if (IsBookingMode)
-        {
-            ReviewWhenText = BuildSlotRangeText();
-            OnPropertyChanged(nameof(ReviewOperatorLabel));
-            return;
-        }
-
-        var row = SelectedOperatorChoice?.OperatorId is { } operatorId
-            ? QueueSummary.FirstOrDefault(r => r.OperatorId == operatorId)
-            : QueueSummary.OrderBy(r => r.NewJoinWaitMinutes).FirstOrDefault();
-
-        var ahead = row is null ? 0 : row.WaitingCount + row.ServingCount;
-        var waitMinutes = row?.NewJoinWaitMinutes ?? 0;
-
-        ReviewPositionText = Ordinal(ahead + 1) + " in line";
-        var turnAt = LocalTime.Now.AddMinutes(waitMinutes);
-        ReviewTurnText = turnAt.ToString("HH:mm");
-
-        OnPropertyChanged(nameof(ReviewOperatorLabel));
-    }
-
-    public Task SubmitAsync() => IsBookingMode ? SubmitBookingAsync() : SubmitJoinAsync();
-
-    public async Task SubmitJoinAsync()
-    {
-        if (SelectedServiceRow is null)
-            return;
-
-        IsSubmitting = true;
-        try
-        {
-            var userId = await _authService.GetUserIdAsync();
-            if (string.IsNullOrEmpty(userId))
-                throw new InvalidOperationException("No signed-in user id — should never happen post-splash-gate.");
-
-            var customerName = await _profileService.GetMyDisplayNameAsync(Guid.Parse(userId));
-
-            await _queueService.JoinQueueAsync(
-                _businessId,
-                SelectedOperatorChoice?.OperatorId,
-                Guid.Parse(userId),
-                customerName,
-                SelectedServiceRow.Service.Id);
-
-            CloseFlow();
-            await RefreshQueueAsync();
-            await RefreshMyStatusAsync();
-            RefreshLandingCard();
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
-        }
-        finally
-        {
-            IsSubmitting = false;
-        }
-    }
-
-    public async Task SubmitBookingAsync()
-    {
-        if (SelectedServiceRow is null || SelectedSlot is null)
-            return;
-
-        if (SelectedOperatorChoice is null)
-        {
-            await HandleExceptionAsync(new InvalidOperationException(
-                "Pick who's doing the work before booking."));
-            return;
-        }
-
-        IsSubmitting = true;
-        try
-        {
-            var userId = await _authService.GetUserIdAsync();
-            if (string.IsNullOrEmpty(userId))
-                throw new InvalidOperationException("No signed-in user id — should never happen post-splash-gate.");
-
-            if (SelectedOperatorChoice.IsAnyAvailable)
-            {
-                await _bookingService.CreateBookingAnyAsync(new CreateBookingAnyRequest
-                {
-                    BusinessId = _businessId,
-                    ServiceId = SelectedServiceRow.Service.Id,
-                    CustomerId = Guid.Parse(userId),
-                    StartsAt = SelectedSlot.Slot.SlotStart,
-                    Note = TrimmedBookingNote(),
-                });
-            }
-            else
-            {
-                await _bookingService.CreateBookingAsync(new CreateBookingRequest
-                {
-                    BusinessId = _businessId,
-                    OperatorId = SelectedOperatorChoice.OperatorId!.Value,
-                    ServiceId = SelectedServiceRow.Service.Id,
-                    CustomerId = Guid.Parse(userId),
-                    StartsAt = SelectedSlot.Slot.SlotStart,
-                    Note = TrimmedBookingNote(),
-                });
-            }
-
-            CloseFlow();
-            await RefreshMyBookingsAsync();
-            RefreshLandingCard();
-        }
-        catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.Conflict)
-        {
-            // bookings_no_overlap caught a race — someone took this exact slot between the list
-            // loading and the confirm tap.
-            await HandleExceptionAsync(new InvalidOperationException(
-                "That slot was just booked by someone else — please pick another time."));
-            _slotCache.Clear();
-            await LoadSlotsAsync();
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
-        }
-        finally
-        {
-            IsSubmitting = false;
-        }
-    }
-
-    public void RefreshTicket()
-    {
-        TicketDots.Clear();
-
-        if (MyStatus is null)
-            return;
-
-        TicketHeadline = IsBeingServed
-            ? $"You're up with {MyStatus.OperatorName}"
-            : $"You're {Ordinal(MyStatus.Position)} in line";
-
-        var minutes = (double)(MyWaitMinutes ?? 0);
-        TicketWaitText = IsBeingServed ? "now" : $"{minutes:0} min";
-
-        var turnAt = LocalTime.Now.AddMinutes(minutes);
-        TicketTurnText = turnAt.ToString("HH:mm");
-
-        if (_travelMinutes is { } travel && !IsBeingServed)
-        {
-            TicketLeaveText = turnAt.AddMinutes(-travel).ToString("HH:mm");
-            TicketTravelNote = $"{travel} min travel";
-        }
-        else
-        {
-            TicketLeaveText = string.Empty;
-            TicketTravelNote = string.Empty;
-        }
-
-        // Compared in UTC so the ring never depends on how the JSON reader happened to tag the kind.
-        var joinedUtc = MyStatus.JoinedAt.Kind == DateTimeKind.Unspecified
-            ? DateTime.SpecifyKind(MyStatus.JoinedAt, DateTimeKind.Utc)
-            : MyStatus.JoinedAt.ToUniversalTime();
-        var elapsed = Math.Max(0, (DateTime.UtcNow - joinedUtc).TotalMinutes);
-        var total = elapsed + minutes;
-        TicketRing = new RingDrawable(total > 0 ? elapsed / total : 0);
-
-        foreach (var marker in _ticketScheme.BuildStrip(MyStatus.Position))
-        {
-            TicketDots.Add(new TicketDot
-            {
-                Label = marker.Label,
-                IsNowServing = marker.IsNowServing,
-                IsMine = marker.IsMine,
-            });
-        }
-
-        OnPropertyChanged(nameof(ShowTicketLeaveText));
-        OnPropertyChanged(nameof(IsBeingServed));
-    }
-
-    public void RefreshBookingConfirmation()
-    {
-        if (ActiveBooking is null)
-            return;
-
-        var start = LocalTime.ToLocal(ActiveBooking.StartsAt);
-        var end = LocalTime.ToLocal(ActiveBooking.EndsAt);
-
-        BookingWhenText = start.ToString("ddd d MMM · HH:mm");
-        BookingEndsText = end.ToString("HH:mm");
-        BookingOperatorText = ActiveBooking.OperatorName;
-        BookingServiceText = ActiveBooking.ServiceName;
-        BookingPriceText = ServiceRows
-            .FirstOrDefault(s => s.Name == ActiveBooking.ServiceName)?.PriceText ?? string.Empty;
-
-        BookingPendingBlurb = ActiveBooking.Status == "pending"
-            ? $"{ActiveBooking.OperatorName} needs to confirm. You'll get a notification — usually within an hour during trading."
-            : $"{ActiveBooking.OperatorName} has confirmed. See you then.";
-
-        OnPropertyChanged(nameof(BookingOperatorLabel));
-    }
-
-    [RelayCommand]
-    public async Task LeaveQueueAsync()
-    {
-        if (MyStatus is null)
-            return;
-
-        IsLeaving = true;
-        try
-        {
-            await _queueService.CancelEntryAsync(MyStatus.EntryId);
-            MyStatus = null;
-            MyWaitMinutes = null;
-
-            OnPropertyChanged(nameof(ActiveQueueEntry));
-            OnPropertyChanged(nameof(IsInQueue));
-            OnPropertyChanged(nameof(IsShowingConfirmation));
-            OnPropertyChanged(nameof(IsShowingLanding));
-
-            await RefreshQueueAsync();
-            RefreshLandingCard();
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
-        }
-        finally
-        {
-            IsLeaving = false;
-        }
-    }
-
-    [RelayCommand]
-    public async Task CancelBookingAsync()
-    {
-        if (ActiveBooking is null)
-            return;
-
-        IsCancellingBooking = true;
-        try
-        {
-            await _bookingService.CancelBookingAsync(ActiveBooking.Id);
-            ActiveBooking = null;
-
-            OnPropertyChanged(nameof(IsShowingConfirmation));
-            OnPropertyChanged(nameof(IsShowingLanding));
-
-            RefreshLandingCard();
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
-        }
-        finally
-        {
-            IsCancellingBooking = false;
-        }
-    }
-
     [RelayCommand]
     public async Task OpenDirectionsAsync()
     {
@@ -1582,18 +629,11 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             await HandleExceptionAsync(ex);
         }
     }
-
     [RelayCommand]
     public async Task GoBackAsync()
     {
         try
         {
-            if (IsFlowActive)
-            {
-                FlowBack();
-                return;
-            }
-
             if (_openedFromTabs)
             {
                 var (ownsBusiness, mode) = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
@@ -1610,7 +650,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             await HandleExceptionAsync(ex);
         }
     }
-
     public static string Initials(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -1621,7 +660,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             ? parts[0][..Math.Min(2, parts[0].Length)].ToUpperInvariant()
             : $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
     }
-
     public static string Ordinal(int value) => value switch
     {
         11 or 12 or 13 => $"{value}th",
@@ -1630,7 +668,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         _ when value % 10 == 3 => $"{value}rd",
         _ => $"{value}th",
     };
-
     public static double HaversineKm(double lat1, double lon1, double lat2, double lon2)
     {
         const double earthRadiusKm = 6371;
@@ -1641,6 +678,5 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 * Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
         return earthRadiusKm * 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
     }
-
     #endregion
 }

@@ -2,7 +2,7 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Name="Root"
-             x:Class="QueueApp.Features.BusinessDetail.Helpers.ReviewStepView">
+             x:Class="QueueApp.Features.Flow.Helpers.ReviewStepView">
 
     <ScrollView IsVisible="{Binding ShowReviewStep, Source={x:Reference Root}}">
         <VerticalStackLayout Spacing="0">
