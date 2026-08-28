@@ -41,7 +41,10 @@ public class QueueRealtimeService : IQueueRealtimeService
 
     private readonly IAuthService _authService;
     private readonly SemaphoreSlim _gate = new(1, 1);
-    private readonly Dictionary<object, (string Key, Func<Task> OnChange)> _owners = new();
+
+    // Keyed by owner *and* table: one screen legitimately watches two feeds at once — the browse
+    // dashboard follows its queue ticket and its upcoming bookings side by side.
+    private readonly Dictionary<(object Owner, string Table), (string ChannelKey, Func<Task> OnChange)> _owners = new();
     private readonly Dictionary<string, ChannelEntry> _channels = new();
 
     private Client? _client;
@@ -57,13 +60,14 @@ public class QueueRealtimeService : IQueueRealtimeService
         try
         {
             var key = $"{table}:{filterColumn}=eq.{filterValue}";
+            var ownerKey = (owner, table);
 
-            if (_owners.TryGetValue(owner, out var existing))
+            if (_owners.TryGetValue(ownerKey, out var existing))
             {
-                if (existing.Key == key)
+                if (existing.ChannelKey == key)
                     return;
 
-                DetachOwner(owner);
+                DetachOwner(ownerKey);
             }
 
             var client = await EnsureConnectedAsync();
@@ -85,7 +89,7 @@ public class QueueRealtimeService : IQueueRealtimeService
             }
 
             entry.Handlers.Add(onChange);
-            _owners[owner] = (key, onChange);
+            _owners[ownerKey] = (key, onChange);
         }
         finally
         {
@@ -98,7 +102,8 @@ public class QueueRealtimeService : IQueueRealtimeService
         await _gate.WaitAsync();
         try
         {
-            DetachOwner(owner);
+            foreach (var ownerKey in _owners.Keys.Where(k => ReferenceEquals(k.Owner, owner)).ToList())
+                DetachOwner(ownerKey);
 
             if (_owners.Count == 0 && _client is not null)
             {
@@ -113,12 +118,12 @@ public class QueueRealtimeService : IQueueRealtimeService
         }
     }
 
-    private void DetachOwner(object owner)
+    private void DetachOwner((object Owner, string Table) ownerKey)
     {
-        if (!_owners.Remove(owner, out var registration))
+        if (!_owners.Remove(ownerKey, out var registration))
             return;
 
-        if (!_channels.TryGetValue(registration.Key, out var entry))
+        if (!_channels.TryGetValue(registration.ChannelKey, out var entry))
             return;
 
         entry.Handlers.Remove(registration.OnChange);
@@ -127,8 +132,8 @@ public class QueueRealtimeService : IQueueRealtimeService
             return;
 
         entry.Channel.Unsubscribe();
-        _channels.Remove(registration.Key);
-        Debug.WriteLine($"[Realtime] unsubscribed from {registration.Key}");
+        _channels.Remove(registration.ChannelKey);
+        Debug.WriteLine($"[Realtime] unsubscribed from {registration.ChannelKey}");
     }
 
     private async Task<Client> EnsureConnectedAsync()

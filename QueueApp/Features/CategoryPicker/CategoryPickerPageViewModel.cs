@@ -30,8 +30,8 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     private Guid _customerId;
     private double? _customerLatitude;
     private double? _customerLongitude;
-    private string? _subscribedScopeKey;
     private readonly SemaphoreSlim _realtimeLock = new(1, 1);
+    private const int UpcomingBookingsShown = 3;
     public IReadOnlyList<ServiceCategory> Categories { get; } = CategoryCatalog.All.Where(c => c.Available).ToList();
     public string? CustomerDisplayName { get; set; }
     public bool IsLoading { get; set; }
@@ -200,7 +200,6 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
             try
             {
                 await _realtimeService.UnsubscribeAsync(this);
-                _subscribedScopeKey = null;
             }
             finally
             {
@@ -213,6 +212,12 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         }
     }
 
+    // Two feeds, because the dashboard shows two live things. The ticket follows the whole
+    // business's queue while one is held — the position changes when somebody else is served, not
+    // only when the customer's own row does — and falls back to the customer's own entries when
+    // there is no ticket. Upcoming bookings only ever turn on the customer's own rows, so that one
+    // is always customer scoped. Re-subscribing to the same feed is a no-op in the service, so this
+    // is safe to call on every refresh.
     public async Task EnsureRealtimeSubscriptionAsync()
     {
         if (_customerId == Guid.Empty) return;
@@ -220,12 +225,6 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         await _realtimeLock.WaitAsync();
         try
         {
-            var desiredKey = ActiveEntry is not null
-                ? $"business:{ActiveEntry.BusinessId}"
-                : $"customer:{_customerId}";
-
-            if (desiredKey == _subscribedScopeKey) return;
-
             if (ActiveEntry is not null)
             {
                 await _realtimeService.SubscribeAsync(this, "business_id", ActiveEntry.BusinessId.ToString(),
@@ -237,7 +236,9 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
                     () => MainThread.InvokeOnMainThreadAsync(RefreshActiveEntryAsync));
             }
 
-            _subscribedScopeKey = desiredKey;
+            await _realtimeService.SubscribeAsync(this, "customer_id", _customerId.ToString(),
+                () => MainThread.InvokeOnMainThreadAsync(RefreshUpcomingBookingsAsync),
+                table: "bookings");
         }
         catch (Exception ex)
         {
@@ -246,6 +247,26 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         finally
         {
             _realtimeLock.Release();
+        }
+    }
+
+    public async Task RefreshUpcomingBookingsAsync()
+    {
+        try
+        {
+            if (_customerId == Guid.Empty) return;
+
+            var bookings = await _bookingService.GetMyUpcomingBookingsAsync(_customerId);
+
+            UpcomingBookings.Clear();
+            foreach (var booking in bookings.Take(UpcomingBookingsShown))
+                UpcomingBookings.Add(booking);
+
+            OnPropertyChanged(nameof(HasUpcomingBookings));
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
         }
     }
 
@@ -277,11 +298,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
 
             if (_customerId != Guid.Empty)
             {
-                var bookings = await _bookingService.GetMyUpcomingBookingsAsync(_customerId);
-                UpcomingBookings.Clear();
-                foreach (var b in bookings.Take(3))
-                    UpcomingBookings.Add(b);
-                OnPropertyChanged(nameof(HasUpcomingBookings));
+                await RefreshUpcomingBookingsAsync();
 
                 var visits = await _queueService.GetMyVisitsAsync(_customerId);
                 FrequentBusinesses.Clear();
