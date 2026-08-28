@@ -73,6 +73,12 @@ public class StubOperatorService : IOperatorService
             .OrderBy(a => a.DayOfWeek).ThenBy(a => a.StartTime)
             .ToList());
 
+    public Task<List<OperatorAvailabilityResponse>> GetAvailabilityAsync(IReadOnlyCollection<Guid> operatorIds)
+        => Task.FromResult(_availability
+            .Where(a => operatorIds.Contains(a.OperatorId))
+            .OrderBy(a => a.DayOfWeek).ThenBy(a => a.StartTime)
+            .ToList());
+
     public Task<List<OperatorAvailabilityResponse>> CreateAvailabilityAsync(CreateAvailabilityRequest request)
     {
         var window = new OperatorAvailabilityResponse

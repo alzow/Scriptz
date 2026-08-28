@@ -38,6 +38,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     private BusinessHours _hours = BusinessHours.Unknown;
     private CategoryLabelSet _labels = CategoryLabels.Resolve(null);
     private List<OperatorResponse> _allOperators = new();
+    private List<ServiceResponse> _services = new();
     private List<OperatorResponse> _selectableOperators = new();
     private int _servingCount;
     private bool _hasActiveBooking;
@@ -183,45 +184,42 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
 
             IsLoading = true;
 
-            Business = await _businessService.GetBusinessAsync(_businessId);
+            // Two waves rather than a chain of eight. Nothing in the first needs anything but the
+            // business id, and nothing in the second needs anything from its own wave, so the load
+            // costs two round trips end to end instead of the sum of all of them.
+            var businessTask = _businessService.GetBusinessAsync(_businessId);
+            var operatorsTask = _operatorService.GetOperatorsAsync(_businessId);
+            var servicesTask = _serviceOfferingsService.GetActiveServicesAsync(_businessId);
+
+            await Task.WhenAll(businessTask, operatorsTask, servicesTask);
+
+            Business = await businessTask;
             if (Business is null)
                 throw new InvalidOperationException("That business is no longer available.");
 
             Title = Business.Name;
             _labels = CategoryLabels.Resolve(Business.Category);
 
-            _allOperators = await _operatorService.GetOperatorsAsync(_businessId);
+            _allOperators = await operatorsTask;
             _selectableOperators = FlowStepEngine.SelectableOperators(_allOperators);
 
-            var services = await _serviceOfferingsService.GetActiveServicesAsync(_businessId);
+            _services = await servicesTask;
             ServiceRows.Clear();
-            foreach (var service in services.OrderBy(s => s.SortOrder))
+            foreach (var service in _services.OrderBy(s => s.SortOrder))
                 ServiceRows.Add(ServiceChoiceItem.From(service));
             OnPropertyChanged(nameof(HasServices));
             OnPropertyChanged(nameof(ServicesCountText));
             OnPropertyChanged(nameof(ServicesListHeight));
 
-            _hours = await LoadHoursAsync(_allOperators);
-            await LoadDistanceAsync();
+            var hoursTask = LoadHoursAsync(_allOperators);
+            var distanceTask = LoadDistanceAsync();
+            var liveTask = RefreshLiveStateAsync();
 
-            if (IsQueueMode)
-            {
-                await RefreshQueueAsync();
-                await RefreshMyStatusAsync();
-            }
-            else
-            {
-                await RefreshBookingSlotStatsAsync();
-                await RefreshMyBookingsAsync();
-            }
+            _hours = await hoursTask;
+            await distanceTask;
+            await liveTask;
 
             BuildTeam();
-
-            // One subscription for the whole page, scoped to this business and torn down on
-            // disappearing. The confirmation states are driven off the same feed — they do not open
-            // a second one.
-            await SubscribeRealtimeAsync();
-
             RefreshLandingCard();
         }
         catch (Exception ex)
@@ -231,7 +229,31 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         finally
         {
             IsLoading = false;
+
+            // Deliberately not awaited: opening the websocket and joining the channel is a
+            // handshake the first paint does not depend on, and awaiting it here put it on the
+            // critical path — connect, retry delay and all.
+            _ = SubscribeRealtimeAsync();
         }
+    }
+
+    // The two live reads for whichever mode the business is in. They touch different state, so they
+    // run together rather than one behind the other.
+    public async Task RefreshLiveStateAsync()
+    {
+        if (IsQueueMode)
+        {
+            var queueTask = RefreshQueueAsync();
+            var statusTask = RefreshMyStatusAsync();
+            await queueTask;
+            await statusTask;
+            return;
+        }
+
+        var slotsTask = RefreshBookingSlotStatsAsync();
+        var bookingsTask = RefreshMyBookingsAsync();
+        await slotsTask;
+        await bookingsTask;
     }
     // Re-subscribes after a page pushed over this one is popped: Loaded runs once per page, so
     // without this the feed torn down on Disappearing never comes back.
@@ -296,7 +318,12 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
 
             await NavigationService.NavigateAsync(
                 IsBookingMode ? NavigationPaths.BookingFlowPage : NavigationPaths.QueueFlowPage,
-                new NavigationParameters { { NavigationKeys.BusinessId, _businessId } });
+                new NavigationParameters
+                {
+                    { NavigationKeys.BusinessId, _businessId },
+                    { NavigationKeys.BusinessSnapshot,
+                        new BusinessSnapshot(Business, _allOperators, _services, _hours) },
+                });
         }
         catch (Exception ex)
         {
@@ -346,16 +373,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         {
             try
             {
-                if (IsQueueMode)
-                {
-                    await RefreshQueueAsync();
-                    await RefreshMyStatusAsync();
-                }
-                else
-                {
-                    await RefreshBookingSlotStatsAsync();
-                    await RefreshMyBookingsAsync();
-                }
+                await RefreshLiveStateAsync();
 
                 BuildTeam();
                 RefreshLandingCard();
@@ -366,7 +384,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             }
         });
     // operator_availability is per operator, so the business's trading hours are the union across
-    // the ones on the books. Fetched concurrently — a shop has a handful of operators, not hundreds.
+    // the ones on the books — read in one request over all of them.
     public async Task<BusinessHours> LoadHoursAsync(IReadOnlyList<OperatorResponse> operators)
     {
         try
@@ -375,8 +393,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             if (active.Count == 0)
                 return BusinessHours.Unknown;
 
-            var windows = await Task.WhenAll(active.Select(o => _operatorService.GetAvailabilityAsync(o.Id)));
-            return BusinessHours.FromAvailability(windows.SelectMany(w => w));
+            var windows = await _operatorService.GetAvailabilityAsync(active.Select(o => o.Id).ToList());
+            return BusinessHours.FromAvailability(windows);
         }
         catch (Exception ex)
         {
@@ -455,16 +473,18 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         await _loadLock.WaitAsync();
         try
         {
-            var rows = await _queueService.GetQueueSummaryAsync(_businessId);
+            // business_queue_summary reports waiting counts only, and there is no ticket sequence to
+            // read a "now serving" number off, so the live card's anchor stat is counted from the
+            // active entries instead. Neither read needs the other, so they go together.
+            var summaryTask = _queueService.GetQueueSummaryAsync(_businessId);
+            var activeTask = _queueService.GetActiveEntriesAsync(_businessId);
 
+            var rows = await summaryTask;
             QueueSummary.Clear();
             foreach (var row in rows)
                 QueueSummary.Add(row);
 
-            // business_queue_summary reports waiting counts only, and there is no ticket sequence to
-            // read a "now serving" number off, so the live card's anchor stat is counted from the
-            // active entries instead.
-            var active = await _queueService.GetActiveEntriesAsync(_businessId);
+            var active = await activeTask;
             _servingCount = active.Count(e => e.Status == "serving");
         }
         catch (Exception ex)

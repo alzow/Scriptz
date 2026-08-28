@@ -15,4 +15,9 @@ public static class NavigationKeys
     public const string IsOperatorFlow  = "isOperatorFlow";
     public const string PreferredDate   = "preferredDate";
     public const string PreferredStart  = "preferredStart";
+
+    // A BusinessSnapshot handed from the business landing to the flow it opens, so the flow can skip
+    // re-fetching what the page behind it already has. Optional: absent when the flow is opened from
+    // anywhere else, and the flow fetches for itself then.
+    public const string BusinessSnapshot = "businessSnapshot";
 }

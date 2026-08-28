@@ -17,41 +17,29 @@ public static class RefitConfiguration
         services.AddTransient<SupabaseAuthHeaderHandler>();
         services.AddTransient<HttpLoggingHandler>();
 
-       services.AddRefitClient<IQueueApi>()
-            .ConfigureHttpClient(c => c.BaseAddress = new Uri(SupabaseConfig.RestUrl))
-            .AddHttpMessageHandler<SupabaseAuthHeaderHandler>()
-            .AddHttpMessageHandler<HttpLoggingHandler>();
-
-        services.AddRefitClient<IBusinessApi>()
-            .ConfigureHttpClient(c => c.BaseAddress = new Uri(SupabaseConfig.RestUrl))
-            .AddHttpMessageHandler<SupabaseAuthHeaderHandler>()
-            .AddHttpMessageHandler<HttpLoggingHandler>();
-
-        services.AddRefitClient<IOperatorApi>()
-            .ConfigureHttpClient(c => c.BaseAddress = new Uri(SupabaseConfig.RestUrl))
-            .AddHttpMessageHandler<SupabaseAuthHeaderHandler>()
-            .AddHttpMessageHandler<HttpLoggingHandler>();
-
-        services.AddRefitClient<IAuthApi>()
-            .ConfigureHttpClient(c => c.BaseAddress = new Uri(SupabaseConfig.AuthUrl))
-            .AddHttpMessageHandler<SupabaseAuthHeaderHandler>()
-            .AddHttpMessageHandler<HttpLoggingHandler>();
-
-        services.AddRefitClient<IProfileApi>()
-            .ConfigureHttpClient(c => c.BaseAddress = new Uri(SupabaseConfig.RestUrl))
-            .AddHttpMessageHandler<SupabaseAuthHeaderHandler>()
-            .AddHttpMessageHandler<HttpLoggingHandler>();
-
-        services.AddRefitClient<IServiceOfferingsApi>()
-            .ConfigureHttpClient(c => c.BaseAddress = new Uri(SupabaseConfig.RestUrl))
-            .AddHttpMessageHandler<SupabaseAuthHeaderHandler>()
-            .AddHttpMessageHandler<HttpLoggingHandler>();
-
-        services.AddRefitClient<IBookingApi>()
-            .ConfigureHttpClient(c => c.BaseAddress = new Uri(SupabaseConfig.RestUrl))
-            .AddHttpMessageHandler<SupabaseAuthHeaderHandler>()
-            .AddHttpMessageHandler<HttpLoggingHandler>();
+        services.AddApiClient<IQueueApi>(SupabaseConfig.RestUrl);
+        services.AddApiClient<IBusinessApi>(SupabaseConfig.RestUrl);
+        services.AddApiClient<IOperatorApi>(SupabaseConfig.RestUrl);
+        services.AddApiClient<IAuthApi>(SupabaseConfig.AuthUrl);
+        services.AddApiClient<IProfileApi>(SupabaseConfig.RestUrl);
+        services.AddApiClient<IServiceOfferingsApi>(SupabaseConfig.RestUrl);
+        services.AddApiClient<IBookingApi>(SupabaseConfig.RestUrl);
 
         return services;
+    }
+
+    // HttpLoggingHandler reads every request and response body into a string and writes the lot to
+    // logcat, on the calling thread, before the deserialiser ever sees it. That is worth paying while
+    // debugging and worth nothing in a release build, so it is only in the pipeline for one of them.
+    private static void AddApiClient<T>(this IServiceCollection services, string baseUrl)
+        where T : class
+    {
+        var builder = services.AddRefitClient<T>()
+            .ConfigureHttpClient(client => client.BaseAddress = new Uri(baseUrl))
+            .AddHttpMessageHandler<SupabaseAuthHeaderHandler>();
+
+#if DEBUG
+        builder.AddHttpMessageHandler<HttpLoggingHandler>();
+#endif
     }
 }

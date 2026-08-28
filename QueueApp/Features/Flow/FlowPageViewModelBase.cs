@@ -18,6 +18,7 @@ using QueueApp.Services.Api.Operator.Models;
 using QueueApp.Services.Api.Queue;
 using QueueApp.Services.Api.Queue.Models;
 using QueueApp.Services.Api.ServiceOfferings;
+using QueueApp.Services.Api.ServiceOfferings.Models;
 using QueueApp.Services.Auth;
 using QueueApp.Services.Api.Profile;
 using QueueApp.Services.Popup;
@@ -179,22 +180,51 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
 
             IsLoading = true;
 
-            Business = await _businessService.GetBusinessAsync(_businessId)
-                ?? throw new InvalidOperationException("That business is no longer available.");
+            var snapshot = parameters is not null
+                && parameters.TryGetValue(NavigationKeys.BusinessSnapshot, out var snapshotObj)
+                    ? snapshotObj as BusinessSnapshot
+                    : null;
 
-            Title = Business.Name;
-            _labels = CategoryLabels.Resolve(Business.Category);
+            BusinessResponse business;
+            IReadOnlyList<ServiceResponse> services;
 
-            _allOperators = await _operatorService.GetOperatorsAsync(_businessId);
+            if (snapshot is not null)
+            {
+                // Handed over by the business landing, which fetched all of this a tap ago. Four
+                // round trips the flow would otherwise spend re-reading what the page behind it
+                // already had on screen.
+                business = snapshot.Business;
+                _allOperators = snapshot.Operators.ToList();
+                services = snapshot.Services;
+                _hours = snapshot.Hours;
+            }
+            else
+            {
+                // Opened from somewhere with nothing to hand over — the agenda's add-booking, say.
+                // One wave for the three that need only the business id, then the hours.
+                var businessTask = _businessService.GetBusinessAsync(_businessId);
+                var operatorsTask = _operatorService.GetOperatorsAsync(_businessId);
+                var servicesTask = _serviceOfferingsService.GetActiveServicesAsync(_businessId);
+
+                await Task.WhenAll(businessTask, operatorsTask, servicesTask);
+
+                business = await businessTask
+                    ?? throw new InvalidOperationException("That business is no longer available.");
+                _allOperators = await operatorsTask;
+                services = await servicesTask;
+
+                _hours = await LoadHoursAsync(_allOperators);
+            }
+
+            Business = business;
+            Title = business.Name;
+            _labels = CategoryLabels.Resolve(business.Category);
             _selectableOperators = FlowStepEngine.SelectableOperators(_allOperators, IsOperatorFlow);
 
-            var services = await _serviceOfferingsService.GetActiveServicesAsync(_businessId);
             ServiceRows.Clear();
             foreach (var service in services.OrderBy(s => s.SortOrder))
                 ServiceRows.Add(ServiceChoiceItem.From(service));
             OnPropertyChanged(nameof(HasServices));
-
-            _hours = await LoadHoursAsync(_allOperators);
 
             if (IsQueueMode)
                 await LoadQueueSummaryAsync();
@@ -332,8 +362,8 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
             if (active.Count == 0)
                 return BusinessHours.Unknown;
 
-            var windows = await Task.WhenAll(active.Select(o => _operatorService.GetAvailabilityAsync(o.Id)));
-            return BusinessHours.FromAvailability(windows.SelectMany(w => w));
+            var windows = await _operatorService.GetAvailabilityAsync(active.Select(o => o.Id).ToList());
+            return BusinessHours.FromAvailability(windows);
         }
         catch (Exception ex)
         {
