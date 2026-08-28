@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
+             xmlns:entry="clr-namespace:QueueApp.Shared.Templates.QueueEntry"
+             xmlns:helpers="clr-namespace:QueueApp.Features.Auth.Helpers"
+             x:Name="Root"
+             x:Class="QueueApp.Features.Auth.Helpers.RegisterFormView">
+
+    <VerticalStackLayout Padding="24,32,24,24" Spacing="16">
+
+        <helpers:AuthInlineErrorView Message="{Binding ErrorMessage, Source={x:Reference Root}}"/>
+
+        <entry:QueueEntry
+            Placeholder="Your name"
+            Text="{Binding DisplayName, Source={x:Reference Root}}"
+            Validator="{Binding NameValidator, Source={x:Reference Root}}"
+            SharedStateManager="{Binding FormStateManager, Source={x:Reference Root}}"
+            ValidateOnTextChanged="True"
+            ReturnType="Next"/>
+
+        <entry:QueueEntry
+            Placeholder="Email"
+            Text="{Binding EmailAddress, Source={x:Reference Root}}"
+            InputType="Email"
+            Validator="{Binding EmailValidator, Source={x:Reference Root}}"
+            SharedStateManager="{Binding FormStateManager, Source={x:Reference Root}}"
+            ValidateOnTextChanged="True"
+            ReturnType="Next"/>
+
+        <entry:QueueEntry
+            Placeholder="Mobile number"
+            Text="{Binding PhoneNumber, Source={x:Reference Root}}"
+            InputType="Telephone"
+            Validator="{Binding PhoneValidator, Source={x:Reference Root}}"
+            SharedStateManager="{Binding FormStateManager, Source={x:Reference Root}}"
+            ValidateOnTextChanged="True"
+            ReturnType="Next"/>
+
+        <entry:QueueEntry
+            Placeholder="Password"
+            Text="{Binding Password, Source={x:Reference Root}}"
+            IsPassword="True"
+            Validator="{Binding PasswordValidator, Source={x:Reference Root}}"
+            SharedStateManager="{Binding FormStateManager, Source={x:Reference Root}}"
+            ValidateOnTextChanged="True"
+            ReturnType="Next"/>
+
+        <VerticalStackLayout Spacing="4">
+            <entry:QueueEntry
+                Placeholder="Confirm password"
+                Text="{Binding ConfirmPassword, Source={x:Reference Root}}"
+                IsPassword="True"/>
+            <Label Text="Passwords don't match"
+                   Style="{StaticResource lbl12_Regular_Danger}"
+                   Margin="12,0,0,0"
+                   IsVisible="{Binding ShowPasswordMismatch, Source={x:Reference Root}}"/>
+        </VerticalStackLayout>
+
+        <controls:AlzowLoadingButton
+            Text="Create Account →"
+            LoadingText="Creating account…"
+            Command="{Binding RegisterCommand, Source={x:Reference Root}}"
+            IsLoading="{Binding IsRegistering, Source={x:Reference Root}}"
+            IsEnabled="{Binding CanSubmit, Source={x:Reference Root}}"
+            HeightRequest="54"
+            Margin="0,8,0,0"
+            ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
+
+        <Label Text="Pay on delivery · No upfront cost"
+               Style="{StaticResource lbl12_Regular_TextLight}"
+               HorizontalOptions="Center"/>
+
+    </VerticalStackLayout>
+
+</ContentView>

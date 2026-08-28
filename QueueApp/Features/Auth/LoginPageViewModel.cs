@@ -5,62 +5,97 @@ using QueueApp.Framework.Navigation;
 using QueueApp.Services.Api.Business;
 using QueueApp.Services.Auth;
 using QueueApp.Services.Storage;
-using QueueApp.Services.Popup;
 using QueueApp.Shared.Templates.QueueEntry.Validators;
+using FormValidators = QueueApp.Shared.Templates.QueueEntry.Validators;
+using Refit;
 
 namespace QueueApp.Features.Auth;
 
 public partial class LoginPageViewModel : BaseViewModel
 {
-    private readonly IAuthService _authService;
-    private readonly IQueuePopupService _popupService;
-    private readonly IBusinessService _businessService;
+    #region Constants
+    private const string InvalidCredentialsMessage = "That email and password don't match an account.";
+    private const string EmailNotConfirmedMessage = "Confirm your email address first — check your inbox for the link.";
+    private const string RateLimitedMessage = "Too many attempts. Wait a minute and try again.";
+    private const string OfflineMessage = "No connection. Check your internet and try again.";
+    private const string GenericFailureMessage = "Couldn't sign you in. Please try again.";
+    #endregion
 
-    public string Email { get; set; } = "alzow.sayed01@gmail.com";
-    public string Password { get; set; } = "S@yed786";
+    #region Properties
+    public ISharedStateManager FormStateManager { get; } = new FormValidators.SharedStateManager();
+
+    public IValidator EmailValidator { get; } = new FormValidators.EmailValidator("Enter a valid email address.");
+    public IValidator PasswordValidator { get; } = new FormValidators.RequiredValidator("Enter your password.");
+
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+
+    public string ErrorMessage { get; set; } = string.Empty;
+    public bool IsFormValid { get; set; }
     public bool IsSigningIn { get; set; }
 
-    public IValidator EmailValidator { get; } = new RequiredValidator("Enter your email.");
-    public IValidator PasswordValidator { get; } = new RequiredValidator("Enter your password.");
+    public bool CanSubmit => IsFormValid;
+    #endregion
 
+    #region Services
+    private readonly IAuthService _authService;
+    private readonly IBusinessService _businessService;
+    #endregion
+
+    #region Constructor
     public LoginPageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
         IAuthService authService,
-        IQueuePopupService popupService,
         IBusinessService businessService)
         : base(navigationService, secureStorageService)
     {
         _authService = authService;
-        _popupService = popupService;
         _businessService = businessService;
+
+        FormStateManager.ValidationStateChanged += OnFormValidationStateChanged;
+        IsFormValid = FormStateManager.IsValid;
     }
+    #endregion
+
+    public void OnFormValidationStateChanged(bool isValid) => IsFormValid = isValid;
 
     // TODO (Step 5b): swap for Supabase phone-OTP sign-in. Token pipeline stays the same.
     [RelayCommand]
-    private async Task LoginAsync()
+    public async Task LoginAsync()
     {
-        if (!EmailValidator.Validate(Email) || !PasswordValidator.Validate(Password))
-        {
-            await _popupService.ShowAlertAsync("Validation Error", "Please enter email and password");
-            return;
-        }
-
-        IsSigningIn = true;
         try
         {
-            var ok = await _authService.SignInAsync(Email.Trim(), Password);
+            if (!CanSubmit)
+                return;
 
-            if (ok)
+            ErrorMessage = string.Empty;
+            IsSigningIn = true;
+
+            var response = await _authService.SignInAsync(Email.Trim(), Password);
+
+            if (string.IsNullOrEmpty(response.AccessToken))
             {
-                var (ownsBusiness, mode) = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
-                var uri = MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: ownsBusiness, manageMode: mode);
-                await NavigationService.NavigateAsync(uri);
+                ErrorMessage = InvalidCredentialsMessage;
+                return;
             }
-            else
-            {
-                await _popupService.ShowAlertAsync("Login Failed", "Invalid email or password");
-            }
+
+            var (ownsBusiness, mode) = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
+            var uri = MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: ownsBusiness, manageMode: mode);
+            await NavigationService.NavigateAsync(uri);
+        }
+        catch (ApiException exception)
+        {
+            ErrorMessage = TranslateSignInError(exception);
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
+        {
+            ErrorMessage = OfflineMessage;
+        }
+        catch (Exception exception)
+        {
+            ErrorMessage = GenericFailureMessage;
+            await HandleExceptionAsync(exception);
         }
         finally
         {
@@ -69,8 +104,35 @@ public partial class LoginPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task NavigateToRegisterAsync()
+    public async Task NavigateToRegisterAsync()
     {
-        await NavigationService.NavigateAsync(NavigationPaths.RegisterPage);
+        try
+        {
+            await NavigationService.NavigateAsync(NavigationPaths.RegisterPage);
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
+    }
+
+    public static string TranslateSignInError(ApiException exception)
+    {
+        var body = exception.Content ?? string.Empty;
+
+        if (body.Contains("Email not confirmed", StringComparison.OrdinalIgnoreCase)
+            || body.Contains("email_not_confirmed", StringComparison.OrdinalIgnoreCase))
+            return EmailNotConfirmedMessage;
+
+        if (body.Contains("Invalid login credentials", StringComparison.OrdinalIgnoreCase)
+            || body.Contains("invalid_credentials", StringComparison.OrdinalIgnoreCase)
+            || exception.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            return InvalidCredentialsMessage;
+
+        if (body.Contains("rate limit", StringComparison.OrdinalIgnoreCase)
+            || exception.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+            return RateLimitedMessage;
+
+        return GenericFailureMessage;
     }
 }

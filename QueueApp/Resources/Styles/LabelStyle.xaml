@@ -309,4 +309,14 @@
         <Setter Property="LineBreakMode" Value="NoWrap"/>
     </Style>
 
+    <Style x:Key="lbl12_Regular_Danger" TargetType="Label">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="TextColor" Value="{StaticResource Danger}"/>
+    </Style>
+
+    <Style x:Key="lbl13_Regular_Danger" TargetType="Label">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="TextColor" Value="{StaticResource Danger}"/>
+    </Style>
+
 </ResourceDictionary>
