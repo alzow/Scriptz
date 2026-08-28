@@ -1,6 +1,6 @@
 using QueueApp.Services.Api.Operator.Models;
 
-namespace QueueApp.Features.BusinessDetail.Flow;
+namespace QueueApp.Shared.Domain;
 
 public sealed record NextOpening(string Label, string TimeText);
 

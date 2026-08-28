@@ -4,7 +4,7 @@
              xmlns:vm="clr-namespace:QueueApp.Features.BusinessDetail"
              xmlns:helpers="clr-namespace:QueueApp.Features.CategoryPicker.Helpers"
              xmlns:bdHelpers="clr-namespace:QueueApp.Features.BusinessDetail.Helpers"
-             xmlns:models="clr-namespace:QueueApp.Features.BusinessDetail.Models"
+             xmlns:models="clr-namespace:QueueApp.Shared.Domain.Models"
              xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
              x:Class="QueueApp.Features.BusinessDetail.BusinessDetailPage"
              x:DataType="vm:BusinessDetailPageViewModel"

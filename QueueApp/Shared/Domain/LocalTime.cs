@@ -1,4 +1,4 @@
-namespace QueueApp.Features.BusinessDetail.Flow;
+namespace QueueApp.Shared.Domain;
 
 // Same fixed +2 SAST conversion the booking models already use — SA has no DST, and the device
 // clock can't be trusted to be on local time.

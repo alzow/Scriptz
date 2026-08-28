@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace QueueApp.Features.BusinessDetail.Models;
+namespace QueueApp.Shared.Domain.Models;
 
 public sealed class DayChoiceItem : ObservableObject
 {

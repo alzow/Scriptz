@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using QueueApp.Features.BookingAgenda.Models;
-using QueueApp.Features.BusinessDetail.Flow;
+using QueueApp.Shared.Domain;
 using QueueApp.Services.Api.Booking.Models;
 using QueueApp.Services.Api.Operator.Models;
 using QueueApp.Services.Popup;

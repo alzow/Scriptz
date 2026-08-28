@@ -4,7 +4,7 @@
                              xmlns:bottomsheet="clr-namespace:QueueApp.Shared.Templates.BottomSheet"
                              xmlns:sheets="clr-namespace:QueueApp.Features.BookingAgenda.Sheets"
                              xmlns:models="clr-namespace:QueueApp.Features.BookingAgenda.Models"
-                             xmlns:flowmodels="clr-namespace:QueueApp.Features.BusinessDetail.Models"
+                             xmlns:flowmodels="clr-namespace:QueueApp.Shared.Domain.Models"
                              x:Name="Root"
                              x:Class="QueueApp.Features.BookingAgenda.Sheets.MoveBookingSheet"
                              x:DataType="sheets:MoveBookingSheet">

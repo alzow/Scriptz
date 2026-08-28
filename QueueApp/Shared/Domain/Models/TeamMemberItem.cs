@@ -1,4 +1,4 @@
-namespace QueueApp.Features.BusinessDetail.Models;
+namespace QueueApp.Shared.Domain.Models;
 
 // Landing-page team strip. Avatars stay neutral: purple is this system's informational colour and
 // identity is not a status, so presence is carried by the dot and the opacity alone.

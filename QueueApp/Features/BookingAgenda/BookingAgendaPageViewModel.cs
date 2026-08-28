@@ -4,7 +4,7 @@ using MPowerKit.Navigation;
 using QueueApp.Constants;
 using QueueApp.Features.BookingAgenda.Models;
 using QueueApp.Features.BookingAgenda.Sheets;
-using QueueApp.Features.BusinessDetail.Flow;
+using QueueApp.Shared.Domain;
 using QueueApp.Framework.Base;
 using QueueApp.Framework.Extensions;
 using QueueApp.Services.Api.Booking;

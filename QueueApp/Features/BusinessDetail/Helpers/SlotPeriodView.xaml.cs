@@ -1,5 +1,5 @@
 using System.Windows.Input;
-using QueueApp.Features.BusinessDetail.Models;
+using QueueApp.Shared.Domain.Models;
 
 namespace QueueApp.Features.BusinessDetail.Helpers;
 

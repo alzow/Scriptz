@@ -1,4 +1,4 @@
-namespace QueueApp.Features.BusinessDetail.Flow;
+namespace QueueApp.Shared.Domain;
 
 public sealed record CategoryLabelSet(string StepHeading, string Noun, string PluralNoun, string SectionTitle);
 

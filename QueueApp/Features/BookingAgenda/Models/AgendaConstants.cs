@@ -1,5 +1,5 @@
 using Microsoft.Maui.Controls.Shapes;
-using QueueApp.Features.BusinessDetail.Flow;
+using QueueApp.Shared.Domain;
 
 namespace QueueApp.Features.BookingAgenda.Models;
 

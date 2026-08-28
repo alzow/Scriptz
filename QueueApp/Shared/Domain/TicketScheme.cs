@@ -1,4 +1,4 @@
-namespace QueueApp.Features.BusinessDetail.Flow;
+namespace QueueApp.Shared.Domain;
 
 // One marker in the confirmation card's "now serving → yours" strip.
 public sealed record TicketMarker(string Label, bool IsNowServing, bool IsMine);

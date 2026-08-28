@@ -1,5 +1,5 @@
 using Microsoft.Maui.Controls.Shapes;
-using QueueApp.Features.BusinessDetail.Flow;
+using QueueApp.Shared.Domain;
 using QueueApp.Services.Api.Booking.Models;
 using QueueApp.Services.Api.Operator.Models;
 

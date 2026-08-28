@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace QueueApp.Features.BusinessDetail.Models;
+namespace QueueApp.Shared.Domain.Models;
 
 // A row in the operator step. OperatorId is null for the pinned "Any available" option, which is a
 // real choice in queue mode — queue_entries.operator_id is nullable — and never offered in booking

@@ -1,6 +1,6 @@
 using Microsoft.Maui.Graphics;
 
-namespace QueueApp.Features.BusinessDetail.Flow;
+namespace QueueApp.Shared.Domain;
 
 // The draining ring on the queue ticket. A new instance is assigned whenever progress moves, which
 // is what makes the GraphicsView repaint — the view model has no handle on the view to invalidate.

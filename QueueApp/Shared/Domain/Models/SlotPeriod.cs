@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 
-namespace QueueApp.Features.BusinessDetail.Models;
+namespace QueueApp.Shared.Domain.Models;
 
 // One of MORNING / AFTERNOON / EVENING on the time step. An empty period keeps its header and gets
 // an explanation instead of collapsing — a missing evening on a three-hour job reads as a bug

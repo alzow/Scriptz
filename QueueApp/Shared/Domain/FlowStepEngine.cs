@@ -1,7 +1,7 @@
 using QueueApp.Services.Api.Business.Models;
 using QueueApp.Services.Api.Operator.Models;
 
-namespace QueueApp.Features.BusinessDetail.Flow;
+namespace QueueApp.Shared.Domain;
 
 // The step list is computed per business, never fixed: a shop with one available operator asks
 // nothing about operators, so the rail renders one fewer segment rather than a skipped-but-shown one.

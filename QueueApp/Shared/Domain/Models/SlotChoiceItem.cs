@@ -1,7 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using QueueApp.Services.Api.Booking.Models;
 
-namespace QueueApp.Features.BusinessDetail.Models;
+namespace QueueApp.Shared.Domain.Models;
 
 public sealed class SlotChoiceItem : ObservableObject
 {
