@@ -43,7 +43,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     private string _nextFreeSlotText = "—";
     private string _slotsLeftTodayText = "—";
     public BusinessResponse? Business { get; set; }
-    public bool IsLoading { get; set; }
+    public bool IsLoading { get; set; } = true;
     public bool IsQueueMode => Business?.Mode == FlowStepEngine.QueueMode;
     public bool IsBookingMode => Business?.Mode == FlowStepEngine.BookingMode;
 

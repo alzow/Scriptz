@@ -28,7 +28,7 @@ namespace QueueApp.Features.Flow;
 public abstract partial class FlowPageViewModelBase : BaseViewModel
 {
     public BusinessResponse? Business { get; set; }
-    public bool IsLoading { get; set; }
+    public bool IsLoading { get; set; } = true;
     public bool IsQueueMode => Business?.Mode == FlowStepEngine.QueueMode;
     public bool IsBookingMode => Business?.Mode == FlowStepEngine.BookingMode;
 

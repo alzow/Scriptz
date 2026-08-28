@@ -33,7 +33,7 @@ public partial class ConfirmationPageViewModel : BaseViewModel
         ? TicketHeadline
         : IsShowingBooking ? "Request sent" : "Nothing active";
     public BusinessResponse? Business { get; set; }
-    public bool IsLoading { get; set; }
+    public bool IsLoading { get; set; } = true;
     public bool IsQueueMode => Business?.Mode == FlowStepEngine.QueueMode;
     public bool IsBookingMode => Business?.Mode == FlowStepEngine.BookingMode;
 

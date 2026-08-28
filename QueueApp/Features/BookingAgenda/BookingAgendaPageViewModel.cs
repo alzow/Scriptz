@@ -37,7 +37,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     // Two loaders, because they mean different things. IsInitialLoading covers the cold open, when
     // there is no header, no stats and no rows to look at. IsLoading covers a day or bay switch,
     // where the chrome stays put and only the list underneath is being replaced.
-    public bool IsInitialLoading { get; set; }
+    public bool IsInitialLoading { get; set; } = true;
     public bool IsLoading { get; set; }
     public bool IsSwitchingDay => IsLoading && !IsInitialLoading;
     public bool ShowEmptyState => !IsLoading && !IsInitialLoading && Rows.Count == 0;
