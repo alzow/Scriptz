@@ -61,6 +61,9 @@ public sealed class HistoryRow
             ? $"Booking · {booking.OperatorName}"
             : $"Booking · {booking.ServiceName} with {booking.OperatorName}";
 
+        if (booking.HasCancellationReason)
+            meta = $"{meta} · {booking.CancellationReason}";
+
         var (statusText, fill, ink, outline, warn) = booking.EffectiveStatus switch
         {
             "confirmed" => ("CONFIRMED", HistoryStatusPalette.LiveFill, HistoryStatusPalette.LiveInk, false, false),

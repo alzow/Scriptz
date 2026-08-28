@@ -46,6 +46,33 @@
         <Setter Property="Padding" Value="14,10"/>
     </Style>
 
+    <!--
+        Outlined, neutral. Decline sits beside Confirm at equal weight — a genuine binary, not a
+        primary with an escape hatch — so it can't borrow Danger and can't be a second filled green.
+    -->
+    <Style x:Key="GhostButtonStyle" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="BorderColor" Value="{StaticResource Line}"/>
+        <Setter Property="BorderWidth" Value="1"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="FontSize" Value="14.5"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="14,10"/>
+    </Style>
+
+    <!-- Fill is an invitation, not the commit — outlined green so the now/next card keeps the one filled green. -->
+    <Style x:Key="OutlineGreenButtonStyle" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="BorderColor" Value="{StaticResource Green}"/>
+        <Setter Property="BorderWidth" Value="1.5"/>
+        <Setter Property="TextColor" Value="{StaticResource Green}"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="FontSize" Value="13.5"/>
+        <Setter Property="CornerRadius" Value="11"/>
+        <Setter Property="Padding" Value="16,8"/>
+    </Style>
+
     <Style x:Key="ToggleButtonStyle" TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
         <Style.Triggers>
             <Trigger TargetType="Button"
@@ -163,6 +190,22 @@
     <Style x:Key="btn15_Regular_SheetBad" TargetType="Button" BasedOn="{StaticResource btn15_Regular_SheetRow}">
         <Setter Property="BackgroundColor" Value="Transparent"/>
         <Setter Property="TextColor" Value="{StaticResource Danger}"/>
+    </Style>
+
+    <Style x:Key="btn14_Bold_Neutral" TargetType="Button" BasedOn="{StaticResource btn12_Bold_Neutral}">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="16,0"/>
+    </Style>
+
+    <!--
+        Row action. Sits inside a card next to its own content, so it is outlined rather than filled
+        and carries its own height — the sheet buttons' 56px would dwarf a two-line list row.
+    -->
+    <Style x:Key="btn12_Bold_RowAction" TargetType="Button" BasedOn="{StaticResource btn12_Bold_Neutral}">
+        <Setter Property="HeightRequest" Value="34"/>
+        <Setter Property="Padding" Value="12,0"/>
+        <Setter Property="MinimumWidthRequest" Value="76"/>
     </Style>
 
 </ResourceDictionary>

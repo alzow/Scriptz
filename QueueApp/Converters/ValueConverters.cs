@@ -16,27 +16,6 @@ public class IsNotNullOrEmptyConverter : IValueConverter
     }
 }
 
-public class BoolToColorConverter : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        if (value is bool boolValue && parameter is string colors)
-        {
-            var colorPair = colors.Split('|');
-            if (colorPair.Length == 2)
-            {
-                return boolValue ? Color.FromArgb(colorPair[0]) : Color.FromArgb(colorPair[1]);
-            }
-        }
-        return Colors.Transparent;
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
-}
-
 public class BoolToTextConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -97,19 +76,6 @@ public class IsNotNullConverter : IValueConverter
     }
 }
 
-public class IsNullConverter : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        return value is null;
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
-}
-
 public class ActiveToLabelConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -118,30 +84,6 @@ public class ActiveToLabelConverter : IValueConverter
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-// Compares the two bound values (item, currently-selected item) for equality and returns one of two
-// colors — used to highlight the selected item in a picker CollectionView/BindableLayout.
-public class ItemEqualsSelectedToColorConverter : IMultiValueConverter
-{
-    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
-    {
-        if (values is [var item, var selected, ..] && parameter is string colors)
-        {
-            var colorPair = colors.Split('|');
-            if (colorPair.Length == 2)
-            {
-                var isSelected = item is not null && Equals(item, selected);
-                return Color.FromArgb(isSelected ? colorPair[0] : colorPair[1]);
-            }
-        }
-        return Colors.Transparent;
-    }
-
-    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
     {
         throw new NotImplementedException();
     }
@@ -229,32 +171,6 @@ public class WaitBucketToColorConverter : IValueConverter
         };
 
         return Color.FromArgb(parts[index]);
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-public class EqualsToColorConverter : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        if (parameter is string param)
-        {
-            var parts = param.Split('|');
-            if (parts.Length == 3)
-            {
-                var compareValue = parts[0];
-                var trueColor = parts[1];
-                var falseColor = parts[2];
-
-                bool isEqual = value?.ToString() == compareValue;
-                return isEqual ? Color.FromArgb(trueColor) : Color.FromArgb(falseColor);
-            }
-        }
-        return Colors.Transparent;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

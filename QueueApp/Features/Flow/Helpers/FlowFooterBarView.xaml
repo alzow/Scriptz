@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
+             x:Name="Root"
+             VerticalOptions="Start"
+             x:Class="QueueApp.Features.Flow.Helpers.FlowFooterBarView">
+
+    <Border Padding="18,13,18,18"
+            BackgroundColor="{StaticResource Surface}"
+            Stroke="{StaticResource Line}" StrokeThickness="0"
+            IsVisible="{Binding IsFlowActive, Source={x:Reference Root}}">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+            <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
+                <Label Text="{Binding FooterLabel, Source={x:Reference Root}}" Style="{StaticResource lbl9_Mono_TextMuted}"
+                       LineBreakMode="TailTruncation"/>
+                <Label Text="{Binding FooterValue, Source={x:Reference Root}}" Style="{StaticResource lbl14_Bold_TextDark}"/>
+            </VerticalStackLayout>
+            <!-- BypassIsLoading: this button advances the step on most taps and only submits on
+                 the last one. Letting it set its own IsLoading would strand the spinner on every
+                 "Next", since nothing submits and nothing clears it — the view model owns the
+                 flag instead and raises it only around the actual submit. -->
+            <controls:AlzowLoadingButton Grid.Column="1"
+                    Text="{Binding FooterCtaText, Source={x:Reference Root}}"
+                    LoadingText="Sending…"
+                    Command="{Binding NextCommand, Source={x:Reference Root}}"
+                    IsLoading="{Binding IsSubmitting, Source={x:Reference Root}}"
+                    BypassIsLoading="True"
+                    IsEnabled="{Binding IsFooterCtaEnabled, Source={x:Reference Root}}"
+                    ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
+        </Grid>
+    </Border>
+
+</ContentView>

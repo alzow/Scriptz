@@ -32,4 +32,5 @@ public class VisitOperatorRef
 public class VisitServiceRef
 {
     [JsonPropertyName("name")] public string Name { get; set; } = "";
+    [JsonPropertyName("price_cents")] public int? PriceCents { get; set; }
 }

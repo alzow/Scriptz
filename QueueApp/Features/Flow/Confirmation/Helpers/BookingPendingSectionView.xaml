@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
+             x:Name="Root"
+             VerticalOptions="Start"
+             x:Class="QueueApp.Features.Flow.Confirmation.Helpers.BookingPendingSectionView">
+
+    <VerticalStackLayout Spacing="0" IsVisible="{Binding HasActiveBooking, Source={x:Reference Root}}">
+
+        <VerticalStackLayout Spacing="0" Padding="34,32,34,22">
+            <Border WidthRequest="76" HeightRequest="76" Padding="0" HorizontalOptions="Center"
+                    BackgroundColor="{StaticResource OrangePale}"
+                    Stroke="{StaticResource PurpleDim}" StrokeThickness="1">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="24"/>
+                </Border.StrokeShape>
+                <Image Source="ic_clock" WidthRequest="42" HeightRequest="42"
+                       HorizontalOptions="Center" VerticalOptions="Center"/>
+            </Border>
+            <Label Text="Waiting on the shop" HorizontalOptions="Center" Margin="0,18,0,0"
+                   Style="{StaticResource lbl20_Bold_TextDark}"/>
+            <Label Text="{Binding BookingPendingBlurb, Source={x:Reference Root}}" HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center" Margin="0,9,0,0"
+                   Style="{StaticResource lbl12_Regular_TextLight}"/>
+        </VerticalStackLayout>
+
+        <Border Margin="20,0" Padding="15,6"
+                BackgroundColor="{StaticResource Surface}"
+                Stroke="{StaticResource PurpleDim}" StrokeThickness="1">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="17"/>
+            </Border.StrokeShape>
+            <VerticalStackLayout Spacing="0">
+                <Grid ColumnDefinitions="*,Auto" Padding="0,11">
+                    <Label Grid.Column="0" Text="When" Style="{StaticResource lbl13_Regular_TextMid}"/>
+                    <Label Grid.Column="1" Text="{Binding BookingWhenText, Source={x:Reference Root}}" Style="{StaticResource lbl14_Bold_TextDark}"/>
+                </Grid>
+                <Grid ColumnDefinitions="*,Auto" Padding="0,11">
+                    <Label Grid.Column="0" Text="Ends about" Style="{StaticResource lbl13_Regular_TextMid}"/>
+                    <Label Grid.Column="1" Text="{Binding BookingEndsText, Source={x:Reference Root}}" Style="{StaticResource lbl14_Bold_TextDark}"/>
+                </Grid>
+                <Grid ColumnDefinitions="*,Auto" Padding="0,11">
+                    <Label Grid.Column="0" Text="{Binding BookingOperatorLabel, Source={x:Reference Root}}" Style="{StaticResource lbl13_Regular_TextMid}"/>
+                    <Label Grid.Column="1" Text="{Binding BookingOperatorText, Source={x:Reference Root}}" Style="{StaticResource lbl14_Bold_TextDark}"/>
+                </Grid>
+                <Grid ColumnDefinitions="*,Auto" Padding="0,11">
+                    <Label Grid.Column="0" Text="Service" Style="{StaticResource lbl13_Regular_TextMid}"/>
+                    <Label Grid.Column="1" Text="{Binding BookingServiceText, Source={x:Reference Root}}" Style="{StaticResource lbl14_Bold_TextDark}"/>
+                </Grid>
+                <Grid ColumnDefinitions="*,Auto" Padding="0,11">
+                    <Label Grid.Column="0" Text="Price" Style="{StaticResource lbl13_Regular_TextMid}"/>
+                    <Label Grid.Column="1" Text="{Binding BookingPriceText, Source={x:Reference Root}}" Style="{StaticResource lbl14_Bold_TextDark}"/>
+                </Grid>
+
+                <BoxView HeightRequest="1" BackgroundColor="{StaticResource Line}" Margin="0,4"/>
+
+                <Grid ColumnDefinitions="*,Auto" Padding="0,11">
+                    <Label Grid.Column="0" Text="Status" Style="{StaticResource lbl13_Regular_TextMid}"
+                           VerticalOptions="Center"/>
+                    <Border Grid.Column="1" Padding="8,4"
+                            BackgroundColor="{StaticResource OrangePale}"
+                            Stroke="Transparent" StrokeThickness="0">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="7"/>
+                        </Border.StrokeShape>
+                        <Label Text="{Binding BookingStatusLabel, Source={x:Reference Root}}"
+                               Style="{StaticResource lbl10_Mono_Purple}"/>
+                    </Border>
+                </Grid>
+            </VerticalStackLayout>
+        </Border>
+
+        <controls:AlzowLoadingButton Margin="20,16,20,0"
+                Text="Cancel request"
+                LoadingText="Cancelling…"
+                Command="{Binding CancelBookingCommand, Source={x:Reference Root}}"
+                IsLoading="{Binding IsCancellingBooking, Source={x:Reference Root}}"
+                ButtonStyle="{StaticResource TertiaryButtonStyle}"/>
+
+        <!-- bookings_no_overlap covers pending as well as confirmed, so this is true —
+             and without saying it, a pending booking feels like it might evaporate. -->
+        <Label Margin="20,14,20,0" Style="{StaticResource lbl11_Regular_TextFaint}">
+            <Label.FormattedText>
+                <FormattedString>
+                    <Span Text="The slot is held for you while it's pending, so nobody else can take "/>
+                    <Span Text="{Binding BookingWhenText, Source={x:Reference Root}}"/>
+                    <Span Text="."/>
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
+    </VerticalStackLayout>
+
+</ContentView>

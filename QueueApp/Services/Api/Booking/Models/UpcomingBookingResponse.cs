@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json.Serialization;
 using QueueApp.Services.Api.Queue.Models;
 
@@ -21,6 +22,8 @@ public class UpcomingBookingResponse
     [JsonPropertyName("operator")] public VisitOperatorRef? Operator { get; set; }
     [JsonPropertyName("service")] public VisitServiceRef? Service { get; set; }
     [JsonPropertyName("progress_status")] public string? ProgressStatus { get; set; }
+    [JsonPropertyName("note")] public string? Note { get; set; }
+    [JsonPropertyName("details")] public BookingDetails? Details { get; set; }
 
     [JsonIgnore] public bool IsCancelling { get; set; }
 
@@ -30,6 +33,13 @@ public class UpcomingBookingResponse
     [JsonIgnore] public string ServiceName => Service?.Name ?? "";
     [JsonIgnore] public string Category => Business?.Category ?? "other";
     [JsonIgnore] public bool HasProgress => !string.IsNullOrWhiteSpace(ProgressStatus);
+    [JsonIgnore] public bool HasNote => !string.IsNullOrWhiteSpace(Note);
+
+    // Why the business called it off, if they gave a reason. Without it a cancellation is just a
+    // booking that vanished.
+    [JsonIgnore] public string? CancellationReason => Details?.CancellationReason;
+    [JsonIgnore] public bool HasCancellationReason => !string.IsNullOrWhiteSpace(CancellationReason);
+    [JsonIgnore] public string CancellationReasonText => $"Cancelled — {CancellationReason}";
 
     // "with Bay 3" reads as useful detail at a barbershop, noise at a car wash the customer never
     // got to choose a bay at — omit the operator clause entirely for pooled businesses.
@@ -44,7 +54,10 @@ public class UpcomingBookingResponse
     [JsonIgnore]
     public string DateTimeDisplay => LocalStart.ToString("ddd d MMM, h:mm tt");
 
-    [JsonIgnore] public string DayText => LocalStart.ToString("d");
+    // Day.ToString(), not ToString("d") — a lone "d" is the standard short-date specifier, so on a
+    // za-ZA device the date rail read "2026/08/28" instead of "28". Invariant so the number is
+    // digits whatever the device's culture is.
+    [JsonIgnore] public string DayText => LocalStart.Day.ToString(CultureInfo.InvariantCulture);
     [JsonIgnore] public string MonthText => LocalStart.ToString("MMM").ToUpperInvariant();
     [JsonIgnore] public string TimeText => LocalStart.ToString("h:mm tt");
 

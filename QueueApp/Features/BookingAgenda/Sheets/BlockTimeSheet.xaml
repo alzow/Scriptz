@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<bottomsheet:BottomSheetPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                             xmlns:bottomsheet="clr-namespace:QueueApp.Shared.Templates.BottomSheet"
+                             xmlns:sheets="clr-namespace:QueueApp.Features.BookingAgenda.Sheets"
+                             xmlns:models="clr-namespace:QueueApp.Features.BookingAgenda.Models"
+                             x:Name="Root"
+                             x:Class="QueueApp.Features.BookingAgenda.Sheets.BlockTimeSheet"
+                             x:DataType="sheets:BlockTimeSheet">
+
+    <Border VerticalOptions="End" Style="{StaticResource brd22_Sheet}" Padding="16,10,16,26">
+        <ScrollView>
+            <VerticalStackLayout Spacing="0">
+
+                <Border Style="{StaticResource brd6_Tag}"
+                        BackgroundColor="{StaticResource Line}"
+                        WidthRequest="38" HeightRequest="4" Margin="0,0,0,16"
+                        HorizontalOptions="Center"/>
+
+                <VerticalStackLayout Spacing="3">
+                    <Label Text="Block time" Style="{StaticResource lbl16_Bold_TextDark}"/>
+                    <Label Text="{Binding DayText, Source={x:Reference Root}}"
+                           Style="{StaticResource lbl11_Regular_TextLight}"/>
+                </VerticalStackLayout>
+
+                <Label Text="{Binding ResourceLabel, Source={x:Reference Root}}"
+                       Style="{StaticResource lbl9_Mono_TextMuted}" Margin="0,16,0,9"/>
+                <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                    <HorizontalStackLayout Spacing="8"
+                                           BindableLayout.ItemsSource="{Binding Resources, Source={x:Reference Root}}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:BayFilterOption">
+                                <Border Style="{StaticResource brd11_Chip}"
+                                        MinimumHeightRequest="42" Padding="14,0">
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="Stroke" Value="{StaticResource Green}"/>
+                                            <Setter Property="BackgroundColor" Value="{StaticResource GreenSelectedFill}"/>
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                    <Label Text="{Binding Label}" VerticalOptions="Center"
+                                           Style="{StaticResource lbl13_Regular_TextMid}">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="TextColor" Value="{StaticResource Green}"/>
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding ToggleResourceCommand, Source={x:Reference Root}}"
+                                            CommandParameter="{Binding .}"/>
+                                    </Border.GestureRecognizers>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </HorizontalStackLayout>
+                </ScrollView>
+
+                <Label Text="FROM" Style="{StaticResource lbl9_Mono_TextMuted}" Margin="0,16,0,8"/>
+                <Border Style="{StaticResource brd12_Cream}" Padding="10,4">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <DatePicker Grid.Column="0" Date="{Binding FromDate, Source={x:Reference Root}}"
+                                    Style="{StaticResource picker14_Sheet}"/>
+                        <TimePicker Grid.Column="1" Time="{Binding FromTime, Source={x:Reference Root}}"
+                                    Style="{StaticResource timepicker13_Sheet}"/>
+                    </Grid>
+                </Border>
+
+                <Label Text="UNTIL" Style="{StaticResource lbl9_Mono_TextMuted}" Margin="0,16,0,8"/>
+                <Border Style="{StaticResource brd12_Cream}" Padding="10,4">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <DatePicker Grid.Column="0" Date="{Binding UntilDate, Source={x:Reference Root}}"
+                                    Style="{StaticResource picker14_Sheet}"/>
+                        <TimePicker Grid.Column="1" Time="{Binding UntilTime, Source={x:Reference Root}}"
+                                    Style="{StaticResource timepicker13_Sheet}"/>
+                    </Grid>
+                </Border>
+
+                <Label Text="REASON — OPTIONAL" Style="{StaticResource lbl9_Mono_TextMuted}" Margin="0,16,0,8"/>
+                <Border Style="{StaticResource brd12_Cream}" Padding="4,0">
+                    <Entry Text="{Binding Reason, Source={x:Reference Root}}"
+                           Placeholder="Parts delivery"
+                           Style="{StaticResource entry14_Sheet}"/>
+                </Border>
+
+                <Border Style="{StaticResource brd13_Warning}" Margin="0,16,0,0" Padding="13,12"
+                        IsVisible="{Binding HasWarning, Source={x:Reference Root}}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Image Grid.Column="0" Source="ic_alert" WidthRequest="16" HeightRequest="16"
+                               VerticalOptions="Start" Margin="0,2,0,0"/>
+                        <Label Grid.Column="1" Text="{Binding WarningText, Source={x:Reference Root}}"
+                               Style="{StaticResource lbl12_Regular_TextMuted}"/>
+                    </Grid>
+                </Border>
+
+                <Button Text="Block this time" Margin="0,18,0,0"
+                        Style="{StaticResource btn15_Bold_SheetGo}"
+                        Clicked="OnSubmitClicked"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Border>
+
+</bottomsheet:BottomSheetPage>

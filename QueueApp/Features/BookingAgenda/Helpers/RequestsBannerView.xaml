@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:QueueApp.Features.BookingAgenda.Models"
+             x:Name="Root"
+             VerticalOptions="Start"
+             x:Class="QueueApp.Features.BookingAgenda.Helpers.RequestsBannerView">
+
+    <Border Style="{StaticResource brd16_Pool}"
+            Stroke="{Binding RequestsStroke, Source={x:Reference Root}}"
+            StrokeThickness="{Binding RequestsStrokeThickness, Source={x:Reference Root}}"
+            Margin="18,13,18,0"
+            IsVisible="{Binding HasRequests, Source={x:Reference Root}}">
+        <VerticalStackLayout Spacing="0">
+
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="11"
+                  Padding="14,13" MinimumHeightRequest="62"
+                  BackgroundColor="Transparent">
+                <Border Grid.Column="0" WidthRequest="38" HeightRequest="38"
+                        Style="{StaticResource brd6_Tag}"
+                        BackgroundColor="{StaticResource PurpleBadgeFill}"
+                        VerticalOptions="Center">
+                    <Image Source="ic_clock" WidthRequest="18" HeightRequest="18"
+                           HorizontalOptions="Center" VerticalOptions="Center"/>
+                </Border>
+
+                <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                    <Label Text="{Binding RequestsCountText, Source={x:Reference Root}}"
+                           Style="{StaticResource lbl15_Bold_Purple}"/>
+                    <Label Text="{Binding RequestsAgeText, Source={x:Reference Root}}"
+                           Style="{StaticResource lbl11_Regular_TextLight}"/>
+                </VerticalStackLayout>
+
+                <Image Grid.Column="2" Source="{Binding RequestsChevron, Source={x:Reference Root}}"
+                       WidthRequest="18" HeightRequest="18" Opacity="0.65"
+                       VerticalOptions="Center"/>
+
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ToggleRequestsCommand, Source={x:Reference Root}}"/>
+                </Grid.GestureRecognizers>
+            </Grid>
+
+            <VerticalStackLayout Spacing="0" Padding="12,0,12,12"
+                                 IsVisible="{Binding IsRequestsExpanded, Source={x:Reference Root}}"
+                                 BindableLayout.ItemsSource="{Binding Requests, Source={x:Reference Root}}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="models:BookingRequestItem">
+                        <Border Style="{StaticResource brd14_White}" Padding="13" Margin="0,8,0,0">
+                            <VerticalStackLayout Spacing="5">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                    <Label Grid.Column="0" Text="{Binding CustomerName}"
+                                           Style="{StaticResource lbl14_Bold_TextDark}"/>
+                                    <Label Grid.Column="1" Text="{Binding WhenText}"
+                                           Style="{StaticResource lbl11_Regular_TextDark}"/>
+                                </Grid>
+                                <Label Text="{Binding DetailText}" Style="{StaticResource lbl11_Regular_TextLight}"/>
+
+                                <Border Style="{StaticResource brd13_Warning}"
+                                        Margin="0,5,0,0" Padding="11,9"
+                                        IsVisible="{Binding HasConflict}">
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                        <Image Grid.Column="0" Source="ic_alert"
+                                               WidthRequest="14" HeightRequest="14"
+                                               VerticalOptions="Start" Margin="0,2,0,0"/>
+                                        <Label Grid.Column="1" Text="{Binding ConflictText}"
+                                               Style="{StaticResource lbl11_Regular_TextLight}"/>
+                                    </Grid>
+                                </Border>
+
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="9" Margin="0,7,0,0">
+                                    <Button Grid.Column="0" Text="Confirm" HeightRequest="48"
+                                            Style="{StaticResource btn16_Bold_Green}"
+                                            IsEnabled="{Binding IsEnabled}"
+                                            Command="{Binding ConfirmRequestCommand, Source={x:Reference Root}}"
+                                            CommandParameter="{Binding .}"/>
+                                    <Button Grid.Column="1" Text="Decline" HeightRequest="48"
+                                            Style="{StaticResource btn14_Bold_Neutral}"
+                                            IsEnabled="{Binding IsEnabled}"
+                                            Command="{Binding DeclineRequestCommand, Source={x:Reference Root}}"
+                                            CommandParameter="{Binding .}"/>
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </Border>
+
+</ContentView>

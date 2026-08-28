@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Name="Root"
+             VerticalOptions="Start"
+             x:Class="QueueApp.Features.BookingAgenda.Helpers.AgendaHeaderView">
+
+    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="11" Margin="18,14,18,0">
+        <Label Grid.Column="0"
+               Text="{Binding BusinessName, Source={x:Reference Root}}"
+               Style="{StaticResource lbl20_Bold_TextDark}"
+               LineBreakMode="TailTruncation"
+               VerticalOptions="Center"/>
+
+        <Border Grid.Column="1" Style="{StaticResource brd6_Tag}"
+                BackgroundColor="Transparent"
+                Stroke="{StaticResource Line}" StrokeThickness="1"
+                Padding="8,4" VerticalOptions="Center">
+            <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
+                <Ellipse WidthRequest="6" HeightRequest="6" VerticalOptions="Center"
+                         Fill="{StaticResource TextFaint}">
+                    <Ellipse.Triggers>
+                        <DataTrigger TargetType="Ellipse"
+                                     Binding="{Binding IsOpenNow, Source={x:Reference Root}}" Value="True">
+                            <Setter Property="Fill" Value="{StaticResource Green}"/>
+                        </DataTrigger>
+                    </Ellipse.Triggers>
+                </Ellipse>
+                <Label Text="{Binding OpenLabel, Source={x:Reference Root}}"
+                       Style="{StaticResource lbl9_Mono_TextFaint}">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding IsOpenNow, Source={x:Reference Root}}" Value="True">
+                            <Setter Property="TextColor" Value="{StaticResource Green}"/>
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+            </HorizontalStackLayout>
+        </Border>
+
+        <Border Grid.Column="2" WidthRequest="40" HeightRequest="40" Padding="0"
+                Style="{StaticResource brd12_White}">
+            <Image Source="ic_settings" WidthRequest="20" HeightRequest="20"
+                   HorizontalOptions="Center" VerticalOptions="Center"/>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding OpenSettingsCommand, Source={x:Reference Root}}"/>
+            </Border.GestureRecognizers>
+        </Border>
+    </Grid>
+
+</ContentView>

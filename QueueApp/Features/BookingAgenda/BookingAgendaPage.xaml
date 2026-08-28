@@ -2,138 +2,110 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.BookingAgenda"
-             xmlns:models="clr-namespace:QueueApp.Services.Api.Booking.Models"
-             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
-             xmlns:queueEntry="clr-namespace:QueueApp.Shared.Templates.QueueEntry"
+             xmlns:models="clr-namespace:QueueApp.Features.BookingAgenda.Models"
+             xmlns:helpers="clr-namespace:QueueApp.Features.BookingAgenda.Helpers"
              x:Name="Root"
-             Title="Bookings"
+             Title="Manage"
              IconImageSource="icon_manage_business"
              x:Class="QueueApp.Features.BookingAgenda.BookingAgendaPage"
              x:DataType="vm:BookingAgendaPageViewModel"
              Style="{StaticResource NavigationPageStyle}">
 
-    <Grid RowDefinitions="Auto,Auto,*">
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="16,16,16,0">
-            <Label Grid.Column="0"
-                   Text="{Binding BusinessName}"
-                   Style="{StaticResource lbl24_Bold_TextDark}"
-                   VerticalOptions="Center"/>
-            <Image Grid.Column="1"
-                   Source="ic_settings"
-                   WidthRequest="24" HeightRequest="24"
-                   VerticalOptions="Center">
-                <Image.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding OpenSettingsCommand}"/>
-                </Image.GestureRecognizers>
-            </Image>
-        </Grid>
+    <Grid BackgroundColor="{StaticResource DeepBackground}"
+            RowDefinitions="Auto,*,Auto">
 
-        <CollectionView Grid.Row="1" ItemsSource="{Binding DateOptions}" Margin="0,10"
-                        HeightRequest="72" VerticalOptions="Start">
-            <CollectionView.ItemsLayout>
-                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8"/>
-            </CollectionView.ItemsLayout>
+        <VerticalStackLayout Grid.Row="0" Spacing="0" ZIndex="1">
+
+            <helpers:AgendaHeaderView BusinessName="{Binding BusinessName}"
+                                      IsOpenNow="{Binding IsOpenNow}"
+                                      OpenLabel="{Binding OpenLabel}"
+                                      OpenSettingsCommand="{Binding OpenSettingsCommand}"/>
+
+            <helpers:DayStripView Days="{Binding DateOptions}"
+                                  SelectDayCommand="{Binding SelectDateCommand}"/>
+
+            <helpers:AgendaStatsBarView BookedCountText="{Binding BookedCountText}"
+                                        FreeText="{Binding FreeText}"
+                                        RevenueText="{Binding RevenueText}"
+                                        RevenueLabel="{Binding RevenueLabel}"
+                                        ResourceCountText="{Binding ResourceCountText}"
+                                        ResourceCountLabel="{Binding ResourceCountLabel}"/>
+
+            <helpers:RequestsBannerView HasRequests="{Binding HasRequests}"
+                                        IsVisible="{Binding HasRequests}"
+                                        IsRequestsExpanded="{Binding IsRequestsExpanded}"
+                                        RequestsCountText="{Binding RequestsCountText}"
+                                        RequestsAgeText="{Binding RequestsAgeText}"
+                                        RequestsChevron="{Binding RequestsChevron}"
+                                        RequestsStroke="{Binding RequestsStroke}"
+                                        RequestsStrokeThickness="{Binding RequestsStrokeThickness}"
+                                        Requests="{Binding Requests}"
+                                        ToggleRequestsCommand="{Binding ToggleRequestsCommand}"
+                                        ConfirmRequestCommand="{Binding ConfirmRequestCommand}"
+                                        DeclineRequestCommand="{Binding DeclineRequestCommand}"/>
+
+            <helpers:BayFilterBarView HeightRequest="54"
+                                      Filters="{Binding BayFilters}"
+                                      SelectFilterCommand="{Binding SelectBayCommand}"/>
+
+          
+            <Label Text="{Binding AgendaHeaderText}" Margin="18,22,18,6"
+                   Style="{StaticResource lbl9_Mono_TextFaint}"/>
+
+        </VerticalStackLayout>
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Rows}"
+                VerticalOptions="Fill" ZIndex="0">
+
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="vm:AgendaDateOption">
-                    <Border Padding="8" Margin="4,0" HeightRequest="64" WidthRequest="64"
-                            VerticalOptions="Center" HorizontalOptions="Center"
-                            StrokeThickness="0"
-                            BackgroundColor="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#A45EFF|#252C39'}">
-                        <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="12"/>
-                        </Border.StrokeShape>
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer
-                                Command="{Binding BindingContext.SelectDateCommand, Source={x:Reference Root}}"
-                                CommandParameter="{Binding .}"/>
-                        </Border.GestureRecognizers>
-                        <VerticalStackLayout VerticalOptions="Center">
-                            <Label Text="{Binding DayLabel}" HorizontalOptions="Center"
-                                   Style="{StaticResource lbl13_Regular_TextMid}"
-                                   TextColor="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#FFFFFF|#8A8F98'}"/>
-                            <Label Text="{Binding DateLabel}" HorizontalOptions="Center"
-                                   Style="{StaticResource lbl16_Regular_TextDark}" FontAttributes="Bold"
-                                   TextColor="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#FFFFFF|#F2F4F7'}"/>
-                        </VerticalStackLayout>
-                    </Border>
+                <DataTemplate x:DataType="models:AgendaRow">
+                    <helpers:AgendaRowView
+                        RowTappedCommand="{Binding BindingContext.RowTappedCommand, Source={x:Reference Root}}"
+                        FillGapCommand="{Binding BindingContext.FillGapCommand, Source={x:Reference Root}}"/>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
+
         </CollectionView>
 
-        <Grid Grid.Row="2">
-            <CollectionView ItemsSource="{Binding Bookings}"
-                             IsVisible="{Binding IsEmpty, Converter={StaticResource InvertedBoolConverter}}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:AgendaBookingResponse">
-                        <Border Style="{StaticResource brd16_White}" Padding="14" Margin="12,6">
-                            <VerticalStackLayout Spacing="6">
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <Label Grid.Column="0" Text="{Binding TimeRangeDisplay}"
-                                           Style="{StaticResource lbl16_Regular_TextDark}" FontAttributes="Bold"/>
-                                    <Label Grid.Column="1" Text="{Binding StatusLabel}"
-                                           Style="{StaticResource lbl13_Regular_TextMid}"/>
-                                </Grid>
-                                <Label Text="{Binding CustomerName}" Style="{StaticResource lbl16_Regular_TextDark}"/>
-                                <Label Style="{StaticResource lbl13_Regular_TextMid}">
-                                    <Label.FormattedText>
-                                        <FormattedString>
-                                            <Span Text="{Binding ServiceName}"/>
-                                            <Span Text=" with "/>
-                                            <Span Text="{Binding OperatorName}"/>
-                                        </FormattedString>
-                                    </Label.FormattedText>
-                                </Label>
-                                <HorizontalStackLayout Spacing="8">
-                                    <controls:AlzowLoadingButton Text="Confirm" IsVisible="{Binding CanConfirm}"
-                                            LoadingText="Confirming…"
-                                            Margin="0" HeightRequest="44"
-                                            Command="{Binding BindingContext.ConfirmCommand, Source={x:Reference Root}}"
-                                            CommandParameter="{Binding .}" IsLoading="{Binding IsConfirming}"
-                                            ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
-                                    <controls:AlzowLoadingButton Text="Complete" IsVisible="{Binding CanComplete}"
-                                            LoadingText="Completing…"
-                                            Margin="0" HeightRequest="44"
-                                            Command="{Binding BindingContext.CompleteCommand, Source={x:Reference Root}}"
-                                            CommandParameter="{Binding .}" IsLoading="{Binding IsCompleting}"
-                                            ButtonStyle="{StaticResource SecondaryButtonStyle}"/>
-                                    <controls:AlzowLoadingButton Text="Cancel" IsVisible="{Binding CanCancel}"
-                                            LoadingText="Cancelling…"
-                                            Margin="0" HeightRequest="44"
-                                            Command="{Binding BindingContext.CancelCommand, Source={x:Reference Root}}"
-                                            CommandParameter="{Binding .}" IsLoading="{Binding IsCancelling}"
-                                            ButtonStyle="{StaticResource DangerButtonStyle}"/>
-                                </HorizontalStackLayout>
+        <!-- Switching day or bay keeps the header and stats in place and only replaces the list, so
+             the spinner sits over the list rather than the page. -->
+        <ActivityIndicator Grid.Row="1" ZIndex="1"
+                           IsRunning="{Binding IsSwitchingDay}"
+                           IsVisible="{Binding IsSwitchingDay}"
+                           Color="{StaticResource Green}"
+                           HorizontalOptions="Center" VerticalOptions="Center"/>
 
-                                <!-- Optional, quiet — never blocks Confirm/Complete/Cancel -->
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6" Margin="0,4,0,0">
-                                    <queueEntry:QueueEntry Grid.Column="0"
-                                            Text="{Binding ProgressStatus}"
-                                            Placeholder="What's happening? (optional)"/>
-                                    <controls:AlzowLoadingButton Grid.Column="1" Text="Save"
-                                            LoadingText="Saving…"
-                                            Margin="0" HeightRequest="44"
-                                            Command="{Binding BindingContext.SaveProgressCommand, Source={x:Reference Root}}"
-                                            CommandParameter="{Binding .}"
-                                            IsLoading="{Binding IsSavingProgress}"
-                                            ButtonStyle="{StaticResource TertiaryButtonStyle}"/>
-                                </Grid>
-                            </VerticalStackLayout>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+        <Label Grid.Row="1" ZIndex="1" Margin="40,0"
+               IsVisible="{Binding ShowEmptyState}"
+               Text="Nothing on the books for this day yet."
+               Style="{StaticResource lbl12_Regular_TextMuted}"
+               HorizontalTextAlignment="Center"
+               HorizontalOptions="Center" VerticalOptions="Center"/>
 
-            <Border IsVisible="{Binding IsEmpty}"
-                    StrokeThickness="0"
-                    BackgroundColor="Transparent"
-                    Padding="24"
-                    VerticalOptions="Center"
-                    HorizontalOptions="Center">
-                <Label Text="No bookings this day" Style="{StaticResource lbl18_Bold_TextDark}"/>
-            </Border>
+        <helpers:AgendaFooterView Grid.Row="2"
+                                  IsClosedDay="{Binding IsClosedDay}"
+                                  ClosedDayText="{Binding ClosedDayText}"
+                                  IsQuietDay="{Binding IsQuietDay}"
+                                  QuietDayText="{Binding QuietDayText}"
+                                  AddBookingCommand="{Binding AddBookingCommand}"
+                                  BlockTimeCommand="{Binding BlockTimeCommand}"
+                                  ZIndex="2"/>
 
-            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
-                               HorizontalOptions="Center" VerticalOptions="Center"/>
+        <!-- Cold open: there is no header, no stats and no rows behind this yet, so it covers the
+             whole page rather than letting empty chrome flash first. -->
+        <Grid Grid.Row="0" Grid.RowSpan="3" ZIndex="3"
+              IsVisible="{Binding IsInitialLoading}"
+              BackgroundColor="{StaticResource DeepBackground}">
+            <VerticalStackLayout Spacing="14" HorizontalOptions="Center" VerticalOptions="Center">
+                <ActivityIndicator IsRunning="{Binding IsInitialLoading}"
+                                   Color="{StaticResource Green}"
+                                   HorizontalOptions="Center"/>
+                <Label Text="LOADING THE DIARY"
+                       Style="{StaticResource lbl9_Mono_TextFaint}"
+                       HorizontalOptions="Center"/>
+            </VerticalStackLayout>
         </Grid>
+
     </Grid>
+
 </ContentPage>

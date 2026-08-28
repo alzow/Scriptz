@@ -40,9 +40,13 @@ internal static class NavigationStartup
     {
         var assembly = typeof(App).GetTypeInfo().Assembly;
 
+        // PopupPage derives from ContentPage but is never a navigation target: the sheets are shown
+        // through IPopupService over whatever page is already up, and registering them here would
+        // put them in the navigation registry under names nothing can navigate to.
         var pageTypes = assembly
             .DefinedTypes
             .Where(t => t.IsSubclassOf(typeof(Page)) && !t.IsAbstract)
+            .Where(t => !t.IsSubclassOf(typeof(MPowerKit.Popups.PopupPage)))
             .ToList();
 
         foreach (var pageType in pageTypes)

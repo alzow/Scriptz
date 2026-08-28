@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<bottomsheet:BottomSheetPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                             xmlns:bottomsheet="clr-namespace:QueueApp.Shared.Templates.BottomSheet"
+                             xmlns:sheets="clr-namespace:QueueApp.Features.BookingAgenda.Sheets"
+                             xmlns:models="clr-namespace:QueueApp.Features.BookingAgenda.Models"
+                             xmlns:flowmodels="clr-namespace:QueueApp.Shared.Domain.Models"
+                             x:Name="Root"
+                             x:Class="QueueApp.Features.BookingAgenda.Sheets.MoveBookingSheet"
+                             x:DataType="sheets:MoveBookingSheet">
+
+    <Border VerticalOptions="End" Style="{StaticResource brd22_Sheet}" Padding="16,10,16,26">
+        <ScrollView>
+            <VerticalStackLayout Spacing="0">
+
+                <Border Style="{StaticResource brd6_Tag}"
+                        BackgroundColor="{StaticResource Line}"
+                        WidthRequest="38" HeightRequest="4" Margin="0,0,0,16"
+                        HorizontalOptions="Center"/>
+
+                <VerticalStackLayout Spacing="3">
+                    <Label Text="{Binding TitleText, Source={x:Reference Root}}"
+                           Style="{StaticResource lbl16_Bold_TextDark}"/>
+                    <Label Text="{Binding CurrentText, Source={x:Reference Root}}"
+                           Style="{StaticResource lbl11_Regular_TextLight}"/>
+                    <Label Text="{Binding ServiceText, Source={x:Reference Root}}"
+                           Style="{StaticResource lbl10_Mono_TextFaint}" Margin="0,3,0,0"/>
+                </VerticalStackLayout>
+
+                <Label Text="DAY" Style="{StaticResource lbl9_Mono_TextMuted}" Margin="0,16,0,8"/>
+                <Border Style="{StaticResource brd12_Cream}" Padding="10,4">
+                    <DatePicker Date="{Binding Date, Source={x:Reference Root}}"
+                                MinimumDate="{Binding MinimumDate, Source={x:Reference Root}}"
+                                Style="{StaticResource picker14_Sheet}"/>
+                </Border>
+
+                <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never" Margin="0,16,0,0">
+                    <HorizontalStackLayout Spacing="8"
+                                           BindableLayout.ItemsSource="{Binding Resources, Source={x:Reference Root}}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:BayFilterOption">
+                                <Border Style="{StaticResource brd11_Chip}"
+                                        MinimumHeightRequest="42" Padding="14,0">
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="Stroke" Value="{StaticResource Green}"/>
+                                            <Setter Property="BackgroundColor" Value="{StaticResource GreenSelectedFill}"/>
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                    <Label Text="{Binding Label}" VerticalOptions="Center"
+                                           Style="{StaticResource lbl13_Regular_TextMid}">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="TextColor" Value="{StaticResource Green}"/>
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding SelectResourceCommand, Source={x:Reference Root}}"
+                                            CommandParameter="{Binding .}"/>
+                                    </Border.GestureRecognizers>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </HorizontalStackLayout>
+                </ScrollView>
+
+                <Label Text="WHEN" Style="{StaticResource lbl9_Mono_TextMuted}" Margin="0,16,0,9"/>
+
+                <ActivityIndicator IsRunning="{Binding IsLoadingSlots, Source={x:Reference Root}}"
+                                   IsVisible="{Binding IsLoadingSlots, Source={x:Reference Root}}"
+                                   Color="{StaticResource Green}" HorizontalOptions="Center"/>
+
+                <Label Text="Nothing free that day. Try another."
+                       IsVisible="{Binding IsEmpty, Source={x:Reference Root}}"
+                       Style="{StaticResource lbl12_Regular_TextLight}"/>
+
+                <FlexLayout Wrap="Wrap" Direction="Row" JustifyContent="Start"
+                            IsVisible="{Binding HasSlots, Source={x:Reference Root}}"
+                            BindableLayout.ItemsSource="{Binding Slots, Source={x:Reference Root}}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="flowmodels:SlotChoiceItem">
+                            <Border Style="{StaticResource brd11_Chip}"
+                                    MinimumHeightRequest="42" Padding="14,0" Margin="0,0,8,8">
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                        <Setter Property="Stroke" Value="{StaticResource Green}"/>
+                                        <Setter Property="BackgroundColor" Value="{StaticResource GreenSelectedFill}"/>
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="{Binding TimeText}" VerticalOptions="Center"
+                                       Style="{StaticResource lbl13_Regular_TextMid}">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="TextColor" Value="{StaticResource Green}"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding SelectSlotCommand, Source={x:Reference Root}}"
+                                        CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+
+                <Button Text="Move booking" Margin="0,10,0,0"
+                        Style="{StaticResource btn15_Bold_SheetGo}"
+                        Clicked="OnSubmitClicked"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Border>
+
+</bottomsheet:BottomSheetPage>

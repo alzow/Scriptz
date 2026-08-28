@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<bottomsheet:BottomSheetPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                             xmlns:bottomsheet="clr-namespace:QueueApp.Shared.Templates.BottomSheet"
+                             xmlns:sheets="clr-namespace:QueueApp.Features.BookingAgenda.Sheets"
+                             xmlns:models="clr-namespace:QueueApp.Features.BookingAgenda.Models"
+                             x:Name="Root"
+                             x:Class="QueueApp.Features.BookingAgenda.Sheets.BookingActionsSheet"
+                             x:DataType="sheets:BookingActionsSheet">
+
+    <Border VerticalOptions="End"
+            Style="{StaticResource brd22_Sheet}"
+            Padding="16,10,16,26">
+        <ScrollView>
+            <VerticalStackLayout Spacing="0">
+
+                <Border Style="{StaticResource brd6_Tag}"
+                        BackgroundColor="{StaticResource Line}"
+                        WidthRequest="38"
+                        HeightRequest="4"
+                        Margin="0,0,0,16"
+                        HorizontalOptions="Center"/>
+
+                <Grid ColumnDefinitions="Auto,*,Auto"
+                        ColumnSpacing="12"
+                        Padding="0,0,0,14">
+                    <Border Grid.Column="0"
+                            WidthRequest="48"
+                            HeightRequest="48"
+                            BackgroundColor="{StaticResource SurfaceRaised}"
+                            Stroke="{StaticResource Line}"
+                            StrokeThickness="1"
+                            StrokeShape="Ellipse">
+                        <Label Text="{Binding Initials, Source={x:Reference Root}}"
+                               Style="{StaticResource lbl12_Mono_TextPrimary}"
+                               HorizontalOptions="Center"
+                                VerticalOptions="Center"/>
+                    </Border>
+
+                    <VerticalStackLayout Grid.Column="1"
+                            Spacing="3"
+                            VerticalOptions="Center">
+                        <Label Text="{Binding CustomerName, Source={x:Reference Root}}"
+                               Style="{StaticResource lbl16_Bold_TextDark}"/>
+                        <Label Text="{Binding WhenText, Source={x:Reference Root}}"
+                               Style="{StaticResource lbl11_Regular_TextLight}"/>
+                    </VerticalStackLayout>
+
+                    <Border Grid.Column="2"
+                            WidthRequest="44"
+                            HeightRequest="44"
+                            Style="{StaticResource brd13_Raised}"
+                            Stroke="{StaticResource Line}"
+                            StrokeThickness="1"
+                            IsVisible="{Binding HasPhone, Source={x:Reference Root}}">
+                        <Image Source="ic_phone"
+                                WidthRequest="18"
+                                HeightRequest="18"
+                               HorizontalOptions="Center"
+                                VerticalOptions="Center"/>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnCallClicked"/>
+                        </Border.GestureRecognizers>
+                    </Border>
+                </Grid>
+
+                <BoxView HeightRequest="1"
+                        Color="{StaticResource Line}"
+                        Margin="0,0,0,14"/>
+
+                <Border Style="{StaticResource brd13_Raised}"
+                        Padding="13,12"
+                        Margin="0,0,0,9"
+                        IsVisible="{Binding HasNote, Source={x:Reference Root}}">
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="ADDITIONAL DETAILS" Style="{StaticResource lbl9_Mono_TextMuted}"/>
+                        <Label Text="{Binding NoteText, Source={x:Reference Root}}"
+                               Style="{StaticResource lbl12_Regular_TextMuted}"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource brd13_Raised}"
+                        Padding="13,4">
+                    <VerticalStackLayout Spacing="0">
+                        <Grid ColumnDefinitions="*,Auto"
+                                Padding="0,9">
+                            <Label Grid.Column="0"
+                                    Text="Service"
+                                    Style="{StaticResource lbl12_Regular_TextLight}"/>
+                            <Label Grid.Column="1"
+                                    Text="{Binding ServiceName, Source={x:Reference Root}}"
+                                   Style="{StaticResource lbl12_Bold_TextDark}"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto"
+                                Padding="0,9">
+                            <Label Grid.Column="0"
+                                    Text="Price"
+                                    Style="{StaticResource lbl12_Regular_TextLight}"/>
+                            <Label Grid.Column="1"
+                                    Text="{Binding PriceText, Source={x:Reference Root}}"
+                                   Style="{StaticResource lbl12_Bold_TextDark}"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto"
+                                Padding="0,9">
+                            <Label Grid.Column="0"
+                                    Text="Booked"
+                                    Style="{StaticResource lbl12_Regular_TextLight}"/>
+                            <Label Grid.Column="1"
+                                    Text="{Binding BookedAgoText, Source={x:Reference Root}}"
+                                   Style="{StaticResource lbl12_Bold_TextDark}"/>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <VerticalStackLayout Spacing="0"
+                                     IsVisible="{Binding CanUpdateCustomer, Source={x:Reference Root}}">
+                    <Label Text="UPDATE THE CUSTOMER"
+                           Style="{StaticResource lbl9_Mono_TextMuted}"
+                           Margin="0,14,0,8"/>
+                    <Grid ColumnDefinitions="*,Auto"
+                            ColumnSpacing="8">
+                        <Border Grid.Column="0"
+                                Style="{StaticResource brd12_Cream}"
+                                Padding="4,0">
+                            <Entry Text="{Binding ProgressStatus, Source={x:Reference Root}}"
+                                   Placeholder="What's happening? (optional)"
+                                   Style="{StaticResource entry14_Sheet}"/>
+                        </Border>
+                        <Button Grid.Column="1"
+                                Text="Save"
+                                HeightRequest="52"
+                                Style="{StaticResource btn14_Bold_Neutral}"
+                                Clicked="OnSaveProgressClicked"/>
+                    </Grid>
+                </VerticalStackLayout>
+
+                <Button Text="Mark as done"
+                        Margin="0,12,0,0"
+                        Style="{StaticResource btn15_Bold_SheetGo}"
+                        IsVisible="{Binding CanComplete, Source={x:Reference Root}}"
+                        Clicked="OnCompleteClicked"/>
+
+                <Button Text="Move to another time"
+                        Margin="0,9,0,0"
+                        Style="{StaticResource btn15_Regular_SheetRow}"
+                        Clicked="OnMoveTimeClicked"/>
+
+                <VerticalStackLayout Spacing="0"
+                                     IsVisible="{Binding HasMoveTargets, Source={x:Reference Root}}"
+                                     BindableLayout.ItemsSource="{Binding MoveTargets, Source={x:Reference Root}}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:MoveTargetOption">
+                            <Button Text="{Binding Label}"
+                                    Margin="0,9,0,0"
+                                    Style="{StaticResource btn15_Regular_SheetRow}"
+                                    Clicked="OnMoveResourceClicked"/>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <BoxView HeightRequest="1"
+                        Color="{StaticResource Line}"
+                        Margin="0,16,0,4"/>
+
+                <Button Text="Cancel booking"
+                        Margin="0,9,0,0"
+                        Style="{StaticResource btn15_Regular_SheetBad}"
+                        IsVisible="{Binding CanCancel, Source={x:Reference Root}}"
+                        Clicked="OnCancelClicked"/>
+
+                <Button Text="Didn't show up"
+                        Margin="0,9,0,0"
+                        Style="{StaticResource btn15_Regular_SheetBad}"
+                        IsVisible="{Binding CanMarkNoShow, Source={x:Reference Root}}"
+                        Clicked="OnNoShowClicked"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Border>
+
+</bottomsheet:BottomSheetPage>

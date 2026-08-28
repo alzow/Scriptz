@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:QueueApp.Shared.Domain.Models"
+             x:Name="Root"
+             VerticalOptions="Start"
+             x:Class="QueueApp.Features.Flow.Helpers.SlotPeriodView">
+
+    <VerticalStackLayout Spacing="0">
+
+        <Grid ColumnDefinitions="*,Auto" Padding="20,20,20,9">
+            <Label Grid.Column="0" Text="{Binding Period.Title, Source={x:Reference Root}}" Style="{StaticResource lbl9_Mono_TextMuted}"
+                   TextColor="{StaticResource TextPrimary}"/>
+            <Label Grid.Column="1" Text="{Binding Period.CountText, Source={x:Reference Root}}" Style="{StaticResource lbl10_Mono_TextFaint}"/>
+        </Grid>
+        <CollectionView ItemsSource="{Binding Period.Slots, Source={x:Reference Root}}"
+                        HeightRequest="{Binding Period.GridHeight, Source={x:Reference Root}}"
+                        IsVisible="{Binding Period.HasSlots, Source={x:Reference Root}}"
+                        Margin="20,0">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical" Span="4"
+                                 HorizontalItemSpacing="8" VerticalItemSpacing="8"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:SlotChoiceItem">
+                    <Border Padding="0,11" HeightRequest="42"
+                            BackgroundColor="{StaticResource Surface}"
+                            Stroke="{StaticResource Line}" StrokeThickness="1">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="11"/>
+                        </Border.StrokeShape>
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                <Setter Property="Stroke" Value="{StaticResource Green}"/>
+                                <Setter Property="BackgroundColor" Value="{StaticResource Green}"/>
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding SelectSlotCommand, Source={x:Reference Root}}"
+                                CommandParameter="{Binding .}"/>
+                        </Border.GestureRecognizers>
+                        <Label Text="{Binding TimeText}" HorizontalOptions="Center" VerticalOptions="Center"
+                               Style="{StaticResource lbl13_Mono_TextPrimary}">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="TextColor" Value="{StaticResource DeepBackground}"/>
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+        <Border Margin="20,0" Padding="14" IsVisible="{Binding Period.IsEmpty, Source={x:Reference Root}}"
+                BackgroundColor="Transparent"
+                Stroke="{StaticResource Line}" StrokeThickness="1"
+                StrokeDashArray="4,4" StrokeDashOffset="0">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="12"/>
+            </Border.StrokeShape>
+            <Label Text="No slot long enough left in the day" HorizontalOptions="Center"
+                   Style="{StaticResource lbl11_Regular_TextLight}"/>
+        </Border>
+
+    </VerticalStackLayout>
+
+</ContentView>

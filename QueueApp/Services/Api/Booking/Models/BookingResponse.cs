@@ -8,7 +8,7 @@ public class BookingResponse
     [JsonPropertyName("business_id")] public Guid BusinessId { get; set; }
     [JsonPropertyName("operator_id")] public Guid OperatorId { get; set; }
     [JsonPropertyName("service_id")] public Guid ServiceId { get; set; }
-    [JsonPropertyName("customer_id")] public Guid CustomerId { get; set; }
+    [JsonPropertyName("customer_id")] public Guid? CustomerId { get; set; }
     [JsonPropertyName("starts_at")] public DateTimeOffset StartsAt { get; set; }
     [JsonPropertyName("ends_at")] public DateTimeOffset EndsAt { get; set; }
     [JsonPropertyName("status")] public string Status { get; set; } = "pending";

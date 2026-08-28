@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:QueueApp.Features.Flow.QueueFlow"
+             xmlns:flow="clr-namespace:QueueApp.Features.Flow.Helpers"
+             xmlns:topbar="clr-namespace:QueueApp.Shared.Templates.TopBar"
+             x:Name="Root"
+             x:Class="QueueApp.Features.Flow.QueueFlow.QueueFlowPage"
+             x:DataType="vm:QueueFlowPageViewModel"
+             Style="{StaticResource NavigationPageStyle}">
+
+    <Grid BackgroundColor="{StaticResource DeepBackground}"
+          RowDefinitions="Auto,*,Auto">
+
+        <topbar:TopBarView Grid.Row="0"
+                FlowTitle="{Binding FlowTitle}"
+                IsFlowActive="True"
+                BusinessName="{Binding BusinessName}"
+                GoBackCommand="{Binding FlowBackCommand}"/>
+
+        <Grid Grid.Row="1" RowDefinitions="Auto,*">
+
+            <flow:FlowRailView Grid.Row="0"
+                    RailSegments="{Binding RailSegments}"
+                    RailStepLabel="{Binding RailStepLabel}"
+                    RailCountText="{Binding RailCountText}"
+                    Crumbs="{Binding Crumbs}"
+                    HasCrumbs="{Binding HasCrumbs}"
+                    StepHeading="{Binding StepHeading}"
+                    StepSubheading="{Binding StepSubheading}"
+                    JumpToCrumbCommand="{Binding JumpToCrumbCommand}"/>
+
+            <Grid Grid.Row="1">
+
+                <flow:OperatorStepView
+                        IsVisible="{Binding ShowOperatorStep}"
+                        OperatorChoices="{Binding OperatorChoices}"
+                        ShowOperatorStep="{Binding ShowOperatorStep}"
+                        SelectOperatorCommand="{Binding SelectOperatorCommand}"/>
+
+                <flow:ServiceStepView
+                        IsVisible="{Binding ShowServiceStep}"
+                        ServiceRows="{Binding ServiceRows}"
+                        ShowServiceStep="{Binding ShowServiceStep}"
+                        SelectServiceCommand="{Binding SelectServiceCommand}"/>
+
+                <flow:ReviewStepView
+                        IsVisible="{Binding ShowReviewStep}"
+                        ShowReviewStep="{Binding ShowReviewStep}"
+                        ReviewOperatorLabel="{Binding ReviewOperatorLabel}"
+                        ReviewOperatorText="{Binding ReviewOperatorText}"
+                        ReviewServiceText="{Binding ReviewServiceText}"
+                        ReviewPriceText="{Binding ReviewPriceText}"
+                        ReviewPositionText="{Binding ReviewPositionText}"
+                        ReviewTurnText="{Binding ReviewTurnText}"
+                        ReviewWhenText="{Binding ReviewWhenText}"
+                        ShowReviewWhen="{Binding ShowReviewWhen}"
+                        ShowReviewQueueLines="{Binding ShowReviewQueueLines}"
+                        BookingNote="{Binding BookingNote}"/>
+
+            </Grid>
+        </Grid>
+
+        <flow:FlowFooterBarView Grid.Row="2"
+                IsFlowActive="True"
+                FooterLabel="{Binding FooterLabel}"
+                FooterValue="{Binding FooterValue}"
+                FooterCtaText="{Binding FooterCtaText}"
+                IsSubmitting="{Binding IsSubmitting}"
+                IsFooterCtaEnabled="{Binding IsFooterCtaEnabled}"
+                NextCommand="{Binding NextCommand}"/>
+
+        <ActivityIndicator Grid.Row="1" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                           Color="{StaticResource Green}"
+                           HorizontalOptions="Center" VerticalOptions="Center"/>
+
+    </Grid>
+
+</ContentPage>

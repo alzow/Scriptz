@@ -2,194 +2,80 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.BusinessDetail"
-             xmlns:helpers="clr-namespace:QueueApp.Features.CategoryPicker.Helpers"
              xmlns:bdHelpers="clr-namespace:QueueApp.Features.BusinessDetail.Helpers"
-             xmlns:models="clr-namespace:QueueApp.Features.BusinessDetail.Models"
-             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
              x:Class="QueueApp.Features.BusinessDetail.BusinessDetailPage"
              x:DataType="vm:BusinessDetailPageViewModel"
              Title="{Binding BusinessName}"
              BackgroundColor="{StaticResource DeepBackground}"
              Style="{StaticResource NavigationPageStyle}">
 
-    <Grid RowDefinitions="Auto,*,Auto">
+    <Grid RowDefinitions="Auto,*">
 
-        <!-- ================= TOP BAR — flow and confirmation only ================= -->
-        <bdHelpers:TopBarView Grid.Row="0"
-                IsVisible="{Binding IsShowingLanding, Converter={StaticResource InvertedBoolConverter}}"
-                FlowTitle="{Binding FlowTitle}"
-                IsFlowActive="{Binding IsFlowActive}"
-                TicketHeadline="{Binding TicketHeadline}"
-                IsInQueue="{Binding IsInQueue}"
-                HasActiveBooking="{Binding ActiveBooking, Converter={StaticResource IsNotNullConverter}}"
+        <bdHelpers:LandingHeaderView Grid.Row="0"
                 BusinessName="{Binding BusinessName}"
+                IsOpen="{Binding IsOpen}"
+                OpenPillText="{Binding OpenPillText}"
+                AddressLine="{Binding AddressLine}"
+                ModeLine="{Binding ModeLine}"
                 GoBackCommand="{Binding GoBackCommand}"/>
 
-        <!-- ========================================================================
-             LANDING
-             ======================================================================== -->
-        <Grid Grid.Row="1" RowDefinitions="Auto,*" IsVisible="{Binding IsShowingLanding}">
-
-            <bdHelpers:LandingHeaderView Grid.Row="0"
-                    BusinessName="{Binding BusinessName}"
-                    IsOpen="{Binding IsOpen}"
-                    OpenPillText="{Binding OpenPillText}"
-                    AddressLine="{Binding AddressLine}"
-                    ModeLine="{Binding ModeLine}"
-                    GoBackCommand="{Binding GoBackCommand}"/>
-
-            <ScrollView Grid.Row="1">
-                <VerticalStackLayout Spacing="0" Padding="0,0,0,24">
-
-                    <bdHelpers:LiveCardView
-                            IsBookingMode="{Binding IsBookingMode}"
-                            IsOpen="{Binding IsOpen}"
-                            LiveCardTitle="{Binding LiveCardTitle}"
-                            LiveCardStatus="{Binding LiveCardStatus}"
-                            ShowLiveDot="{Binding ShowLiveDot}"
-                            PrimaryStatValue="{Binding PrimaryStatValue}"
-                            PrimaryStatLabel="{Binding PrimaryStatLabel}"
-                            SecondaryStatValue="{Binding SecondaryStatValue}"
-                            SecondaryStatLabel="{Binding SecondaryStatLabel}"
-                            TertiaryStatValue="{Binding TertiaryStatValue}"
-                            TertiaryStatLabel="{Binding TertiaryStatLabel}"
-                            CtaText="{Binding CtaText}"
-                            IsCtaEnabled="{Binding IsCtaEnabled}"
-                            LiveFootnote="{Binding LiveFootnote}"
-                            StartFlowCommand="{Binding StartFlowCommand}"/>
-
-                    <bdHelpers:ServicesListSectionView
-                            HasServices="{Binding HasServices}"
-                            ServicesCountText="{Binding ServicesCountText}"
-                            ServiceRows="{Binding ServiceRows}"
-                            ServicesListHeight="{Binding ServicesListHeight}"/>
-
-                    <bdHelpers:TeamSectionView
-                            HasTeam="{Binding HasTeam}"
-                            TeamSectionTitle="{Binding TeamSectionTitle}"
-                            TeamCountText="{Binding TeamCountText}"
-                            TeamMembers="{Binding TeamMembers}"/>
-
-                    <bdHelpers:GettingThereSectionView
-                            AddressLine="{Binding AddressLine}"
-                            DistanceText="{Binding DistanceText}"
-                            HasDistance="{Binding HasDistance}"
-                            OpenDirectionsCommand="{Binding OpenDirectionsCommand}"/>
-
-                </VerticalStackLayout>
-            </ScrollView>
-
-        </Grid>
-
-        <!-- ========================================================================
-             STEP FLOW — inline takeover, no page push
-             ======================================================================== -->
-        <Grid Grid.Row="1" RowDefinitions="Auto,*" IsVisible="{Binding IsFlowActive}">
-
-            <bdHelpers:FlowRailView Grid.Row="0"
-                    RailSegments="{Binding RailSegments}"
-                    RailStepLabel="{Binding RailStepLabel}"
-                    RailCountText="{Binding RailCountText}"
-                    Crumbs="{Binding Crumbs}"
-                    HasCrumbs="{Binding HasCrumbs}"
-                    StepHeading="{Binding StepHeading}"
-                    StepSubheading="{Binding StepSubheading}"
-                    JumpToCrumbCommand="{Binding JumpToCrumbCommand}"/>
-
-            <!-- Step bodies are siblings toggled by IsVisible — nothing is re-templated on Next -->
-            <Grid Grid.Row="1">
-
-                <bdHelpers:OperatorStepView
-                        IsVisible="{Binding ShowOperatorStep}"
-                        OperatorChoices="{Binding OperatorChoices}"
-                        ShowOperatorStep="{Binding ShowOperatorStep}"
-                        SelectOperatorCommand="{Binding SelectOperatorCommand}"/>
-
-                <bdHelpers:ServiceStepView
-                        IsVisible="{Binding ShowServiceStep}"
-                        ServiceRows="{Binding ServiceRows}"
-                        ShowServiceStep="{Binding ShowServiceStep}"
-                        SelectServiceCommand="{Binding SelectServiceCommand}"/>
-
-                <bdHelpers:DayStepView
-                        IsVisible="{Binding ShowDayStep}"
-                        ShowDayStep="{Binding ShowDayStep}"
-                        DayChoices="{Binding DayChoices}"
-                        IsLoadingDays="{Binding IsLoadingDays}"
-                        SelectedDay="{Binding SelectedDay}"
-                        ReviewOperatorLabel="{Binding ReviewOperatorLabel}"
-                        SelectedOperatorChoice="{Binding SelectedOperatorChoice}"
-                        DayFineprint="{Binding DayFineprint}"
-                        SelectDayCommand="{Binding SelectDayCommand}"/>
-
-                <bdHelpers:TimeStepView
-                        IsVisible="{Binding ShowTimeStep}"
-                        ShowTimeStep="{Binding ShowTimeStep}"
-                        IsLoadingSlots="{Binding IsLoadingSlots}"
-                        Morning="{Binding Morning}"
-                        Afternoon="{Binding Afternoon}"
-                        Evening="{Binding Evening}"
-                        SelectSlotCommand="{Binding SelectSlotCommand}"/>
-
-                <bdHelpers:ReviewStepView
-                        IsVisible="{Binding ShowReviewStep}"
-                        ShowReviewStep="{Binding ShowReviewStep}"
-                        ReviewOperatorLabel="{Binding ReviewOperatorLabel}"
-                        ReviewOperatorText="{Binding ReviewOperatorText}"
-                        ReviewServiceText="{Binding ReviewServiceText}"
-                        ReviewPriceText="{Binding ReviewPriceText}"
-                        ReviewPositionText="{Binding ReviewPositionText}"
-                        ReviewTurnText="{Binding ReviewTurnText}"/>
-
-            </Grid>
-        </Grid>
-
-        <!-- ========================================================================
-             CONFIRMATION — queue ticket and booking pending
-             ======================================================================== -->
-        <ScrollView Grid.Row="1" IsVisible="{Binding IsShowingConfirmation}">
+        <ScrollView Grid.Row="1">
             <VerticalStackLayout Spacing="0" Padding="0,0,0,24">
 
-                <!-- QUEUE TICKET -->
-                <helpers:LiveQueueHeroView Margin="16" IsVisible="{Binding IsInQueue}"
-                        ActiveEntry="{Binding ActiveQueueEntry}"
-                        DirectionsCommand="{Binding OpenDirectionsCommand}"
-                        LeaveCommand="{Binding LeaveQueueCommand}"
-                        IsLeaving="{Binding IsLeaving}"/>
+                <bdHelpers:LiveCardView
+                        IsBookingMode="{Binding IsBookingMode}"
+                        IsOpen="{Binding IsOpen}"
+                        LiveCardTitle="{Binding LiveCardTitle}"
+                        LiveCardStatus="{Binding LiveCardStatus}"
+                        ShowLiveDot="{Binding ShowLiveDot}"
+                        PrimaryStatValue="{Binding PrimaryStatValue}"
+                        PrimaryStatLabel="{Binding PrimaryStatLabel}"
+                        SecondaryStatValue="{Binding SecondaryStatValue}"
+                        SecondaryStatLabel="{Binding SecondaryStatLabel}"
+                        TertiaryStatValue="{Binding TertiaryStatValue}"
+                        TertiaryStatLabel="{Binding TertiaryStatLabel}"
+                        CtaText="{Binding CtaText}"
+                        IsCtaEnabled="{Binding IsCtaEnabled}"
+                        LiveFootnote="{Binding LiveFootnote}"
+                        StartFlowCommand="{Binding StartFlowCommand}"/>
 
-                <!-- BOOKING PENDING -->
-                <bdHelpers:BookingPendingSectionView
-                        HasActiveBooking="{Binding ActiveBooking, Converter={StaticResource IsNotNullConverter}}"
-                        BookingPendingBlurb="{Binding BookingPendingBlurb}"
-                        BookingWhenText="{Binding BookingWhenText}"
-                        BookingEndsText="{Binding BookingEndsText}"
-                        BookingOperatorLabel="{Binding BookingOperatorLabel}"
-                        BookingOperatorText="{Binding BookingOperatorText}"
-                        BookingServiceText="{Binding BookingServiceText}"
-                        BookingPriceText="{Binding BookingPriceText}"
-                        BookingStatusLabel="{Binding ActiveBooking.StatusLabel}"
-                        IsCancellingBooking="{Binding IsCancellingBooking}"
-                        CancelBookingCommand="{Binding CancelBookingCommand}"/>
+                <Border Style="{StaticResource brd14_White}" Margin="18,14,18,0" Padding="14,13"
+                        IsVisible="{Binding HasSomethingActive}">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <Label Grid.Column="0" Text="{Binding ActiveStripText}"
+                               Style="{StaticResource lbl14_Bold_TextDark}"
+                               VerticalOptions="Center"/>
+                        <Image Grid.Column="1" Source="ic_chevron_right"
+                               WidthRequest="18" HeightRequest="18" VerticalOptions="Center"/>
+                    </Grid>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenConfirmationCommand}"/>
+                    </Border.GestureRecognizers>
+                </Border>
+
+                <bdHelpers:ServicesListSectionView
+                        HasServices="{Binding HasServices}"
+                        ServicesCountText="{Binding ServicesCountText}"
+                        ServiceRows="{Binding ServiceRows}"
+                        ServicesListHeight="{Binding ServicesListHeight}"/>
+
+                <bdHelpers:TeamSectionView
+                        HasTeam="{Binding HasTeam}"
+                        TeamSectionTitle="{Binding TeamSectionTitle}"
+                        TeamCountText="{Binding TeamCountText}"
+                        TeamMembers="{Binding TeamMembers}"/>
+
+                <bdHelpers:GettingThereSectionView
+                        AddressLine="{Binding AddressLine}"
+                        DistanceText="{Binding DistanceText}"
+                        HasDistance="{Binding HasDistance}"
+                        OpenDirectionsCommand="{Binding OpenDirectionsCommand}"/>
 
             </VerticalStackLayout>
         </ScrollView>
 
-        <!-- ========================================================================
-             BOTTOM BARS — never more than one CTA on screen
-             ======================================================================== -->
-
-        <!-- Flow footer -->
-        <bdHelpers:FlowFooterBarView Grid.Row="2"
-                IsVisible="{Binding IsFlowActive}"
-                IsFlowActive="{Binding IsFlowActive}"
-                FooterLabel="{Binding FooterLabel}"
-                FooterValue="{Binding FooterValue}"
-                FooterCtaText="{Binding FooterCtaText}"
-                IsSubmitting="{Binding IsSubmitting}"
-                IsFooterCtaEnabled="{Binding IsFooterCtaEnabled}"
-                NextCommand="{Binding NextCommand}"/>
-
-        <ActivityIndicator Grid.Row="1" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+        <ActivityIndicator Grid.Row="0" Grid.RowSpan="2"
+                           IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
                            Color="{StaticResource Green}"
                            HorizontalOptions="Center" VerticalOptions="Center"/>
 

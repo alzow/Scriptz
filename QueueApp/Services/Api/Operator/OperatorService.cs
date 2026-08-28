@@ -43,6 +43,21 @@ public class OperatorService : BaseService, IOperatorService
     public Task<List<AvailabilityBlockResponse>> GetAvailabilityBlocksAsync(Guid operatorId) =>
         ExecuteApiCallAsync(_api.GetAvailabilityBlocksAsync($"eq.{operatorId}"));
 
+    public Task<List<AvailabilityBlockResponse>> GetAvailabilityBlocksAsync(
+        IReadOnlyCollection<Guid> operatorIds, DateTimeOffset from, DateTimeOffset until)
+    {
+        if (operatorIds.Count == 0)
+            return Task.FromResult(new List<AvailabilityBlockResponse>());
+
+        var ids = string.Join(',', operatorIds);
+
+        // Overlap, not containment: a block that started yesterday and runs through this morning
+        // still blocks this morning.
+        var overlap = $"(starts_at.lt.{until:yyyy-MM-ddTHH:mm:sszzz},ends_at.gt.{from:yyyy-MM-ddTHH:mm:sszzz})";
+
+        return ExecuteApiCallAsync(_api.GetAvailabilityBlocksForOperatorsAsync($"in.({ids})", overlap));
+    }
+
     public Task<List<AvailabilityBlockResponse>> CreateAvailabilityBlockAsync(CreateAvailabilityBlockRequest request) =>
         ExecuteApiCallAsync(_api.CreateAvailabilityBlockAsync(request));
 

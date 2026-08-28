@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:QueueApp.Features.BookingAgenda.Models"
+             x:Name="Root"
+             VerticalOptions="Start"
+             x:Class="QueueApp.Features.BookingAgenda.Helpers.DayStripView">
+
+    <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never" Margin="0,14,0,0">
+        <HorizontalStackLayout Spacing="8" Padding="18,0"
+                               BindableLayout.ItemsSource="{Binding Days, Source={x:Reference Root}}">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate x:DataType="models:AgendaDateOption">
+                    <Border Style="{StaticResource brd14_White}"
+                            WidthRequest="54" MinimumHeightRequest="62" Padding="0,9">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                <Setter Property="Stroke" Value="{StaticResource Green}"/>
+                                <Setter Property="BackgroundColor" Value="{StaticResource GreenSelectedFill}"/>
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Grid>
+                            <VerticalStackLayout Spacing="4" VerticalOptions="Center">
+                                <Label Text="{Binding DayText}" HorizontalOptions="Center"
+                                       Style="{StaticResource lbl9_Mono_TextMuted}">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="TextColor" Value="{StaticResource Green}"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                                <Label Text="{Binding DateText}" HorizontalOptions="Center"
+                                       Style="{StaticResource lbl18_Mono_TextPrimary}">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="TextColor" Value="{StaticResource Green}"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </VerticalStackLayout>
+                            <Ellipse WidthRequest="6" HeightRequest="6"
+                                     Fill="{StaticResource Purple}"
+                                     Margin="0,7,8,0"
+                                     HorizontalOptions="End" VerticalOptions="Start"
+                                     IsVisible="{Binding HasRequests}"/>
+                        </Grid>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding SelectDayCommand, Source={x:Reference Root}}"
+                                CommandParameter="{Binding .}"/>
+                        </Border.GestureRecognizers>
+                    </Border>
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </HorizontalStackLayout>
+    </ScrollView>
+
+</ContentView>

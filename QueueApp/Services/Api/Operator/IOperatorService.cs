@@ -19,6 +19,8 @@ public interface IOperatorService
     Task DeleteAvailabilityAsync(Guid id);
 
     Task<List<AvailabilityBlockResponse>> GetAvailabilityBlocksAsync(Guid operatorId);
+    Task<List<AvailabilityBlockResponse>> GetAvailabilityBlocksAsync(
+        IReadOnlyCollection<Guid> operatorIds, DateTimeOffset from, DateTimeOffset until);
     Task<List<AvailabilityBlockResponse>> CreateAvailabilityBlockAsync(CreateAvailabilityBlockRequest request);
     Task DeleteAvailabilityBlockAsync(Guid id);
 }

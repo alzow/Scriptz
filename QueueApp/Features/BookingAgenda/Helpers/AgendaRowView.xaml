@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:QueueApp.Features.BookingAgenda.Models"
+             x:Name="Root"
+             VerticalOptions="Start"
+             x:DataType="models:AgendaRow"
+             x:Class="QueueApp.Features.BookingAgenda.Helpers.AgendaRowView">
+
+    <Grid RowDefinitions="Auto,Auto,Auto" VerticalOptions="Start">
+
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*" ColumnSpacing="8"
+              Margin="18,10" IsVisible="{Binding ShowNowLineAbove}">
+            <Label Grid.Column="0" Text="{Binding NowText}"
+                   Style="{StaticResource lbl9_Mono_Green}" VerticalOptions="Center"/>
+            <BoxView Grid.Column="1" HeightRequest="1"
+                     Color="{StaticResource Green}" VerticalOptions="Center"/>
+        </Grid>
+
+        <Border Grid.Row="1" Style="{StaticResource brd14_Row}"
+                Margin="18,0,18,8" Padding="12,11"
+                MinimumHeightRequest="70"
+                BackgroundColor="{Binding RowBackgroundColor}"
+                Stroke="{Binding RowStrokeColor}"
+                StrokeDashArray="{Binding RowStrokeDash}"
+                Opacity="{Binding RowOpacity}"
+                InputTransparent="{Binding IsNotTappable}">
+
+            <Grid ColumnDefinitions="46,3,*,Auto" ColumnSpacing="11">
+                <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
+                    <Label Text="{Binding TimeText}" Style="{StaticResource lbl13_Mono_TextPrimary}"/>
+                    <Label Text="{Binding DurationText}" IsVisible="{Binding ShowDuration}"
+                           Style="{StaticResource lbl9_Mono_TextFaint}"/>
+                </VerticalStackLayout>
+
+                <BoxView Grid.Column="1" WidthRequest="3" CornerRadius="2"
+                         Color="{Binding BarColor}" VerticalOptions="Fill"/>
+
+                <VerticalStackLayout Grid.Column="2" Spacing="3" VerticalOptions="Center">
+                    <HorizontalStackLayout Spacing="7">
+                        <Label Text="{Binding Title}" VerticalOptions="Center"
+                               Style="{StaticResource lbl14_Bold_Row}"
+                               TextColor="{Binding TitleColor}"/>
+                        <Border Style="{StaticResource brd6_Tag}" Padding="6,3"
+                                VerticalOptions="Center"
+                                IsVisible="{Binding ShowTag}"
+                                BackgroundColor="{Binding TagBackgroundColor}">
+                            <Label Text="{Binding TagText}"
+                                   Style="{StaticResource lbl11_Mono_Tag}"
+                                   TextColor="{Binding TagTextColor}"/>
+                        </Border>
+                    </HorizontalStackLayout>
+                    <Label Text="{Binding Subtitle}" Style="{StaticResource lbl11_Regular_TextLight}"/>
+                </VerticalStackLayout>
+
+                <Border Grid.Column="3" Style="{StaticResource brd6_Tag}" Padding="7,5"
+                        VerticalOptions="Center" IsVisible="{Binding ShowBay}">
+                    <Label Text="{Binding BayText}" Style="{StaticResource lbl9_Mono_TextMuted}"/>
+                </Border>
+
+                <Button Grid.Column="3" Text="Fill" HeightRequest="42"
+                        VerticalOptions="Center"
+                        IsVisible="{Binding ShowFill}"
+                        Style="{StaticResource btn14_Bold_GreenOutline}"
+                        Command="{Binding FillGapCommand, Source={x:Reference Root}}"
+                        CommandParameter="{Binding .}"/>
+            </Grid>
+
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer
+                    Command="{Binding RowTappedCommand, Source={x:Reference Root}}"
+                    CommandParameter="{Binding .}"/>
+            </Border.GestureRecognizers>
+        </Border>
+
+        <Grid Grid.Row="2" ColumnDefinitions="Auto,*" ColumnSpacing="8"
+              Margin="18,4,18,10" IsVisible="{Binding ShowNowLineBelow}">
+            <Label Grid.Column="0" Text="{Binding NowText}"
+                   Style="{StaticResource lbl9_Mono_Green}" VerticalOptions="Center"/>
+            <BoxView Grid.Column="1" HeightRequest="1"
+                     Color="{StaticResource Green}" VerticalOptions="Center"/>
+        </Grid>
+
+    </Grid>
+
+</ContentView>

@@ -7,10 +7,16 @@ namespace QueueApp.Services.Stubs;
 // Registered instead of the real OperatorService in DEBUG builds.
 public class StubOperatorService : IOperatorService
 {
+    // Fixed rather than freshly generated so StubBookingService can seed an agenda that actually
+    // lines up with these resources — a demo day whose bay chips filter nothing would be worse than
+    // no demo day.
+    public static readonly Guid FirstOperatorId = new("1a2b3c4d-0001-4000-8000-000000000001");
+    public static readonly Guid SecondOperatorId = new("1a2b3c4d-0002-4000-8000-000000000002");
+
     private readonly List<OperatorResponse> _operators = new()
     {
-        new() { Id = Guid.NewGuid(), DisplayName = "Ahmed", SortOrder = 0, IsAvailable = true, IsActive = true },
-        new() { Id = Guid.NewGuid(), DisplayName = "Yusuf", SortOrder = 1, IsAvailable = true, IsActive = true },
+        new() { Id = FirstOperatorId, DisplayName = "Ahmed", SortOrder = 0, IsAvailable = true, IsActive = true },
+        new() { Id = SecondOperatorId, DisplayName = "Yusuf", SortOrder = 1, IsAvailable = true, IsActive = true },
     };
 
     public Task<List<OperatorResponse>> GetOperatorsAsync(Guid businessId)
@@ -92,6 +98,13 @@ public class StubOperatorService : IOperatorService
     public Task<List<AvailabilityBlockResponse>> GetAvailabilityBlocksAsync(Guid operatorId)
         => Task.FromResult(_availabilityBlocks
             .Where(b => b.OperatorId == operatorId)
+            .OrderBy(b => b.StartsAt)
+            .ToList());
+
+    public Task<List<AvailabilityBlockResponse>> GetAvailabilityBlocksAsync(
+        IReadOnlyCollection<Guid> operatorIds, DateTimeOffset from, DateTimeOffset until)
+        => Task.FromResult(_availabilityBlocks
+            .Where(b => operatorIds.Contains(b.OperatorId) && b.StartsAt < until && b.EndsAt > from)
             .OrderBy(b => b.StartsAt)
             .ToList());
 
