@@ -33,7 +33,14 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     public bool HasRows => Rows.Count > 0;
 
     public string BusinessName { get; set; } = "Bookings";
+
+    // Two loaders, because they mean different things. IsInitialLoading covers the cold open, when
+    // there is no header, no stats and no rows to look at. IsLoading covers a day or bay switch,
+    // where the chrome stays put and only the list underneath is being replaced.
+    public bool IsInitialLoading { get; set; }
     public bool IsLoading { get; set; }
+    public bool IsSwitchingDay => IsLoading && !IsInitialLoading;
+    public bool ShowEmptyState => !IsLoading && !IsInitialLoading && Rows.Count == 0;
     public bool IsOpenNow { get; set; }
     public string OpenLabel => IsOpenNow ? "OPEN" : "CLOSED";
 
@@ -66,6 +73,10 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
 
     private IDispatcherTimer? _tickTimer;
     private bool _hasAppeared;
+
+    // Held as a task, not a list, so the requests banner and the agenda can both await the one
+    // in-flight fetch instead of racing to issue their own.
+    private Task<List<AvailabilityBlockResponse>>? _windowBlocksTask;
 
     private Guid _businessId;
     private Guid? _filterOperatorId;
@@ -109,30 +120,55 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         _messenger = messenger;
     }
 
+    // Two waves of requests rather than a chain of ten. Everything here needs the business id and
+    // nothing else needs anything from its own wave, so the only real ordering is: id, then the
+    // three lookups that take it, then everything that takes an operator id.
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
         try
         {
             await base.OnLoadedAsync(parameters);
 
+            IsInitialLoading = true;
             BuildDayStrip();
 
             _businessId = parameters is not null && parameters.TryGetValue(NavigationKeys.BusinessId, out var idObj)
                 ? (Guid)idObj
                 : await _businessService.GetOwnedBusinessIdAsync();
 
-            _business = await _businessService.GetBusinessAsync(_businessId);
+            var businessTask = _businessService.GetBusinessAsync(_businessId);
+            var operatorsTask = _operatorService.GetOperatorsAsync(_businessId);
+            var servicesTask = _serviceOfferingsService.GetActiveServicesAsync(_businessId);
+
+            await Task.WhenAll(businessTask, operatorsTask, servicesTask);
+
+            _business = await businessTask;
             BusinessName = _business?.Name ?? "Bookings";
             _labels = CategoryLabels.Resolve(_business?.Category);
             ResourceCountLabel = _labels.SectionTitle;
 
-            await LoadStaticsAsync();
-            await LoadRequestsAsync();
-            await LoadDayAsync();
+            _operators = await operatorsTask;
+            _services = await servicesTask;
+            _operatorNames = _operators.ToDictionary(o => o.Id, o => o.DisplayName);
+            ResourceCountText = _operators.Count.ToString();
+
+            BuildBayFilters();
+
+            // The day is what the operator is looking at, so it is not made to wait behind the
+            // trading hours or the requests banner.
+            await Task.WhenAll(LoadHoursAsync(), LoadRequestsAsync(), LoadDayAsync());
+
+            // IsClosedDay reads the hours, which may have landed after the rows did.
+            RefreshDayStates();
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
+        }
+        finally
+        {
+            IsInitialLoading = false;
+            RaiseLoadingStateChanged();
         }
     }
 
@@ -198,16 +234,10 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         }
     }
 
-    public async Task LoadStaticsAsync()
+    public void BuildBayFilters()
     {
         try
         {
-            _operators = await _operatorService.GetOperatorsAsync(_businessId);
-            _operatorNames = _operators.ToDictionary(o => o.Id, o => o.DisplayName);
-            _services = await _serviceOfferingsService.GetActiveServicesAsync(_businessId);
-
-            ResourceCountText = _operators.Count.ToString();
-
             BayFilters.Clear();
             BayFilters.Add(new BayFilterOption
             {
@@ -223,13 +253,27 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
                     Label = resource.DisplayName,
                     IsSelected = _filterOperatorId == resource.Id,
                 });
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
+    }
 
-            var windows = new List<OperatorAvailabilityResponse>();
+    // operator_availability is per operator, so trading hours are the union across the ones on the
+    // books. One request per resource, but issued together — a five-bay shop was paying five round
+    // trips in a row for a header pill.
+    public async Task LoadHoursAsync()
+    {
+        try
+        {
+            if (_operators.Count == 0)
+                return;
 
-            foreach (var resource in _operators)
-                windows.AddRange(await _operatorService.GetAvailabilityAsync(resource.Id));
+            var windows = await Task.WhenAll(
+                _operators.Select(o => _operatorService.GetAvailabilityAsync(o.Id)));
 
-            _hours = BusinessHours.FromAvailability(windows);
+            _hours = BusinessHours.FromAvailability(windows.SelectMany(w => w));
             IsOpenNow = _hours.IsOpenAt(LocalTime.Now);
         }
         catch (Exception ex)
@@ -238,19 +282,40 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         }
     }
 
+    // Every block across the whole day strip, fetched once and shared. The requests banner checks
+    // pending bookings against it and the agenda draws the selected day's blocks out of it, so
+    // switching days costs nothing extra. Both callers await the same in-flight request.
+    public Task<List<AvailabilityBlockResponse>> EnsureWindowBlocksAsync(bool refresh = false)
+    {
+        if (!refresh && _windowBlocksTask is not null)
+            return _windowBlocksTask;
+
+        var today = LocalTime.Now.Date;
+
+        _windowBlocksTask = _operatorNames.Count == 0
+            ? Task.FromResult(new List<AvailabilityBlockResponse>())
+            : _operatorService.GetAvailabilityBlocksAsync(
+                _operatorNames.Keys.ToList(),
+                AgendaConstants.Midnight(today),
+                AgendaConstants.Midnight(today.AddDays(AgendaConstants.DayStripLength)));
+
+        return _windowBlocksTask;
+    }
+
     public async Task LoadRequestsAsync()
     {
         try
         {
             var today = LocalTime.Now.Date;
 
-            var pending = await _bookingService.GetPendingRequestsAsync(
+            var pendingTask = _bookingService.GetPendingRequestsAsync(
                 _businessId, today, AgendaConstants.DayStripLength);
+            var blocksTask = EnsureWindowBlocksAsync();
 
-            _windowBlocks = await _operatorService.GetAvailabilityBlocksAsync(
-                _operatorNames.Keys.ToList(),
-                AgendaConstants.Midnight(today),
-                AgendaConstants.Midnight(today.AddDays(AgendaConstants.DayStripLength)));
+            await Task.WhenAll(pendingTask, blocksTask);
+
+            var pending = await pendingTask;
+            _windowBlocks = await blocksTask;
 
             Requests.Clear();
 
@@ -291,18 +356,27 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         try
         {
             IsLoading = true;
+            RaiseLoadingStateChanged();
 
             var dayStart = AgendaConstants.Midnight(SelectedDate);
             var dayEnd = dayStart.AddDays(1);
 
-            _dayBookings = await _bookingService.GetAgendaBookingsAsync(_businessId, SelectedDate);
+            var bookingsTask = _bookingService.GetAgendaBookingsAsync(_businessId, SelectedDate);
+            var blocksTask = EnsureWindowBlocksAsync();
+            var slotsTask = LoadFreeSlotsAsync();
 
-            _dayBlocks = await _operatorService.GetAvailabilityBlocksAsync(
-                _filterOperatorId is null ? _operatorNames.Keys.ToList() : [_filterOperatorId.Value],
-                dayStart,
-                dayEnd);
+            await Task.WhenAll(bookingsTask, blocksTask, slotsTask);
 
-            var freeSlots = await LoadFreeSlotsAsync();
+            _dayBookings = await bookingsTask;
+            var freeSlots = await slotsTask;
+
+            // Same overlap the query uses — a block that started yesterday and runs into this
+            // morning still blocks this morning.
+            _dayBlocks = (await blocksTask)
+                .Where(b => b.StartsAt < dayEnd && b.EndsAt > dayStart)
+                .Where(b => _filterOperatorId is null || b.OperatorId == _filterOperatorId)
+                .OrderBy(b => b.StartsAt)
+                .ToList();
 
             var visible = _filterOperatorId is null
                 ? _dayBookings
@@ -343,7 +417,41 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         finally
         {
             IsLoading = false;
+            RaiseLoadingStateChanged();
             _loadLock.Release();
+        }
+    }
+
+    public void RaiseLoadingStateChanged()
+    {
+        try
+        {
+            OnPropertyChanged(nameof(IsSwitchingDay));
+            OnPropertyChanged(nameof(ShowEmptyState));
+            OnPropertyChanged(nameof(HasRows));
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
+    }
+
+    public List<AgendaBookingResponse> VisibleBookings() =>
+        _filterOperatorId is null
+            ? _dayBookings
+            : _dayBookings.Where(b => b.OperatorId == _filterOperatorId).ToList();
+
+    // The closed-day and quiet-day strips read the trading hours, which on a cold open land in the
+    // same wave as the rows rather than before them.
+    public void RefreshDayStates()
+    {
+        try
+        {
+            UpdateDayStates(VisibleBookings(), Rows.ToList());
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
         }
     }
 
@@ -508,12 +616,15 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    // Blocks are re-fetched here rather than reused: a refresh is what follows blocking time out or
+    // confirming a request, which is exactly when the cached window has gone stale.
     public async Task RefreshAsync()
     {
         try
         {
-            await LoadRequestsAsync();
-            await LoadDayAsync();
+            _ = EnsureWindowBlocksAsync(refresh: true);
+            await Task.WhenAll(LoadRequestsAsync(), LoadDayAsync());
+            RefreshDayStates();
         }
         catch (Exception ex)
         {

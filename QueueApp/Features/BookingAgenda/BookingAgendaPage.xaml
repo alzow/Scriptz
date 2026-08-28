@@ -67,6 +67,21 @@
 
         </CollectionView>
 
+        <!-- Switching day or bay keeps the header and stats in place and only replaces the list, so
+             the spinner sits over the list rather than the page. -->
+        <ActivityIndicator Grid.Row="1" ZIndex="1"
+                           IsRunning="{Binding IsSwitchingDay}"
+                           IsVisible="{Binding IsSwitchingDay}"
+                           Color="{StaticResource Green}"
+                           HorizontalOptions="Center" VerticalOptions="Center"/>
+
+        <Label Grid.Row="1" ZIndex="1" Margin="40,0"
+               IsVisible="{Binding ShowEmptyState}"
+               Text="Nothing on the books for this day yet."
+               Style="{StaticResource lbl12_Regular_TextMuted}"
+               HorizontalTextAlignment="Center"
+               HorizontalOptions="Center" VerticalOptions="Center"/>
+
         <helpers:AgendaFooterView Grid.Row="2"
                                   IsClosedDay="{Binding IsClosedDay}"
                                   ClosedDayText="{Binding ClosedDayText}"
@@ -75,6 +90,21 @@
                                   AddBookingCommand="{Binding AddBookingCommand}"
                                   BlockTimeCommand="{Binding BlockTimeCommand}"
                                   ZIndex="2"/>
+
+        <!-- Cold open: there is no header, no stats and no rows behind this yet, so it covers the
+             whole page rather than letting empty chrome flash first. -->
+        <Grid Grid.Row="0" Grid.RowSpan="3" ZIndex="3"
+              IsVisible="{Binding IsInitialLoading}"
+              BackgroundColor="{StaticResource DeepBackground}">
+            <VerticalStackLayout Spacing="14" HorizontalOptions="Center" VerticalOptions="Center">
+                <ActivityIndicator IsRunning="{Binding IsInitialLoading}"
+                                   Color="{StaticResource Green}"
+                                   HorizontalOptions="Center"/>
+                <Label Text="LOADING THE DIARY"
+                       Style="{StaticResource lbl9_Mono_TextFaint}"
+                       HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+        </Grid>
 
     </Grid>
 
