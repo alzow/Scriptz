@@ -16,11 +16,3 @@ public sealed class CrumbChip
     public FlowStep Step { get; init; }
     public string Text { get; init; } = string.Empty;
 }
-
-// A dot in the confirmation card's queue strip, built by ITicketScheme.
-public sealed class TicketDot
-{
-    public string Label { get; init; } = string.Empty;
-    public bool IsNowServing { get; init; }
-    public bool IsMine { get; init; }
-}

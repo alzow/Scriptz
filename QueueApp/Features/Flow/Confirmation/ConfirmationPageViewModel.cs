@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using MPowerKit.Navigation;
 using QueueApp.Constants;
@@ -38,9 +37,7 @@ public partial class ConfirmationPageViewModel : BaseViewModel
     public bool IsQueueMode => Business?.Mode == FlowStepEngine.QueueMode;
     public bool IsBookingMode => Business?.Mode == FlowStepEngine.BookingMode;
 
-    // The three top-level states are mutually exclusive: exactly one of these renders at a time.
     public string BusinessName => Business?.Name ?? string.Empty;
-    public ObservableCollection<QueueSummaryRow> QueueSummary { get; } = new();
 
     // Queue confirmation
     public MyQueueStatusResponse? MyStatus { get; set; }
@@ -66,10 +63,6 @@ public partial class ConfirmationPageViewModel : BaseViewModel
             ProgressStatus = MyStatus.ProgressStatus,
         };
     public string TicketHeadline { get; set; } = string.Empty;
-    public string TicketWaitText { get; set; } = string.Empty;
-    public string TicketTurnText { get; set; } = string.Empty;
-    public RingDrawable TicketRing { get; set; } = new(0);
-    public ObservableCollection<TicketDot> TicketDots { get; } = new();
 
     // Booking confirmation
     public MyBookingSummaryResponse? ActiveBooking { get; set; }
@@ -82,8 +75,6 @@ public partial class ConfirmationPageViewModel : BaseViewModel
     public string BookingPendingBlurb { get; set; } = string.Empty;
     public bool IsCancellingBooking { get; set; }
 
-    // Review step
-    private readonly ITicketScheme _ticketScheme = new PositionTicketScheme();
     private Guid _businessId;
     private CategoryLabelSet _labels = CategoryLabels.Resolve(null);
 
@@ -171,9 +162,7 @@ public partial class ConfirmationPageViewModel : BaseViewModel
             else
                 await RefreshMyBookingsAsync();
 
-            OnPropertyChanged(nameof(IsShowingTicket));
-            OnPropertyChanged(nameof(IsShowingBooking));
-            OnPropertyChanged(nameof(HasNothing));
+            RaiseStateChanged();
         }
         catch (Exception ex)
         {
@@ -275,10 +264,10 @@ public partial class ConfirmationPageViewModel : BaseViewModel
             await HandleExceptionAsync(ex);
         }
     }
+    // The wait, the ring and the dot strip are all LiveQueueHeroView's now — it draws them off
+    // ActiveQueueEntry. All that is left here is the line the top bar shows.
     public void RefreshTicket()
     {
-        TicketDots.Clear();
-
         if (MyStatus is null)
             return;
 
@@ -287,31 +276,6 @@ public partial class ConfirmationPageViewModel : BaseViewModel
             : $"You're {Ordinal(MyStatus.Position)} in line";
 
         OnPropertyChanged(nameof(HeaderText));
-
-        var minutes = (double)(MyWaitMinutes ?? 0);
-        TicketWaitText = IsBeingServed ? "now" : $"{minutes:0} min";
-
-        var turnAt = LocalTime.Now.AddMinutes(minutes);
-        TicketTurnText = turnAt.ToString("HH:mm");
-
-        // Compared in UTC so the ring never depends on how the JSON reader happened to tag the kind.
-        var joinedUtc = MyStatus.JoinedAt.Kind == DateTimeKind.Unspecified
-            ? DateTime.SpecifyKind(MyStatus.JoinedAt, DateTimeKind.Utc)
-            : MyStatus.JoinedAt.ToUniversalTime();
-        var elapsed = Math.Max(0, (DateTime.UtcNow - joinedUtc).TotalMinutes);
-        var total = elapsed + minutes;
-        TicketRing = new RingDrawable(total > 0 ? elapsed / total : 0);
-
-        foreach (var marker in _ticketScheme.BuildStrip(MyStatus.Position))
-        {
-            TicketDots.Add(new TicketDot
-            {
-                Label = marker.Label,
-                IsNowServing = marker.IsNowServing,
-                IsMine = marker.IsMine,
-            });
-        }
-
         OnPropertyChanged(nameof(IsBeingServed));
     }
     public void RefreshBookingConfirmation()
