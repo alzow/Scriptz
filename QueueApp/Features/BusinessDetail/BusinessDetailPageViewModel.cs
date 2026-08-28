@@ -30,22 +30,16 @@ namespace QueueApp.Features.BusinessDetail;
 
 public partial class BusinessDetailPageViewModel : BaseViewModel
 {
-    #region Constants
-
-    // No column stores a customer's travel time, so it lives per-device rather than becoming a maps
-    // call on every review step. Nothing writes this yet — Profile needs a field for it.
-    public const string TravelMinutesStorageKey = "customer_travel_minutes";
-    #endregion
     #region Properties and fields
     private readonly SemaphoreSlim _loadLock = new(1, 1);
     private Guid _businessId;
     private bool _openedFromTabs;
-    private int? _travelMinutes;
     private BusinessHours _hours = BusinessHours.Unknown;
     private CategoryLabelSet _labels = CategoryLabels.Resolve(null);
     private List<OperatorResponse> _allOperators = new();
     private List<OperatorResponse> _selectableOperators = new();
     private int _servingCount;
+    private bool _hasActiveBooking;
     private string _nextFreeSlotText = "—";
     private string _slotsLeftTodayText = "—";
     public BusinessResponse? Business { get; set; }
@@ -56,7 +50,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     // The three top-level states are mutually exclusive: exactly one of these renders at a time.
     // A live ticket or a booking awaiting confirmation is a strip on the landing that taps
     // through to ConfirmationPage, which owns the detail.
-    public bool HasSomethingActive => IsInQueue || ActiveBooking is not null;
+    public bool HasSomethingActive => IsInQueue || _hasActiveBooking;
     public string ActiveStripText => IsInQueue ? "You're in the queue" : "Your booking is with the shop";
 
     // Landing — header
@@ -194,7 +188,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
 
             Title = Business.Name;
             _labels = CategoryLabels.Resolve(Business.Category);
-            _travelMinutes = await ReadTravelMinutesAsync();
 
             _allOperators = await _operatorService.GetOperatorsAsync(_businessId);
             _selectableOperators = FlowStepEngine.SelectableOperators(_allOperators);
@@ -324,20 +317,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 await HandleExceptionAsync(ex);
             }
         });
-    public async Task<int?> ReadTravelMinutesAsync()
-    {
-        try
-        {
-            var stored = await SecureStorageService.GetAsync(TravelMinutesStorageKey);
-            return int.TryParse(stored, out var minutes) && minutes > 0 ? minutes : null;
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
-            return null;
-        }
-    }
-
     // operator_availability is per operator, so the business's trading hours are the union across
     // the ones on the books. Fetched concurrently — a shop has a handful of operators, not hundreds.
     public async Task<BusinessHours> LoadHoursAsync(IReadOnlyList<OperatorResponse> operators)
@@ -507,10 +486,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 return;
 
             var bookings = await _bookingService.GetMyBookingsAsync(_businessId, Guid.Parse(userId));
-            ActiveBooking = bookings
-                .Where(b => b.IsCancellable && b.EndsAt > DateTimeOffset.UtcNow)
-                .OrderBy(b => b.StartsAt)
-                .FirstOrDefault();
+            _hasActiveBooking = bookings
+                .Any(b => b.IsCancellable && b.EndsAt > DateTimeOffset.UtcNow);
 
             OnPropertyChanged(nameof(HasSomethingActive));
             OnPropertyChanged(nameof(ActiveStripText));

@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using QueueApp.Framework.Extensions;
 using QueueApp.Services.Api.Queue.Models;
 
 namespace QueueApp.Services.Api.Booking.Models;
@@ -17,6 +18,7 @@ public class MyBookingSummaryResponse
 
     [JsonIgnore] public string OperatorName => Operator?.DisplayName ?? "Any available";
     [JsonIgnore] public string ServiceName => Service?.Name ?? "";
+    [JsonIgnore] public string PriceText => MoneyFormat.Format(Service?.PriceCents);
     [JsonIgnore] public bool HasProgress => !string.IsNullOrWhiteSpace(ProgressStatus);
 
     [JsonIgnore]

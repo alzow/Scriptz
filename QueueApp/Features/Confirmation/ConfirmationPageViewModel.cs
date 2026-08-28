@@ -12,7 +12,6 @@ using QueueApp.Services.Api.Business.Models;
 using QueueApp.Services.Api.Queue;
 using QueueApp.Services.Api.Queue.Models;
 using QueueApp.Services.Auth;
-using QueueApp.Services.Location;
 using QueueApp.Services.Popup;
 using QueueApp.Services.Realtime;
 using QueueApp.Services.Storage;
@@ -62,9 +61,6 @@ public partial class ConfirmationPageViewModel : BaseViewModel
     public string TicketHeadline { get; set; } = string.Empty;
     public string TicketWaitText { get; set; } = string.Empty;
     public string TicketTurnText { get; set; } = string.Empty;
-    public string TicketLeaveText { get; set; } = string.Empty;
-    public bool ShowTicketLeaveText => !string.IsNullOrEmpty(TicketLeaveText);
-    public string TicketTravelNote { get; set; } = string.Empty;
     public RingDrawable TicketRing { get; set; } = new(0);
     public ObservableCollection<TicketDot> TicketDots { get; } = new();
 
@@ -82,7 +78,6 @@ public partial class ConfirmationPageViewModel : BaseViewModel
     // Review step
     private readonly ITicketScheme _ticketScheme = new PositionTicketScheme();
     private Guid _businessId;
-    private int? _travelMinutes;
     private CategoryLabelSet _labels = CategoryLabels.Resolve(null);
 
     private readonly IBusinessService _businessService;
@@ -91,7 +86,6 @@ public partial class ConfirmationPageViewModel : BaseViewModel
     private readonly IAuthService _authService;
     private readonly IQueueRealtimeService _realtimeService;
     private readonly IQueuePopupService _popupService;
-    private readonly ILocationService _locationService;
 
     public ConfirmationPageViewModel(
         INavigationService navigationService,
@@ -101,8 +95,7 @@ public partial class ConfirmationPageViewModel : BaseViewModel
         IBookingService bookingService,
         IAuthService authService,
         IQueueRealtimeService realtimeService,
-        IQueuePopupService popupService,
-        ILocationService locationService)
+        IQueuePopupService popupService)
         : base(navigationService, secureStorageService)
     {
         _businessService = businessService;
@@ -111,7 +104,6 @@ public partial class ConfirmationPageViewModel : BaseViewModel
         _authService = authService;
         _realtimeService = realtimeService;
         _popupService = popupService;
-        _locationService = locationService;
     }
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
@@ -131,7 +123,6 @@ public partial class ConfirmationPageViewModel : BaseViewModel
 
             Title = Business.Name;
             _labels = CategoryLabels.Resolve(Business.Category);
-            _travelMinutes = await ReadTravelMinutesAsync();
 
             await RefreshAsync();
 
@@ -219,20 +210,6 @@ public partial class ConfirmationPageViewModel : BaseViewModel
                 await HandleExceptionAsync(ex);
             }
         });
-    public async Task<int?> ReadTravelMinutesAsync()
-    {
-        try
-        {
-            var stored = await SecureStorageService.GetAsync(TravelMinutesStorageKey);
-            return int.TryParse(stored, out var minutes) && minutes > 0 ? minutes : null;
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
-            return null;
-        }
-    }
-
     // operator_availability is per operator, so the business's trading hours are the union across
     // the ones on the books. Fetched concurrently — a shop has a handful of operators, not hundreds.
     public async Task RefreshMyStatusAsync()
@@ -302,17 +279,6 @@ public partial class ConfirmationPageViewModel : BaseViewModel
         var turnAt = LocalTime.Now.AddMinutes(minutes);
         TicketTurnText = turnAt.ToString("HH:mm");
 
-        if (_travelMinutes is { } travel && !IsBeingServed)
-        {
-            TicketLeaveText = turnAt.AddMinutes(-travel).ToString("HH:mm");
-            TicketTravelNote = $"{travel} min travel";
-        }
-        else
-        {
-            TicketLeaveText = string.Empty;
-            TicketTravelNote = string.Empty;
-        }
-
         // Compared in UTC so the ring never depends on how the JSON reader happened to tag the kind.
         var joinedUtc = MyStatus.JoinedAt.Kind == DateTimeKind.Unspecified
             ? DateTime.SpecifyKind(MyStatus.JoinedAt, DateTimeKind.Utc)
@@ -331,7 +297,6 @@ public partial class ConfirmationPageViewModel : BaseViewModel
             });
         }
 
-        OnPropertyChanged(nameof(ShowTicketLeaveText));
         OnPropertyChanged(nameof(IsBeingServed));
     }
     public void RefreshBookingConfirmation()
@@ -346,8 +311,7 @@ public partial class ConfirmationPageViewModel : BaseViewModel
         BookingEndsText = end.ToString("HH:mm");
         BookingOperatorText = ActiveBooking.OperatorName;
         BookingServiceText = ActiveBooking.ServiceName;
-        BookingPriceText = ServiceRows
-            .FirstOrDefault(s => s.Name == ActiveBooking.ServiceName)?.PriceText ?? string.Empty;
+        BookingPriceText = ActiveBooking.PriceText;
 
         BookingPendingBlurb = ActiveBooking.Status == "pending"
             ? $"{ActiveBooking.OperatorName} needs to confirm. You'll get a notification — usually within an hour during trading."

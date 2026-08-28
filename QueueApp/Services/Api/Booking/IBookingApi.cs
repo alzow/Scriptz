@@ -32,7 +32,7 @@ public interface IBookingApi
     [Post("/rpc/set_booking_progress")]
     Task<BookingResponse> SetBookingProgressAsync([Body] SetBookingProgressRequest request);
 
-    [Get("/bookings?select=id,starts_at,ends_at,status,operator:operators(display_name),service:services(name),progress_status&order=created_at.desc&limit=5")]
+    [Get("/bookings?select=id,starts_at,ends_at,status,operator:operators(display_name),service:services(name,price_cents),progress_status&order=created_at.desc&limit=5")]
     Task<List<MyBookingSummaryResponse>> GetMyBookingsAsync(
         [AliasAs("business_id")] string businessId,
         [AliasAs("customer_id")] string customerId);
