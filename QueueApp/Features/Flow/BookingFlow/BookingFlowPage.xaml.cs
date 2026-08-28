@@ -1,10 +1,9 @@
-using QueueApp.Features.Flow;
 
-namespace QueueApp.Features.QueueFlow;
+namespace QueueApp.Features.Flow.BookingFlow;
 
-public partial class QueueFlowPage : ContentPage
+public partial class BookingFlowPage : ContentPage
 {
-    public QueueFlowPage()
+    public BookingFlowPage()
     {
         InitializeComponent();
     }

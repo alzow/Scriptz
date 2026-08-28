@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using MPowerKit.Navigation;
 using QueueApp.Constants;
 using QueueApp.Framework.Base;
+using QueueApp.Framework.Navigation;
 using QueueApp.Shared.Domain;
 using QueueApp.Shared.Domain.Models;
 using QueueApp.Services.Api.Booking;
@@ -16,7 +17,7 @@ using QueueApp.Services.Popup;
 using QueueApp.Services.Realtime;
 using QueueApp.Services.Storage;
 
-namespace QueueApp.Features.Confirmation;
+namespace QueueApp.Features.Flow.Confirmation;
 
 // What happened after a submit, and what you can still do about it: the live queue ticket, or the
 // booking the shop has yet to confirm. It owns this outright — the business landing keeps only a
@@ -181,12 +182,17 @@ public partial class ConfirmationPageViewModel : BaseViewModel
         OnPropertyChanged(nameof(HasNothing));
     }
 
+    // Back from here rebuilds the tabs rather than popping. Submitting replaced the stack with this
+    // page precisely so there is no committed flow behind it, and reaching it from the business
+    // landing's strip is the same journey a step later — either way the way out is the tabs.
     [RelayCommand]
     public async Task DoneAsync()
     {
         try
         {
-            await NavigationService.GoBackAsync();
+            var (ownsBusiness, mode) = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
+            await NavigationService.NavigateAsync(
+                MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: ownsBusiness, manageMode: mode));
         }
         catch (Exception ex)
         {

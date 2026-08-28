@@ -1,7 +1,6 @@
 using MPowerKit;
 using MPowerKit.Navigation;
 using QueueApp.Constants;
-using QueueApp.Features.Flow;
 using QueueApp.Services.Api.Booking;
 using QueueApp.Services.Api.Business;
 using QueueApp.Services.Api.Operator;
@@ -12,13 +11,13 @@ using QueueApp.Services.Auth;
 using QueueApp.Services.Popup;
 using QueueApp.Services.Storage;
 
-namespace QueueApp.Features.BookingFlow;
+namespace QueueApp.Features.Flow.QueueFlow;
 
-// Operator, service, day, time, review. Everything but the step list and where it lands
-// afterwards is the queue flow too, so it all lives on the base.
-public partial class BookingFlowPageViewModel : FlowPageViewModelBase
+// Operator, service, review. No day or time: a walk-in queue has no slots to pick from, and
+// FlowStepEngine leaves those steps out rather than showing them skipped.
+public partial class QueueFlowPageViewModel : FlowPageViewModelBase
 {
-    public BookingFlowPageViewModel(
+    public QueueFlowPageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
         IBusinessService businessService,
@@ -35,24 +34,11 @@ public partial class BookingFlowPageViewModel : FlowPageViewModelBase
     {
     }
 
-    // Submitting replaces this page rather than stacking on it: backing out of the confirmation
-    // should land on the business, not on a flow that has already been committed.
-    //
-    // The shop's own booking has no confirmation to show — the row it just created is already on
-    // the agenda underneath, so the pop is the whole answer.
     public override async Task OnSubmittedAsync()
     {
         try
         {
-            await NavigationService.GoBackAsync();
-
-            if (IsOperatorFlow)
-                return;
-
-            await NavigationService.NavigateAsync(NavigationPaths.ConfirmationPage, new NavigationParameters
-            {
-                { NavigationKeys.BusinessId, BusinessId },
-            });
+            await GoToConfirmationAsync();
         }
         catch (Exception ex)
         {

@@ -1,6 +1,6 @@
 using System.Windows.Input;
 
-namespace QueueApp.Features.Confirmation.Helpers;
+namespace QueueApp.Features.Flow.Confirmation.Helpers;
 
 public partial class BookingPendingSectionView : ContentView
 {

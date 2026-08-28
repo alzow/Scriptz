@@ -1,10 +1,12 @@
 using System.Collections.ObjectModel;
 using System.Net;
 using CommunityToolkit.Mvvm.Input;
+using MPowerKit;
 using MPowerKit.Navigation;
 using Refit;
 using QueueApp.Constants;
 using QueueApp.Framework.Base;
+using QueueApp.Framework.Navigation;
 using QueueApp.Shared.Domain;
 using QueueApp.Shared.Domain.Models;
 using QueueApp.Services.Api.Booking;
@@ -252,13 +254,48 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
 
     // Android's hardware back has to mean the same thing as the on-screen one, or it pops the whole
     // page from step three. Returns true when it consumed the press.
+    //
+    // Step 0 is only left to the platform for the customer, whose flow sits on top of the business
+    // it came from. The operator's was pushed as a new root away from the tabs, so a plain pop has
+    // nowhere to land and CloseFlow has to do it.
     public bool TryHandleHardwareBack()
     {
         if (CurrentStepIndex <= 0)
-            return false;
+        {
+            if (!IsOperatorFlow)
+                return false;
+
+            CloseFlow();
+            return true;
+        }
 
         FlowBack();
         return true;
+    }
+
+    // One absolute navigation, not a pop followed by a push. Popping destroys this page, and the
+    // push that followed it was being issued from a view model whose page had already gone — which
+    // is why the confirmation never appeared. Replacing the stack also means back from the
+    // confirmation cannot walk into a flow that has already been committed.
+    public Task GoToConfirmationAsync() =>
+        NavigationService.NavigateAsync(
+            $"/NavigationPage/{NavigationPaths.ConfirmationPage}",
+            new NavigationParameters { { NavigationKeys.BusinessId, BusinessId } });
+
+    // The tabs are rebuilt rather than popped back to: leaving them is an absolute navigation that
+    // dropped the tabbed page, so there is no stack entry left to return to.
+    public async Task ReturnToTabsAsync(string? selectTab = null)
+    {
+        try
+        {
+            var (ownsBusiness, mode) = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
+            await NavigationService.NavigateAsync(
+                MainTabbedNavigation.BuildMainTabbedUri(ownsBusiness, mode, selectTab));
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
 
     protected override Task HandleExceptionAsync(Exception exception)
@@ -303,7 +340,11 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
         try
         {
             ResetFlowState();
-            _ = NavigationService.GoBackAsync();
+
+            if (IsOperatorFlow)
+                _ = ReturnToTabsAsync(NavigationPaths.BookingAgendaPage);
+            else
+                _ = NavigationService.GoBackAsync();
         }
         catch (Exception ex)
         {

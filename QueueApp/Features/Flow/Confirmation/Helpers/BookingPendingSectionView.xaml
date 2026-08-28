@@ -4,7 +4,7 @@
              xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
              x:Name="Root"
              VerticalOptions="Start"
-             x:Class="QueueApp.Features.Confirmation.Helpers.BookingPendingSectionView">
+             x:Class="QueueApp.Features.Flow.Confirmation.Helpers.BookingPendingSectionView">
 
     <VerticalStackLayout Spacing="0" IsVisible="{Binding HasActiveBooking, Source={x:Reference Root}}">
 

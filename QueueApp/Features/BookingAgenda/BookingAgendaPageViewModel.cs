@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using MPowerKit;
 using MPowerKit.Navigation;
 using QueueApp.Constants;
@@ -8,6 +9,7 @@ using QueueApp.Features.BookingAgenda.Sheets;
 using QueueApp.Shared.Domain;
 using QueueApp.Framework.Base;
 using QueueApp.Framework.Extensions;
+using QueueApp.Framework.Messages;
 using QueueApp.Services.Api.Booking;
 using QueueApp.Services.Api.Booking.Models;
 using QueueApp.Services.Api.Business;
@@ -84,6 +86,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     private readonly IServiceOfferingsService _serviceOfferingsService;
     private readonly IQueueRealtimeService _realtimeService;
     private readonly IQueuePopupService _popupService;
+    private readonly IMessenger _messenger;
 
     public BookingAgendaPageViewModel(
         INavigationService navigationService,
@@ -93,7 +96,8 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         IOperatorService operatorService,
         IServiceOfferingsService serviceOfferingsService,
         IQueueRealtimeService realtimeService,
-        IQueuePopupService popupService)
+        IQueuePopupService popupService,
+        IMessenger messenger)
         : base(navigationService, secureStorageService)
     {
         _businessService = businessService;
@@ -102,6 +106,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         _serviceOfferingsService = serviceOfferingsService;
         _realtimeService = realtimeService;
         _popupService = popupService;
+        _messenger = messenger;
     }
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
@@ -146,8 +151,8 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
 
             StartTicking();
 
-            // Coming back from the booking flow: whatever it added is not in Rows yet, and realtime
-            // was unsubscribed while this page was off-screen, so nothing else would put it there.
+            // Coming back from a page pushed over this one — settings, say. Realtime was
+            // unsubscribed the whole time it was up, so nothing has been putting changes into Rows.
             if (_hasAppeared)
                 await RefreshAsync();
 
@@ -858,7 +863,11 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
             if (preferredStart is { } start)
                 parameters.Add(NavigationKeys.PreferredStart, start);
 
-            await NavigationService.NavigateAsync(NavigationPaths.BookingFlowPage, parameters);
+            // The agenda is a tab, so pushing from here would bury the flow inside the tab's own
+            // stack with the tab bar still on screen. The flow gets the whole window, and comes
+            // back by rebuilding the tabs on the agenda.
+            _messenger.Send(new NavigateAwayFromTabsMessage(
+                $"/NavigationPage/{NavigationPaths.BookingFlowPage}", parameters, true));
         }
         catch (Exception ex)
         {

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:vm="clr-namespace:QueueApp.Features.Confirmation"
-             xmlns:helpers="clr-namespace:QueueApp.Features.Confirmation.Helpers"
+             xmlns:vm="clr-namespace:QueueApp.Features.Flow.Confirmation"
+             xmlns:helpers="clr-namespace:QueueApp.Features.Flow.Confirmation.Helpers"
              xmlns:browse="clr-namespace:QueueApp.Features.CategoryPicker.Helpers"
              xmlns:topbar="clr-namespace:QueueApp.Shared.Templates.TopBar"
              x:Name="Root"
-             x:Class="QueueApp.Features.Confirmation.ConfirmationPage"
+             x:Class="QueueApp.Features.Flow.Confirmation.ConfirmationPage"
              x:DataType="vm:ConfirmationPageViewModel"
              Style="{StaticResource NavigationPageStyle}">
 

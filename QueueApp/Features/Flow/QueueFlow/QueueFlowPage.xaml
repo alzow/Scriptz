@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:vm="clr-namespace:QueueApp.Features.BookingFlow"
+             xmlns:vm="clr-namespace:QueueApp.Features.Flow.QueueFlow"
              xmlns:flow="clr-namespace:QueueApp.Features.Flow.Helpers"
              xmlns:topbar="clr-namespace:QueueApp.Shared.Templates.TopBar"
              x:Name="Root"
-             x:Class="QueueApp.Features.BookingFlow.BookingFlowPage"
-             x:DataType="vm:BookingFlowPageViewModel"
+             x:Class="QueueApp.Features.Flow.QueueFlow.QueueFlowPage"
+             x:DataType="vm:QueueFlowPageViewModel"
              Style="{StaticResource NavigationPageStyle}">
 
     <Grid BackgroundColor="{StaticResource DeepBackground}"
@@ -44,26 +44,6 @@
                         ShowServiceStep="{Binding ShowServiceStep}"
                         SelectServiceCommand="{Binding SelectServiceCommand}"/>
 
-                <flow:DayStepView
-                        IsVisible="{Binding ShowDayStep}"
-                        ShowDayStep="{Binding ShowDayStep}"
-                        DayChoices="{Binding DayChoices}"
-                        IsLoadingDays="{Binding IsLoadingDays}"
-                        SelectedDay="{Binding SelectedDay}"
-                        ReviewOperatorLabel="{Binding ReviewOperatorLabel}"
-                        SelectedOperatorChoice="{Binding SelectedOperatorChoice}"
-                        DayFineprint="{Binding DayFineprint}"
-                        SelectDayCommand="{Binding SelectDayCommand}"/>
-
-                <flow:TimeStepView
-                        IsVisible="{Binding ShowTimeStep}"
-                        ShowTimeStep="{Binding ShowTimeStep}"
-                        IsLoadingSlots="{Binding IsLoadingSlots}"
-                        Morning="{Binding Morning}"
-                        Afternoon="{Binding Afternoon}"
-                        Evening="{Binding Evening}"
-                        SelectSlotCommand="{Binding SelectSlotCommand}"/>
-
                 <flow:ReviewStepView
                         IsVisible="{Binding ShowReviewStep}"
                         ShowReviewStep="{Binding ShowReviewStep}"
@@ -76,10 +56,6 @@
                         ReviewWhenText="{Binding ReviewWhenText}"
                         ShowReviewWhen="{Binding ShowReviewWhen}"
                         ShowReviewQueueLines="{Binding ShowReviewQueueLines}"
-                        ShowCustomerCapture="{Binding ShowCustomerCapture}"
-                        CustomerName="{Binding CustomerName}"
-                        CustomerPhone="{Binding CustomerPhone}"
-                        NoteLabelText="{Binding NoteLabelText}"
                         BookingNote="{Binding BookingNote}"/>
 
             </Grid>
