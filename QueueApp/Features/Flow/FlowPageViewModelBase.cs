@@ -277,8 +277,8 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
     // push that followed it was being issued from a view model whose page had already gone — which
     // is why the confirmation never appeared. Replacing the stack also means back from the
     // confirmation cannot walk into a flow that has already been committed.
-    public Task GoToConfirmationAsync() =>
-        NavigationService.NavigateAsync(
+    public async Task GoToConfirmationAsync() =>
+        await NavigationService.NavigateAsync(
             $"/NavigationPage/{NavigationPaths.ConfirmationPage}",
             new NavigationParameters { { NavigationKeys.BusinessId, BusinessId } });
 
