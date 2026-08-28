@@ -19,9 +19,7 @@ public sealed class AgendaRow : ObservableObject
 
     public AgendaBookingResponse? Booking { get; init; }
 
-    public bool IsBooking => Kind == AgendaRowKind.Booking;
     public bool IsGap => Kind == AgendaRowKind.Gap;
-    public bool IsBlocked => Kind == AgendaRowKind.Blocked;
     public bool IsNotTappable => Kind == AgendaRowKind.Blocked;
 
     public string TimeText { get; init; } = string.Empty;
