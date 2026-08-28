@@ -36,6 +36,20 @@ public partial class ReviewStepView : ContentView
         nameof(BookingNote), typeof(string), typeof(ReviewStepView), string.Empty,
         defaultBindingMode: BindingMode.TwoWay);
 
+    public static readonly BindableProperty NoteLabelTextProperty = BindableProperty.Create(
+        nameof(NoteLabelText), typeof(string), typeof(ReviewStepView), "ANYTHING THEY SHOULD KNOW — OPTIONAL");
+
+    public static readonly BindableProperty ShowCustomerCaptureProperty = BindableProperty.Create(
+        nameof(ShowCustomerCapture), typeof(bool), typeof(ReviewStepView), false);
+
+    public static readonly BindableProperty CustomerNameProperty = BindableProperty.Create(
+        nameof(CustomerName), typeof(string), typeof(ReviewStepView), string.Empty,
+        defaultBindingMode: BindingMode.TwoWay);
+
+    public static readonly BindableProperty CustomerPhoneProperty = BindableProperty.Create(
+        nameof(CustomerPhone), typeof(string), typeof(ReviewStepView), string.Empty,
+        defaultBindingMode: BindingMode.TwoWay);
+
     public bool ShowReviewStep
     {
         get => (bool)GetValue(ShowReviewStepProperty);
@@ -100,6 +114,30 @@ public partial class ReviewStepView : ContentView
     {
         get => (string)GetValue(ReviewTurnTextProperty);
         set => SetValue(ReviewTurnTextProperty, value);
+    }
+
+    public string NoteLabelText
+    {
+        get => (string)GetValue(NoteLabelTextProperty);
+        set => SetValue(NoteLabelTextProperty, value);
+    }
+
+    public bool ShowCustomerCapture
+    {
+        get => (bool)GetValue(ShowCustomerCaptureProperty);
+        set => SetValue(ShowCustomerCaptureProperty, value);
+    }
+
+    public string CustomerName
+    {
+        get => (string)GetValue(CustomerNameProperty);
+        set => SetValue(CustomerNameProperty, value);
+    }
+
+    public string CustomerPhone
+    {
+        get => (string)GetValue(CustomerPhoneProperty);
+        set => SetValue(CustomerPhoneProperty, value);
     }
 
     public ReviewStepView()

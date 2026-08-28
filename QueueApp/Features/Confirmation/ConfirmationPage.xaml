@@ -4,7 +4,7 @@
              xmlns:vm="clr-namespace:QueueApp.Features.Confirmation"
              xmlns:helpers="clr-namespace:QueueApp.Features.Confirmation.Helpers"
              xmlns:browse="clr-namespace:QueueApp.Features.CategoryPicker.Helpers"
-             xmlns:bdHelpers="clr-namespace:QueueApp.Features.BusinessDetail.Helpers"
+             xmlns:topbar="clr-namespace:QueueApp.Shared.Templates.TopBar"
              x:Name="Root"
              x:Class="QueueApp.Features.Confirmation.ConfirmationPage"
              x:DataType="vm:ConfirmationPageViewModel"
@@ -13,7 +13,7 @@
     <Grid BackgroundColor="{StaticResource DeepBackground}"
           RowDefinitions="Auto,*">
 
-        <bdHelpers:TopBarView Grid.Row="0"
+        <topbar:TopBarView Grid.Row="0"
                 FlowTitle="{Binding TicketHeadline}"
                 IsFlowActive="True"
                 TicketHeadline="{Binding TicketHeadline}"

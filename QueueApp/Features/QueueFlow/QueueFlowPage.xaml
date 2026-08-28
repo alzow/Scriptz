@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.QueueFlow"
              xmlns:flow="clr-namespace:QueueApp.Features.Flow.Helpers"
-             xmlns:bdHelpers="clr-namespace:QueueApp.Features.BusinessDetail.Helpers"
+             xmlns:topbar="clr-namespace:QueueApp.Shared.Templates.TopBar"
              x:Name="Root"
              x:Class="QueueApp.Features.QueueFlow.QueueFlowPage"
              x:DataType="vm:QueueFlowPageViewModel"
@@ -12,7 +12,7 @@
     <Grid BackgroundColor="{StaticResource DeepBackground}"
           RowDefinitions="Auto,*,Auto">
 
-        <bdHelpers:TopBarView Grid.Row="0"
+        <topbar:TopBarView Grid.Row="0"
                 FlowTitle="{Binding FlowTitle}"
                 IsFlowActive="True"
                 BusinessName="{Binding BusinessName}"

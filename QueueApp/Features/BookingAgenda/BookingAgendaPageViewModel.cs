@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
+using MPowerKit;
 using MPowerKit.Navigation;
 using QueueApp.Constants;
 using QueueApp.Features.BookingAgenda.Models;
@@ -62,6 +63,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     private readonly SemaphoreSlim _loadLock = new(1, 1);
 
     private IDispatcherTimer? _tickTimer;
+    private bool _hasAppeared;
 
     private Guid _businessId;
     private Guid? _filterOperatorId;
@@ -143,6 +145,13 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
                 table: "bookings");
 
             StartTicking();
+
+            // Coming back from the booking flow: whatever it added is not in Rows yet, and realtime
+            // was unsubscribed while this page was off-screen, so nothing else would put it there.
+            if (_hasAppeared)
+                await RefreshAsync();
+
+            _hasAppeared = true;
         }
         catch (Exception ex)
         {
@@ -825,6 +834,8 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         }
     }
 
+    // The same page the customer books on, in operator mode. A sheet here would have meant a second
+    // slot engine, a second set of day counts and a second thing to fix every time either changed.
     public async Task OpenAddBookingAsync(DateTimeOffset? preferredStart = null)
     {
         try
@@ -837,35 +848,17 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
                 return;
             }
 
-            var sheet = new AddBookingSheet(
-                _popupService, _bookingService, _businessId, SelectedDate, _services, _operators, _labels)
+            var parameters = new NavigationParameters
             {
-                PreferredStart = preferredStart,
+                { NavigationKeys.BusinessId, _businessId },
+                { NavigationKeys.IsOperatorFlow, true },
+                { NavigationKeys.PreferredDate, SelectedDate },
             };
 
-            await _popupService.ShowSheetAsync(sheet);
-            await sheet.LoadSlotsAsync();
+            if (preferredStart is { } start)
+                parameters.Add(NavigationKeys.PreferredStart, start);
 
-            var result = await sheet.Completion;
-
-            if (!result.Confirmed || result.Service is null)
-                return;
-
-            await _bookingService.CreateOperatorBookingAsync(new CreateOperatorBookingRequest
-            {
-                BusinessId = _businessId,
-                OperatorId = result.OperatorId,
-                ServiceId = result.Service.Id,
-                StartsAt = result.StartsAt,
-                EndsAt = result.EndsAt,
-                Status = BookingStatuses.Confirmed,
-                Note = result.Note,
-                CustomerName = result.CustomerName,
-                CustomerPhone = result.Phone,
-                Details = new BookingDetails { CreatedBy = "operator" },
-            });
-
-            await RefreshAsync();
+            await NavigationService.NavigateAsync(NavigationPaths.BookingFlowPage, parameters);
         }
         catch (Exception ex)
         {

@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Name="Root"
              VerticalOptions="Start"
-             x:Class="QueueApp.Features.BusinessDetail.Helpers.TopBarView">
+             x:Class="QueueApp.Shared.Templates.TopBar.TopBarView">
 
     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="20,14,20,6">
 

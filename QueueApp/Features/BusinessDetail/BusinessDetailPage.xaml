@@ -2,10 +2,8 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.BusinessDetail"
-             xmlns:helpers="clr-namespace:QueueApp.Features.CategoryPicker.Helpers"
              xmlns:bdHelpers="clr-namespace:QueueApp.Features.BusinessDetail.Helpers"
-             xmlns:models="clr-namespace:QueueApp.Shared.Domain.Models"
-             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
+             xmlns:topbar="clr-namespace:QueueApp.Shared.Templates.TopBar"
              x:Class="QueueApp.Features.BusinessDetail.BusinessDetailPage"
              x:DataType="vm:BusinessDetailPageViewModel"
              Title="{Binding BusinessName}"
@@ -15,7 +13,7 @@
     <Grid RowDefinitions="Auto,*">
 
         <!-- ================= TOP BAR — flow and confirmation only ================= -->
-        <bdHelpers:TopBarView Grid.Row="0"
+        <topbar:TopBarView Grid.Row="0"
                 IsVisible="False"
                 BusinessName="{Binding BusinessName}"
                 GoBackCommand="{Binding GoBackCommand}"/>

@@ -18,8 +18,9 @@ Four things turned out **not** to need SQL:
   `create_booking` is the customer path and needs a real `customer_id` a phone booking hasn't got.
 - **Additional details** (vehicle registration, what's actually wrong) use the `bookings.note`
   column, which already exists, and `create_booking` / `create_booking_any` already accept it as
-  `p_note`. Captured on the customer's review step and on the operator's add-booking sheet, and
-  read back to the operator in the booking actions sheet.
+  `p_note`. Captured on the review step — which the shop now walks too, since "Add a booking"
+  pushes the customer's booking flow in operator mode instead of a sheet of its own — and read
+  back to the operator in the booking actions sheet.
 - **Cancellation reasons** live in `bookings.details` under `cancellation_reason`, which stays a
   jsonb key rather than becoming a column: unlike a name or a number, nothing queries or joins on
   it. `cancel_booking`

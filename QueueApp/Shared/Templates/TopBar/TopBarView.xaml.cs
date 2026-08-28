@@ -1,6 +1,6 @@
 using System.Windows.Input;
 
-namespace QueueApp.Features.BusinessDetail.Helpers;
+namespace QueueApp.Shared.Templates.TopBar;
 
 public partial class TopBarView : ContentView
 {

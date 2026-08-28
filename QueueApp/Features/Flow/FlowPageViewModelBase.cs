@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
+using System.Net;
 using CommunityToolkit.Mvvm.Input;
 using MPowerKit.Navigation;
+using Refit;
 using QueueApp.Constants;
 using QueueApp.Framework.Base;
 using QueueApp.Shared.Domain;
@@ -10,6 +12,7 @@ using QueueApp.Services.Api.Booking.Models;
 using QueueApp.Services.Api.Business;
 using QueueApp.Services.Api.Business.Models;
 using QueueApp.Services.Api.Operator;
+using QueueApp.Services.Api.Operator.Models;
 using QueueApp.Services.Api.Queue;
 using QueueApp.Services.Api.Queue.Models;
 using QueueApp.Services.Api.ServiceOfferings;
@@ -27,11 +30,21 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
     public bool IsQueueMode => Business?.Mode == FlowStepEngine.QueueMode;
     public bool IsBookingMode => Business?.Mode == FlowStepEngine.BookingMode;
 
+    // The shop taking a booking at the counter walks the same steps against the same slot engine.
+    // What differs is who it's for: there is no account behind it, so the name and phone are typed
+    // in, and the row is inserted already confirmed instead of going through create_booking.
+    public bool IsOperatorFlow { get; set; }
+    public bool IsSlotFlow => IsBookingMode || IsOperatorFlow;
+    public string CustomerName { get; set; } = string.Empty;
+    public string CustomerPhone { get; set; } = string.Empty;
+
     // The three top-level states are mutually exclusive: exactly one of these renders at a time.
     public string BusinessName => Business?.Name ?? string.Empty;
     public ObservableCollection<ServiceChoiceItem> ServiceRows { get; } = new();
     public bool HasServices => ServiceRows.Count > 0;
-    public string FlowTitle => IsBookingMode ? "Book a slot" : "Join the queue";
+    public string FlowTitle => IsOperatorFlow
+        ? "Add a booking"
+        : IsBookingMode ? "Book a slot" : "Join the queue";
     public ObservableCollection<RailSegment> RailSegments { get; } = new();
     public ObservableCollection<CrumbChip> Crumbs { get; } = new();
     public bool HasCrumbs => Crumbs.Count > 0;
@@ -79,13 +92,16 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
     public string ReviewPositionText { get; set; } = string.Empty;
     public string ReviewTurnText { get; set; } = string.Empty;
     public string ReviewWhenText { get; set; } = string.Empty;
-    public bool ShowReviewWhen => IsBookingMode;
-    public bool ShowReviewQueueLines => !IsBookingMode;
+    public bool ShowReviewWhen => IsSlotFlow;
+    public bool ShowReviewQueueLines => !IsSlotFlow;
+    public bool ShowCustomerCapture => IsOperatorFlow;
+    public string NoteLabelText => IsOperatorFlow
+        ? "ADDITIONAL DETAILS — OPTIONAL"
+        : "ANYTHING THEY SHOULD KNOW — OPTIONAL";
 
     // Free text the customer adds before committing — a registration, what is actually wrong.
     // Stored in bookings.note, which create_booking already accepts as p_note.
     public string BookingNote { get; set; } = string.Empty;
-    private readonly SemaphoreSlim _loadLock = new(1, 1);
     private readonly Dictionary<(Guid OperatorId, Guid ServiceId), Dictionary<DateTime, int>> _dayCountCache = new();
     private readonly Dictionary<DateTime, List<SlotResponse>> _slotCache = new();
     private Guid _businessId;
@@ -97,6 +113,11 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
     private List<OperatorResponse> _selectableOperators = new();
     private List<FlowStep> _steps = new();
     private CancellationTokenSource? _slotDebounce;
+
+    // Where the agenda was standing when it handed over — the day it was showing, and the gap that
+    // was tapped. Both are one-shot: once the matching chip is selected they stop steering anything.
+    private DateTime? _preferredDate;
+    private DateTimeOffset? _preferredStart;
 
     // Mode and page state
     private readonly IBusinessService _businessService;
@@ -141,6 +162,19 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
                 ? (Guid)idObj
                 : throw new InvalidOperationException("A flow page requires a 'businessId' parameter.");
 
+            if (parameters is not null)
+            {
+                if (parameters.TryGetValue(NavigationKeys.IsOperatorFlow, out var operatorFlagObj))
+                    IsOperatorFlow = operatorFlagObj is true;
+
+                if (parameters.TryGetValue(NavigationKeys.PreferredDate, out var dateObj) && dateObj is DateTime date)
+                    _preferredDate = date.Date;
+
+                if (parameters.TryGetValue(NavigationKeys.PreferredStart, out var startObj)
+                    && startObj is DateTimeOffset start)
+                    _preferredStart = start;
+            }
+
             IsLoading = true;
 
             Business = await _businessService.GetBusinessAsync(_businessId)
@@ -150,7 +184,7 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
             _labels = CategoryLabels.Resolve(Business.Category);
 
             _allOperators = await _operatorService.GetOperatorsAsync(_businessId);
-            _selectableOperators = FlowStepEngine.SelectableOperators(_allOperators);
+            _selectableOperators = FlowStepEngine.SelectableOperators(_allOperators, IsOperatorFlow);
 
             var services = await _serviceOfferingsService.GetActiveServicesAsync(_businessId);
             ServiceRows.Clear();
@@ -198,7 +232,7 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
             if (Business is null)
                 return;
 
-            _steps = FlowStepEngine.BuildSteps(Business, _selectableOperators);
+            _steps = FlowStepEngine.BuildSteps(Business, _selectableOperators, IsOperatorFlow);
 
             BuildOperatorChoices();
 
@@ -268,17 +302,25 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
     {
         try
         {
-            BookingNote = string.Empty;
-            ShowOperatorStep = ShowServiceStep = ShowDayStep = ShowTimeStep = ShowReviewStep = false;
-            Crumbs.Clear();
-            OnPropertyChanged(nameof(HasCrumbs));
-
+            ResetFlowState();
             _ = NavigationService.GoBackAsync();
         }
         catch (Exception ex)
         {
             _ = HandleExceptionAsync(ex);
         }
+    }
+
+    // Submitting does not go through CloseFlow: OnSubmittedAsync owns the navigation from there, and
+    // popping twice would take the whole stack with it.
+    public void ResetFlowState()
+    {
+        BookingNote = string.Empty;
+        CustomerName = string.Empty;
+        CustomerPhone = string.Empty;
+        ShowOperatorStep = ShowServiceStep = ShowDayStep = ShowTimeStep = ShowReviewStep = false;
+        Crumbs.Clear();
+        OnPropertyChanged(nameof(HasCrumbs));
     }
     [RelayCommand]
     public async Task NextAsync()
@@ -355,14 +397,16 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
         switch (step)
         {
             case FlowStep.Operator:
-                StepHeading = _labels.StepHeading;
-                StepSubheading = IsBookingMode
-                    ? $"Availability is per {_labels.Noun.ToLowerInvariant()}, so this decides which times you'll see."
-                    : $"Pick a {_labels.Noun.ToLowerInvariant()}, or take whoever's free first.";
+                StepHeading = IsOperatorFlow ? $"Which {_labels.Noun.ToLowerInvariant()}?" : _labels.StepHeading;
+                StepSubheading = IsOperatorFlow
+                    ? $"Availability is per {_labels.Noun.ToLowerInvariant()}, so this decides which times are free."
+                    : IsBookingMode
+                        ? $"Availability is per {_labels.Noun.ToLowerInvariant()}, so this decides which times you'll see."
+                        : $"Pick a {_labels.Noun.ToLowerInvariant()}, or take whoever's free first.";
                 break;
             case FlowStep.Service:
-                StepHeading = "What service do you need?";
-                StepSubheading = IsBookingMode
+                StepHeading = IsOperatorFlow ? "What are they in for?" : "What service do you need?";
+                StepSubheading = IsSlotFlow
                     ? "This helps us match the right appointment length."
                     : "This helps us estimate how long you'll be in the queue.";
                 break;
@@ -377,10 +421,14 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
                     : $"{SelectedServiceRow.Name} runs {SelectedServiceRow.DurationText}. Times shown can fit it.";
                 break;
             default:
-                StepHeading = IsBookingMode ? "Ready to request?" : "Ready to join?";
-                StepSubheading = IsBookingMode
-                    ? "The shop confirms this before it's final. You can cancel any time."
-                    : "You can leave the queue any time.";
+                StepHeading = IsOperatorFlow
+                    ? "Who's it for?"
+                    : IsBookingMode ? "Ready to request?" : "Ready to join?";
+                StepSubheading = IsOperatorFlow
+                    ? "Added by you, so it's confirmed straight away. No account means no reminder — take a number if you want to call them."
+                    : IsBookingMode
+                        ? "The shop confirms this before it's final. You can cancel any time."
+                        : "You can leave the queue any time.";
                 break;
         }
     }
@@ -434,16 +482,18 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
                 IsFooterCtaEnabled = SelectedSlot is not null;
                 break;
             default:
-                FooterLabel = IsBookingMode ? "Requesting" : "Joining as";
-                FooterValue = IsBookingMode ? BuildSlotRangeText() : ReviewPositionText;
-                IsFooterCtaEnabled = IsBookingMode
+                FooterLabel = IsOperatorFlow
+                    ? string.IsNullOrWhiteSpace(CustomerName) ? "Needs a name" : CustomerName.Trim()
+                    : IsBookingMode ? "Requesting" : "Joining as";
+                FooterValue = IsSlotFlow ? BuildSlotRangeText() : ReviewPositionText;
+                IsFooterCtaEnabled = IsSlotFlow
                     ? SelectedServiceRow is not null && SelectedSlot is not null
                     : SelectedServiceRow is not null;
                 break;
         }
 
         FooterCtaText = isLast
-            ? IsBookingMode ? "Request booking" : "Join queue"
+            ? IsOperatorFlow ? "Add booking" : IsBookingMode ? "Request booking" : "Join queue"
             : "Next";
     }
     public string BuildSlotRangeText()
@@ -543,9 +593,13 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
     {
         OperatorChoices.Clear();
 
+        // The shop gets no "any available": get_available_slots_any returns a time, not the resource
+        // it belongs to, and an operator-created booking is a direct insert that needs a real
+        // operator_id. So the pooled choice is customer-only, and the shop picks a real resource.
+        //
         // queue_entries.operator_id is nullable, so "any available" is a real first-class choice
-        // here — pinned, tagged, and selected by default so the common path is one tap.
-        if (IsQueueMode)
+        // there — pinned, tagged, and selected by default so the common path is one tap.
+        if (IsQueueMode && !IsOperatorFlow)
         {
             var fastest = QueueSummary.Count > 0 ? QueueSummary.Min(r => r.NewJoinWaitMinutes) : 0;
             var any = new OperatorChoiceItem
@@ -561,7 +615,7 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
             OperatorChoices.Add(any);
             SelectedOperatorChoice = any;
         }
-        else if (IsBookingMode)
+        else if (IsBookingMode && !IsOperatorFlow)
         {
             var any = new OperatorChoiceItem
             {
@@ -625,6 +679,13 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
                         DayOfWeekText = date.ToString("ddd").ToUpperInvariant(),
                         DayNumberText = date.Day.ToString(),
                     });
+                }
+
+                // The agenda hands over the day it was showing, so the shop doesn't re-pick it.
+                if (_preferredDate is { } wanted)
+                {
+                    SelectDay(DayChoices.FirstOrDefault(d => d.Date == wanted));
+                    _preferredDate = null;
                 }
             }
 
@@ -751,6 +812,15 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
         Evening = new SlotPeriod("EVENING", InPeriod(items, 17, 24), EmptyNote(17, 24));
 
         SelectedSlot = null;
+
+        // A tapped gap on the agenda names an exact start. It only survives until it matches once:
+        // changing the resource or the service can move every boundary on the day.
+        if (_preferredStart is { } wanted)
+        {
+            SelectSlot(items.FirstOrDefault(i => i.Slot.SlotStart == wanted));
+            _preferredStart = null;
+        }
+
         RefreshFooter();
     }
     public static List<SlotChoiceItem> InPeriod(IEnumerable<SlotChoiceItem> items, int fromHour, int toHour) =>
@@ -806,7 +876,72 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
 
         OnPropertyChanged(nameof(ReviewOperatorLabel));
     }
-    public Task SubmitAsync() => IsBookingMode ? SubmitBookingAsync() : SubmitJoinAsync();
+    public Task SubmitAsync() => IsOperatorFlow
+        ? SubmitOperatorBookingAsync()
+        : IsBookingMode ? SubmitBookingAsync() : SubmitJoinAsync();
+
+    // PropertyChanged.Fody calls this off the woven setter, so the footer keeps up with the name
+    // being typed on the review step.
+    public void OnCustomerNameChanged() => RefreshFooter();
+
+    // The shop's own booking is a direct insert, not create_booking: there is no customer_id to
+    // supply and nobody left to confirm with, so it goes in already confirmed with whatever name
+    // and number the operator was given.
+    public async Task SubmitOperatorBookingAsync()
+    {
+        if (SelectedServiceRow is null || SelectedSlot is null)
+            return;
+
+        if (SelectedOperatorChoice?.OperatorId is not { } operatorId)
+        {
+            await HandleExceptionAsync(new InvalidOperationException(
+                $"Pick which {_labels.Noun.ToLowerInvariant()} is taking this before adding it."));
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(CustomerName))
+        {
+            await HandleExceptionAsync(new InvalidOperationException(
+                "A name is needed — it's all the agenda has to show for a booking with no account behind it."));
+            return;
+        }
+
+        IsSubmitting = true;
+        try
+        {
+            await _bookingService.CreateOperatorBookingAsync(new CreateOperatorBookingRequest
+            {
+                BusinessId = _businessId,
+                OperatorId = operatorId,
+                ServiceId = SelectedServiceRow.Service.Id,
+                StartsAt = SelectedSlot.Slot.SlotStart,
+                EndsAt = SelectedSlot.Slot.SlotEnd,
+                Status = BookingStatuses.Confirmed,
+                Note = TrimmedBookingNote(),
+                CustomerName = CustomerName.Trim(),
+                CustomerPhone = string.IsNullOrWhiteSpace(CustomerPhone) ? null : CustomerPhone.Trim(),
+                Details = new BookingDetails { CreatedBy = "operator" },
+            });
+
+            ResetFlowState();
+            await OnSubmittedAsync();
+        }
+        catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.Conflict)
+        {
+            await HandleExceptionAsync(new InvalidOperationException(
+                "That slot was just taken — please pick another time."));
+            _slotCache.Clear();
+            await LoadSlotsAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+        finally
+        {
+            IsSubmitting = false;
+        }
+    }
     public async Task SubmitJoinAsync()
     {
         if (SelectedServiceRow is null)
@@ -828,7 +963,7 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
                 customerName,
                 SelectedServiceRow.Service.Id);
 
-            CloseFlow();
+            ResetFlowState();
             await OnSubmittedAsync();
         }
         catch (Exception ex)
@@ -883,7 +1018,7 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
                 });
             }
 
-            CloseFlow();
+            ResetFlowState();
             await OnSubmittedAsync();
         }
         catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.Conflict)
