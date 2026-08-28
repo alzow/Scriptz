@@ -23,10 +23,6 @@
         <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
             <Label Text="{Binding FlowTitle, Source={x:Reference Root}}" Style="{StaticResource lbl15_Bold_TextDark}"
                    IsVisible="{Binding IsFlowActive, Source={x:Reference Root}}"/>
-            <Label Text="{Binding TicketHeadline, Source={x:Reference Root}}" Style="{StaticResource lbl15_Bold_TextDark}"
-                   IsVisible="{Binding IsInQueue, Source={x:Reference Root}}"/>
-            <Label Text="Request sent" Style="{StaticResource lbl15_Bold_TextDark}"
-                   IsVisible="{Binding HasActiveBooking, Source={x:Reference Root}}"/>
             <Label Text="{Binding BusinessName, Source={x:Reference Root}}" Style="{StaticResource lbl11_Bold_White}"
                    TextColor="{StaticResource TextMuted}"/>
         </VerticalStackLayout>

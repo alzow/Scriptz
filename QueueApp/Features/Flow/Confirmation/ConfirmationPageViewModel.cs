@@ -27,6 +27,12 @@ public partial class ConfirmationPageViewModel : BaseViewModel
     public bool IsShowingTicket => IsInQueue;
     public bool IsShowingBooking => ActiveBooking is not null;
     public bool HasNothing => !IsShowingTicket && !IsShowingBooking && !IsLoading;
+
+    // The one line the top bar shows. The ticket card underneath already leads with the position,
+    // so this reading it off a second bar meant "You're 1st in line" twice on the same screen.
+    public string HeaderText => IsShowingTicket
+        ? TicketHeadline
+        : IsShowingBooking ? "Request sent" : "Nothing active";
     public BusinessResponse? Business { get; set; }
     public bool IsLoading { get; set; }
     public bool IsQueueMode => Business?.Mode == FlowStepEngine.QueueMode;
@@ -180,6 +186,7 @@ public partial class ConfirmationPageViewModel : BaseViewModel
         OnPropertyChanged(nameof(IsShowingTicket));
         OnPropertyChanged(nameof(IsShowingBooking));
         OnPropertyChanged(nameof(HasNothing));
+        OnPropertyChanged(nameof(HeaderText));
     }
 
     // Back from here rebuilds the tabs rather than popping. Submitting replaced the stack with this
@@ -278,6 +285,8 @@ public partial class ConfirmationPageViewModel : BaseViewModel
         TicketHeadline = IsBeingServed
             ? $"You're up with {MyStatus.OperatorName}"
             : $"You're {Ordinal(MyStatus.Position)} in line";
+
+        OnPropertyChanged(nameof(HeaderText));
 
         var minutes = (double)(MyWaitMinutes ?? 0);
         TicketWaitText = IsBeingServed ? "now" : $"{minutes:0} min";

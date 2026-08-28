@@ -14,11 +14,8 @@
           RowDefinitions="Auto,*">
 
         <topbar:TopBarView Grid.Row="0"
-                FlowTitle="{Binding TicketHeadline}"
+                FlowTitle="{Binding HeaderText}"
                 IsFlowActive="True"
-                TicketHeadline="{Binding TicketHeadline}"
-                IsInQueue="{Binding IsInQueue}"
-                HasActiveBooking="{Binding IsShowingBooking}"
                 BusinessName="{Binding BusinessName}"
                 GoBackCommand="{Binding DoneCommand}"/>
 
