@@ -55,6 +55,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     private List<ServiceResponse> _services = new();
     private List<QueueEntryResponse> _entries = new();
     private List<QueueSummaryRow> _summary = new();
+    private bool _isVisible;
 
     private readonly IQueueService _queueService;
     private readonly IBusinessService _businessService;
@@ -98,6 +99,26 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
             BusinessName = business?.Name ?? "Queue";
 
             await LoadQueueAsync();
+
+            // Appearing fires before Loaded on Android, so the first pass through
+            // OnAppearingAsync had no business id to filter on and skipped the subscription.
+            await SubscribeRealtimeAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    public async Task SubscribeRealtimeAsync()
+    {
+        try
+        {
+            if (!_isVisible || _businessId == Guid.Empty)
+                return;
+
+            await _realtimeService.SubscribeAsync(this, "business_id", _businessId.ToString(),
+                async () => await MainThread.InvokeOnMainThreadAsync(LoadQueueAsync));
         }
         catch (Exception ex)
         {
@@ -111,8 +132,9 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         {
             await base.OnAppearingAsync();
 
-            await _realtimeService.SubscribeAsync("business_id", _businessId.ToString(),
-                async () => await MainThread.InvokeOnMainThreadAsync(LoadQueueAsync));
+            _isVisible = true;
+
+            await SubscribeRealtimeAsync();
 
             StartTicking();
         }
@@ -127,8 +149,9 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         try
         {
             await base.OnDisappearingAsync();
+            _isVisible = false;
             StopTicking();
-            await _realtimeService.UnsubscribeAsync();
+            await _realtimeService.UnsubscribeAsync(this);
         }
         catch (Exception ex)
         {

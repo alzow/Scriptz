@@ -1,4 +1,5 @@
 using QueueApp.Framework.Base;
+using QueueApp.Services.Api.Profile.Models;
 
 namespace QueueApp.Services.Api.Profile;
 
@@ -14,8 +15,14 @@ public class ProfileService : BaseService, IProfileService
 
     public async Task<string> GetMyDisplayNameAsync(Guid userId)
     {
-        var rows = await ExecuteApiCallAsync(_api.GetProfileByIdAsync($"eq.{userId}"));
-        var name = rows.FirstOrDefault()?.DisplayName;
+        var profile = await GetMyProfileAsync(userId);
+        var name = profile?.DisplayName;
         return string.IsNullOrWhiteSpace(name) ? "Customer" : name;
+    }
+
+    public async Task<ProfileResponse?> GetMyProfileAsync(Guid userId)
+    {
+        var rows = await ExecuteApiCallAsync(_api.GetProfileByIdAsync($"eq.{userId}"));
+        return rows.FirstOrDefault();
     }
 }

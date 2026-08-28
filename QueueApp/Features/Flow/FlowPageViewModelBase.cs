@@ -1173,6 +1173,26 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
             IsSubmitting = false;
         }
     }
+    // create_booking has no name parameter and the shop cannot read the customer's profile, so the
+    // booking lands on the agenda as "Customer". The customer owns the row they just created, so
+    // they write their own name onto it. Best effort: a booking with no name on it beats failing a
+    // booking that already succeeded.
+    public async Task StampBookingCustomerNameAsync(Guid bookingId, Guid userId)
+    {
+        try
+        {
+            var profile = await _profileService.GetMyProfileAsync(userId);
+            if (profile is null || string.IsNullOrWhiteSpace(profile.DisplayName))
+                return;
+
+            await _bookingService.SetCustomerNameAsync(bookingId, profile.DisplayName);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Could not stamp the booking's customer name: {ex.Message}");
+        }
+    }
+
     public async Task SubmitBookingAsync()
     {
         if (SelectedServiceRow is null || SelectedSlot is null)
@@ -1192,9 +1212,11 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
             if (string.IsNullOrEmpty(userId))
                 throw new InvalidOperationException("No signed-in user id — should never happen post-splash-gate.");
 
+            BookingResponse booking;
+
             if (SelectedOperatorChoice.IsAnyAvailable)
             {
-                await _bookingService.CreateBookingAnyAsync(new CreateBookingAnyRequest
+                booking = await _bookingService.CreateBookingAnyAsync(new CreateBookingAnyRequest
                 {
                     BusinessId = _businessId,
                     ServiceId = SelectedServiceRow.Service.Id,
@@ -1205,7 +1227,7 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
             }
             else
             {
-                await _bookingService.CreateBookingAsync(new CreateBookingRequest
+                booking = await _bookingService.CreateBookingAsync(new CreateBookingRequest
                 {
                     BusinessId = _businessId,
                     OperatorId = SelectedOperatorChoice.OperatorId!.Value,
@@ -1215,6 +1237,8 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
                     Note = TrimmedBookingNote(),
                 });
             }
+
+            await StampBookingCustomerNameAsync(booking.Id, Guid.Parse(userId));
 
             ResetFlowState();
             await OnSubmittedAsync();

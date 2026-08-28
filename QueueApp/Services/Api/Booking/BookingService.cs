@@ -80,6 +80,27 @@ public class BookingService : BaseService, IBookingService
     public Task<AgendaBookingResponse?> SetCancellationReasonAsync(Guid bookingId, BookingDetails details) =>
         PatchAsync(bookingId, new UpdateBookingRequest { Details = details });
 
+    // create_booking takes no name, and the agenda's customer:profiles embed comes back null for the
+    // shop (profiles is self-read only), so a customer-made booking reads as "Customer" until the
+    // Step 18 §3 migration lands. The customer owns the row they just created, so they write their
+    // own name into the details jsonb — the one place the owner can read it from today. Same trick
+    // as the cancellation reason, and no migration needed.
+    //
+    // Name only, deliberately: bookings is still public read on the current schema, and the phone
+    // number is exactly what Step 18 §4 exists to stop publishing to every signed-in user.
+    //
+    // TODO: drop this once Step 18 §3's customer_name column and fill_booking_customer_snapshot
+    // trigger are applied — the trigger fills the column and the reader prefers it over details.
+    public Task<AgendaBookingResponse?> SetCustomerNameAsync(Guid bookingId, string customerName) =>
+        PatchAsync(bookingId, new UpdateBookingRequest
+        {
+            Details = new BookingDetails
+            {
+                CustomerName = customerName.Trim(),
+                CreatedBy = "customer",
+            },
+        });
+
     public Task<AgendaBookingResponse?> MoveBookingAsync(
         Guid bookingId, Guid operatorId, DateTimeOffset startsAt, DateTimeOffset endsAt) =>
         PatchAsync(bookingId, new UpdateBookingRequest

@@ -34,6 +34,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     private readonly SemaphoreSlim _loadLock = new(1, 1);
     private Guid _businessId;
     private bool _openedFromTabs;
+    private bool _isVisible;
     private BusinessHours _hours = BusinessHours.Unknown;
     private CategoryLabelSet _labels = CategoryLabels.Resolve(null);
     private List<OperatorResponse> _allOperators = new();
@@ -219,11 +220,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             // One subscription for the whole page, scoped to this business and torn down on
             // disappearing. The confirmation states are driven off the same feed — they do not open
             // a second one.
-            await _realtimeService.SubscribeAsync(
-                "business_id",
-                _businessId.ToString(),
-                OnRealtimeChangeAsync,
-                table: IsBookingMode ? "bookings" : "queue_entries");
+            await SubscribeRealtimeAsync();
 
             RefreshLandingCard();
         }
@@ -236,12 +233,49 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             IsLoading = false;
         }
     }
+    // Re-subscribes after a page pushed over this one is popped: Loaded runs once per page, so
+    // without this the feed torn down on Disappearing never comes back.
+    public override async Task OnAppearingAsync()
+    {
+        try
+        {
+            await base.OnAppearingAsync();
+            _isVisible = true;
+            await SubscribeRealtimeAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
     public override async Task OnDisappearingAsync()
     {
         try
         {
             await base.OnDisappearingAsync();
-            await _realtimeService.UnsubscribeAsync();
+            _isVisible = false;
+            await _realtimeService.UnsubscribeAsync(this);
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    public async Task SubscribeRealtimeAsync()
+    {
+        try
+        {
+            if (!_isVisible || _businessId == Guid.Empty || Business is null)
+                return;
+
+            await _realtimeService.SubscribeAsync(
+                this,
+                "business_id",
+                _businessId.ToString(),
+                OnRealtimeChangeAsync,
+                table: IsBookingMode ? "bookings" : "queue_entries");
         }
         catch (Exception ex)
         {

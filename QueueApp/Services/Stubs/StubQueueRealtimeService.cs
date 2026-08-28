@@ -6,7 +6,7 @@ namespace QueueApp.Services.Stubs;
 // no live backend to subscribe to.
 public class StubQueueRealtimeService : IQueueRealtimeService
 {
-    public Task SubscribeAsync(string filterColumn, string filterValue, Func<Task> onChange, string table = "queue_entries") => Task.CompletedTask;
+    public Task SubscribeAsync(object owner, string filterColumn, string filterValue, Func<Task> onChange, string table = "queue_entries") => Task.CompletedTask;
 
-    public Task UnsubscribeAsync() => Task.CompletedTask;
+    public Task UnsubscribeAsync(object owner) => Task.CompletedTask;
 }

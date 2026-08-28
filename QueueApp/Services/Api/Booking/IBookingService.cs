@@ -18,6 +18,7 @@ public interface IBookingService
     Task<List<AgendaBookingResponse>> GetBookingsInRangeAsync(Guid businessId, DateTimeOffset from, DateTimeOffset until);
     Task<AgendaBookingResponse?> MarkBookingNoShowAsync(Guid bookingId);
     Task<AgendaBookingResponse?> SetCancellationReasonAsync(Guid bookingId, BookingDetails details);
+    Task<AgendaBookingResponse?> SetCustomerNameAsync(Guid bookingId, string customerName);
     Task<AgendaBookingResponse?> MoveBookingAsync(Guid bookingId, Guid operatorId, DateTimeOffset startsAt, DateTimeOffset endsAt);
     Task<AgendaBookingResponse?> CreateOperatorBookingAsync(CreateOperatorBookingRequest request);
     Task<List<UpcomingBookingResponse>> GetMyUpcomingBookingsAsync(Guid customerId);

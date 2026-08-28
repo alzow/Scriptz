@@ -199,7 +199,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
             await _realtimeLock.WaitAsync();
             try
             {
-                await _realtimeService.UnsubscribeAsync();
+                await _realtimeService.UnsubscribeAsync(this);
                 _subscribedScopeKey = null;
             }
             finally
@@ -226,16 +226,14 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
 
             if (desiredKey == _subscribedScopeKey) return;
 
-            // await _realtimeService.UnsubscribeAsync(); //ReAdd later TODO messing up manage subscription
-
             if (ActiveEntry is not null)
             {
-                await _realtimeService.SubscribeAsync("business_id", ActiveEntry.BusinessId.ToString(),
+                await _realtimeService.SubscribeAsync(this, "business_id", ActiveEntry.BusinessId.ToString(),
                     () => MainThread.InvokeOnMainThreadAsync(RefreshActiveEntryAsync));
             }
             else
             {
-                await _realtimeService.SubscribeAsync("customer_id", _customerId.ToString(),
+                await _realtimeService.SubscribeAsync(this, "customer_id", _customerId.ToString(),
                     () => MainThread.InvokeOnMainThreadAsync(RefreshActiveEntryAsync));
             }
 
