@@ -236,29 +236,3 @@ public class WaitBucketToColorConverter : IValueConverter
         throw new NotImplementedException();
     }
 }
-
-public class EqualsToColorConverter : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        if (parameter is string param)
-        {
-            var parts = param.Split('|');
-            if (parts.Length == 3)
-            {
-                var compareValue = parts[0];
-                var trueColor = parts[1];
-                var falseColor = parts[2];
-
-                bool isEqual = value?.ToString() == compareValue;
-                return isEqual ? Color.FromArgb(trueColor) : Color.FromArgb(falseColor);
-            }
-        }
-        return Colors.Transparent;
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
-}
