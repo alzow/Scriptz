@@ -23,14 +23,11 @@
 
             <!-- Converters -->
             <converters:IsNotNullOrEmptyConverter x:Key="IsNotNullOrEmptyConverter"/>
-            <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
             <converters:BoolToTextConverter x:Key="BoolToTextConverter"/>
             <converters:BoolToOpacityConverter x:Key="BoolToOpacityConverter"/>
             <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
             <converters:IsNotNullConverter x:Key="IsNotNullConverter"/>
-            <converters:IsNullConverter x:Key="IsNullConverter"/>
             <converters:ActiveToLabelConverter x:Key="ActiveToLabelConverter"/>
-            <converters:ItemEqualsSelectedToColorConverter x:Key="ItemEqualsSelectedToColorConverter"/>
             <converters:ItemEqualsSelectedConverter x:Key="ItemEqualsSelectedConverter"/>
             <converters:ItemSelectionOpacityConverter x:Key="ItemSelectionOpacityConverter"/>
             <converters:WaitBucketToColorConverter x:Key="WaitBucketToColorConverter"/>
