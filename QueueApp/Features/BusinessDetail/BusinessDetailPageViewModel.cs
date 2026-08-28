@@ -289,9 +289,23 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     // Base HandleExceptionAsync only logs — surface real failures to the customer instead, most
     // notably a pooled join/booking race ("all resources are currently busy", "that time was
     // just taken") — those are normal operational states, not faults, and deserve to be seen.
-    protected override Task HandleExceptionAsync(Exception exception)
+    // Called from inside every catch block on this page, so it is the one method that must never
+    // throw: an exception escaping here escapes the catch that was handling the first one, and
+    // nothing above catches it. DisplayAlert needs a MainPage, which there isn't one of while the
+    // page is still being pushed.
+    protected override async Task HandleExceptionAsync(Exception exception)
     {
-        return _popupService.ShowAlertAsync("Couldn't do that", GetFriendlyErrorMessage(exception));
+        var message = GetFriendlyErrorMessage(exception);
+        System.Diagnostics.Debug.WriteLine($"Error: {message}");
+
+        try
+        {
+            await _popupService.ShowAlertAsync("Couldn't do that", message);
+        }
+        catch (Exception)
+        {
+            // No page to show it on. The line above is the whole record of it.
+        }
     }
     public async Task OnRealtimeChangeAsync() =>
         await MainThread.InvokeOnMainThreadAsync(async () =>
@@ -340,39 +354,46 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     // Presence is operators.is_available; an inactive operator isn't rendered at all.
     public void BuildTeam()
     {
-        TeamMembers.Clear();
-
-        foreach (var op in _allOperators.Where(o => o.IsActive).OrderBy(o => o.SortOrder))
+        try
         {
-            var summary = QueueSummary.FirstOrDefault(r => r.OperatorId == op.Id);
-            var subLabel = !op.IsAvailable
-                ? "off today"
-                : summary is null
-                    ? "free now"
-                    : (summary.WaitingCount, summary.ServingCount) switch
-                    {
-                        (0, 0) => "free now",
-                        (var waiting, 0) => $"{waiting} waiting",
-                        (0, var serving) => $"{serving} being served",
-                        (var waiting, var serving) => $"{waiting} waiting · {serving} being served",
-                    };
+            TeamMembers.Clear();
 
-            TeamMembers.Add(new TeamMemberItem
+            foreach (var op in _allOperators.Where(o => o.IsActive).OrderBy(o => o.SortOrder))
             {
-                Initials = Initials(op.DisplayName),
-                Name = op.DisplayName,
-                SubLabel = subLabel,
-                ShowSubLabel = !IsBookingMode,
-                IsOnShift = op.IsAvailable,
-                RowOpacity = op.IsAvailable ? 1 : 0.4,
-            });
+                var summary = QueueSummary.FirstOrDefault(r => r.OperatorId == op.Id);
+                var subLabel = !op.IsAvailable
+                    ? "off today"
+                    : summary is null
+                        ? "free now"
+                        : (summary.WaitingCount, summary.ServingCount) switch
+                        {
+                            (0, 0) => "free now",
+                            (var waiting, 0) => $"{waiting} waiting",
+                            (0, var serving) => $"{serving} being served",
+                            (var waiting, var serving) => $"{waiting} waiting · {serving} being served",
+                        };
+
+                TeamMembers.Add(new TeamMemberItem
+                {
+                    Initials = Initials(op.DisplayName),
+                    Name = op.DisplayName,
+                    SubLabel = subLabel,
+                    ShowSubLabel = !IsBookingMode,
+                    IsOnShift = op.IsAvailable,
+                    RowOpacity = op.IsAvailable ? 1 : 0.4,
+                });
+            }
+
+            var onShift = TeamMembers.Count(m => m.IsOnShift);
+            TeamCountText = onShift == 0 ? "off shift" : $"{onShift} on shift";
+
+            OnPropertyChanged(nameof(HasTeam));
+            OnPropertyChanged(nameof(TeamSectionTitle));
         }
-
-        var onShift = TeamMembers.Count(m => m.IsOnShift);
-        TeamCountText = onShift == 0 ? "off shift" : $"{onShift} on shift";
-
-        OnPropertyChanged(nameof(HasTeam));
-        OnPropertyChanged(nameof(TeamSectionTitle));
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
     }
     public async Task LoadDistanceAsync()
     {
@@ -499,89 +520,110 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     }
     public void RefreshLandingCard()
     {
-        var now = LocalTime.Now;
-
-        if (IsBookingMode)
+        try
         {
-            IsOpen = !_hours.HasData || _hours.IsOpenAt(now);
-            RefreshBookingCard();
-        }
-        else
-        {
-            // No opening-hours columns exist, so "open" is the live signals that do: the owner app's
-            // heartbeat and whether anyone is on shift. Weekly windows narrow it further when set.
-            var onShift = TeamMembers.Any(m => m.IsOnShift);
-            IsOpen = (Business?.IsAvailableNow ?? false)
-                && onShift
-                && (!_hours.HasData || _hours.IsOpenAt(now));
-            RefreshQueueCard();
-        }
+            var now = LocalTime.Now;
 
-        OnPropertyChanged(nameof(OpenPillText));
-        OnPropertyChanged(nameof(LiveCardStatus));
-        OnPropertyChanged(nameof(ShowLiveDot));
-        OnPropertyChanged(nameof(ModeLine));
+            if (IsBookingMode)
+            {
+                IsOpen = !_hours.HasData || _hours.IsOpenAt(now);
+                RefreshBookingCard();
+            }
+            else
+            {
+                // No opening-hours columns exist, so "open" is the live signals that do: the owner app's
+                // heartbeat and whether anyone is on shift. Weekly windows narrow it further when set.
+                var onShift = TeamMembers.Any(m => m.IsOnShift);
+                IsOpen = (Business?.IsAvailableNow ?? false)
+                    && onShift
+                    && (!_hours.HasData || _hours.IsOpenAt(now));
+                RefreshQueueCard();
+            }
+
+            OnPropertyChanged(nameof(OpenPillText));
+            OnPropertyChanged(nameof(LiveCardStatus));
+            OnPropertyChanged(nameof(ShowLiveDot));
+            OnPropertyChanged(nameof(ModeLine));
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
     }
     public void RefreshQueueCard()
     {
-        PrimaryStatLabel = "Now serving";
-        SecondaryStatLabel = "In queue";
-
-        if (!IsOpen)
+        try
         {
-            PrimaryStatValue = "—";
-            SecondaryStatValue = "—";
+            PrimaryStatLabel = "Now serving";
+            SecondaryStatLabel = "In queue";
 
-            var next = _hours.FindNextOpening(LocalTime.Now);
-            TertiaryStatLabel = next?.Label ?? "Closed";
-            TertiaryStatValue = next?.TimeText ?? "—";
-            CtaText = next is not null ? $"Queue opens {next.TimeText}" : "Queue is closed";
-            IsCtaEnabled = true;//TODO revert later after testing
-            LiveFootnote = "The queue reopens when the shop does";
-            return;
+            if (!IsOpen)
+            {
+                PrimaryStatValue = "—";
+                SecondaryStatValue = "—";
+
+                var next = _hours.FindNextOpening(LocalTime.Now);
+                TertiaryStatLabel = next?.Label ?? "Closed";
+                TertiaryStatValue = next?.TimeText ?? "—";
+                CtaText = next is not null ? $"Queue opens {next.TimeText}" : "Queue is closed";
+                IsCtaEnabled = true;//TODO revert later after testing
+                LiveFootnote = "The queue reopens when the shop does";
+                return;
+            }
+
+            // The design's anchor is the ticket number on the shop wall. queue_entries has no such
+            // column, so this is the closest thing that is actually true — how many people are in a
+            // chair right now. Restoring the wall number needs the per-day sequence.
+            var waiting = QueueSummary.Sum(r => r.WaitingCount);
+            var wait = QueueSummary.Count > 0 ? QueueSummary.Min(r => r.NewJoinWaitMinutes) : 0;
+
+            PrimaryStatValue = _servingCount.ToString();
+            SecondaryStatValue = waiting.ToString();
+            TertiaryStatLabel = "Est. wait";
+            TertiaryStatValue = $"~{wait:0} min";
+
+            var onShift = TeamMembers.Count(m => m.IsOnShift);
+            LiveFootnote = $"{onShift} of {TeamMembers.Count} {_labels.PluralNoun} on shift";
+
+            CtaText = "Join queue";
+            IsCtaEnabled = ServiceRows.Count > 0;
         }
-
-        // The design's anchor is the ticket number on the shop wall. queue_entries has no such
-        // column, so this is the closest thing that is actually true — how many people are in a
-        // chair right now. Restoring the wall number needs the per-day sequence.
-        var waiting = QueueSummary.Sum(r => r.WaitingCount);
-        var wait = QueueSummary.Count > 0 ? QueueSummary.Min(r => r.NewJoinWaitMinutes) : 0;
-
-        PrimaryStatValue = _servingCount.ToString();
-        SecondaryStatValue = waiting.ToString();
-        TertiaryStatLabel = "Est. wait";
-        TertiaryStatValue = $"~{wait:0} min";
-
-        var onShift = TeamMembers.Count(m => m.IsOnShift);
-        LiveFootnote = $"{onShift} of {TeamMembers.Count} {_labels.PluralNoun} on shift";
-
-        CtaText = "Join queue";
-        IsCtaEnabled = ServiceRows.Count > 0;
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
     }
     public void RefreshBookingCard()
     {
-        PrimaryStatLabel = "Next free slot";
-        SecondaryStatLabel = "Left today";
-        TertiaryStatLabel = _labels.SectionTitle;
-
-        PrimaryStatValue = _nextFreeSlotText;
-        SecondaryStatValue = _slotsLeftTodayText;
-        TertiaryStatValue = _selectableOperators.Count.ToString();
-
-        LiveFootnote = "No walk-in queue here — slots only";
-
-        if (IsOpen)
+        try
         {
-            CtaText = "Book a slot";
-            IsCtaEnabled = ServiceRows.Count > 0 && _selectableOperators.Count > 0;
+            PrimaryStatLabel = "Next free slot";
+            SecondaryStatLabel = "Left today";
+            TertiaryStatLabel = _labels.SectionTitle;
+
+            PrimaryStatValue = _nextFreeSlotText;
+            SecondaryStatValue = _slotsLeftTodayText;
+            TertiaryStatValue = _selectableOperators.Count.ToString();
+
+            LiveFootnote = "No walk-in queue here — slots only";
+
+            if (IsOpen)
+            {
+                CtaText = "Book a slot";
+                IsCtaEnabled = ServiceRows.Count > 0 && _selectableOperators.Count > 0;
+            }
+            else
+            {
+                var next = _hours.FindNextOpening(LocalTime.Now);
+                TertiaryStatLabel = next?.Label ?? "Closed";
+                TertiaryStatValue = next?.TimeText ?? "—";
+                CtaText = next is not null ? $"Booking opens {next.TimeText}" : "Currently closed";
+                IsCtaEnabled = true;
+            }
         }
-        else
+        catch (Exception ex)
         {
-            var next = _hours.FindNextOpening(LocalTime.Now);
-            TertiaryStatLabel = next?.Label ?? "Closed";
-            TertiaryStatValue = next?.TimeText ?? "—";
-            CtaText = next is not null ? $"Booking opens {next.TimeText}" : "Currently closed";
-            IsCtaEnabled = true;
+            _ = HandleExceptionAsync(ex);
         }
     }
     [RelayCommand]
@@ -645,15 +687,24 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         _ when value % 10 == 3 => $"{value}rd",
         _ => $"{value}th",
     };
+    // Static, so there is no HandleExceptionAsync to reach. A distance of 0 reads as "no distance
+    // known" to the one caller, which is the honest answer if the maths ever fails.
     public static double HaversineKm(double lat1, double lon1, double lat2, double lon2)
     {
-        const double earthRadiusKm = 6371;
-        var dLat = (lat2 - lat1) * Math.PI / 180;
-        var dLon = (lon2 - lon1) * Math.PI / 180;
-        var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2)
-                + Math.Cos(lat1 * Math.PI / 180) * Math.Cos(lat2 * Math.PI / 180)
-                * Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
-        return earthRadiusKm * 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        try
+        {
+            const double earthRadiusKm = 6371;
+            var dLat = (lat2 - lat1) * Math.PI / 180;
+            var dLon = (lon2 - lon1) * Math.PI / 180;
+            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2)
+                    + Math.Cos(lat1 * Math.PI / 180) * Math.Cos(lat2 * Math.PI / 180)
+                    * Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+            return earthRadiusKm * 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        }
+        catch (Exception)
+        {
+            return 0;
+        }
     }
     #endregion
 }

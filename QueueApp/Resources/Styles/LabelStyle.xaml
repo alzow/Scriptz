@@ -287,4 +287,26 @@
         <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
     </Style>
 
+    <!-- Date rail on a booking row: the day number, then the month under it. -->
+    <Style x:Key="lbl19_Bold_TextDark" TargetType="Label">
+        <Setter Property="FontSize" Value="19"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="LineBreakMode" Value="NoWrap"/>
+    </Style>
+
+    <Style x:Key="lbl11_Medium_Green" TargetType="Label">
+        <Setter Property="FontSize" Value="11.5"/>
+        <Setter Property="FontFamily" Value="RobotoMedium"/>
+        <Setter Property="TextColor" Value="{StaticResource Green}"/>
+    </Style>
+
+    <!-- Status pill text. Green is the confirmed default; pending swaps it for purple. -->
+    <Style x:Key="lbl10_Bold_Green" TargetType="Label">
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="TextColor" Value="{StaticResource Green}"/>
+        <Setter Property="LineBreakMode" Value="NoWrap"/>
+    </Style>
+
 </ResourceDictionary>

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json.Serialization;
 using QueueApp.Services.Api.Queue.Models;
 
@@ -53,7 +54,10 @@ public class UpcomingBookingResponse
     [JsonIgnore]
     public string DateTimeDisplay => LocalStart.ToString("ddd d MMM, h:mm tt");
 
-    [JsonIgnore] public string DayText => LocalStart.ToString("d");
+    // Day.ToString(), not ToString("d") — a lone "d" is the standard short-date specifier, so on a
+    // za-ZA device the date rail read "2026/08/28" instead of "28". Invariant so the number is
+    // digits whatever the device's culture is.
+    [JsonIgnore] public string DayText => LocalStart.Day.ToString(CultureInfo.InvariantCulture);
     [JsonIgnore] public string MonthText => LocalStart.ToString("MMM").ToUpperInvariant();
     [JsonIgnore] public string TimeText => LocalStart.ToString("h:mm tt");
 

@@ -8,13 +8,22 @@ public partial class ConfirmationPage : ContentPage
     }
 
     // There is nothing behind this page to pop to — the submit that reached it replaced the stack —
-    // so hardware back has to take the same route out as the on-screen one.
+    // so hardware back has to take the same route out as the on-screen one. A throw here takes the
+    // app down, so it falls back to the platform's handling instead.
     protected override bool OnBackButtonPressed()
     {
-        if (BindingContext is not ConfirmationPageViewModel vm)
-            return base.OnBackButtonPressed();
+        try
+        {
+            if (BindingContext is ConfirmationPageViewModel vm)
+            {
+                vm.DoneCommand.Execute(null);
+                return true;
+            }
+        }
+        catch (Exception)
+        {
+        }
 
-        vm.DoneCommand.Execute(null);
-        return true;
+        return base.OnBackButtonPressed();
     }
 }

@@ -172,10 +172,17 @@ public partial class ConfirmationPageViewModel : BaseViewModel
 
     public void RaiseStateChanged()
     {
-        OnPropertyChanged(nameof(IsShowingTicket));
-        OnPropertyChanged(nameof(IsShowingBooking));
-        OnPropertyChanged(nameof(HasNothing));
-        OnPropertyChanged(nameof(HeaderText));
+        try
+        {
+            OnPropertyChanged(nameof(IsShowingTicket));
+            OnPropertyChanged(nameof(IsShowingBooking));
+            OnPropertyChanged(nameof(HasNothing));
+            OnPropertyChanged(nameof(HeaderText));
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
     }
 
     // Back from here rebuilds the tabs rather than popping. Submitting replaced the stack with this
@@ -196,9 +203,23 @@ public partial class ConfirmationPageViewModel : BaseViewModel
         }
     }
 
-    protected override Task HandleExceptionAsync(Exception exception)
+    // Called from inside every catch block on this page, so it is the one method that must never
+    // throw: an exception escaping here escapes the catch that was handling the first one, and
+    // nothing above catches it. DisplayAlert needs a MainPage, which there isn't one of while the
+    // page is still being pushed.
+    protected override async Task HandleExceptionAsync(Exception exception)
     {
-        return _popupService.ShowAlertAsync("Couldn't do that", GetFriendlyErrorMessage(exception));
+        var message = GetFriendlyErrorMessage(exception);
+        System.Diagnostics.Debug.WriteLine($"Error: {message}");
+
+        try
+        {
+            await _popupService.ShowAlertAsync("Couldn't do that", message);
+        }
+        catch (Exception)
+        {
+            // No page to show it on. The line above is the whole record of it.
+        }
     }
     public async Task OnRealtimeChangeAsync() =>
         await MainThread.InvokeOnMainThreadAsync(async () =>
@@ -268,35 +289,49 @@ public partial class ConfirmationPageViewModel : BaseViewModel
     // ActiveQueueEntry. All that is left here is the line the top bar shows.
     public void RefreshTicket()
     {
-        if (MyStatus is null)
-            return;
+        try
+        {
+            if (MyStatus is null)
+                return;
 
-        TicketHeadline = IsBeingServed
-            ? $"You're up with {MyStatus.OperatorName}"
-            : $"You're {Ordinal(MyStatus.Position)} in line";
+            TicketHeadline = IsBeingServed
+                ? $"You're up with {MyStatus.OperatorName}"
+                : $"You're {Ordinal(MyStatus.Position)} in line";
 
-        OnPropertyChanged(nameof(HeaderText));
-        OnPropertyChanged(nameof(IsBeingServed));
+            OnPropertyChanged(nameof(HeaderText));
+            OnPropertyChanged(nameof(IsBeingServed));
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
     }
     public void RefreshBookingConfirmation()
     {
-        if (ActiveBooking is null)
-            return;
+        try
+        {
+            if (ActiveBooking is null)
+                return;
 
-        var start = LocalTime.ToLocal(ActiveBooking.StartsAt);
-        var end = LocalTime.ToLocal(ActiveBooking.EndsAt);
+            var start = LocalTime.ToLocal(ActiveBooking.StartsAt);
+            var end = LocalTime.ToLocal(ActiveBooking.EndsAt);
 
-        BookingWhenText = start.ToString("ddd d MMM · HH:mm");
-        BookingEndsText = end.ToString("HH:mm");
-        BookingOperatorText = ActiveBooking.OperatorName;
-        BookingServiceText = ActiveBooking.ServiceName;
-        BookingPriceText = ActiveBooking.PriceText;
+            BookingWhenText = start.ToString("ddd d MMM · HH:mm");
+            BookingEndsText = end.ToString("HH:mm");
+            BookingOperatorText = ActiveBooking.OperatorName;
+            BookingServiceText = ActiveBooking.ServiceName;
+            BookingPriceText = ActiveBooking.PriceText;
 
-        BookingPendingBlurb = ActiveBooking.Status == "pending"
-            ? $"{ActiveBooking.OperatorName} needs to confirm. You'll get a notification — usually within an hour during trading."
-            : $"{ActiveBooking.OperatorName} has confirmed. See you then.";
+            BookingPendingBlurb = ActiveBooking.Status == "pending"
+                ? $"{ActiveBooking.OperatorName} needs to confirm. You'll get a notification — usually within an hour during trading."
+                : $"{ActiveBooking.OperatorName} has confirmed. See you then.";
 
-        OnPropertyChanged(nameof(BookingOperatorLabel));
+            OnPropertyChanged(nameof(BookingOperatorLabel));
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
     }
     [RelayCommand]
     public async Task LeaveQueueAsync()

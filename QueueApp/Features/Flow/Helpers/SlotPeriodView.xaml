@@ -60,7 +60,7 @@
                 <RoundRectangle CornerRadius="12"/>
             </Border.StrokeShape>
             <Label Text="No slot long enough left in the day" HorizontalOptions="Center"
-                   Style="{StaticResource lbl12_Regular_TextLight}" FontSize="11"/>
+                   Style="{StaticResource lbl11_Regular_TextLight}"/>
         </Border>
 
     </VerticalStackLayout>

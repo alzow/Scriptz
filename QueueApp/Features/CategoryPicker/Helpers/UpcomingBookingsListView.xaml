@@ -10,47 +10,54 @@
         <BindableLayout.ItemTemplate>
             <DataTemplate x:DataType="bookingModels:UpcomingBookingResponse">
                 <Border Style="{StaticResource brd16_White}" Padding="14" Margin="0,5">
-                    <Grid ColumnDefinitions="52,*,Auto" ColumnSpacing="13">
-                        <VerticalStackLayout Grid.Column="0"
-                                              HorizontalOptions="Center"
-                                              Spacing="2"
-                                              Padding="0,0,13,0">
-                            <VerticalStackLayout.Resources>
-                                <Style TargetType="BoxView">
-                                    <Setter Property="Color" Value="{StaticResource Line}"/>
-                                </Style>
-                            </VerticalStackLayout.Resources>
-                            <Label Text="{Binding DayText}" FontFamily="RobotoBold" FontSize="19"
-                                   TextColor="{StaticResource TextPrimary}" HorizontalOptions="Center"/>
-                            <Label Text="{Binding MonthText}" Style="{StaticResource SectionTitle}" FontSize="9"/>
-                        </VerticalStackLayout>
-                        <BoxView Grid.Column="0" WidthRequest="1" Color="{StaticResource Line}" HorizontalOptions="End"/>
+
+                    <!-- Date rail, then the booking, then what you can do about it. The rail is Auto
+                         so a two-digit day sets its own width instead of being squeezed. -->
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="13">
+
+                        <Grid Grid.Column="0" ColumnDefinitions="Auto,1" ColumnSpacing="13"
+                              VerticalOptions="Center">
+                            <VerticalStackLayout Grid.Column="0" Spacing="2"
+                                                 MinimumWidthRequest="30"
+                                                 HorizontalOptions="Center">
+                                <Label Text="{Binding DayText}"
+                                       Style="{StaticResource lbl19_Bold_TextDark}"
+                                       HorizontalOptions="Center"/>
+                                <Label Text="{Binding MonthText}"
+                                       Style="{StaticResource lbl9_Mono_TextMuted}"
+                                       HorizontalOptions="Center"/>
+                            </VerticalStackLayout>
+                            <BoxView Grid.Column="1" Color="{StaticResource Line}"/>
+                        </Grid>
 
                         <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
                             <Label Text="{Binding BusinessName}" Style="{StaticResource lbl15_Bold_TextDark}"/>
                             <Label Text="{Binding ScheduleText}" Style="{StaticResource lbl12_Regular_TextLight}"/>
                             <Label Text="{Binding ProgressStatus}"
                                    IsVisible="{Binding HasProgress}"
-                                   FontFamily="RobotoMedium" FontSize="11.5"
-                                   TextColor="{StaticResource Green}"/>
+                                   Style="{StaticResource lbl11_Medium_Green}"/>
                         </VerticalStackLayout>
 
-                        <VerticalStackLayout Grid.Column="2" Spacing="6" HorizontalOptions="End">
-                            <Border StrokeThickness="0" Padding="8,4" HorizontalOptions="End">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="20"/>
-                                </Border.StrokeShape>
-                                <Border.BackgroundColor>
-                                    <Binding Path="Status" Converter="{StaticResource EqualsToColorConverter}"
-                                             ConverterParameter="pending|#26A45EFF|#2139FF7A"/>
-                                </Border.BackgroundColor>
-                                <Label Text="{Binding StatusLabel}" FontFamily="RobotoBold" FontSize="10">
-                                    <Label.TextColor>
-                                        <Binding Path="Status" Converter="{StaticResource EqualsToColorConverter}"
-                                                 ConverterParameter="pending|#A45EFF|#39FF7A"/>
-                                    </Label.TextColor>
+                        <VerticalStackLayout Grid.Column="2" Spacing="8"
+                                             HorizontalOptions="End" VerticalOptions="Center">
+
+                            <!-- Confirmed is the default; a pending request is the exception, so it
+                                 is the one the trigger repaints. -->
+                            <Border Style="{StaticResource brd20_StatusPill}">
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding Status}" Value="pending">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource PurpleBadgeFill}"/>
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="{Binding StatusLabel}" Style="{StaticResource lbl10_Bold_Green}">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding Status}" Value="pending">
+                                            <Setter Property="TextColor" Value="{StaticResource Purple}"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
                                 </Label>
                             </Border>
+
                             <controls:AlzowLoadingButton
                                     Text="Cancel"
                                     LoadingText="Cancelling…"
@@ -58,7 +65,7 @@
                                     Command="{Binding BindingContext.CancelCommand, Source={x:Reference Root}}"
                                     CommandParameter="{Binding .}"
                                     IsLoading="{Binding IsCancelling}"
-                                    ButtonStyle="{StaticResource TertiaryButtonStyle}"/>
+                                    ButtonStyle="{StaticResource btn12_Bold_RowAction}"/>
                         </VerticalStackLayout>
                     </Grid>
                 </Border>

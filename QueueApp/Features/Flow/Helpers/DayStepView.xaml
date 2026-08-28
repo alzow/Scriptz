@@ -39,7 +39,7 @@
                                        Style="{StaticResource lbl18_Bold_TextDark}"/>
                                 <Label Text="{Binding FreeText}" HorizontalOptions="Center"
                                        LineBreakMode="TailTruncation"
-                                       Style="{StaticResource lbl12_Regular_TextLight}" FontSize="9"/>
+                                       Style="{StaticResource lbl9_Regular_TextLight}"/>
                             </VerticalStackLayout>
                         </Border>
                     </DataTemplate>
@@ -69,7 +69,7 @@
             </Border>
 
             <Label Text="{Binding DayFineprint, Source={x:Reference Root}}" Margin="20,14,20,20"
-                   Style="{StaticResource lbl12_Regular_TextLight}" FontSize="11"/>
+                   Style="{StaticResource lbl11_Regular_TextLight}"/>
         </VerticalStackLayout>
     </ScrollView>
 

@@ -80,7 +80,7 @@
 
         <!-- bookings_no_overlap covers pending as well as confirmed, so this is true —
              and without saying it, a pending booking feels like it might evaporate. -->
-        <Label Margin="20,14,20,0" Style="{StaticResource lbl13_Regular_BrownLight}" FontSize="11">
+        <Label Margin="20,14,20,0" Style="{StaticResource lbl11_Regular_TextFaint}">
             <Label.FormattedText>
                 <FormattedString>
                     <Span Text="The slot is held for you while it's pending, so nobody else can take "/>

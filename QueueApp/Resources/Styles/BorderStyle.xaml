@@ -224,4 +224,17 @@
         </Setter>
     </Style>
 
+    <!-- Status pill on a list row. Green is the confirmed default; pending swaps it for purple. -->
+    <Style x:Key="brd20_StatusPill" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource SoonestBadgeFill}"/>
+        <Setter Property="StrokeThickness" Value="0"/>
+        <Setter Property="Padding" Value="9,4"/>
+        <Setter Property="HorizontalOptions" Value="End"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="20"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>

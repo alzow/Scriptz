@@ -198,4 +198,14 @@
         <Setter Property="Padding" Value="16,0"/>
     </Style>
 
+    <!--
+        Row action. Sits inside a card next to its own content, so it is outlined rather than filled
+        and carries its own height — the sheet buttons' 56px would dwarf a two-line list row.
+    -->
+    <Style x:Key="btn12_Bold_RowAction" TargetType="Button" BasedOn="{StaticResource btn12_Bold_Neutral}">
+        <Setter Property="HeightRequest" Value="34"/>
+        <Setter Property="Padding" Value="12,0"/>
+        <Setter Property="MinimumWidthRequest" Value="76"/>
+    </Style>
+
 </ResourceDictionary>

@@ -887,9 +887,20 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         return days == 1 ? "1 day" : $"{days} days";
     }
 
+    // Called from inside every catch block on this page, so it is the one method that must never
+    // throw: an exception escaping here escapes the catch that was handling the first one, and
+    // nothing above catches it.
     protected override async Task HandleExceptionAsync(Exception exception)
     {
         await base.HandleExceptionAsync(exception);
-        await _popupService.ShowAlertAsync("Couldn't do that", GetFriendlyErrorMessage(exception));
+
+        try
+        {
+            await _popupService.ShowAlertAsync("Couldn't do that", GetFriendlyErrorMessage(exception));
+        }
+        catch (Exception)
+        {
+            // No page to show it on. base.HandleExceptionAsync is the whole record of it.
+        }
     }
 }
