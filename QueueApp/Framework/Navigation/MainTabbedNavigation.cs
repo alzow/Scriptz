@@ -57,11 +57,11 @@ public static class MainTabbedNavigation
     private static bool TabsAreStillBehindUs =>
         Application.Current?.Windows.FirstOrDefault()?.Navigation.ModalStack.Count > 0;
 
-    // The way home from any page reached through NavigateAwayFromTabsMessage. Those pages are pushed
-    // modally, so the tabbed page is still standing behind them and dismissing the modal is the whole
-    // journey: no owned-business lookup, no tabs to build, no feed to reload. The rebuild is kept
-    // only as the fallback for a window that has no modal on it — a page that got here some other
-    // way, or one left over after the shell was replaced.
+    // The way home from any page a tab opened over the tabs. Those pages are pushed modally, so the
+    // tabbed page is still standing behind them and dismissing the modal is the whole journey: no
+    // owned-business lookup, no tabs to build, no feed to reload. The rebuild is kept only as the
+    // fallback for a window that has no modal on it — a page that got here some other way, or one
+    // left over after the shell was replaced.
     public static async Task ReturnToTabsAsync(
         INavigationService navigationService,
         IBusinessService businessService,

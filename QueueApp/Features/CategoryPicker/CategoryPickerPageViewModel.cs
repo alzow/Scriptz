@@ -1,14 +1,12 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
 using MPowerKit;
 using MPowerKit.Navigation;
 using QueueApp.Constants;
 using QueueApp.Features.CategoryPicker.Helpers;
 using QueueApp.Features.CategoryPicker.Models;
 using QueueApp.Framework.Base;
-using QueueApp.Framework.Messages;
 using QueueApp.Services.Api.Booking;
 using QueueApp.Services.Api.Booking.Models;
 using QueueApp.Services.Api.Business;
@@ -53,7 +51,6 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     public bool HasFrequentBusinesses => FrequentBusinesses.Count > 0;
     public bool IsBusinessesEmpty => Businesses.Count == 0 && !IsLoading;
 
-    private readonly IMessenger _messenger;
     private readonly IBusinessService _businessService;
     private readonly IQueueService _queueService;
     private readonly IBookingService _bookingService;
@@ -66,7 +63,6 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     public CategoryPickerPageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
-        IMessenger messenger,
         IBusinessService businessService,
         IQueueService queueService,
         IBookingService bookingService,
@@ -77,7 +73,6 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         ILocationService locationService)
         : base(navigationService, secureStorageService)
     {
-        _messenger = messenger;
         _businessService = businessService;
         _queueService = queueService;
         _bookingService = bookingService;
@@ -477,8 +472,11 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
                 [NavigationKeys.BusinessId] = businessId.Value,
                 [NavigationKeys.OpenedFromTabs] = true,
             };
-            _messenger.Send(new NavigateAwayFromTabsMessage(
-                $"NavigationPage/{NavigationPaths.BusinessDetailPage}", navParams));
+            // Modal, so the tabbed page and every tab's feed stay standing underneath and the way
+            // back is a dismissal rather than a shell rebuilt from scratch.
+            await NavigationService.NavigateAsync(
+                $"NavigationPage/{NavigationPaths.BusinessDetailPage}", navParams,
+                modal: true, animated: false);
         }
         catch (Exception ex)
         {
@@ -495,8 +493,9 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
             if (SelectedCategory is not null)
                 navParams[NavigationKeys.Category] = SelectedCategory.Key;
 
-            _messenger.Send(new NavigateAwayFromTabsMessage(
-                $"NavigationPage/{NavigationPaths.BusinessListPage}", navParams));
+            await NavigationService.NavigateAsync(
+                $"NavigationPage/{NavigationPaths.BusinessListPage}", navParams,
+                modal: true, animated: false);
         }
         catch (Exception ex)
         {
