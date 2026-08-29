@@ -1,26 +1,63 @@
+using System.Net;
 using CommunityToolkit.Mvvm.Input;
-using QueueApp.Constants;
 using QueueApp.Framework.Base;
+using QueueApp.Framework.Navigation;
 using QueueApp.Services.Auth;
-using QueueApp.Services.Storage;
 using QueueApp.Services.Popup;
-using System.Diagnostics;
+using QueueApp.Services.Storage;
+using QueueApp.Shared.Templates.QueueEntry.Validators;
+using FormValidators = QueueApp.Shared.Templates.QueueEntry.Validators;
+using Refit;
 
 namespace QueueApp.Features.Auth;
 
 public partial class RegisterPageViewModel : BaseViewModel
 {
-    private readonly IAuthService _authService;
-    private readonly IQueuePopupService _popupService;
+    #region Constants
+    private const int PasswordMinimumLength = 6;
 
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public string PhoneNumber { get; set; } = string.Empty;
+    private const string EmailTakenMessage = "That email is already registered. Try signing in instead.";
+    private const string PhoneTakenMessage = "That mobile number is already registered. Try signing in instead.";
+    private const string ShortPasswordMessage = "Your password is too short.";
+    private const string BadEmailMessage = "That email address doesn't look right.";
+    private const string RateLimitedMessage = "Too many attempts. Wait a minute and try again.";
+    private const string OfflineMessage = "No connection. Check your internet and try again.";
+    private const string GenericFailureMessage = "Couldn't create your account. Please try again.";
+    private const string ConfirmEmailMessage = "Account created. Check your email to confirm your address, then sign in.";
+    #endregion
+
+    #region Properties
+    public ISharedStateManager FormStateManager { get; } = new FormValidators.SharedStateManager();
+
+    public IValidator NameValidator { get; } = new FormValidators.RequiredValidator("Enter your name.");
+    public IValidator EmailValidator { get; } = new FormValidators.EmailValidator("Enter a valid email address.");
+    public IValidator PhoneValidator { get; } = new FormValidators.SaPhoneValidator("Enter a valid SA mobile number.");
+    public IValidator PasswordValidator { get; } = new FormValidators.MinLengthValidator(
+        PasswordMinimumLength, $"At least {PasswordMinimumLength} characters.");
+
+    public string DisplayName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
+    public string Phone { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
     public string ConfirmPassword { get; set; } = string.Empty;
-    public bool IsSigningUp { get; set; }
 
+    public string ErrorMessage { get; set; } = string.Empty;
+    public bool IsFormValid { get; set; }
+    public bool IsRegistering { get; set; }
+
+    public bool PasswordsMatch => !string.IsNullOrEmpty(Password) && Password == ConfirmPassword;
+
+    public bool ShowPasswordMismatch => !string.IsNullOrEmpty(ConfirmPassword) && !PasswordsMatch;
+
+    public bool CanSubmit => IsFormValid && PasswordsMatch;
+    #endregion
+
+    #region Services
+    private readonly IAuthService _authService;
+    private readonly IQueuePopupService _popupService;
+    #endregion
+
+    #region Constructor
     public RegisterPageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
@@ -30,63 +67,98 @@ public partial class RegisterPageViewModel : BaseViewModel
     {
         _authService = authService;
         _popupService = popupService;
-    }
 
-    public override async Task OnLoadedAsync(INavigationParameters? parameters)
-    {
-        Debug.WriteLine("REGISTER LOADED");
-        await base.OnLoadedAsync(parameters);
+        FormStateManager.ValidationStateChanged += OnFormValidationStateChanged;
+        IsFormValid = FormStateManager.IsValid;
     }
+    #endregion
 
+    public void OnFormValidationStateChanged(bool isValid) => IsFormValid = isValid;
 
     [RelayCommand]
-    private async Task RegisterAsync()
+    public async Task RegisterAsync()
     {
-        if (string.IsNullOrWhiteSpace(FirstName) || string.IsNullOrWhiteSpace(LastName) ||
-            string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
-        {
-            await _popupService.ShowAlertAsync("Validation Error", "Please fill in all required fields");
-            return;
-        }
-
-        if (Password != ConfirmPassword)
-        {
-            await _popupService.ShowAlertAsync("Validation Error", "Passwords do not match");
-            return;
-        }
-
-        if (Password.Length < 6)
-        {
-            await _popupService.ShowAlertAsync("Validation Error", "Password must be at least 6 characters");
-            return;
-        }
-
-        // TODO (Step 5b): swap for Supabase phone-OTP sign-up. Token pipeline stays the same.
-
-        IsSigningUp = true;
         try
         {
-            var ok = await _authService.SignUpAsync(Email.Trim(), Password);
+            if (!CanSubmit)
+                return;
 
-            if (ok)
+            ErrorMessage = string.Empty;
+            IsRegistering = true;
+
+            var phoneAvailable = await _authService.IsPhoneAvailableAsync(Phone.Trim());
+            if (!phoneAvailable)
             {
-                await _popupService.ShowAlertAsync("Success", "Account created successfully!");
-                await NavigationService.NavigateAsync($"/{NavigationPaths.OperatorQueuePage}");
+                ErrorMessage = PhoneTakenMessage;
+                return;
             }
-            else
+
+            var response = await _authService.SignUpAsync(
+                Email.Trim(), Password, DisplayName.Trim(), Phone.Trim());
+
+            if (!string.IsNullOrEmpty(response.AccessToken))
             {
-                await _popupService.ShowAlertAsync("Registration Failed", "Unable to create account. Please try again.");
+                await NavigationService.NavigateAsync(
+                    MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: false));
+                return;
             }
+
+            await _popupService.ShowAlertAsync("Almost there", ConfirmEmailMessage);
+            await NavigationService.GoBackAsync();
+        }
+        catch (ApiException exception)
+        {
+            ErrorMessage = TranslateSignUpError(exception);
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
+        {
+            ErrorMessage = OfflineMessage;
+        }
+        catch (Exception exception)
+        {
+            ErrorMessage = GenericFailureMessage;
+            await HandleExceptionAsync(exception);
         }
         finally
         {
-            IsSigningUp = false;
+            IsRegistering = false;
         }
     }
 
     [RelayCommand]
-    private async Task NavigateToLoginAsync()
+    public async Task NavigateToLoginAsync()
     {
-        await NavigationService.GoBackAsync();
+        try
+        {
+            await NavigationService.GoBackAsync();
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
+    }
+
+    public static string TranslateSignUpError(ApiException exception)
+    {
+        var body = exception.Content ?? string.Empty;
+
+        if (body.Contains("already registered", StringComparison.OrdinalIgnoreCase)
+            || body.Contains("already been registered", StringComparison.OrdinalIgnoreCase)
+            || body.Contains("user_already_exists", StringComparison.OrdinalIgnoreCase))
+            return EmailTakenMessage;
+
+        if (body.Contains("Password should be at least", StringComparison.OrdinalIgnoreCase)
+            || body.Contains("weak_password", StringComparison.OrdinalIgnoreCase))
+            return ShortPasswordMessage;
+
+        if (body.Contains("invalid format", StringComparison.OrdinalIgnoreCase)
+            || body.Contains("Unable to validate email", StringComparison.OrdinalIgnoreCase))
+            return BadEmailMessage;
+
+        if (body.Contains("rate limit", StringComparison.OrdinalIgnoreCase)
+            || exception.StatusCode == HttpStatusCode.TooManyRequests)
+            return RateLimitedMessage;
+
+        return GenericFailureMessage;
     }
 }

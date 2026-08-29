@@ -34,6 +34,15 @@ public class OperatorService : BaseService, IOperatorService
     public Task<List<OperatorAvailabilityResponse>> GetAvailabilityAsync(Guid operatorId) =>
         ExecuteApiCallAsync(_api.GetAvailabilityAsync($"eq.{operatorId}"));
 
+    public Task<List<OperatorAvailabilityResponse>> GetAvailabilityAsync(IReadOnlyCollection<Guid> operatorIds)
+    {
+        if (operatorIds.Count == 0)
+            return Task.FromResult(new List<OperatorAvailabilityResponse>());
+
+        return ExecuteApiCallAsync(
+            _api.GetAvailabilityForOperatorsAsync($"in.({string.Join(',', operatorIds)})"));
+    }
+
     public Task<List<OperatorAvailabilityResponse>> CreateAvailabilityAsync(CreateAvailabilityRequest request) =>
         ExecuteApiCallAsync(_api.CreateAvailabilityAsync(request));
 

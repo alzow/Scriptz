@@ -15,6 +15,7 @@ public interface IOperatorService
     Task SetOperatorAvailableAsync(Guid id, bool isAvailable);
 
     Task<List<OperatorAvailabilityResponse>> GetAvailabilityAsync(Guid operatorId);
+    Task<List<OperatorAvailabilityResponse>> GetAvailabilityAsync(IReadOnlyCollection<Guid> operatorIds);
     Task<List<OperatorAvailabilityResponse>> CreateAvailabilityAsync(CreateAvailabilityRequest request);
     Task DeleteAvailabilityAsync(Guid id);
 

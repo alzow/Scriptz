@@ -76,6 +76,7 @@ public partial class ConfirmationPageViewModel : BaseViewModel
     public bool IsCancellingBooking { get; set; }
 
     private Guid _businessId;
+    private bool _isVisible;
     private CategoryLabelSet _labels = CategoryLabels.Resolve(null);
 
     private readonly IBusinessService _businessService;
@@ -124,11 +125,7 @@ public partial class ConfirmationPageViewModel : BaseViewModel
 
             await RefreshAsync();
 
-            await _realtimeService.SubscribeAsync(
-                "business_id",
-                _businessId.ToString(),
-                OnRealtimeChangeAsync,
-                table: IsBookingMode ? "bookings" : "queue_entries");
+            await SubscribeRealtimeAsync();
         }
         catch (Exception ex)
         {
@@ -140,12 +137,49 @@ public partial class ConfirmationPageViewModel : BaseViewModel
         }
     }
 
+    // Re-subscribes after a page pushed over this one is popped: Loaded runs once per page, so
+    // without this the feed torn down on Disappearing never comes back.
+    public override async Task OnAppearingAsync()
+    {
+        try
+        {
+            await base.OnAppearingAsync();
+            _isVisible = true;
+            await SubscribeRealtimeAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    public async Task SubscribeRealtimeAsync()
+    {
+        try
+        {
+            if (!_isVisible || _businessId == Guid.Empty || Business is null)
+                return;
+
+            await _realtimeService.SubscribeAsync(
+                this,
+                "business_id",
+                _businessId.ToString(),
+                OnRealtimeChangeAsync,
+                table: IsBookingMode ? "bookings" : "queue_entries");
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
     public override async Task OnDisappearingAsync()
     {
         try
         {
             await base.OnDisappearingAsync();
-            await _realtimeService.UnsubscribeAsync();
+            _isVisible = false;
+            await _realtimeService.UnsubscribeAsync(this);
         }
         catch (Exception ex)
         {

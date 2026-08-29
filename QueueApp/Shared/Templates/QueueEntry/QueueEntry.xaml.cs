@@ -15,6 +15,7 @@ public partial class QueueEntry : ContentView, IValidationView
     public static readonly BindableProperty IsReadOnlyProperty = BindableProperty.Create(nameof(IsReadOnly), typeof(bool), typeof(QueueEntry), default(bool), propertyChanged: OnIsReadOnlyChanged);
     public static readonly BindableProperty ValidatorProperty = BindableProperty.Create(nameof(Validator), typeof(IValidator), typeof(QueueEntry), default(IValidator));
     public static readonly BindableProperty ValidateOnTextChangedProperty = BindableProperty.Create(nameof(ValidateOnTextChanged), typeof(bool), typeof(QueueEntry), default(bool));
+    public static readonly BindableProperty SharedStateManagerProperty = BindableProperty.Create(nameof(SharedStateManager), typeof(ISharedStateManager), typeof(QueueEntry), default(ISharedStateManager), propertyChanged: OnSharedStateManagerChanged);
     public static readonly BindableProperty IsValidProperty = BindableProperty.Create(nameof(IsValid), typeof(bool), typeof(QueueEntry), default(bool), BindingMode.OneWayToSource);
 
     public string Text
@@ -91,6 +92,12 @@ public partial class QueueEntry : ContentView, IValidationView
         private set => SetValue(IsValidProperty, value);
     }
 
+    public ISharedStateManager? SharedStateManager
+    {
+        get => (ISharedStateManager?)GetValue(SharedStateManagerProperty);
+        set => SetValue(SharedStateManagerProperty, value);
+    }
+
     public string ErrorMessage { get; private set; } = string.Empty;
 
     public event EventHandler<bool> ValidationChanged;
@@ -109,6 +116,14 @@ public partial class QueueEntry : ContentView, IValidationView
     private static void OnLeftIconChanged(BindableObject bindable, object oldValue, object newValue)
     {
         ((QueueEntry)bindable).OnPropertyChanged(nameof(HasLeftIcon));
+    }
+
+    private static void OnSharedStateManagerChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        var control = (QueueEntry)bindable;
+
+        (oldValue as ISharedStateManager)?.Unregister(control);
+        (newValue as ISharedStateManager)?.Register(control);
     }
 
     private static void OnIsPasswordChanged(BindableObject bindable, object oldValue, object newValue)

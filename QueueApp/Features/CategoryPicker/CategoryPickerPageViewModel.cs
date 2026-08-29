@@ -30,8 +30,8 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     private Guid _customerId;
     private double? _customerLatitude;
     private double? _customerLongitude;
-    private string? _subscribedScopeKey;
     private readonly SemaphoreSlim _realtimeLock = new(1, 1);
+    private const int UpcomingBookingsShown = 3;
     public IReadOnlyList<ServiceCategory> Categories { get; } = CategoryCatalog.All.Where(c => c.Available).ToList();
     public string? CustomerDisplayName { get; set; }
     public bool IsLoading { get; set; }
@@ -110,11 +110,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
 
             var userId = await _authService.GetUserIdAsync();
             if (!string.IsNullOrEmpty(userId))
-            {
                 _customerId = Guid.Parse(userId);
-                var displayName = await _profileService.GetMyDisplayNameAsync(_customerId);
-                CustomerDisplayName = string.IsNullOrWhiteSpace(displayName) ? null : displayName;
-            }
 
             var cached = await _locationService.GetCachedLocationAsync();
             if (cached is not null)
@@ -126,7 +122,10 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
 
             await LoadAsync();
 
-            await RefreshLocationAsync(silent: true);
+            // Not awaited: a live fix is a permission prompt on a cold install and up to twelve
+            // seconds of GPS after that, and the dashboard is already on screen from the cached
+            // location. It reloads itself only if the fix says the customer actually moved.
+            _ = RefreshLocationAsync(silent: true);
         }
         catch (Exception ex)
         {
@@ -153,7 +152,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
                 return;
             }
 
-            var moved = _customerLatitude != location.Latitude || _customerLongitude != location.Longitude;
+            var moved = location.HasMovedFrom(_customerLatitude, _customerLongitude);
             _customerLatitude = location.Latitude;
             _customerLongitude = location.Longitude;
             LocationLabel = location.Label;
@@ -199,8 +198,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
             await _realtimeLock.WaitAsync();
             try
             {
-                await _realtimeService.UnsubscribeAsync();
-                _subscribedScopeKey = null;
+                await _realtimeService.UnsubscribeAsync(this);
             }
             finally
             {
@@ -213,6 +211,12 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         }
     }
 
+    // Two feeds, because the dashboard shows two live things. The ticket follows the whole
+    // business's queue while one is held — the position changes when somebody else is served, not
+    // only when the customer's own row does — and falls back to the customer's own entries when
+    // there is no ticket. Upcoming bookings only ever turn on the customer's own rows, so that one
+    // is always customer scoped. Re-subscribing to the same feed is a no-op in the service, so this
+    // is safe to call on every refresh.
     public async Task EnsureRealtimeSubscriptionAsync()
     {
         if (_customerId == Guid.Empty) return;
@@ -220,26 +224,20 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         await _realtimeLock.WaitAsync();
         try
         {
-            var desiredKey = ActiveEntry is not null
-                ? $"business:{ActiveEntry.BusinessId}"
-                : $"customer:{_customerId}";
-
-            if (desiredKey == _subscribedScopeKey) return;
-
-            // await _realtimeService.UnsubscribeAsync(); //ReAdd later TODO messing up manage subscription
-
             if (ActiveEntry is not null)
             {
-                await _realtimeService.SubscribeAsync("business_id", ActiveEntry.BusinessId.ToString(),
+                await _realtimeService.SubscribeAsync(this, "business_id", ActiveEntry.BusinessId.ToString(),
                     () => MainThread.InvokeOnMainThreadAsync(RefreshActiveEntryAsync));
             }
             else
             {
-                await _realtimeService.SubscribeAsync("customer_id", _customerId.ToString(),
+                await _realtimeService.SubscribeAsync(this, "customer_id", _customerId.ToString(),
                     () => MainThread.InvokeOnMainThreadAsync(RefreshActiveEntryAsync));
             }
 
-            _subscribedScopeKey = desiredKey;
+            await _realtimeService.SubscribeAsync(this, "customer_id", _customerId.ToString(),
+                () => MainThread.InvokeOnMainThreadAsync(RefreshUpcomingBookingsAsync),
+                table: "bookings");
         }
         catch (Exception ex)
         {
@@ -248,6 +246,29 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         finally
         {
             _realtimeLock.Release();
+        }
+    }
+
+    public void ApplyUpcomingBookings(List<UpcomingBookingResponse> bookings)
+    {
+        UpcomingBookings.Clear();
+        foreach (var booking in bookings.Take(UpcomingBookingsShown))
+            UpcomingBookings.Add(booking);
+
+        OnPropertyChanged(nameof(HasUpcomingBookings));
+    }
+
+    public async Task RefreshUpcomingBookingsAsync()
+    {
+        try
+        {
+            if (_customerId == Guid.Empty) return;
+
+            ApplyUpcomingBookings(await _bookingService.GetMyUpcomingBookingsAsync(_customerId));
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
         }
     }
 
@@ -265,29 +286,44 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         }
     }
 
+    // Everything here reads a different thing and none of it needs anything from the others, so it
+    // goes out in one wave. Serially it was the sum of five round trips before the first business
+    // row appeared. The business list is awaited first so a failure in one of the smaller reads
+    // cannot keep the page's main content off screen.
     [RelayCommand]
     public async Task LoadAsync()
     {
         IsLoading = true;
         try
         {
-            await RefreshActiveEntryAsync();
+            var isSignedIn = _customerId != Guid.Empty;
 
-            _allBusinesses = await _businessService.GetBrowseBusinessesAsync(
+            var entryTask = _queueService.GetMyActiveEntryAsync();
+            var businessesTask = _businessService.GetBrowseBusinessesAsync(
                 SelectedCategory?.Key, customerLatitude: _customerLatitude, customerLongitude: _customerLongitude);
+            var nameTask = isSignedIn ? _profileService.GetMyDisplayNameAsync(_customerId) : null;
+            var bookingsTask = isSignedIn ? _bookingService.GetMyUpcomingBookingsAsync(_customerId) : null;
+            var visitsTask = isSignedIn ? _queueService.GetMyVisitsAsync(_customerId) : null;
+
+            _allBusinesses = await businessesTask;
             ApplyBusinessFilter();
 
-            if (_customerId != Guid.Empty)
-            {
-                var bookings = await _bookingService.GetMyUpcomingBookingsAsync(_customerId);
-                UpcomingBookings.Clear();
-                foreach (var b in bookings.Take(3))
-                    UpcomingBookings.Add(b);
-                OnPropertyChanged(nameof(HasUpcomingBookings));
+            ActiveEntry = await entryTask;
+            OnPropertyChanged(nameof(HasActiveEntry));
 
-                var visits = await _queueService.GetMyVisitsAsync(_customerId);
+            if (nameTask is not null)
+            {
+                var displayName = await nameTask;
+                CustomerDisplayName = string.IsNullOrWhiteSpace(displayName) ? null : displayName;
+            }
+
+            if (bookingsTask is not null)
+                ApplyUpcomingBookings(await bookingsTask);
+
+            if (visitsTask is not null)
+            {
                 FrequentBusinesses.Clear();
-                foreach (var item in BuildFrequentBusinesses(visits))
+                foreach (var item in BuildFrequentBusinesses(await visitsTask))
                     FrequentBusinesses.Add(item);
                 OnPropertyChanged(nameof(HasFrequentBusinesses));
             }
@@ -301,6 +337,11 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
             IsLoading = false;
             IsRefreshing = false;
             OnPropertyChanged(nameof(IsBusinessesEmpty));
+
+            // Not awaited: joining the channel is a websocket handshake, and it was the first thing
+            // the load waited on — RefreshActiveEntryAsync opened it before a single row was asked
+            // for.
+            _ = EnsureRealtimeSubscriptionAsync();
         }
     }
 

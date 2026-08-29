@@ -73,6 +73,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
 
     private IDispatcherTimer? _tickTimer;
     private bool _hasAppeared;
+    private bool _isVisible;
 
     // Held as a task, not a list, so the requests banner and the agenda can both await the one
     // in-flight fetch instead of racing to issue their own.
@@ -160,6 +161,10 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
 
             // IsClosedDay reads the hours, which may have landed after the rows did.
             RefreshDayStates();
+
+            // Appearing fires before Loaded on Android, so the first pass through
+            // OnAppearingAsync had no business id to filter on and skipped the subscription.
+            await SubscribeRealtimeAsync();
         }
         catch (Exception ex)
         {
@@ -178,12 +183,9 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         {
             await base.OnAppearingAsync();
 
-            if (_businessId == Guid.Empty)
-                return;
+            _isVisible = true;
 
-            await _realtimeService.SubscribeAsync("business_id", _businessId.ToString(),
-                async () => await MainThread.InvokeOnMainThreadAsync(RefreshAsync),
-                table: "bookings");
+            await SubscribeRealtimeAsync();
 
             StartTicking();
 
@@ -205,8 +207,26 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         try
         {
             await base.OnDisappearingAsync();
+            _isVisible = false;
             StopTicking();
-            await _realtimeService.UnsubscribeAsync();
+            await _realtimeService.UnsubscribeAsync(this);
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    public async Task SubscribeRealtimeAsync()
+    {
+        try
+        {
+            if (!_isVisible || _businessId == Guid.Empty)
+                return;
+
+            await _realtimeService.SubscribeAsync(this, "business_id", _businessId.ToString(),
+                async () => await MainThread.InvokeOnMainThreadAsync(RefreshAsync),
+                table: "bookings");
         }
         catch (Exception ex)
         {

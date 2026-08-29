@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Mirrors Resources/Styles/Colors.xaml. These three names are what the Android theme reads for
+    the system bars, the text cursor and selection handles, and the ripple — leave them stale and
+    the OS chrome around the app is a different palette to the app itself.
+-->
 <resources>
-    <color name="colorPrimary">#E8621A</color>
-    <color name="colorPrimaryDark">#3D2314</color>
-    <color name="colorAccent">#E8621A</color>
+    <color name="colorPrimary">#39FF7A</color>
+    <color name="colorPrimaryDark">#141821</color>
+    <color name="colorAccent">#A45EFF</color>
 </resources>

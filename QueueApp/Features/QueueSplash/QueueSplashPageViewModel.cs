@@ -39,7 +39,7 @@ public class QueueSplashPageViewModel : BaseViewModel
 
             if (!isValid)
             {
-                await _navigationService.NavigateAsync($"/{NavigationPaths.LoginPage}");
+                await _navigationService.NavigateAsync($"/{NavigationPaths.Login}");
                 return;
             }
 
@@ -50,7 +50,7 @@ public class QueueSplashPageViewModel : BaseViewModel
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
-            await _navigationService.NavigateAsync($"/{NavigationPaths.LoginPage}");
+            await _navigationService.NavigateAsync($"/{NavigationPaths.Login}");
         }
     }
 

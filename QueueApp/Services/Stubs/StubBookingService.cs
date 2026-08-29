@@ -171,6 +171,21 @@ public class StubBookingService : IBookingService
         return Task.FromResult<AgendaBookingResponse?>(booking);
     }
 
+    public Task<AgendaBookingResponse?> SetCustomerNameAsync(Guid bookingId, string customerName)
+    {
+        var booking = _agenda.FirstOrDefault(b => b.Id == bookingId);
+        if (booking is not null)
+        {
+            booking.Details = new BookingDetails
+            {
+                CustomerName = customerName,
+                CreatedBy = "customer",
+            };
+        }
+
+        return Task.FromResult<AgendaBookingResponse?>(booking);
+    }
+
     public Task<AgendaBookingResponse?> MoveBookingAsync(
         Guid bookingId, Guid operatorId, DateTimeOffset startsAt, DateTimeOffset endsAt)
     {

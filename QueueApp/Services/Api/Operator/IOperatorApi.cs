@@ -36,6 +36,14 @@ public interface IOperatorApi
         [AliasAs("operator_id")] string operatorIdEq,
         [AliasAs("order")] string order = "day_of_week.asc,start_time.asc");
 
+    // Every window across a set of resources in one request. The trading-hours union needs all of
+    // them and does not care which operator each came from, so fanning out one request per operator
+    // was N round trips for a single answer.
+    [Get("/operator_availability")]
+    Task<List<OperatorAvailabilityResponse>> GetAvailabilityForOperatorsAsync(
+        [AliasAs("operator_id")] string operatorIdIn,
+        [AliasAs("order")] string order = "day_of_week.asc,start_time.asc");
+
     [Post("/operator_availability")]
     Task<List<OperatorAvailabilityResponse>> CreateAvailabilityAsync([Body] CreateAvailabilityRequest request);
 

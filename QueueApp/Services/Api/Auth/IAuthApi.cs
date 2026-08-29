@@ -3,7 +3,6 @@ using QueueApp.Services.Api.Auth.Models;
 
 namespace QueueApp.Services.Api.Auth;
 
-// Supabase Auth (GoTrue) lives at /auth/v1 off the project root.
 public interface IAuthApi
 {
     [Post("/auth/v1/token?grant_type=password")]
@@ -14,4 +13,7 @@ public interface IAuthApi
 
     [Post("/auth/v1/token?grant_type=refresh_token")]
     Task<AuthTokenResponse> RefreshTokenAsync([Body] RefreshTokenRequest request);
+
+    [Post("/rest/v1/rpc/is_phone_available")]
+    Task<bool> IsPhoneAvailableAsync([Body] PhoneCheckRequest request);
 }

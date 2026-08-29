@@ -1,8 +1,9 @@
-using System.Diagnostics;
+using System.Net;
 using QueueApp.Constants;
 using QueueApp.Services.Api.Auth;
 using QueueApp.Services.Api.Auth.Models;
 using QueueApp.Services.Storage;
+using Refit;
 
 namespace QueueApp.Services.Auth;
 
@@ -21,45 +22,43 @@ public class AuthService : IAuthService
 
     public Task<string?> GetUserIdAsync() => _secureStorage.GetAsync(SupabaseConfig.UserIdKey);
 
-    public async Task<bool> SignInAsync(string email, string password)
+    public async Task<AuthTokenResponse> SignInAsync(string email, string password)
     {
-        try
-        {
-            var response = await _authApi.SignInAsync(new SignInRequest { Email = email, Password = password });
-            await SetSessionAsync(response.AccessToken, response.RefreshToken, response.ExpiresIn);
-
-            if (response.User is not null)
-                await _secureStorage.SetAsync(SupabaseConfig.UserIdKey, response.User.Id.ToString());
-
-            return true;
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"SignIn error: {ex.Message}");
-            return false;
-        }
+        var response = await _authApi.SignInAsync(new SignInRequest { Email = email, Password = password });
+        await PersistSessionAsync(response);
+        return response;
     }
 
-    public async Task<bool> SignUpAsync(string email, string password)
+    public async Task<AuthTokenResponse> SignUpAsync(string email, string password, string displayName, string phone)
+    {
+        var response = await _authApi.SignUpAsync(new SignUpRequest
+        {
+            Email = email,
+            Password = password,
+            Data = new SignUpMetadata
+            {
+                DisplayName = displayName,
+                Phone = phone
+            }
+        });
+
+        await PersistSessionAsync(response);
+        return response;
+    }
+
+    public async Task<bool> IsPhoneAvailableAsync(string phone)
     {
         try
         {
-            var response = await _authApi.SignUpAsync(new SignUpRequest { Email = email, Password = password });
-
-            if (!string.IsNullOrEmpty(response.AccessToken))
-            {
-                await SetSessionAsync(response.AccessToken, response.RefreshToken, response.ExpiresIn);
-
-                if (response.User is not null)
-                    await _secureStorage.SetAsync(SupabaseConfig.UserIdKey, response.User.Id.ToString());
-            }
-
-            return true;
+            return await _authApi.IsPhoneAvailableAsync(new PhoneCheckRequest { Phone = phone });
         }
-        catch (Exception ex)
+        catch (ApiException ex) when (ex.StatusCode is HttpStatusCode.NotFound
+                                          or HttpStatusCode.Unauthorized
+                                          or HttpStatusCode.Forbidden)
         {
-            System.Diagnostics.Debug.WriteLine($"SignUp error: {ex.Message}");
-            return false;
+            // TODO: drop this fallback once is_phone_available is deployed to every environment.
+            System.Diagnostics.Debug.WriteLine($"Phone availability check unavailable: {ex.StatusCode}");
+            return true;
         }
     }
 
@@ -84,10 +83,8 @@ public class AuthService : IAuthService
 
         try
         {
-            Debug.WriteLine("Access token expired, attempting to refresh...");
             var response = await _authApi.RefreshTokenAsync(new RefreshTokenRequest { RefreshToken = refreshToken });
             await SetSessionAsync(response.AccessToken, response.RefreshToken, response.ExpiresIn);
-            Debug.WriteLine("Refreshed Token successfully.");
             return true;
         }
         catch (Exception ex)
@@ -116,6 +113,16 @@ public class AuthService : IAuthService
         await _secureStorage.RemoveAsync(SupabaseConfig.UserIdKey);
     }
 
-    public Task<bool> IsAuthenticatedAsync()
-        => EnsureValidSessionAsync();
+    public Task<bool> IsAuthenticatedAsync() => EnsureValidSessionAsync();
+
+    private async Task PersistSessionAsync(AuthTokenResponse response)
+    {
+        if (string.IsNullOrEmpty(response.AccessToken))
+            return;
+
+        await SetSessionAsync(response.AccessToken, response.RefreshToken, response.ExpiresIn);
+
+        if (response.User is not null)
+            await _secureStorage.SetAsync(SupabaseConfig.UserIdKey, response.User.Id.ToString());
+    }
 }

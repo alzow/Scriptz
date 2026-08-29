@@ -237,4 +237,16 @@
         </Setter>
     </Style>
 
+    <Style x:Key="brd12_Danger" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource RedPale}"/>
+        <Setter Property="Stroke" Value="{StaticResource DangerDim}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="Padding" Value="14,11"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="12"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>
