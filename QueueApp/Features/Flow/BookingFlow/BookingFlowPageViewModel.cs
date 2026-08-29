@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.Messaging;
 using MPowerKit;
 using MPowerKit.Navigation;
 using QueueApp.Constants;
@@ -27,10 +28,11 @@ public partial class BookingFlowPageViewModel : FlowPageViewModelBase
         IBookingService bookingService,
         IAuthService authService,
         IQueuePopupService popupService,
-        IProfileService profileService)
+        IProfileService profileService,
+        IMessenger messenger)
         : base(navigationService, secureStorageService, businessService, queueService,
             operatorService, serviceOfferingsService, bookingService, authService,
-            popupService, profileService)
+            popupService, profileService, messenger)
     {
     }
 

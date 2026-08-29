@@ -197,7 +197,7 @@ public partial class HistoryPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    public void OpenRow(HistoryRow row)
+    public async Task OpenRowAsync(HistoryRow row)
     {
         try
         {
@@ -209,12 +209,15 @@ public partial class HistoryPageViewModel : BaseViewModel
                 [NavigationKeys.BusinessId] = row.BusinessId,
                 [NavigationKeys.OpenedFromTabs] = true,
             };
-            _messenger.Send(new NavigateAwayFromTabsMessage(
-                $"/NavigationPage/{NavigationPaths.BusinessDetailPage}", navParams, true));
+            // Modal, so the tabbed page and every tab's feed stay standing underneath and the way
+            // back is a dismissal rather than a shell rebuilt from scratch.
+            await NavigationService.NavigateAsync(
+                $"NavigationPage/{NavigationPaths.BusinessDetailPage}", navParams,
+                modal: true, animated: false);
         }
         catch (Exception ex)
         {
-            _ = HandleExceptionAsync(ex);
+            await HandleExceptionAsync(ex);
         }
     }
 
@@ -223,7 +226,9 @@ public partial class HistoryPageViewModel : BaseViewModel
     {
         try
         {
-            _messenger.Send(new NavigateAwayFromTabsMessage($"/NavigationPage/{NavigationPaths.CategoryPickerPage}"));
+            // Browse is the tab next door, not a new screen — this used to navigate to a bare
+            // CategoryPickerPage, which threw the whole tabbed shell away to show a tab it already had.
+            _messenger.Send(new SelectTabMessage(NavigationPaths.CategoryPickerPage));
         }
         catch (Exception ex)
         {

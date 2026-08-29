@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
 using MPowerKit;
 using MPowerKit.Navigation;
 using QueueApp.Constants;
@@ -9,7 +8,6 @@ using QueueApp.Features.BookingAgenda.Sheets;
 using QueueApp.Shared.Domain;
 using QueueApp.Framework.Base;
 using QueueApp.Framework.Extensions;
-using QueueApp.Framework.Messages;
 using QueueApp.Services.Api.Booking;
 using QueueApp.Services.Api.Booking.Models;
 using QueueApp.Services.Api.Business;
@@ -98,7 +96,6 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     private readonly IServiceOfferingsService _serviceOfferingsService;
     private readonly IQueueRealtimeService _realtimeService;
     private readonly IQueuePopupService _popupService;
-    private readonly IMessenger _messenger;
 
     public BookingAgendaPageViewModel(
         INavigationService navigationService,
@@ -108,8 +105,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         IOperatorService operatorService,
         IServiceOfferingsService serviceOfferingsService,
         IQueueRealtimeService realtimeService,
-        IQueuePopupService popupService,
-        IMessenger messenger)
+        IQueuePopupService popupService)
         : base(navigationService, secureStorageService)
     {
         _businessService = businessService;
@@ -118,7 +114,6 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         _serviceOfferingsService = serviceOfferingsService;
         _realtimeService = realtimeService;
         _popupService = popupService;
-        _messenger = messenger;
     }
 
     // Two waves of requests rather than a chain of ten. Everything here needs the business id and
@@ -994,11 +989,12 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
             if (preferredStart is { } start)
                 parameters.Add(NavigationKeys.PreferredStart, start);
 
-            // The agenda is a tab, so pushing from here would bury the flow inside the tab's own
-            // stack with the tab bar still on screen. The flow gets the whole window, and comes
-            // back by rebuilding the tabs on the agenda.
-            _messenger.Send(new NavigateAwayFromTabsMessage(
-                $"/NavigationPage/{NavigationPaths.BookingFlowPage}", parameters, true));
+            // The agenda is a tab, so a plain push would bury the flow inside the tab's own stack
+            // with the tab bar still on screen. Modally it gets the whole window, and comes back by
+            // dismissing onto the agenda it left — still standing, because a modal does not replace it.
+            await NavigationService.NavigateAsync(
+                $"NavigationPage/{NavigationPaths.BookingFlowPage}", parameters,
+                modal: true, animated: false);
         }
         catch (Exception ex)
         {

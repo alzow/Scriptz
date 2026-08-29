@@ -56,6 +56,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     private List<QueueEntryResponse> _entries = new();
     private List<QueueSummaryRow> _summary = new();
     private bool _isVisible;
+    private bool _hasAppeared;
 
     private readonly IQueueService _queueService;
     private readonly IBusinessService _businessService;
@@ -94,6 +95,9 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
             _businessId = parameters is not null && parameters.TryGetValue(NavigationKeys.BusinessId, out var idObj)
                 ? (Guid)idObj
                 : await _businessService.GetOwnedBusinessIdAsync();
+
+            // The beat StartTicking skipped because Appearing ran before this did.
+            _ = _businessService.HeartbeatAsync(_businessId);
 
             var business = await _businessService.GetBusinessAsync(_businessId);
             BusinessName = business?.Name ?? "Queue";
@@ -137,6 +141,14 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
             await SubscribeRealtimeAsync();
 
             StartTicking();
+
+            // Coming back from another tab, or from a page pushed over this one. The feed was
+            // released while the board was away, so nothing has been putting changes into Sections
+            // and what is on screen is as old as the moment it left.
+            if (_hasAppeared)
+                await LoadQueueAsync();
+
+            _hasAppeared = true;
         }
         catch (Exception ex)
         {
@@ -168,12 +180,21 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         {
             IsLoading = true;
 
-            _operators = await _operatorService.GetOperatorsAsync(_businessId);
-            _services = await _serviceOfferingsService.GetActiveServicesAsync(_businessId);
-            _entries = await _queueService.GetActiveEntriesAsync(_businessId);
-            _summary = await _queueService.GetQueueSummaryAsync(_businessId);
+            // Five independent reads. Awaited one after another they cost five round trips of
+            // latency, and this runs again on every realtime event, so the board spent most of a
+            // refresh waiting rather than fetching.
+            var operatorsTask = _operatorService.GetOperatorsAsync(_businessId);
+            var servicesTask = _serviceOfferingsService.GetActiveServicesAsync(_businessId);
+            var entriesTask = _queueService.GetActiveEntriesAsync(_businessId);
+            var summaryTask = _queueService.GetQueueSummaryAsync(_businessId);
+            var completedTask = SafeCompletedTodayAsync();
 
-            var completedToday = await SafeCompletedTodayAsync();
+            _operators = await operatorsTask;
+            _services = await servicesTask;
+            _entries = await entriesTask;
+            _summary = await summaryTask;
+
+            var completedToday = await completedTask;
             var avg = AverageServiceMinutes(completedToday);
 
             await MainThread.InvokeOnMainThreadAsync(() =>
@@ -416,7 +437,11 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     {
         try
         {
-            _ = _businessService.HeartbeatAsync(_businessId);
+            // Appearing runs before Loaded, so on the first pass there is no business to beat for
+            // yet — without this the board PATCHes /businesses?id=eq.00000000-0000-0000-0000-000000000000
+            // on every launch. OnLoadedAsync beats once itself as soon as the id is known.
+            if (_businessId != Guid.Empty)
+                _ = _businessService.HeartbeatAsync(_businessId);
 
             _tickTimer = Application.Current!.Dispatcher.CreateTimer();
             _tickTimer.Interval = TimeSpan.FromSeconds(BoardConstants.TickIntervalSeconds);
@@ -453,7 +478,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         {
             RefreshTickText();
 
-            if (++_ticks % BoardConstants.HeartbeatTicks == 0)
+            if (++_ticks % BoardConstants.HeartbeatTicks == 0 && _businessId != Guid.Empty)
                 _ = _businessService.HeartbeatAsync(_businessId);
         }
         catch (Exception ex)

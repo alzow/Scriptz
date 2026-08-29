@@ -11,107 +11,115 @@
              IconImageSource="icon_dashboard"
              Style="{StaticResource NavigationPageStyle}">
 
-    <RefreshView IsRefreshing="{Binding IsRefreshing}"
-            Command="{Binding RefreshCommand}">
-        <ScrollView>
-            <VerticalStackLayout Padding="16"
-                    Spacing="0">
+    <!-- The greeting is the one part of the dashboard that stays put: it sits above the scroller
+         rather than inside it, so it does not slide away with the content. -->
+    <Grid RowDefinitions="Auto,*">
 
-                <!-- Greeting + notifications -->
-                <Grid ColumnDefinitions="*,Auto">
-                    <VerticalStackLayout Grid.Column="0"
-                            Spacing="4"
-                            VerticalOptions="Center">
-                        <helpers:WelcomeGreetingView Name="{Binding CustomerDisplayName}"/>
-                        <helpers:LocationBarView
-                            LocationLabel="{Binding LocationLabel}"
-                            IsResolving="{Binding IsResolvingLocation}"
-                            RefreshCommand="{Binding RefreshLocationCommand}"/>
-                    </VerticalStackLayout>
-                </Grid>
-
-                <!-- Search -->
-                <entry:QueueEntry Margin="0,16,0,0"
-                                  LeftIcon="ic_search"
-                                  Text="{Binding SearchText}"
-                                  Placeholder="Search barbers, car washes, clinics"
-                                  ShowClearTextButton="True"
-                                  ReturnType="Search"/>
-
-                <!-- Live queue hero, or the quiet idle band -->
-                <helpers:LiveQueueHeroView Margin="0,16,0,0"
-                                           IsVisible="{Binding HasActiveEntry}"
-                                           ActiveEntry="{Binding ActiveEntry}"
-                                           DirectionsCommand="{Binding OpenDirectionsCommand}"
-                                           LeaveCommand="{Binding LeaveQueueCommand}"
-                                           IsLeaving="{Binding IsLeavingQueue}"/>
-                <helpers:IdleDiscoveryBandView Margin="0,16,0,0"
-                                               IsVisible="{Binding HasActiveEntry, Converter={StaticResource InvertedBoolConverter}}"/>
-
-                <!-- Upcoming bookings -->
-                <Grid ColumnDefinitions="*,Auto"
-                        Margin="0,16,0,10"
-                        IsVisible="{Binding HasUpcomingBookings}">
-                    <Label Grid.Column="0"
-                            Text="UPCOMING"
-                            Style="{StaticResource SectionTitle}"/>
-                </Grid>
-                <helpers:UpcomingBookingsListView
-                    IsVisible="{Binding HasUpcomingBookings}"
-                    Items="{Binding UpcomingBookings}"
-                    CancelCommand="{Binding CancelBookingCommand}"/>
-
-                <!-- Categories -->
-                <!-- <Label Text="BROWSE BY CATEGORY" Style="{StaticResource SectionTitle}" Margin="0,26,0,12"/> -->
-                <helpers:CategoryCarouselView
-                    Margin="-16,16,-16,0"
-                    Categories="{Binding Categories}"
-                    SelectedCategory="{Binding SelectedCategory}"
-                    SelectCommand="{Binding SelectCategoryCommand}"/>
-
-                <!-- Nearby businesses -->
-                <Grid ColumnDefinitions="*,Auto"
-                        Margin="0,16,0,10">
-                    <Label Grid.Column="0"
-                            Text="NEAR YOU"
-                            Style="{StaticResource SectionTitle}"/>
-                    <Label Grid.Column="1"
-                            Text="See all"
-                            Style="{StaticResource lbl13_Bold_Orange}"
-                            FontSize="11">
-                        <Label.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding SeeAllBusinessesCommand}"/>
-                        </Label.GestureRecognizers>
-                    </Label>
-                </Grid>
-                <helpers:BrowseBusinessListView
-                    Items="{Binding Businesses}"
-                    OpenCommand="{Binding OpenBusinessCommand}"/>
-                <Label Text="No businesses match yet."
-                       Style="{StaticResource lbl13_Regular_TextLight}"
-                       IsVisible="{Binding IsBusinessesEmpty}"
-                       HorizontalOptions="Center"
-                       Margin="0,20,0,20"/>
-                <ActivityIndicator IsRunning="{Binding IsLoading}"
-                        IsVisible="{Binding IsLoading}"
-                                   Color="{StaticResource Green}"
-                        Margin="0,16,0,0"/>
-
-                <!-- Frequent -->
-                <Grid ColumnDefinitions="*,Auto"
-                        Margin="0,16,0,10"
-                        IsVisible="{Binding HasFrequentBusinesses}">
-                    <Label Grid.Column="0"
-                            Text="FREQUENTLY VISITED"
-                            Style="{StaticResource SectionTitle}"/>
-                </Grid>
-                <helpers:FrequentBusinessListView
-                    IsVisible="{Binding HasFrequentBusinesses}"
-                    Items="{Binding FrequentBusinesses}"
-                    OpenCommand="{Binding OpenBusinessCommand}"/>
-
+        <!-- Greeting + notifications -->
+        <Grid Grid.Row="0"
+                ColumnDefinitions="*,Auto"
+                Padding="16,16,16,0">
+            <VerticalStackLayout Grid.Column="0"
+                    Spacing="4"
+                    VerticalOptions="Center">
+                <helpers:WelcomeGreetingView Name="{Binding CustomerDisplayName}"/>
+                <helpers:LocationBarView
+                    LocationLabel="{Binding LocationLabel}"
+                    IsResolving="{Binding IsResolvingLocation}"
+                    RefreshCommand="{Binding RefreshLocationCommand}"/>
             </VerticalStackLayout>
-        </ScrollView>
-    </RefreshView>
+        </Grid>
+
+        <RefreshView Grid.Row="1"
+                IsRefreshing="{Binding IsRefreshing}"
+                Command="{Binding RefreshCommand}">
+            <ScrollView>
+                <VerticalStackLayout Padding="16,0,16,16"
+                        Spacing="0">
+
+                    <!-- Search -->
+                    <entry:QueueEntry Margin="0,16,0,0"
+                                      LeftIcon="ic_search"
+                                      Text="{Binding SearchText}"
+                                      Placeholder="Search barbers, car washes, clinics"
+                                      ShowClearTextButton="True"
+                                      ReturnType="Search"/>
+
+                    <!-- Live queue hero, or the quiet idle band -->
+                    <helpers:LiveQueueHeroView Margin="0,16,0,0"
+                                               IsVisible="{Binding HasActiveEntry}"
+                                               ActiveEntry="{Binding ActiveEntry}"
+                                               DirectionsCommand="{Binding OpenDirectionsCommand}"
+                                               LeaveCommand="{Binding LeaveQueueCommand}"
+                                               IsLeaving="{Binding IsLeavingQueue}"/>
+                    <helpers:IdleDiscoveryBandView Margin="0,16,0,0"
+                                                   IsVisible="{Binding HasActiveEntry, Converter={StaticResource InvertedBoolConverter}}"/>
+
+                    <!-- Upcoming bookings -->
+                    <Grid ColumnDefinitions="*,Auto"
+                            Margin="0,16,0,10"
+                            IsVisible="{Binding HasUpcomingBookings}">
+                        <Label Grid.Column="0"
+                                Text="UPCOMING"
+                                Style="{StaticResource SectionTitle}"/>
+                    </Grid>
+                    <helpers:UpcomingBookingsListView
+                        IsVisible="{Binding HasUpcomingBookings}"
+                        Items="{Binding UpcomingBookings}"
+                        CancelCommand="{Binding CancelBookingCommand}"/>
+
+                    <!-- Categories -->
+                    <!-- <Label Text="BROWSE BY CATEGORY" Style="{StaticResource SectionTitle}" Margin="0,26,0,12"/> -->
+                    <helpers:CategoryCarouselView
+                        Margin="-16,16,-16,0"
+                        Categories="{Binding Categories}"
+                        SelectedCategory="{Binding SelectedCategory}"
+                        SelectCommand="{Binding SelectCategoryCommand}"/>
+
+                    <!-- Nearby businesses -->
+                    <Grid ColumnDefinitions="*,Auto"
+                            Margin="0,16,0,10">
+                        <Label Grid.Column="0"
+                                Text="NEAR YOU"
+                                Style="{StaticResource SectionTitle}"/>
+                        <Label Grid.Column="1"
+                                Text="See all"
+                                Style="{StaticResource lbl13_Bold_Orange}"
+                                FontSize="11">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SeeAllBusinessesCommand}"/>
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </Grid>
+                    <helpers:BrowseBusinessListView
+                        Items="{Binding Businesses}"
+                        OpenCommand="{Binding OpenBusinessCommand}"/>
+                    <Label Text="No businesses match yet."
+                           Style="{StaticResource lbl13_Regular_TextLight}"
+                           IsVisible="{Binding IsBusinessesEmpty}"
+                           HorizontalOptions="Center"
+                           Margin="0,20,0,20"/>
+                    <ActivityIndicator IsRunning="{Binding IsLoading}"
+                            IsVisible="{Binding IsLoading}"
+                                       Color="{StaticResource Green}"
+                            Margin="0,16,0,0"/>
+
+                    <!-- Frequent -->
+                    <Grid ColumnDefinitions="*,Auto"
+                            Margin="0,16,0,10"
+                            IsVisible="{Binding HasFrequentBusinesses}">
+                        <Label Grid.Column="0"
+                                Text="FREQUENTLY VISITED"
+                                Style="{StaticResource SectionTitle}"/>
+                    </Grid>
+                    <helpers:FrequentBusinessListView
+                        IsVisible="{Binding HasFrequentBusinesses}"
+                        Items="{Binding FrequentBusinesses}"
+                        OpenCommand="{Binding OpenBusinessCommand}"/>
+
+                </VerticalStackLayout>
+            </ScrollView>
+        </RefreshView>
+    </Grid>
 
 </ContentPage>
