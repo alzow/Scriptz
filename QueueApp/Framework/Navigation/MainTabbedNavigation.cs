@@ -1,4 +1,6 @@
+using CommunityToolkit.Mvvm.Messaging;
 using QueueApp.Constants;
+using QueueApp.Framework.Messages;
 using QueueApp.Services.Api.Business;
 
 namespace QueueApp.Framework.Navigation;
@@ -49,5 +51,36 @@ public static class MainTabbedNavigation
         uri += $"&{KnownNavigationParameters.SelectTab}={tab}";
 
         return uri;
+    }
+
+    // True while a page sits over the tabs rather than in place of them.
+    private static bool TabsAreStillBehindUs =>
+        Application.Current?.Windows.FirstOrDefault()?.Navigation.ModalStack.Count > 0;
+
+    // The way home from any page reached through NavigateAwayFromTabsMessage. Those pages are pushed
+    // modally, so the tabbed page is still standing behind them and dismissing the modal is the whole
+    // journey: no owned-business lookup, no tabs to build, no feed to reload. The rebuild is kept
+    // only as the fallback for a window that has no modal on it — a page that got here some other
+    // way, or one left over after the shell was replaced.
+    public static async Task ReturnToTabsAsync(
+        INavigationService navigationService,
+        IBusinessService businessService,
+        IMessenger? messenger = null,
+        string? selectTab = null)
+    {
+        if (TabsAreStillBehindUs)
+        {
+            // Sent before the dismissal, not after: the tabbed page can switch tabs while it is
+            // still covered, so the tab change happens behind the modal instead of flashing once
+            // it has gone.
+            if (selectTab is not null && messenger is not null)
+                messenger.Send(new SelectTabMessage(selectTab));
+
+            await navigationService.GoBackAsync(modal: true);
+            return;
+        }
+
+        var (ownsBusiness, mode) = await TryGetOwnedBusinessAsync(businessService);
+        await navigationService.NavigateAsync(BuildMainTabbedUri(ownsBusiness, mode, selectTab));
     }
 }

@@ -708,15 +708,9 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         try
         {
             if (_openedFromTabs)
-            {
-                var (ownsBusiness, mode) = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
-                var uri = MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: ownsBusiness, manageMode: mode);
-                await NavigationService.NavigateAsync(uri);
-            }
+                await MainTabbedNavigation.ReturnToTabsAsync(NavigationService, _businessService);
             else
-            {
                 await NavigationService.GoBackAsync();
-            }
         }
         catch (Exception ex)
         {

@@ -995,10 +995,10 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
                 parameters.Add(NavigationKeys.PreferredStart, start);
 
             // The agenda is a tab, so pushing from here would bury the flow inside the tab's own
-            // stack with the tab bar still on screen. The flow gets the whole window, and comes
-            // back by rebuilding the tabs on the agenda.
+            // stack with the tab bar still on screen. The flow gets the whole window as a modal over
+            // the tabs, and comes back by dismissing it onto the agenda it left.
             _messenger.Send(new NavigateAwayFromTabsMessage(
-                $"/NavigationPage/{NavigationPaths.BookingFlowPage}", parameters, true));
+                $"NavigationPage/{NavigationPaths.BookingFlowPage}", parameters, true));
         }
         catch (Exception ex)
         {

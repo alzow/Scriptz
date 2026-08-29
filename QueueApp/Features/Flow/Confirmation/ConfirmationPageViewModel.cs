@@ -219,17 +219,15 @@ public partial class ConfirmationPageViewModel : BaseViewModel
         }
     }
 
-    // Back from here rebuilds the tabs rather than popping. Submitting replaced the stack with this
-    // page precisely so there is no committed flow behind it, and reaching it from the business
-    // landing's strip is the same journey a step later — either way the way out is the tabs.
+    // Back from here dismisses the whole modal rather than popping one page off it: the flow that
+    // reached this page is still on the stack underneath, and it has already been committed. Both
+    // the on-screen button and hardware back come through here, so there is no way into it.
     [RelayCommand]
     public async Task DoneAsync()
     {
         try
         {
-            var (ownsBusiness, mode) = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
-            await NavigationService.NavigateAsync(
-                MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: ownsBusiness, manageMode: mode));
+            await MainTabbedNavigation.ReturnToTabsAsync(NavigationService, _businessService);
         }
         catch (Exception ex)
         {

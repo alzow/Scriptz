@@ -210,7 +210,7 @@ public partial class HistoryPageViewModel : BaseViewModel
                 [NavigationKeys.OpenedFromTabs] = true,
             };
             _messenger.Send(new NavigateAwayFromTabsMessage(
-                $"/NavigationPage/{NavigationPaths.BusinessDetailPage}", navParams, true));
+                $"NavigationPage/{NavigationPaths.BusinessDetailPage}", navParams, true));
         }
         catch (Exception ex)
         {
@@ -223,7 +223,9 @@ public partial class HistoryPageViewModel : BaseViewModel
     {
         try
         {
-            _messenger.Send(new NavigateAwayFromTabsMessage($"/NavigationPage/{NavigationPaths.CategoryPickerPage}"));
+            // Browse is the tab next door, not a new screen — this used to navigate to a bare
+            // CategoryPickerPage, which threw the whole tabbed shell away to show a tab it already had.
+            _messenger.Send(new SelectTabMessage(NavigationPaths.CategoryPickerPage));
         }
         catch (Exception ex)
         {

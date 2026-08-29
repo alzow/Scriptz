@@ -444,7 +444,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
                 [NavigationKeys.OpenedFromTabs] = true,
             };
             _messenger.Send(new NavigateAwayFromTabsMessage(
-                $"/NavigationPage/{NavigationPaths.BusinessDetailPage}", navParams, true));
+                $"NavigationPage/{NavigationPaths.BusinessDetailPage}", navParams, true));
         }
         catch (Exception ex)
         {
@@ -462,7 +462,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
                 navParams[NavigationKeys.Category] = SelectedCategory.Key;
 
             _messenger.Send(new NavigateAwayFromTabsMessage(
-                $"/NavigationPage/{NavigationPaths.BusinessListPage}", navParams, true));
+                $"NavigationPage/{NavigationPaths.BusinessListPage}", navParams, true));
         }
         catch (Exception ex)
         {

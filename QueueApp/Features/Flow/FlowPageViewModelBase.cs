@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Net;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using MPowerKit;
 using MPowerKit.Navigation;
 using Refit;
@@ -131,6 +132,7 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
     private readonly IAuthService _authService;
     private readonly IQueuePopupService _popupService;
     private readonly IProfileService _profileService;
+    private readonly IMessenger _messenger;
 
     protected FlowPageViewModelBase(
         INavigationService navigationService,
@@ -142,9 +144,11 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
         IBookingService bookingService,
         IAuthService authService,
         IQueuePopupService popupService,
-        IProfileService profileService)
+        IProfileService profileService,
+        IMessenger messenger)
         : base(navigationService, secureStorageService)
     {
+        _messenger = messenger;
         _profileService = profileService;
         _businessService = businessService;
         _queueService = queueService;
@@ -311,24 +315,25 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
         }
     }
 
-    // One absolute navigation, not a pop followed by a push. Popping destroys this page, and the
-    // push that followed it was being issued from a view model whose page had already gone — which
-    // is why the confirmation never appeared. Replacing the stack also means back from the
-    // confirmation cannot walk into a flow that has already been committed.
+    // A push onto the modal this flow is already in, not an absolute navigation — an absolute one
+    // replaces the window's root, which would take the tabbed page standing behind the modal with
+    // it. Nothing is popped first either: popping destroys this page, and the push that followed was
+    // being issued from a view model whose page had already gone, which is why the confirmation
+    // never appeared. The committed flow stays on the stack below, and back from the confirmation
+    // cannot walk into it because both routes out of that page dismiss the whole modal.
     public async Task GoToConfirmationAsync() =>
         await NavigationService.NavigateAsync(
-            $"/NavigationPage/{NavigationPaths.ConfirmationPage}",
+            NavigationPaths.ConfirmationPage,
             new NavigationParameters { { NavigationKeys.BusinessId, BusinessId } });
 
-    // The tabs are rebuilt rather than popped back to: leaving them is an absolute navigation that
-    // dropped the tabbed page, so there is no stack entry left to return to.
+    // The tabs are still standing behind this modal, so leaving is a dismissal and selectTab is a
+    // message to the tabbed page rather than a whole shell rebuilt around the tab we want.
     public async Task ReturnToTabsAsync(string? selectTab = null)
     {
         try
         {
-            var (ownsBusiness, mode) = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
-            await NavigationService.NavigateAsync(
-                MainTabbedNavigation.BuildMainTabbedUri(ownsBusiness, mode, selectTab));
+            await MainTabbedNavigation.ReturnToTabsAsync(
+                NavigationService, _businessService, _messenger, selectTab);
         }
         catch (Exception ex)
         {
