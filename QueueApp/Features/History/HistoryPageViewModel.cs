@@ -210,7 +210,7 @@ public partial class HistoryPageViewModel : BaseViewModel
                 [NavigationKeys.OpenedFromTabs] = true,
             };
             _messenger.Send(new NavigateAwayFromTabsMessage(
-                $"NavigationPage/{NavigationPaths.BusinessDetailPage}", navParams, true));
+                $"NavigationPage/{NavigationPaths.BusinessDetailPage}", navParams));
         }
         catch (Exception ex)
         {

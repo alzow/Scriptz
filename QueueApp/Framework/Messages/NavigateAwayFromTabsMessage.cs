@@ -10,8 +10,7 @@ namespace QueueApp.Framework.Messages;
 // back to.
 public record NavigateAwayFromTabsMessage(
     string NavigationPath,
-    INavigationParameters? Parameters = null,
-    bool IsAnimated = false);
+    INavigationParameters? Parameters = null);
 
 // Sent by a page on its way out of the modal when the tabs underneath should land on a specific
 // tab. Only the tabbed page's own navigation service can select a tab, so it goes through the

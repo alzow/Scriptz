@@ -76,7 +76,7 @@ public static class MainTabbedNavigation
             if (selectTab is not null && messenger is not null)
                 messenger.Send(new SelectTabMessage(selectTab));
 
-            await navigationService.GoBackAsync(modal: true);
+            await navigationService.GoBackAsync(modal: true, animated: false);
             return;
         }
 

@@ -38,7 +38,7 @@ public partial class MainTabbedPageViewModel : BaseViewModel,
             try
             {
                 await NavigationService.NavigateAsync(
-                    message.NavigationPath, message.Parameters, modal: true, animated: message.IsAnimated);
+                    message.NavigationPath, message.Parameters, modal: true, animated: false);
             }
             catch (Exception ex)
             {

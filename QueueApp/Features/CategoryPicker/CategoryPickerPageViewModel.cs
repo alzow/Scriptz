@@ -31,6 +31,8 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     private double? _customerLatitude;
     private double? _customerLongitude;
     private readonly SemaphoreSlim _realtimeLock = new(1, 1);
+    private bool _isVisible;
+    private bool _hasAppeared;
     private const int UpcomingBookingsShown = 3;
     public IReadOnlyList<ServiceCategory> Categories { get; } = CategoryCatalog.All.Where(c => c.Available).ToList();
     public string? CustomerDisplayName { get; set; }
@@ -175,6 +177,8 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         await base.OnAppearingAsync();
         try
         {
+            _isVisible = true;
+
             if (_customerId == Guid.Empty)
             {
                 var userId = await _authService.GetUserIdAsync();
@@ -182,7 +186,30 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
                     _customerId = Guid.Parse(userId);
             }
 
-            await EnsureRealtimeSubscriptionAsync();
+            // Coming back from a page that was over the tabs — a booking or a queue join, most of
+            // the time. The feed was released while that page was up, so the ticket and the upcoming
+            // list are as old as the moment the dashboard left, and the thing the customer just did
+            // is exactly what is missing from them. The rest of the dashboard (businesses nearby,
+            // the display name, frequently visited) does not go stale on a detour, so this refreshes
+            // the two live things rather than reloading the whole screen.
+            //
+            // The first Appearing runs before Loaded on Android, and Loaded does the full load, so
+            // there is nothing to refresh on that pass.
+            if (_hasAppeared)
+            {
+                // RefreshActiveEntryAsync resubscribes once it knows whether a ticket is held, since
+                // that decides whether the feed is scoped to the business or to the customer.
+                var entryTask = RefreshActiveEntryAsync();
+                var bookingsTask = RefreshUpcomingBookingsAsync();
+                await entryTask;
+                await bookingsTask;
+            }
+            else
+            {
+                await EnsureRealtimeSubscriptionAsync();
+            }
+
+            _hasAppeared = true;
         }
         catch (Exception ex)
         {
@@ -195,6 +222,8 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         await base.OnDisappearingAsync();
         try
         {
+            _isVisible = false;
+
             await _realtimeLock.WaitAsync();
             try
             {
@@ -224,6 +253,11 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         await _realtimeLock.WaitAsync();
         try
         {
+            // Appearing and Disappearing are both fire-and-forget, so a subscribe that was already
+            // in flight can land after the page has gone. Checked inside the lock, so it sees the
+            // Disappearing that is waiting on it rather than racing it.
+            if (!_isVisible) return;
+
             if (ActiveEntry is not null)
             {
                 await _realtimeService.SubscribeAsync(this, "business_id", ActiveEntry.BusinessId.ToString(),
@@ -444,7 +478,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
                 [NavigationKeys.OpenedFromTabs] = true,
             };
             _messenger.Send(new NavigateAwayFromTabsMessage(
-                $"NavigationPage/{NavigationPaths.BusinessDetailPage}", navParams, true));
+                $"NavigationPage/{NavigationPaths.BusinessDetailPage}", navParams));
         }
         catch (Exception ex)
         {
@@ -462,7 +496,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
                 navParams[NavigationKeys.Category] = SelectedCategory.Key;
 
             _messenger.Send(new NavigateAwayFromTabsMessage(
-                $"NavigationPage/{NavigationPaths.BusinessListPage}", navParams, true));
+                $"NavigationPage/{NavigationPaths.BusinessListPage}", navParams));
         }
         catch (Exception ex)
         {

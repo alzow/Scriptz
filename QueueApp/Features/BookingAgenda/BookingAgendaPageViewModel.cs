@@ -998,7 +998,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
             // stack with the tab bar still on screen. The flow gets the whole window as a modal over
             // the tabs, and comes back by dismissing it onto the agenda it left.
             _messenger.Send(new NavigateAwayFromTabsMessage(
-                $"NavigationPage/{NavigationPaths.BookingFlowPage}", parameters, true));
+                $"NavigationPage/{NavigationPaths.BookingFlowPage}", parameters));
         }
         catch (Exception ex)
         {
