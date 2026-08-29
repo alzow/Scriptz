@@ -28,8 +28,7 @@
             </VerticalStackLayout>
 
             <Border Margin="20,0" Padding="15,6"
-                    BackgroundColor="{StaticResource Surface}"
-                    Stroke="{StaticResource Line}" StrokeThickness="1">
+                    Style="{StaticResource brd15_Card}">
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="17"/>
                 </Border.StrokeShape>
@@ -47,7 +46,7 @@
                         <Label Grid.Column="1" Text="{Binding ReviewPriceText, Source={x:Reference Root}}" Style="{StaticResource lbl14_Bold_TextDark}"/>
                     </Grid>
 
-                    <BoxView HeightRequest="1" BackgroundColor="{StaticResource Line}" Margin="0,4"/>
+                    <BoxView HeightRequest="1" Style="{StaticResource bx_Divider}" Margin="0,4"/>
 
                     <!-- The part the customer hasn't seen yet — shown before committing -->
                     <Grid ColumnDefinitions="*,Auto" Padding="0,11"

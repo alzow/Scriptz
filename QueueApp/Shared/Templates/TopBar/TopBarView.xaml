@@ -8,8 +8,7 @@
     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="20,14,20,6">
 
         <Border Grid.Column="0" WidthRequest="36" HeightRequest="36" Padding="0"
-                BackgroundColor="{StaticResource Surface}"
-                Stroke="{StaticResource Line}" StrokeThickness="1">
+                Style="{StaticResource brd16_Surface}">
             <Border.StrokeShape>
                 <RoundRectangle CornerRadius="11"/>
             </Border.StrokeShape>
@@ -23,8 +22,7 @@
         <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
             <Label Text="{Binding FlowTitle, Source={x:Reference Root}}" Style="{StaticResource lbl15_Bold_TextDark}"
                    IsVisible="{Binding IsFlowActive, Source={x:Reference Root}}"/>
-            <Label Text="{Binding BusinessName, Source={x:Reference Root}}" Style="{StaticResource lbl11_Bold_White}"
-                   TextColor="{StaticResource TextMuted}"/>
+            <Label Text="{Binding BusinessName, Source={x:Reference Root}}" Style="{StaticResource lbl11_Bold_TextMuted}"/>
         </VerticalStackLayout>
     </Grid>
 

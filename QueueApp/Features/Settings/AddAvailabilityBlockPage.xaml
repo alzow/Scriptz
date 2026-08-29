@@ -19,7 +19,7 @@
             <Label Text="Date" Style="{StaticResource lbl15_Bold_TextDark}"/>
             <DatePicker Date="{Binding Date}"
                         MinimumDate="{Binding MinimumDate}"
-                        TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}"
+                        Style="{StaticResource picker14_Inline}"
                         FontSize="16"/>
 
             <HorizontalStackLayout Spacing="10">
@@ -30,11 +30,11 @@
             <VerticalStackLayout Spacing="16" IsVisible="{Binding IsAllDay, Converter={StaticResource InvertedBoolConverter}}">
                 <Label Text="From" Style="{StaticResource lbl15_Bold_TextDark}"/>
                 <TimePicker Time="{Binding StartTime}"
-                            TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}"
+                            Style="{StaticResource timepicker14_Inline}"
                             FontSize="16"/>
                 <Label Text="Until" Style="{StaticResource lbl15_Bold_TextDark}"/>
                 <TimePicker Time="{Binding EndTime}"
-                            TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}"
+                            Style="{StaticResource timepicker14_Inline}"
                             FontSize="16"/>
             </VerticalStackLayout>
 

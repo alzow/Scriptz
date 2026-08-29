@@ -4,9 +4,7 @@
              x:Name="Root"
              x:Class="QueueApp.Features.CategoryPicker.Helpers.IdleDiscoveryBandView">
 
-    <Border BackgroundColor="{StaticResource Surface}"
-            Stroke="{StaticResource Line}" StrokeThickness="1"
-            StrokeDashArray="4,3"
+    <Border Style="{StaticResource brd_Ghost_Dashed}"
             Padding="18,20">
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="18"/>

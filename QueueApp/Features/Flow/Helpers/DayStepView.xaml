@@ -15,18 +15,7 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:DayChoiceItem">
                         <Border WidthRequest="64" Padding="4,11"
-                                Opacity="{Binding DayOpacity}"
-                                BackgroundColor="{StaticResource Surface}"
-                                Stroke="{StaticResource Line}" StrokeThickness="1">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="14"/>
-                            </Border.StrokeShape>
-                            <Border.Triggers>
-                                <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                    <Setter Property="Stroke" Value="{StaticResource Green}"/>
-                                    <Setter Property="BackgroundColor" Value="{StaticResource GreenSelectedFill}"/>
-                                </DataTrigger>
-                            </Border.Triggers>
+                                Style="{StaticResource brd14_DayTile_Selectable}">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer
                                     Command="{Binding SelectDayCommand, Source={x:Reference Root}}"
@@ -47,14 +36,10 @@
             </CollectionView>
 
             <ActivityIndicator IsRunning="{Binding IsLoadingDays, Source={x:Reference Root}}" IsVisible="{Binding IsLoadingDays, Source={x:Reference Root}}"
-                               Color="{StaticResource Green}" Margin="0,12,0,0"/>
+                               Style="{StaticResource ai_Accent}" Margin="0,12,0,0"/>
 
             <Border Margin="20,16,20,0" Padding="14,6"
-                    BackgroundColor="{StaticResource Surface}"
-                    Stroke="{StaticResource Line}" StrokeThickness="1">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="15"/>
-                </Border.StrokeShape>
+                    Style="{StaticResource brd15_Card}">
                 <VerticalStackLayout Spacing="0">
                     <Grid ColumnDefinitions="*,Auto" Padding="0,9">
                         <Label Grid.Column="0" Text="Selected" Style="{StaticResource lbl12_Regular_TextLight}"/>

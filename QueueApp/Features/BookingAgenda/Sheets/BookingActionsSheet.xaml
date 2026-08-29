@@ -14,8 +14,7 @@
         <ScrollView>
             <VerticalStackLayout Spacing="0">
 
-                <Border Style="{StaticResource brd6_Tag}"
-                        BackgroundColor="{StaticResource Line}"
+                <Border Style="{StaticResource brd2_Grabber}"
                         WidthRequest="38"
                         HeightRequest="4"
                         Margin="0,0,0,16"
@@ -27,10 +26,7 @@
                     <Border Grid.Column="0"
                             WidthRequest="48"
                             HeightRequest="48"
-                            BackgroundColor="{StaticResource SurfaceRaised}"
-                            Stroke="{StaticResource Line}"
-                            StrokeThickness="1"
-                            StrokeShape="Ellipse">
+                            Style="{StaticResource brd_Avatar_Ellipse}">
                         <Label Text="{Binding Initials, Source={x:Reference Root}}"
                                Style="{StaticResource lbl12_Mono_TextPrimary}"
                                HorizontalOptions="Center"
@@ -49,9 +45,7 @@
                     <Border Grid.Column="2"
                             WidthRequest="44"
                             HeightRequest="44"
-                            Style="{StaticResource brd13_Raised}"
-                            Stroke="{StaticResource Line}"
-                            StrokeThickness="1"
+                            Style="{StaticResource brd13_Raised_Lined}"
                             IsVisible="{Binding HasPhone, Source={x:Reference Root}}">
                         <Image Source="ic_phone"
                                 WidthRequest="18"
@@ -65,7 +59,7 @@
                 </Grid>
 
                 <BoxView HeightRequest="1"
-                        Color="{StaticResource Line}"
+                        Style="{StaticResource bx_Divider}"
                         Margin="0,0,0,14"/>
 
                 <Border Style="{StaticResource brd13_Raised}"
@@ -159,7 +153,7 @@
                 </VerticalStackLayout>
 
                 <BoxView HeightRequest="1"
-                        Color="{StaticResource Line}"
+                        Style="{StaticResource bx_Divider}"
                         Margin="0,16,0,4"/>
 
                 <Button Text="Cancel booking"

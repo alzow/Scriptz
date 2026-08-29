@@ -1,5 +1,6 @@
 using System.Windows.Input;
 using QueueApp.Services.Api.Queue.Models;
+using QueueApp.Framework.Theming;
 
 namespace QueueApp.Features.CategoryPicker.Helpers;
 
@@ -102,8 +103,8 @@ public partial class LiveQueueHeroView : ContentView
             var span = TimeSpan.FromSeconds(Math.Max(0, _remainingSeconds));
             CountdownLabel.Text = _remainingSeconds <= 0 ? "GO" : $"{span.Minutes:00}:{span.Seconds:00}";
             CountdownLabel.TextColor = _remainingSeconds <= 0
-                ? (Color)Application.Current!.Resources["Green"]
-                : (Color)Application.Current!.Resources["TextPrimary"];
+                ? ThemePalette.AccentText
+                : ThemePalette.TextInk;
         }
         catch (Exception)
         {

@@ -1,3 +1,5 @@
+using QueueApp.Framework.Theming;
+
 namespace QueueApp.Features.OperatorQueue.Models;
 
 public sealed class AssignTargetItem
@@ -12,6 +14,8 @@ public sealed class AssignTargetItem
 
     public bool IsPool { get; init; }
 
-    public double RowOpacity => IsSelectable ? 1 : 0.4;
+    // An operator who can't take this entry is dimmed by token, not by fading the row.
+    public Color NameColor => IsSelectable ? ThemePalette.TextInk : ThemePalette.TextDim;
+    public Color SubLabelColor => IsSelectable ? ThemePalette.TextMuted : ThemePalette.TextDim;
     public double SortWaitMinutes { get; init; }
 }

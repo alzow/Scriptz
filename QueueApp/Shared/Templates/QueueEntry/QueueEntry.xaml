@@ -6,12 +6,7 @@
     <StackLayout>
         <Border
             x:Name="QueueEntryBorder"
-            HeightRequest="50"
-            HorizontalOptions="Fill"
-            Stroke="{StaticResource Line}"
-            StrokeShape="RoundRectangle 16"
-            StrokeThickness="1"
-            BackgroundColor="{StaticResource Surface}">
+            Style="{StaticResource brd16_Entry}">
             <Grid
                 ColumnDefinitions="Auto,*,Auto"
                 RowDefinitions="Auto"
@@ -65,7 +60,7 @@
             x:Name="ErrorLabel"
             Margin="12,4,0,0"
             FontSize="12"
-            TextColor="{StaticResource Danger}"
+            Style="{StaticResource lbl13_Regular_Danger}"
             LineBreakMode="WordWrap"
             IsVisible="False"/>
     </StackLayout>

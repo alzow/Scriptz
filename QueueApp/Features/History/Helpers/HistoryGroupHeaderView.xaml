@@ -4,17 +4,9 @@
              xmlns:models="clr-namespace:QueueApp.Features.History.Models"
              x:DataType="models:HistoryGroup"
              x:Class="QueueApp.Features.History.Helpers.HistoryGroupHeaderView">
-    <Grid HeightRequest="40" Padding="20,0" BackgroundColor="{StaticResource DeepBackground}">
+    <Grid HeightRequest="40" Padding="20,0" Style="{StaticResource grid_Page}">
         <Label Text="{Binding Title}"
                VerticalOptions="Center"
-               FontFamily="RobotoBold" FontSize="10" CharacterSpacing="1.5"
-               LineBreakMode="NoWrap"
-               TextColor="{StaticResource TextFaint}">
-            <Label.Triggers>
-                <DataTrigger TargetType="Label" Binding="{Binding IsUpcoming}" Value="True">
-                    <Setter Property="TextColor" Value="{StaticResource Green}"/>
-                </DataTrigger>
-            </Label.Triggers>
-        </Label>
+               Style="{StaticResource lbl10_Bold_GroupHeader}"/>
     </Grid>
 </ContentView>

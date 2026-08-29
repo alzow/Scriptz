@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!--
+        Rules, dots, spinners and page grounds — the small painted things that are not a Border, a
+        Label or a Button. Each style sets colour only; every size, margin and alignment stays at
+        the use site, because those are layout and this pass does not touch layout.
+    -->
+
+    <!--
+        Dividers. BoxView paints Color over BackgroundColor, so both are set: a divider that
+        inherits the implicit BoxView style must not show a different colour underneath.
+    -->
+    <Style x:Key="bx_Divider" TargetType="BoxView">
+        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+    </Style>
+
+    <!--
+        Booking-flow progress rail. A finished step sits at the dim green edge colour and the step
+        you are on takes the full brand green, so "where am I" reads at a glance in both themes.
+    -->
+    <Style x:Key="bx3_Rail" TargetType="BoxView">
+        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Style.Triggers>
+            <DataTrigger TargetType="BoxView" Binding="{Binding IsDone}" Value="True">
+                <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource LightAccentBorder}, Dark={StaticResource DarkAccentBorder}}"/>
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightAccentBorder}, Dark={StaticResource DarkAccentBorder}}"/>
+            </DataTrigger>
+            <DataTrigger TargetType="BoxView" Binding="{Binding IsCurrent}" Value="True">
+                <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource LightAccent}, Dark={StaticResource DarkAccent}}"/>
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightAccent}, Dark={StaticResource DarkAccent}}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--
+        Presence and status dots. These are fills, so they stay the vivid brand colour in both
+        themes. The stroke is whatever surface the dot is punched out of, which is why there is one
+        per elevation rather than one shared style.
+    -->
+    <Style x:Key="ell_AccentDot" TargetType="Ellipse">
+        <Setter Property="Fill" Value="{AppThemeBinding Light={StaticResource LightAccent}, Dark={StaticResource DarkAccent}}"/>
+    </Style>
+
+    <Style x:Key="ell_AccentDot_OnBg" TargetType="Ellipse" BasedOn="{StaticResource ell_AccentDot}">
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBg}, Dark={StaticResource DarkBg}}"/>
+        <Setter Property="StrokeThickness" Value="2.5"/>
+    </Style>
+
+    <Style x:Key="ell_AccentDot_OnSurface" TargetType="Ellipse" BasedOn="{StaticResource ell_AccentDot}">
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+        <Setter Property="StrokeThickness" Value="2.5"/>
+    </Style>
+
+    <Style x:Key="ell_AccentDot_OnRaised" TargetType="Ellipse" BasedOn="{StaticResource ell_AccentDot}">
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
+        <Setter Property="StrokeThickness" Value="2.5"/>
+    </Style>
+
+    <Style x:Key="ell_PurpleDot" TargetType="Ellipse">
+        <Setter Property="Fill" Value="{AppThemeBinding Light={StaticResource LightPurple}, Dark={StaticResource DarkPurple}}"/>
+    </Style>
+
+    <!-- Open / closed dot on the agenda header. The page swaps the style, not the colour. -->
+    <Style x:Key="ell_DimDot" TargetType="Ellipse">
+        <Setter Property="Fill" Value="{AppThemeBinding Light={StaticResource LightTextDim}, Dark={StaticResource DarkTextDim}}"/>
+    </Style>
+
+    <!--
+        Spinners. A spinner is a thin stroke, so it takes the text variant rather than the fill:
+        neon green at 2px on a white sheet is not visible.
+    -->
+    <Style x:Key="ai_Accent" TargetType="ActivityIndicator">
+        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
+    </Style>
+
+    <Style x:Key="ai_Purple" TargetType="ActivityIndicator">
+        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource LightPurpleText}, Dark={StaticResource DarkPurpleText}}"/>
+    </Style>
+
+    <Style x:Key="ai_Muted" TargetType="ActivityIndicator">
+        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
+    </Style>
+
+    <!--
+        Page grounds. Several screens paint the root Grid rather than the Page, usually because a
+        sheet or an overlay sits in the same Grid.
+    -->
+    <Style x:Key="grid_Page" TargetType="Grid">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightBg}, Dark={StaticResource DarkBg}}"/>
+    </Style>
+
+    <Style x:Key="grid_Surface" TargetType="Grid">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+    </Style>
+
+    <!--
+        The "now" line across the agenda. It is a 1px rule, so it takes the text variant: the vivid
+        green would vanish against a light page at that weight.
+    -->
+    <Style x:Key="bx_NowLine" TargetType="BoxView">
+        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
+    </Style>
+
+    <!-- The wait bar behind a browse row. Its progress colour is data-bound off the wait bucket. -->
+    <Style x:Key="pb_WaitTrack" TargetType="ProgressBar">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
+    </Style>
+
+</ResourceDictionary>

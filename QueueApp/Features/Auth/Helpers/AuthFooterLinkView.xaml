@@ -6,7 +6,7 @@
 
     <VerticalStackLayout Spacing="16">
         <BoxView HeightRequest="1"
-                 BackgroundColor="{StaticResource CreamBorder}"
+                 Style="{StaticResource bx_Divider}"
                  Margin="0,8,0,0"/>
         <HorizontalStackLayout HorizontalOptions="Center" Spacing="4">
             <Label Text="{Binding PromptText, Source={x:Reference Root}}"

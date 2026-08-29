@@ -4,7 +4,7 @@
              x:Name="Root"
              x:Class="QueueApp.Features.Auth.Helpers.AuthBrandHeaderView">
 
-    <Grid BackgroundColor="{StaticResource Brown}" Padding="24,52,24,36">
+    <Grid Style="{StaticResource grid_Surface}" Padding="24,52,24,36">
         <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
             <Border Style="{StaticResource brd14_Orange}" WidthRequest="44" HeightRequest="44">
                 <Image Source="logo_monogram_reversed"

@@ -10,8 +10,7 @@
         <Label Text="Getting there" Style="{StaticResource lbl15_Bold_TextDark}" Padding="20,22,20,10"/>
 
         <Border Margin="20,0" Padding="13"
-                BackgroundColor="{StaticResource Surface}"
-                Stroke="{StaticResource Line}" StrokeThickness="1">
+                Style="{StaticResource brd16_Surface}">
             <Border.StrokeShape>
                 <RoundRectangle CornerRadius="15"/>
             </Border.StrokeShape>
@@ -20,8 +19,7 @@
             </Border.GestureRecognizers>
             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                 <Border Grid.Column="0" WidthRequest="42" HeightRequest="42" Padding="0"
-                        BackgroundColor="{StaticResource SurfaceRaised}"
-                        Stroke="{StaticResource Line}" StrokeThickness="1">
+                        Style="{StaticResource brd_Raised_Lined}">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="13"/>
                     </Border.StrokeShape>

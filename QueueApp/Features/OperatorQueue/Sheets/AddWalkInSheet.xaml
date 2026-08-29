@@ -14,18 +14,14 @@
         <ScrollView>
             <VerticalStackLayout Spacing="0">
 
-                <Border BackgroundColor="{StaticResource Line}" StrokeThickness="0"
+                <Border Style="{StaticResource brd2_Grabber}"
                         WidthRequest="38" HeightRequest="4" Margin="0,0,0,16"
-                        HorizontalOptions="Center">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="2"/>
-                    </Border.StrokeShape>
-                </Border>
+                        HorizontalOptions="Center"/>
 
                 <Label Text="{Binding TitleText, Source={x:Reference Root}}"
                        Style="{StaticResource lbl18_Bold_TextDark}"/>
 
-                <BoxView HeightRequest="1" Color="{StaticResource Line}" Margin="0,14"/>
+                <BoxView HeightRequest="1" Style="{StaticResource bx_Divider}" Margin="0,14"/>
 
                 <queueEntry:QueueEntry Text="{Binding CustomerName, Source={x:Reference Root}, Mode=TwoWay}"
                                        Placeholder="Name (optional)"

@@ -1,24 +1,33 @@
+using QueueApp.Framework.Theming;
+
 namespace QueueApp.Features.BookingAgenda.Models;
 
+/// <summary>
+/// Agenda row colours, resolved per access so a theme switch reaches rows built after it.
+/// The tints are solid tokens now rather than alpha over the row: an alpha tint composites to a
+/// different colour depending on whether it lands on the page or on a card, and at 5-16% over a
+/// light surface it disappears entirely.
+/// </summary>
 public static class AgendaPalette
 {
-    public static readonly Color Surface = Color.FromArgb("#1C222D");
-    public static readonly Color SurfaceRaised = Color.FromArgb("#252C39");
-    public static readonly Color Line = Color.FromArgb("#343D4D");
+    public static Color Surface => ThemePalette.Surface;
+    public static Color SurfaceRaised => ThemePalette.Raised;
+    public static Color Line => ThemePalette.Border;
 
-    public static readonly Color Green = Color.FromArgb("#39FF7A");
-    public static readonly Color GreenBorder = Color.FromArgb("#2E5F42");
-    public static readonly Color GreenTint = Color.FromArgb("#0D39FF7A");
+    // The status bar down the left of a row is a fill, so it keeps the vivid brand colour.
+    public static Color Green => ThemePalette.Accent;
+    public static Color GreenBorder => ThemePalette.AccentBorder;
+    public static Color GreenTint => ThemePalette.AccentTint;
 
-    public static readonly Color Purple = Color.FromArgb("#A45EFF");
-    public static readonly Color PurpleBorder = Color.FromArgb("#4A3670");
-    public static readonly Color PurpleTint = Color.FromArgb("#29A45EFF");
+    public static Color Purple => ThemePalette.Purple;
+    public static Color PurpleBorder => ThemePalette.PurpleBorder;
+    public static Color PurpleTint => ThemePalette.PurpleTint;
 
-    public static readonly Color Ink = Color.FromArgb("#F2F4F7");
-    public static readonly Color Muted = Color.FromArgb("#8A8F98");
-    public static readonly Color Dim = Color.FromArgb("#565C68");
-    public static readonly Color OnGreen = Color.FromArgb("#141821");
+    public static Color Ink => ThemePalette.TextInk;
+    public static Color Muted => ThemePalette.TextMuted;
+    public static Color Dim => ThemePalette.TextDim;
+    public static Color OnGreen => ThemePalette.TextOnAccent;
 
-    public static readonly Brush PurpleStroke = new SolidColorBrush(Purple);
-    public static readonly Brush PurpleDimStroke = new SolidColorBrush(PurpleBorder);
+    public static Brush PurpleStroke => ThemePalette.Brush("PurpleText");
+    public static Brush PurpleDimStroke => ThemePalette.Brush("PurpleBorder");
 }

@@ -6,7 +6,6 @@
              x:Class="QueueApp.Features.BusinessDetail.BusinessDetailPage"
              x:DataType="vm:BusinessDetailPageViewModel"
              Title="{Binding BusinessName}"
-             BackgroundColor="{StaticResource DeepBackground}"
              Style="{StaticResource NavigationPageStyle}">
 
     <Grid RowDefinitions="Auto,*">
@@ -76,7 +75,7 @@
 
         <ActivityIndicator Grid.Row="0" Grid.RowSpan="2"
                            IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
-                           Color="{StaticResource Green}"
+                           Style="{StaticResource ai_Accent}"
                            HorizontalOptions="Center" VerticalOptions="Center"/>
 
     </Grid>

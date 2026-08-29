@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using QueueApp.Framework.Theming;
 
 namespace QueueApp.Shared.Templates.AlzowSubPageHeader;
 
@@ -41,8 +42,11 @@ public partial class AlzowSubPageHeader : ContentView
         private set => SetValue(BackIconProperty, value);
     }
 
+    // Resolved per instance rather than as a static default: a static default would be evaluated
+    // before Application.Current exists, and a black title is invisible on the dark theme.
     public static readonly BindableProperty TitleColorProperty = BindableProperty.Create(
-        nameof(TitleColor), typeof(Color), typeof(AlzowSubPageHeader), Colors.Black);
+        nameof(TitleColor), typeof(Color), typeof(AlzowSubPageHeader), null,
+        defaultValueCreator: _ => ThemePalette.TextInk);
 
     public Color TitleColor
     {
@@ -56,18 +60,12 @@ public partial class AlzowSubPageHeader : ContentView
             header.ApplyTheme((bool)newValue);
     }
 
+    // Both branches resolved to the same ink even before theming; the header title is TextInk,
+    // which the app theme already flips for us.
     private void ApplyTheme(bool isDark)
     {
-        if (isDark)
-        {
-            BackIcon = "left_arrow_white";
-            TitleColor = (Color)Application.Current!.Resources["Cream"];
-        }
-        else
-        {
-            BackIcon = "left_arrow_white";
-            TitleColor = (Color)Application.Current!.Resources["TextDark"];
-        }
+        BackIcon = "left_arrow_white";
+        TitleColor = ThemePalette.TextInk;
     }
 
     public AlzowSubPageHeader()

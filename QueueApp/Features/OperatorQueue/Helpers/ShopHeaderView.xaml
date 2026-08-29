@@ -10,14 +10,11 @@
             <Label Text="{Binding BusinessName, Source={x:Reference Root}}"
                    Style="{StaticResource lbl24_Bold_TextDark}"
                    VerticalOptions="Center"/>
-            <Border BackgroundColor="{StaticResource LiveBadgeFill}" StrokeThickness="0"
+            <Border Style="{StaticResource brd7_AccentTag}"
                     Padding="8,4" VerticalOptions="Center"
                     IsVisible="{Binding IsLive, Source={x:Reference Root}}">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="7"/>
-                </Border.StrokeShape>
                 <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                    <Ellipse Fill="{StaticResource Green}" WidthRequest="6" HeightRequest="6"
+                    <Ellipse Style="{StaticResource ell_AccentDot}" WidthRequest="6" HeightRequest="6"
                              VerticalOptions="Center"/>
                     <Label Text="LIVE" Style="{StaticResource lbl9_Mono_Green}"
                            VerticalOptions="Center"/>

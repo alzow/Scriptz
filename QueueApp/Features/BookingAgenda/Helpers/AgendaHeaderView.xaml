@@ -12,26 +12,32 @@
                LineBreakMode="TailTruncation"
                VerticalOptions="Center"/>
 
-        <Border Grid.Column="1" Style="{StaticResource brd6_Tag}"
-                BackgroundColor="Transparent"
-                Stroke="{StaticResource Line}" StrokeThickness="1"
+        <Border Grid.Column="1" Style="{StaticResource brd6_Outline}"
                 Padding="8,4" VerticalOptions="Center">
             <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
                 <Ellipse WidthRequest="6" HeightRequest="6" VerticalOptions="Center"
-                         Fill="{StaticResource TextFaint}">
+                         Style="{StaticResource ell_DimDot}">
                     <Ellipse.Triggers>
                         <DataTrigger TargetType="Ellipse"
+                                     Binding="{Binding IsOpenNow, Source={x:Reference Root}}" Value="False">
+                            <Setter Property="Style" Value="{StaticResource ell_DimDot}"/>
+                        </DataTrigger>
+                        <DataTrigger TargetType="Ellipse"
                                      Binding="{Binding IsOpenNow, Source={x:Reference Root}}" Value="True">
-                            <Setter Property="Fill" Value="{StaticResource Green}"/>
+                            <Setter Property="Style" Value="{StaticResource ell_AccentDot}"/>
                         </DataTrigger>
                     </Ellipse.Triggers>
                 </Ellipse>
                 <Label Text="{Binding OpenLabel, Source={x:Reference Root}}"
-                       Style="{StaticResource lbl9_Mono_TextFaint}">
+                       Style="{StaticResource lbl9_Mono_ClosedNow}">
                     <Label.Triggers>
                         <DataTrigger TargetType="Label"
+                                     Binding="{Binding IsOpenNow, Source={x:Reference Root}}" Value="False">
+                            <Setter Property="Style" Value="{StaticResource lbl9_Mono_ClosedNow}"/>
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label"
                                      Binding="{Binding IsOpenNow, Source={x:Reference Root}}" Value="True">
-                            <Setter Property="TextColor" Value="{StaticResource Green}"/>
+                            <Setter Property="Style" Value="{StaticResource lbl9_Mono_OpenNow}"/>
                         </DataTrigger>
                     </Label.Triggers>
                 </Label>

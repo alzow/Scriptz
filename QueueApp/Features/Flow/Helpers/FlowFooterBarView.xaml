@@ -7,8 +7,7 @@
              x:Class="QueueApp.Features.Flow.Helpers.FlowFooterBarView">
 
     <Border Padding="18,13,18,18"
-            BackgroundColor="{StaticResource Surface}"
-            Stroke="{StaticResource Line}" StrokeThickness="0"
+            Style="{StaticResource brd_Surface_Flat}"
             IsVisible="{Binding IsFlowActive, Source={x:Reference Root}}">
         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
             <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">

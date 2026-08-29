@@ -17,9 +17,7 @@
 
             <Border Grid.Column="0"
                     WidthRequest="44" HeightRequest="44"
-                    BackgroundColor="{StaticResource SurfaceRaised}"
-                    Stroke="{StaticResource Line}"
-                    StrokeThickness="1"
+                    Style="{StaticResource brd_Raised_Lined}"
                     VerticalOptions="Center">
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="13"/>
@@ -31,12 +29,10 @@
 
             <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
                 <Label Text="{Binding BusinessName}"
-                       FontSize="14.5" FontAttributes="Bold" CharacterSpacing="-0.2"
-                       TextColor="{StaticResource TextPrimary}"
+                       Style="{StaticResource lbl14_Bold_HistoryRow}"
                        LineBreakMode="TailTruncation"/>
                 <Label Text="{Binding MetaLine}"
-                       FontSize="11.5"
-                       TextColor="{StaticResource TextMuted}"
+                       Style="{StaticResource lbl11_Regular_HistoryMeta}"
                        LineBreakMode="TailTruncation"/>
             </VerticalStackLayout>
 
@@ -53,13 +49,12 @@
                         <Image Source="ic_alert" WidthRequest="10" HeightRequest="10"
                                IsVisible="{Binding ShowWarningIcon}" VerticalOptions="Center"/>
                         <Label Text="{Binding StatusText}"
-                               FontFamily="RobotoBold" FontSize="9.5" CharacterSpacing="0.8"
+                               Style="{StaticResource lbl9_Bold_StatusPill}"
                                TextColor="{Binding StatusInk}"/>
                     </HorizontalStackLayout>
                 </Border>
                 <Label Text="{Binding TimeText}"
-                       FontFamily="RobotoRegular" FontSize="10" CharacterSpacing="0.5"
-                       TextColor="{StaticResource TextFaint}"
+                       Style="{StaticResource lbl10_Regular_Timestamp}"
                        HorizontalOptions="End"/>
             </VerticalStackLayout>
         </Grid>

@@ -21,7 +21,7 @@
                IsVisible="{Binding IsResolving, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}"/>
         <ActivityIndicator IsRunning="{Binding IsResolving, Source={x:Reference Root}}"
                             IsVisible="{Binding IsResolving, Source={x:Reference Root}}"
-                            Color="{StaticResource TextMuted}"
+                            Style="{StaticResource ai_Muted}"
                             WidthRequest="12" HeightRequest="12"
                             VerticalOptions="Center"/>
     </HorizontalStackLayout>

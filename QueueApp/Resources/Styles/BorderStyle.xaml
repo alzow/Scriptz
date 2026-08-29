@@ -6,11 +6,15 @@
     <!--
         Naming convention: brd{CornerRadius}_{BackgroundColor}
         e.g. brd14_White, brd20_Brown
+
+        Every colour resolves through AppThemeBinding over the raw tokens in Colors.xaml. Where a
+        style used a vivid accent as a thin stroke, it now takes the *Text variant: #39FF7A as a
+        1px stroke on a light page is 1.22:1 and disappears. Fills keep the vivid brand colour.
     -->
 
     <Style x:Key="brd10_White" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
-        <Setter Property="Stroke" Value="{StaticResource Line}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -20,8 +24,8 @@
     </Style>
 
     <Style x:Key="brd12_White" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
-        <Setter Property="Stroke" Value="{StaticResource Line}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -31,7 +35,7 @@
     </Style>
 
     <Style x:Key="brd12_Cream" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceRaised}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
         <Setter Property="StrokeThickness" Value="0"/>
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -41,8 +45,8 @@
     </Style>
 
     <Style x:Key="brd14_White" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
-        <Setter Property="Stroke" Value="{StaticResource Line}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
         <Setter Property="StrokeThickness" Value="1.5"/>
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -52,7 +56,7 @@
     </Style>
 
     <Style x:Key="brd14_Orange" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{StaticResource Purple}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightPurple}, Dark={StaticResource DarkPurple}}"/>
         <Setter Property="StrokeThickness" Value="0"/>
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -62,8 +66,8 @@
     </Style>
 
     <Style x:Key="brd16_White" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
-        <Setter Property="Stroke" Value="{StaticResource Line}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
         <Setter Property="StrokeThickness" Value="1.5"/>
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -73,8 +77,8 @@
     </Style>
 
     <Style x:Key="brd16_OrangePale" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceRaised}"/>
-        <Setter Property="Stroke" Value="{StaticResource Purple}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightPurpleText}, Dark={StaticResource DarkPurpleText}}"/>
         <Setter Property="StrokeThickness" Value="1.5"/>
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -84,8 +88,8 @@
     </Style>
 
     <Style x:Key="brd18_OrangePale" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceRaised}"/>
-        <Setter Property="Stroke" Value="{StaticResource Green}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -95,8 +99,8 @@
     </Style>
 
     <Style x:Key="brd20_White" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
-        <Setter Property="Stroke" Value="{StaticResource Line}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -106,7 +110,7 @@
     </Style>
 
     <Style x:Key="brd20_Brown" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceRaised}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
         <Setter Property="StrokeThickness" Value="0"/>
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -117,7 +121,7 @@
 
     <!-- Operator board -->
     <Style x:Key="brd13_Raised" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceRaised}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
         <Setter Property="StrokeThickness" Value="0"/>
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -128,8 +132,8 @@
 
     <!-- The now-serving card. Green edge, never a green fill — the fill belongs to Done. -->
     <Style x:Key="brd14_Serving" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceRaised}"/>
-        <Setter Property="Stroke" Value="{StaticResource GreenDim}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccentBorder}, Dark={StaticResource DarkAccentBorder}}"/>
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -145,8 +149,8 @@
         BoardConstants.PoolStarvationMinutes.
     -->
     <Style x:Key="brd16_Pool" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="#12A45EFF"/>
-        <Setter Property="Stroke" Value="#4A3670"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightPurpleTint}, Dark={StaticResource DarkPurpleTint}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightPurpleBorder}, Dark={StaticResource DarkPurpleBorder}}"/>
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -158,7 +162,7 @@
     <!-- Add walk-in: a ghost, because it is the least frequent action in the section. -->
     <Style x:Key="brd13_Ghost" TargetType="Border">
         <Setter Property="BackgroundColor" Value="Transparent"/>
-        <Setter Property="Stroke" Value="{StaticResource Line}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="StrokeDashArray" Value="4,3"/>
         <Setter Property="StrokeDashOffset" Value="0"/>
@@ -171,8 +175,8 @@
 
     <!-- Bottom sheet body: rounded at the top only, square where it meets the screen edge. -->
     <Style x:Key="brd22_Sheet" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
-        <Setter Property="Stroke" Value="{StaticResource Line}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -182,8 +186,8 @@
     </Style>
 
     <Style x:Key="brd11_Chip" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
-        <Setter Property="Stroke" Value="{StaticResource Line}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -193,7 +197,7 @@
     </Style>
 
     <Style x:Key="brd6_Tag" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{StaticResource SurfaceRaised}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
         <Setter Property="StrokeThickness" Value="0"/>
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -203,8 +207,8 @@
     </Style>
 
     <Style x:Key="brd14_Row" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
-        <Setter Property="Stroke" Value="{StaticResource Line}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
         <Setter Property="StrokeThickness" Value="1.5"/>
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -214,8 +218,8 @@
     </Style>
 
     <Style x:Key="brd13_Warning" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{StaticResource RedPale}"/>
-        <Setter Property="Stroke" Value="{StaticResource DangerDim}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightDangerTint}, Dark={StaticResource DarkDangerTint}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightDangerBorder}, Dark={StaticResource DarkDangerBorder}}"/>
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -226,7 +230,7 @@
 
     <!-- Status pill on a list row. Green is the confirmed default; pending swaps it for purple. -->
     <Style x:Key="brd20_StatusPill" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{StaticResource SoonestBadgeFill}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightAccentTint}, Dark={StaticResource DarkAccentTint}}"/>
         <Setter Property="StrokeThickness" Value="0"/>
         <Setter Property="Padding" Value="9,4"/>
         <Setter Property="HorizontalOptions" Value="End"/>
@@ -238,8 +242,8 @@
     </Style>
 
     <Style x:Key="brd12_Danger" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{StaticResource RedPale}"/>
-        <Setter Property="Stroke" Value="{StaticResource DangerDim}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightDangerTint}, Dark={StaticResource DarkDangerTint}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightDangerBorder}, Dark={StaticResource DarkDangerBorder}}"/>
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="Padding" Value="14,11"/>
         <Setter Property="StrokeShape">
@@ -247,6 +251,437 @@
                 <RoundRectangle CornerRadius="12"/>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <!--
+        ================================================================================
+        Selection states.
+
+        The selected chip carries a tint fill and an accent stroke. On dark the stroke is the vivid
+        #39FF7A it has always been; on light it deepens to AccentText, because a neon 1px stroke on
+        a pale tint is invisible. The trigger lives in the style rather than at the use site so no
+        page has to name a colour to describe "selected".
+        ================================================================================
+    -->
+
+    <Style x:Key="brd11_Chip_Selectable" TargetType="Border" BasedOn="{StaticResource brd11_Chip}">
+        <Style.Triggers>
+            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightAccentTint}, Dark={StaticResource DarkAccentTint}}"/>
+                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="brd14_Day_Selectable" TargetType="Border" BasedOn="{StaticResource brd14_White}">
+        <Style.Triggers>
+            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightAccentTint}, Dark={StaticResource DarkAccentTint}}"/>
+                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Booking-flow day tile: 14px radius but a 1px stroke, so it is not brd14_White. -->
+    <Style x:Key="brd14_DayTile_Selectable" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="14"/>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightAccentTint}, Dark={StaticResource DarkAccentTint}}"/>
+                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Service and operator choice rows in the flow. -->
+    <Style x:Key="brd15_Card" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="15"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd15_Row_Selectable" TargetType="Border" BasedOn="{StaticResource brd15_Card}">
+        <Style.Triggers>
+            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightAccentTint}, Dark={StaticResource DarkAccentTint}}"/>
+                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--
+        A time slot is the one selection that fills rather than tints: picking a time is the commit
+        in the booking flow. The fill stays the vivid brand green in both themes and the label goes
+        to TextOnAccent, which is 14.08:1 on it.
+    -->
+    <Style x:Key="brd11_Slot_Selectable" TargetType="Border" BasedOn="{StaticResource brd11_Chip}">
+        <Style.Triggers>
+            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightAccent}, Dark={StaticResource DarkAccent}}"/>
+                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccent}, Dark={StaticResource DarkAccent}}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- The 22px check circle beside a choice row. -->
+    <Style x:Key="brd11_Radio_Selectable" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="11"/>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Operator avatar in the flow: the ring goes green once that operator can take someone now. -->
+    <Style x:Key="brd21_Avatar_Available" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="21"/>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <DataTrigger TargetType="Border" Binding="{Binding IsAnyAvailable}" Value="True">
+                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccentBorder}, Dark={StaticResource DarkAccentBorder}}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="brd26_Avatar" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="26"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd_Avatar_Ellipse" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape" Value="Ellipse"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+
+    <!--
+        ================================================================================
+        Tints, pills and tags.
+        ================================================================================
+    -->
+
+    <!-- FASTEST beside an operator's name, and the LIVE badge on the board header. -->
+    <Style x:Key="brd6_AccentTag" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightAccentTint}, Dark={StaticResource DarkAccentTint}}"/>
+        <Setter Property="Stroke" Value="Transparent"/>
+        <Setter Property="StrokeThickness" Value="0"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="6"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd7_AccentTag" TargetType="Border" BasedOn="{StaticResource brd6_AccentTag}">
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="7"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd8_AccentTag" TargetType="Border" BasedOn="{StaticResource brd6_AccentTag}">
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="8"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Open / closed pill on a business landing header. Closed drops the tint for a plain outline. -->
+    <Style x:Key="brd8_OpenPill" TargetType="Border" BasedOn="{StaticResource brd8_AccentTag}"/>
+
+    <Style x:Key="brd8_ClosedPill" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="8"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd8_PurpleTag" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightPurpleTint}, Dark={StaticResource DarkPurpleTint}}"/>
+        <Setter Property="Stroke" Value="Transparent"/>
+        <Setter Property="StrokeThickness" Value="0"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="8"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd20_StatusPill_Purple" TargetType="Border" BasedOn="{StaticResource brd20_StatusPill}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightPurpleTint}, Dark={StaticResource DarkPurpleTint}}"/>
+    </Style>
+
+    <!-- Raised box with a purple edge: the pending-booking panel and the assign sheet's banner. -->
+    <Style x:Key="brd13_Raised_Purple" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightPurpleText}, Dark={StaticResource DarkPurpleText}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="13"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd14_PurpleTint" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightPurpleTint}, Dark={StaticResource DarkPurpleTint}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightPurpleBorder}, Dark={StaticResource DarkPurpleBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="14"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd16_Surface_Purple" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightPurpleText}, Dark={StaticResource DarkPurpleText}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="16"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--
+        The live card on a business landing. Its edge turns purple in booking mode, because booking
+        is the awaiting-resolution path — you ask for a slot and the shop confirms it.
+    -->
+    <Style x:Key="brd18_LiveCard" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="18"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd18_LiveCard_Booking" TargetType="Border" BasedOn="{StaticResource brd18_LiveCard}">
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightPurpleText}, Dark={StaticResource DarkPurpleText}}"/>
+    </Style>
+
+    <!-- The hero ring around the queue position on the browse dashboard. -->
+    <Style x:Key="brd_Hero_AccentRing" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
+        <Setter Property="StrokeThickness" Value="6"/>
+    </Style>
+
+    <!--
+        ================================================================================
+        Sundries.
+        ================================================================================
+    -->
+
+    <!-- The 38x4 grab handle at the top of a bottom sheet. -->
+    <Style x:Key="brd2_Grabber" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="StrokeThickness" Value="0"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="2"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Dashed empty state, e.g. a period with no slot long enough left in it. -->
+    <Style x:Key="brd12_Ghost" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeDashArray" Value="4,4"/>
+        <Setter Property="StrokeDashOffset" Value="0"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="12"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Outlined action, square-ish: "Browse nearby" on the history empty state. -->
+    <Style x:Key="brd_Outline_Action" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+    </Style>
+
+    <Style x:Key="brd16_Surface" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="16"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Plain surface fill with no edge: board section wells and the pool's inner rows. -->
+    <Style x:Key="brd_Surface_Flat" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+        <Setter Property="Stroke" Value="Transparent"/>
+        <Setter Property="StrokeThickness" Value="0"/>
+    </Style>
+
+    <Style x:Key="brd_Raised_Flat" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
+        <Setter Property="Stroke" Value="Transparent"/>
+        <Setter Property="StrokeThickness" Value="0"/>
+    </Style>
+
+    <Style x:Key="brd_Raised_Lined" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+    </Style>
+
+    <!-- History filter chips. Root-sourced triggers can't live in a style, so the page swaps style. -->
+    <Style x:Key="brd16_Chip" TargetType="Border" BasedOn="{StaticResource brd16_White}">
+        <Setter Property="Padding" Value="15,7"/>
+    </Style>
+
+    <Style x:Key="brd16_Chip_Selected" TargetType="Border" BasedOn="{StaticResource brd16_Chip}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightAccentTint}, Dark={StaticResource DarkAccentTint}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
+    </Style>
+
+    <!-- History empty state: a dashed well where a list of past visits would be. -->
+    <Style x:Key="brd26_GhostCircle" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeDashArray" Value="4,3"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="26"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- The entry being assigned: purple ring, because assignment is the unresolved thing here. -->
+    <Style x:Key="brd_Avatar_Purple" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightPurpleText}, Dark={StaticResource DarkPurpleText}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape" Value="Ellipse"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+
+    <Style x:Key="brd6_PurpleTag" TargetType="Border" BasedOn="{StaticResource brd8_PurpleTag}">
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="6"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Small outlined tag, e.g. the agenda header's open/closed capsule. -->
+    <Style x:Key="brd6_Outline" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="6"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd13_Raised_Lined" TargetType="Border" BasedOn="{StaticResource brd13_Raised}">
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+    </Style>
+
+    <Style x:Key="brd20_StatusPill_Selectable" TargetType="Border" BasedOn="{StaticResource brd20_StatusPill}">
+        <Style.Triggers>
+            <DataTrigger TargetType="Border" Binding="{Binding Status}" Value="pending">
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightPurpleTint}, Dark={StaticResource DarkPurpleTint}}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Idle discovery band: a dashed invitation, not a card. -->
+    <Style x:Key="brd_Ghost_Dashed" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeDashArray" Value="4,3"/>
+    </Style>
+
+    <Style x:Key="brd7_Raised_Tag" TargetType="Border" BasedOn="{StaticResource brd6_Tag}">
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="7"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--
+        QueueEntry's field. The code-behind swaps between these three as the entry gains focus and
+        as validation passes or fails, so the state lives in styles rather than in raw colours.
+    -->
+    <Style x:Key="brd16_Entry" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape" Value="RoundRectangle 16"/>
+        <Setter Property="HeightRequest" Value="50"/>
+        <Setter Property="HorizontalOptions" Value="Fill"/>
+    </Style>
+
+    <Style x:Key="brd16_Entry_Focused" TargetType="Border" BasedOn="{StaticResource brd16_Entry}">
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightPurpleText}, Dark={StaticResource DarkPurpleText}}"/>
+    </Style>
+
+    <Style x:Key="brd16_Entry_Error" TargetType="Border" BasedOn="{StaticResource brd16_Entry}">
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightDangerText}, Dark={StaticResource DarkDangerText}}"/>
     </Style>
 
 </ResourceDictionary>

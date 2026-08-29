@@ -17,12 +17,12 @@
 
             <Label Text="Start time" Style="{StaticResource lbl15_Bold_TextDark}"/>
             <TimePicker Time="{Binding StartTime}"
-                        TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray900}}"
+                        Style="{StaticResource timepicker14_Inline}"
                         FontSize="16"/>
 
             <Label Text="End time" Style="{StaticResource lbl15_Bold_TextDark}"/>
             <TimePicker Time="{Binding EndTime}"
-                        TextColor="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray900}}"
+                        Style="{StaticResource timepicker14_Inline}"
                         FontSize="16"/>
 
             <controls:AlzowLoadingButton
