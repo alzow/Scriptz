@@ -504,4 +504,33 @@
         </Style.Triggers>
     </Style>
 
+    <!--
+        Booking-flow day tile. A day with nothing free dims every line to TextDim, which is exactly
+        what that token is for — nothing here is something the customer needs to read, because the
+        day cannot be picked.
+    -->
+    <Style x:Key="lbl9_Mono_Day" TargetType="Label" BasedOn="{StaticResource lbl9_Mono_TextMuted}">
+        <Style.Triggers>
+            <DataTrigger TargetType="Label" Binding="{Binding IsFull}" Value="True">
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextDim}, Dark={StaticResource DarkTextDim}}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="lbl18_Bold_Day" TargetType="Label" BasedOn="{StaticResource lbl18_Bold_TextDark}">
+        <Style.Triggers>
+            <DataTrigger TargetType="Label" Binding="{Binding IsFull}" Value="True">
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextDim}, Dark={StaticResource DarkTextDim}}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="lbl9_Regular_Day" TargetType="Label" BasedOn="{StaticResource lbl9_Regular_TextLight}">
+        <Style.Triggers>
+            <DataTrigger TargetType="Label" Binding="{Binding IsFull}" Value="True">
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextDim}, Dark={StaticResource DarkTextDim}}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
 </ResourceDictionary>

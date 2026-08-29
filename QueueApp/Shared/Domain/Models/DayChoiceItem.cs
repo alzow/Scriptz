@@ -14,6 +14,5 @@ public sealed class DayChoiceItem : ObservableObject
     public bool IsFull { get; set; }
     public bool IsSelected { get; set; }
 
-    public double DayOpacity => IsFull ? 0.35 : 1;
     public bool IsSelectable => !IsFull;
 }

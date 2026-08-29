@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
              x:Name="Root"
              VerticalOptions="Start"
              x:Class="QueueApp.Features.BusinessDetail.Helpers.LandingHeaderView">
@@ -11,7 +12,7 @@
             <HorizontalStackLayout.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding GoBackCommand, Source={x:Reference Root}}"/>
             </HorizontalStackLayout.GestureRecognizers>
-            <Image Source="ic_chevron_left" WidthRequest="16" HeightRequest="16" VerticalOptions="Center"/>
+            <tpl:ThemedIcon Icon="ic_chevron_left" WidthRequest="16" HeightRequest="16" VerticalOptions="Center"/>
             <Label Text="Back" Style="{StaticResource lbl13_Regular_TextMid}" VerticalOptions="Center"/>
         </HorizontalStackLayout>
 

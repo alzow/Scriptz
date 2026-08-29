@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
              xmlns:models="clr-namespace:QueueApp.Features.CategoryPicker.Models"
              x:Name="Root"
              x:Class="QueueApp.Features.CategoryPicker.Helpers.FrequentBusinessListView">
@@ -22,7 +23,7 @@
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="14"/>
                             </Border.StrokeShape>
-                            <Image Source="ic_refresh" WidthRequest="24" HeightRequest="24"
+                            <tpl:ThemedIcon Icon="ic_refresh" WidthRequest="24" HeightRequest="24"
                                    HorizontalOptions="Center" VerticalOptions="Center"/>
                         </Border>
                         <VerticalStackLayout Grid.Column="1" Spacing="3">

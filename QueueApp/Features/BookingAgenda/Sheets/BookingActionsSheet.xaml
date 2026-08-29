@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <bottomsheet:BottomSheetPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
                              xmlns:bottomsheet="clr-namespace:QueueApp.Shared.Templates.BottomSheet"
                              xmlns:sheets="clr-namespace:QueueApp.Features.BookingAgenda.Sheets"
                              xmlns:models="clr-namespace:QueueApp.Features.BookingAgenda.Models"
@@ -47,7 +48,7 @@
                             HeightRequest="44"
                             Style="{StaticResource brd13_Raised_Lined}"
                             IsVisible="{Binding HasPhone, Source={x:Reference Root}}">
-                        <Image Source="ic_phone"
+                        <tpl:ThemedIcon Icon="ic_phone"
                                 WidthRequest="18"
                                 HeightRequest="18"
                                HorizontalOptions="Center"

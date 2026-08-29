@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
              xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
              x:Name="Root"
              VerticalOptions="Start"
@@ -14,7 +15,7 @@
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="24"/>
                 </Border.StrokeShape>
-                <Image Source="ic_clock" WidthRequest="42" HeightRequest="42"
+                <tpl:ThemedIcon Icon="ic_clock" WidthRequest="42" HeightRequest="42"
                        HorizontalOptions="Center" VerticalOptions="Center"/>
             </Border>
             <Label Text="Waiting on the shop" HorizontalOptions="Center" Margin="0,18,0,0"

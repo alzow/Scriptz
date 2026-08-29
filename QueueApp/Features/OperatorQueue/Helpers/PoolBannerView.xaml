@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
              xmlns:models="clr-namespace:QueueApp.Features.OperatorQueue.Models"
              x:Name="Root"
              VerticalOptions="Start"
@@ -22,7 +23,7 @@
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="12"/>
                     </Border.StrokeShape>
-                    <Image Source="ic_users" WidthRequest="18" HeightRequest="18"
+                    <tpl:ThemedIcon Icon="ic_users" WidthRequest="18" HeightRequest="18"
                            HorizontalOptions="Center" VerticalOptions="Center"/>
                 </Border>
 
@@ -31,7 +32,7 @@
                     <Label Text="{Binding PoolAgeText, Source={x:Reference Root}}" Style="{StaticResource lbl11_Regular_TextLight}"/>
                 </VerticalStackLayout>
 
-                <Image Grid.Column="2" Source="{Binding PoolChevron, Source={x:Reference Root}}"
+                <tpl:ThemedIcon Grid.Column="2" Icon="{Binding PoolChevron, Source={x:Reference Root}}"
                        WidthRequest="18" HeightRequest="18" Opacity="0.65"
                        VerticalOptions="Center"/>
 

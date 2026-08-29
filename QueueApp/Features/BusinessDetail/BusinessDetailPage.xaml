@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
              xmlns:vm="clr-namespace:QueueApp.Features.BusinessDetail"
              xmlns:bdHelpers="clr-namespace:QueueApp.Features.BusinessDetail.Helpers"
              x:Class="QueueApp.Features.BusinessDetail.BusinessDetailPage"
@@ -44,7 +45,7 @@
                         <Label Grid.Column="0" Text="{Binding ActiveStripText}"
                                Style="{StaticResource lbl14_Bold_TextDark}"
                                VerticalOptions="Center"/>
-                        <Image Grid.Column="1" Source="ic_chevron_right"
+                        <tpl:ThemedIcon Grid.Column="1" Icon="ic_chevron_right"
                                WidthRequest="18" HeightRequest="18" VerticalOptions="Center"/>
                     </Grid>
                     <Border.GestureRecognizers>

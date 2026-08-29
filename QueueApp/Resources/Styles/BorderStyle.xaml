@@ -297,6 +297,15 @@
                 <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightAccentTint}, Dark={StaticResource DarkAccentTint}}"/>
                 <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
             </DataTrigger>
+            <!--
+                A full day is not selectable, and it has to say so without opacity. It drops to the
+                page colour, so it reads as a hole in the strip rather than a card you can pick —
+                which is the same direction in both themes, where a fade is not.
+            -->
+            <DataTrigger TargetType="Border" Binding="{Binding IsFull}" Value="True">
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightBg}, Dark={StaticResource DarkBg}}"/>
+                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+            </DataTrigger>
         </Style.Triggers>
     </Style>
 

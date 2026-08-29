@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
              x:Name="Root"
              x:Class="QueueApp.Shared.Templates.QueueEntry.QueueEntry">
     <StackLayout>
@@ -11,7 +12,7 @@
                 ColumnDefinitions="Auto,*,Auto"
                 RowDefinitions="Auto"
                 VerticalOptions="Center">
-                <Image
+                <tpl:ThemedIcon
                     x:Name="ControlLeftIcon"
                     Grid.Column="0"
                     Margin="12,0,0,0"
@@ -20,7 +21,7 @@
                     MaximumWidthRequest="20"
                     HorizontalOptions="Start"
                     VerticalOptions="Center"
-                    Source="{Binding Source={x:Reference Root}, Path=LeftIcon}"
+                    Icon="{Binding Source={x:Reference Root}, Path=LeftIcon}"
                     IsVisible="{Binding Source={x:Reference Root}, Path=HasLeftIcon}"/>
 
                 <Entry
@@ -39,7 +40,7 @@
                     MaxLength="{Binding Source={x:Reference Root}, Path=MaxLength}"
                     ReturnType="{Binding Source={x:Reference Root}, Path=ReturnType}"/>
 
-                <ImageButton
+                <tpl:ThemedIconButton
                     x:Name="ClearButton"
                     Grid.Column="2"
                     Margin="0,0,12,0"
@@ -51,7 +52,7 @@
                     HorizontalOptions="End"
                     VerticalOptions="Center"
                     IsVisible="False"
-                    Source="ic_close"
+                    Icon="ic_close"
                     Clicked="OnClearButtonClicked"/>
             </Grid>
         </Border>

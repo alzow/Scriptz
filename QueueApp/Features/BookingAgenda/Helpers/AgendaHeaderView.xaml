@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
              x:Name="Root"
              VerticalOptions="Start"
              x:Class="QueueApp.Features.BookingAgenda.Helpers.AgendaHeaderView">
@@ -46,7 +47,7 @@
 
         <Border Grid.Column="2" WidthRequest="40" HeightRequest="40" Padding="0"
                 Style="{StaticResource brd12_White}">
-            <Image Source="ic_settings" WidthRequest="20" HeightRequest="20"
+            <tpl:ThemedIcon Icon="ic_settings" WidthRequest="20" HeightRequest="20"
                    HorizontalOptions="Center" VerticalOptions="Center"/>
             <Border.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding OpenSettingsCommand, Source={x:Reference Root}}"/>
