@@ -1,8 +1,9 @@
 namespace QueueApp.Services.Location;
 
-// Latitude/longitude plus a short human-readable label (suburb/locality) for display —
-// e.g. in the Browse dashboard's location bar.
-public record CustomerLocation(double Latitude, double Longitude, string Label)
+// Latitude/longitude plus a short human-readable label for display — e.g. in the Browse
+// dashboard's location bar. IsCoarse is true when Label only ever got to suburb level (reverse
+// geocoding returned no street, or failed outright) rather than a full street address.
+public record CustomerLocation(double Latitude, double Longitude, string Label, bool IsCoarse, DateTimeOffset ResolvedAt)
 {
     // Two fixes of a stationary phone are never bit-identical, so "has the customer moved" has to
     // be a distance question. Comparing the raw doubles made every fix a move, which re-fetched the
@@ -32,6 +33,20 @@ public record CustomerLocation(double Latitude, double Longitude, string Label)
     }
 }
 
+public enum LocationOutcome
+{
+    Resolved,
+    Coarse,
+    Denied,
+    Failed,
+}
+
+public sealed record LocationResolution(LocationOutcome Outcome, CustomerLocation? Location)
+{
+    public static LocationResolution Denied { get; } = new(LocationOutcome.Denied, null);
+    public static LocationResolution Failed { get; } = new(LocationOutcome.Failed, null);
+}
+
 public interface ILocationService
 {
     // Last resolved location, read from local cache only (no GPS fix, no permission prompt) —
@@ -39,7 +54,7 @@ public interface ILocationService
     Task<CustomerLocation?> GetCachedLocationAsync();
 
     // Requests permission if needed, gets a fresh GPS fix, reverse-geocodes it to a label, and
-    // caches the result. Returns null (never throws) if permission is denied, location services
-    // are off, or the fix times out — callers should fall back to suburb-only browsing.
-    Task<CustomerLocation?> RefreshLocationAsync();
+    // caches the result. Never throws — Denied/Failed distinguish a permission refusal from GPS
+    // timing out or erroring, since the Browse location bar shows a different message for each.
+    Task<LocationResolution> RefreshLocationAsync();
 }

@@ -11,23 +11,16 @@
              IconImageSource="icon_dashboard"
              Style="{StaticResource NavigationPageStyle}">
 
-    <!-- The greeting is the one part of the dashboard that stays put: it sits above the scroller
-         rather than inside it, so it does not slide away with the content. -->
+    <!-- The location bar is the one part of the dashboard that stays put: it sits above the
+         scroller rather than inside it, so it does not slide away with the content, and the
+         first business card is visible without scrolling. -->
     <Grid RowDefinitions="Auto,*">
 
-        <!-- Greeting + notifications -->
-        <Grid Grid.Row="0"
-                ColumnDefinitions="*,Auto"
-                Padding="16,16,16,0">
-            <VerticalStackLayout Grid.Column="0"
-                    Spacing="4"
-                    VerticalOptions="Center">
-                <helpers:WelcomeGreetingView Name="{Binding CustomerDisplayName}"/>
-                <helpers:LocationBarView
-                    LocationLabel="{Binding LocationLabel}"
-                    IsResolving="{Binding IsResolvingLocation}"
-                    RefreshCommand="{Binding RefreshLocationCommand}"/>
-            </VerticalStackLayout>
+        <Grid Grid.Row="0" Padding="16,16,16,0">
+            <helpers:LocationBarView
+                State="{Binding LocationState}"
+                Text="{Binding LocationBarText}"
+                RefreshCommand="{Binding OpenLocationSheetCommand}"/>
         </Grid>
 
         <RefreshView Grid.Row="1"
@@ -38,7 +31,7 @@
                         Spacing="0">
 
                     <!-- Search -->
-                    <entry:QueueEntry Margin="0,16,0,0"
+                    <entry:QueueEntry Margin="0,12,0,0"
                                       LeftIcon="ic_search"
                                       Text="{Binding SearchText}"
                                       Placeholder="Search barbers, car washes, clinics"
