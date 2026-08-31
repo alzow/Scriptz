@@ -23,6 +23,7 @@ public partial class BookingActionsSheet : BottomSheetPage
     public string NoteText { get; }
     public bool HasNote { get; }
     public bool HasPhone { get; }
+    public bool CanConfirm { get; }
     public bool CanComplete { get; }
     public bool CanMarkNoShow { get; }
     public bool CanUpdateCustomer { get; }
@@ -56,10 +57,16 @@ public partial class BookingActionsSheet : BottomSheetPage
         HasNote = booking?.HasNote ?? false;
         ProgressStatus = booking?.ProgressStatus ?? string.Empty;
 
-        CanComplete = booking?.CanComplete ?? false;
-        CanMarkNoShow = booking?.CanMarkNoShow ?? false;
-        CanUpdateCustomer = booking?.CanUpdateCustomer ?? false;
-        CanCancel = booking?.CanCancel ?? false;
+        // A pending booking has not been accepted yet, so the only answers it takes are confirm and
+        // decline. Marking one done, no-showing it, or posting progress to the customer would all be
+        // acting on work that was never agreed to, and "Cancel booking" is what Decline already does.
+        var isPending = booking?.IsPending ?? false;
+
+        CanConfirm = booking?.CanConfirm ?? false;
+        CanComplete = (booking?.CanComplete ?? false) && !isPending;
+        CanMarkNoShow = (booking?.CanMarkNoShow ?? false) && !isPending;
+        CanUpdateCustomer = (booking?.CanUpdateCustomer ?? false) && !isPending;
+        CanCancel = (booking?.CanCancel ?? false) && !isPending;
 
         _phone = booking?.CustomerPhone;
         HasPhone = booking?.HasPhone ?? false;
@@ -102,6 +109,12 @@ public partial class BookingActionsSheet : BottomSheetPage
         var days = (int)age.TotalDays;
         return days == 1 ? "Yesterday" : $"{days} days ago";
     }
+
+    private void OnConfirmClicked(object? sender, EventArgs e) =>
+        Close(new BookingActionResult(BookingAction.Confirm));
+
+    private void OnDeclineClicked(object? sender, EventArgs e) =>
+        Close(new BookingActionResult(BookingAction.Decline));
 
     private void OnCompleteClicked(object? sender, EventArgs e) =>
         Close(new BookingActionResult(BookingAction.Complete));

@@ -41,6 +41,7 @@
                                         RequestsStrokeThickness="{Binding RequestsStrokeThickness}"
                                         Requests="{Binding Requests}"
                                         ToggleRequestsCommand="{Binding ToggleRequestsCommand}"
+                                        OpenRequestCommand="{Binding OpenRequestCommand}"
                                         ConfirmRequestCommand="{Binding ConfirmRequestCommand}"
                                         DeclineRequestCommand="{Binding DeclineRequestCommand}"/>
 

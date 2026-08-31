@@ -32,6 +32,9 @@ public partial class RequestsBannerView : ContentView
     public static readonly BindableProperty ToggleRequestsCommandProperty = BindableProperty.Create(
         nameof(ToggleRequestsCommand), typeof(ICommand), typeof(RequestsBannerView));
 
+    public static readonly BindableProperty OpenRequestCommandProperty = BindableProperty.Create(
+        nameof(OpenRequestCommand), typeof(ICommand), typeof(RequestsBannerView));
+
     public static readonly BindableProperty ConfirmRequestCommandProperty = BindableProperty.Create(
         nameof(ConfirmRequestCommand), typeof(ICommand), typeof(RequestsBannerView));
 
@@ -90,6 +93,12 @@ public partial class RequestsBannerView : ContentView
     {
         get => (ICommand?)GetValue(ToggleRequestsCommandProperty);
         set => SetValue(ToggleRequestsCommandProperty, value);
+    }
+
+    public ICommand? OpenRequestCommand
+    {
+        get => (ICommand?)GetValue(OpenRequestCommandProperty);
+        set => SetValue(OpenRequestCommandProperty, value);
     }
 
     public ICommand? ConfirmRequestCommand
