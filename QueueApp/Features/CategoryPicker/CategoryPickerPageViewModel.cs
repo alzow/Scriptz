@@ -567,25 +567,6 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    public async Task SeeAllBusinessesAsync()
-    {
-        try
-        {
-            var navParams = new NavigationParameters();
-            if (SelectedCategory is not null)
-                navParams[NavigationKeys.Category] = SelectedCategory.Key;
-
-            await NavigationService.NavigateAsync(
-                $"NavigationPage/{NavigationPaths.BusinessListPage}", navParams,
-                modal: true, animated: false);
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
-        }
-    }
-
-    [RelayCommand]
     public async Task CancelBookingAsync(UpcomingBookingResponse booking)
     {
         booking.IsCancelling = true;

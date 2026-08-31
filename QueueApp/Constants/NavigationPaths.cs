@@ -4,18 +4,11 @@ public static class NavigationPaths
 {
     // ── App start ──────────────────────────────────────────────────────────────
     public const string AppStart             = "NavigationPage/QueueSplashPage";
-    public const string QueueSplashPage      = "QueueSplashPage";
 
     // ── Auth ───────────────────────────────────────────────────────────────────
-    public const string LoginPage            = "LoginPage";
     public const string RegisterPage         = "RegisterPage";
-
-    // ── Main (absolute — resets nav stack) ────────────────────────────────────
     public const string Login                = "/NavigationPage/LoginPage";
 
-    // ── Feature pages (relative — pushed onto stack) ──────────────────────────
-    public const string MedicationsListPage  = "MedicationsListPage";
-    public const string MedicationDetailPage = "MedicationDetailPage";
 
     // ── Queue (operator counter-tablet) ──────────────────────────────────────
     public const string OperatorQueuePage    = "OperatorQueuePage";
@@ -37,7 +30,6 @@ public static class NavigationPaths
     public const string BusinessLocationPage   = "BusinessLocationPage";
 
     // ── Browse (customer-facing) ───────────────────────────────────────────────
-    public const string BusinessListPage     = "BusinessListPage";
     public const string BusinessDetailPage   = "BusinessDetailPage";
     public const string BookingFlowPage      = "BookingFlowPage";
     public const string QueueFlowPage        = "QueueFlowPage";
