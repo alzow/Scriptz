@@ -46,8 +46,6 @@
                                                DirectionsCommand="{Binding OpenDirectionsCommand}"
                                                LeaveCommand="{Binding LeaveQueueCommand}"
                                                IsLeaving="{Binding IsLeavingQueue}"/>
-                    <helpers:IdleDiscoveryBandView Margin="0,16,0,0"
-                                                   IsVisible="{Binding HasActiveEntry, Converter={StaticResource InvertedBoolConverter}}"/>
 
                     <!-- Upcoming bookings -->
                     <Grid ColumnDefinitions="*,Auto"

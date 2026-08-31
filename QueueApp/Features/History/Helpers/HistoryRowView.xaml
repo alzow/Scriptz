@@ -8,7 +8,7 @@
              x:Class="QueueApp.Features.History.Helpers.HistoryRowView">
     <Border Style="{StaticResource brd16_White}"
             HeightRequest="72"
-            Margin="20,0,20,8"
+            Margin="16,0,16,8"
             Padding="12,0">
         <Border.GestureRecognizers>
             <TapGestureRecognizer Command="{Binding OpenCommand, Source={x:Reference Root}}"

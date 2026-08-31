@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Name="Root"
              x:Class="QueueApp.Features.History.Helpers.HistoryFilterBar">
-    <HorizontalStackLayout Spacing="8" Margin="20,16,20,4">
+    <HorizontalStackLayout Spacing="8" Margin="16,16,16,4">
         <Border Style="{StaticResource brd16_Chip}">
             <Border.Triggers>
                 <DataTrigger TargetType="Border" Binding="{Binding IsAllSelected, Source={x:Reference Root}}" Value="True">

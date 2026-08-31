@@ -4,7 +4,7 @@
              xmlns:models="clr-namespace:QueueApp.Features.History.Models"
              x:DataType="models:HistoryGroup"
              x:Class="QueueApp.Features.History.Helpers.HistoryGroupHeaderView">
-    <Grid HeightRequest="40" Padding="20,0" Style="{StaticResource grid_Page}">
+    <Grid HeightRequest="40" Padding="16,0" Style="{StaticResource grid_Page}">
         <Label Text="{Binding Title}"
                VerticalOptions="Center"
                Style="{StaticResource lbl10_Bold_GroupHeader}"/>

@@ -670,8 +670,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 var next = _hours.FindNextOpening(LocalTime.Now);
                 TertiaryStatLabel = next?.Label ?? "Closed";
                 TertiaryStatValue = next?.TimeText ?? "—";
-                CtaText = next is not null ? $"Booking opens {next.TimeText}" : "Currently closed";
-                IsCtaEnabled = true;
+                CtaText = "Book a slot";
+                IsCtaEnabled = ServiceRows.Count > 0 && _selectableOperators.Count > 0;
             }
         }
         catch (Exception ex)
