@@ -282,14 +282,6 @@
         </Setter>
     </Style>
 
-    <!--
-        A locked field. Same 16px shape as brd16_Entry, dropped to the page colour so it reads as
-        something the app is showing rather than something the customer can type into.
-    -->
-    <Style x:Key="brd16_Entry_Locked" TargetType="Border" BasedOn="{StaticResource brd16_Entry}">
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightBg}, Dark={StaticResource DarkBg}}"/>
-    </Style>
-
     <Style x:Key="brd12_Danger" TargetType="Border">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightDangerTint}, Dark={StaticResource DarkDangerTint}}"/>
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightDangerBorder}, Dark={StaticResource DarkDangerBorder}}"/>
@@ -740,6 +732,17 @@
 
     <Style x:Key="brd16_Entry_Error" TargetType="Border" BasedOn="{StaticResource brd16_Entry}">
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightDangerText}, Dark={StaticResource DarkDangerText}}"/>
+    </Style>
+
+    <!--
+        A locked field. Same 16px shape as brd16_Entry, dropped to the page colour so it reads as
+        something the app is showing rather than something the customer can type into.
+
+        Must stay *after* brd16_Entry: StaticResource in a ResourceDictionary only sees keys already
+        parsed above it, so a BasedOn that points further down the file throws at load.
+    -->
+    <Style x:Key="brd16_Entry_Locked" TargetType="Border" BasedOn="{StaticResource brd16_Entry}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightBg}, Dark={StaticResource DarkBg}}"/>
     </Style>
 
 </ResourceDictionary>
