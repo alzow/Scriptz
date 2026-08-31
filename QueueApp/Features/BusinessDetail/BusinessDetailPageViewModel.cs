@@ -619,7 +619,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 TertiaryStatLabel = next?.Label ?? "Closed";
                 TertiaryStatValue = next?.TimeText ?? "—";
                 CtaText = next is not null ? $"Queue opens {next.TimeText}" : "Queue is closed";
-                IsCtaEnabled = true;//TODO revert later after testing
+                IsCtaEnabled = true;//TODO revert later after testing. Make operator hours matter for this. Currently, the operator hours are not being used to determine if the queue is open or closed.
                 LiveFootnote = "The queue reopens when the shop does";
                 return;
             }
