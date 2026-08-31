@@ -14,6 +14,7 @@ using QueueApp.Services.Storage;
 using QueueApp.Services.Popup;
 using QueueApp.Services.Realtime;
 using QueueApp.Services.Location;
+using QueueApp.Services.Notifications;
 using CommunityToolkit.Mvvm.Messaging;
 #if USE_STUBS
 using QueueApp.Services.Stubs;
@@ -70,6 +71,12 @@ internal static class NavigationStartup
         // capabilities, not a Supabase dependency, and it already fails soft (returns null) when
         // permission is denied or no fix is available, so it doesn't need a stub.
         services.AddSingleton<ILocationService, LocationService>();
+
+        // Both are OS/device capabilities rather than Supabase ones, so like ILocationService they
+        // stay real in USE_STUBS builds: the permission check reads the phone, and the preferences
+        // live in Preferences.Default.
+        services.AddSingleton<INotificationPermissionService, NotificationPermissionService>();
+        services.AddSingleton<INotificationPreferencesService, NotificationPreferencesService>();
     }
 
     private static void RegisterApiServices(IServiceCollection services)

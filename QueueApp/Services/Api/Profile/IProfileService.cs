@@ -7,4 +7,6 @@ public interface IProfileService
     Task<string> GetMyDisplayNameAsync(Guid userId);
 
     Task<ProfileResponse?> GetMyProfileAsync(Guid userId);
+
+    Task UpdateMyProfileAsync(Guid userId, string? displayName, string? phone);
 }

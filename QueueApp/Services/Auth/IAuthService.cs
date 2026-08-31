@@ -6,6 +6,7 @@ public interface IAuthService
 {
     Task<string?> GetAccessTokenAsync();
     Task<string?> GetUserIdAsync();
+    Task<string?> GetUserEmailAsync();
     Task<AuthTokenResponse> SignInAsync(string email, string password);
     Task<AuthTokenResponse> SignUpAsync(string email, string password, string displayName, string phone);
     Task<bool> IsPhoneAvailableAsync(string phone);
@@ -13,4 +14,10 @@ public interface IAuthService
     Task SetSessionAsync(string accessToken, string? refreshToken, int expiresInSeconds);
     Task ClearSessionAsync();
     Task<bool> IsAuthenticatedAsync();
+
+    // Signs out of this device only — a GoTrue-side revoke is left for later, see AuthService.
+    Task SignOutAsync();
+
+    // See IAuthApi.DeleteMyAccountAsync: the backend RPC this calls doesn't exist yet.
+    Task DeleteAccountAsync();
 }

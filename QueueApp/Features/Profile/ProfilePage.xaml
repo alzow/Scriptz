@@ -3,93 +3,80 @@
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.Profile"
-             x:Name="Root"
+             xmlns:helpers="clr-namespace:QueueApp.Features.Profile.Helpers"
              x:DataType="vm:ProfilePageViewModel"
              IconImageSource="icon_profile"
              Title="Profile"
              Style="{StaticResource NavigationPageStyle}">
-    <VerticalStackLayout Spacing="8" Padding="20,24">
-        <Label Text="Profile" Style="{StaticResource lbl20_Bold_TextDark}"/>
-        <Label Text="Account details, T&amp;Cs, and becoming an operator will live here."
-               Style="{StaticResource lbl13_Regular_TextLight}"/>
 
-        <Label Text="APPEARANCE" Style="{StaticResource SectionTitle}" Margin="0,24,0,0"/>
+    <ScrollView>
+        <VerticalStackLayout Spacing="10" Padding="20,24,20,32">
 
-        <HorizontalStackLayout Spacing="8" Margin="0,8,0,0">
-            <Border Style="{StaticResource brd16_Chip}">
-                <Border.Triggers>
-                    <DataTrigger TargetType="Border" Binding="{Binding IsSystemTheme}" Value="True">
-                        <Setter Property="Style" Value="{StaticResource brd16_Chip_Selected}"/>
-                    </DataTrigger>
-                    <DataTrigger TargetType="Border" Binding="{Binding IsSystemTheme}" Value="False">
-                        <Setter Property="Style" Value="{StaticResource brd16_Chip}"/>
-                    </DataTrigger>
-                </Border.Triggers>
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding SetThemeCommand}" CommandParameter="System"/>
-                </Border.GestureRecognizers>
-                <Label Text="System" Style="{StaticResource lbl13_Chip}">
-                    <Label.Triggers>
-                        <DataTrigger TargetType="Label" Binding="{Binding IsSystemTheme}" Value="True">
-                            <Setter Property="Style" Value="{StaticResource lbl13_Chip_Selected}"/>
-                        </DataTrigger>
-                        <DataTrigger TargetType="Label" Binding="{Binding IsSystemTheme}" Value="False">
-                            <Setter Property="Style" Value="{StaticResource lbl13_Chip}"/>
-                        </DataTrigger>
-                    </Label.Triggers>
-                </Label>
-            </Border>
+            <Label Text="Profile" Style="{StaticResource lbl26_Bold_PageTitle}"/>
 
-            <Border Style="{StaticResource brd16_Chip}">
-                <Border.Triggers>
-                    <DataTrigger TargetType="Border" Binding="{Binding IsLightTheme}" Value="True">
-                        <Setter Property="Style" Value="{StaticResource brd16_Chip_Selected}"/>
-                    </DataTrigger>
-                    <DataTrigger TargetType="Border" Binding="{Binding IsLightTheme}" Value="False">
-                        <Setter Property="Style" Value="{StaticResource brd16_Chip}"/>
-                    </DataTrigger>
-                </Border.Triggers>
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding SetThemeCommand}" CommandParameter="Light"/>
-                </Border.GestureRecognizers>
-                <Label Text="Light" Style="{StaticResource lbl13_Chip}">
-                    <Label.Triggers>
-                        <DataTrigger TargetType="Label" Binding="{Binding IsLightTheme}" Value="True">
-                            <Setter Property="Style" Value="{StaticResource lbl13_Chip_Selected}"/>
-                        </DataTrigger>
-                        <DataTrigger TargetType="Label" Binding="{Binding IsLightTheme}" Value="False">
-                            <Setter Property="Style" Value="{StaticResource lbl13_Chip}"/>
-                        </DataTrigger>
-                    </Label.Triggers>
-                </Label>
-            </Border>
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14" Margin="0,14,0,4">
+                <Border Grid.Column="0"
+                        Style="{StaticResource brd_Avatar_Ellipse}"
+                        WidthRequest="52" HeightRequest="52">
+                    <Label Text="{Binding Initials}"
+                           Style="{StaticResource lbl16_Mono_TextPrimary}"
+                           HorizontalOptions="Center" VerticalOptions="Center"/>
+                </Border>
 
-            <Border Style="{StaticResource brd16_Chip}">
-                <Border.Triggers>
-                    <DataTrigger TargetType="Border" Binding="{Binding IsDarkTheme}" Value="True">
-                        <Setter Property="Style" Value="{StaticResource brd16_Chip_Selected}"/>
-                    </DataTrigger>
-                    <DataTrigger TargetType="Border" Binding="{Binding IsDarkTheme}" Value="False">
-                        <Setter Property="Style" Value="{StaticResource brd16_Chip}"/>
-                    </DataTrigger>
-                </Border.Triggers>
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding SetThemeCommand}" CommandParameter="Dark"/>
-                </Border.GestureRecognizers>
-                <Label Text="Dark" Style="{StaticResource lbl13_Chip}">
-                    <Label.Triggers>
-                        <DataTrigger TargetType="Label" Binding="{Binding IsDarkTheme}" Value="True">
-                            <Setter Property="Style" Value="{StaticResource lbl13_Chip_Selected}"/>
-                        </DataTrigger>
-                        <DataTrigger TargetType="Label" Binding="{Binding IsDarkTheme}" Value="False">
-                            <Setter Property="Style" Value="{StaticResource lbl13_Chip}"/>
-                        </DataTrigger>
-                    </Label.Triggers>
-                </Label>
-            </Border>
-        </HorizontalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                    <Label Text="{Binding DisplayName}" Style="{StaticResource lbl18_Bold_TextDark}"/>
+                    <Label Text="{Binding Email}"
+                           Style="{StaticResource lbl13_Regular_TextLight}"
+                           IsVisible="{Binding HasEmail}"/>
+                </VerticalStackLayout>
+            </Grid>
 
-        <Label Text="Dark is the default. Light exists for a shop window at midday."
-               Style="{StaticResource lbl11_Regular_TextFaint}" Margin="0,10,0,0"/>
-    </VerticalStackLayout>
+            <helpers:ProfileStatusView IsAllowed="{Binding NotificationsAllowed}"
+                                       Headline="{Binding StatusHeadline}"
+                                       Detail="{Binding StatusDetail}"
+                                       ActionText="{Binding StatusActionText}"
+                                       ActionCommand="{Binding TurnOnNotificationsCommand}"
+                                       Margin="0,4,0,10"/>
+
+            <Label Text="YOU" Style="{StaticResource SectionTitle}" Margin="2,6,0,2"/>
+
+            <helpers:ProfileRowView Title="Your details"
+                                    Detail="{Binding DetailsRowDetail}"
+                                    Command="{Binding OpenDetailsCommand}"/>
+
+            <helpers:ProfileRowView Title="Notifications"
+                                    Detail="{Binding NotificationsRowDetail}"
+                                    Command="{Binding OpenNotificationsCommand}"/>
+
+            <Label Text="YOUR BUSINESS" Style="{StaticResource SectionTitle}" Margin="2,16,0,2"
+                   IsVisible="{Binding OwnsBusiness}"/>
+
+            <helpers:ProfileRowView Title="{Binding BusinessName}"
+                                    Detail="{Binding BusinessDetail}"
+                                    Command="{Binding OpenBusinessCommand}"
+                                    IsVisible="{Binding OwnsBusiness}"/>
+
+            <Label Text="APP" Style="{StaticResource SectionTitle}" Margin="2,16,0,2"/>
+
+            <helpers:ProfileRowView Title="Appearance"
+                                    Detail="{Binding AppearanceRowDetail}"
+                                    Command="{Binding OpenAppearanceCommand}"/>
+
+            <helpers:ProfileRowView Title="Account and privacy"
+                                    Detail="Your data, delete account"
+                                    Command="{Binding OpenAccountCommand}"/>
+
+            <Button Text="Sign out"
+                    Command="{Binding SignOutCommand}"
+                    Style="{StaticResource GhostButtonStyle}"
+                    HeightRequest="56"
+                    Margin="0,22,0,0"/>
+
+            <Label Text="{Binding VersionText}"
+                   Style="{StaticResource lbl11_Regular_TextFaint}"
+                   HorizontalOptions="Center"
+                   Margin="0,10,0,0"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

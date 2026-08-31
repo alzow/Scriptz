@@ -25,4 +25,11 @@ public class ProfileService : BaseService, IProfileService
         var rows = await ExecuteApiCallAsync(_api.GetProfileByIdAsync($"eq.{userId}"));
         return rows.FirstOrDefault();
     }
+
+    public Task UpdateMyProfileAsync(Guid userId, string? displayName, string? phone) =>
+        ExecuteApiCallAsync(_api.UpdateProfileAsync($"eq.{userId}", new UpdateProfileRequest
+        {
+            DisplayName = displayName,
+            Phone = phone,
+        }));
 }

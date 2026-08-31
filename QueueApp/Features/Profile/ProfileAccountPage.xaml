@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="QueueApp.Features.Profile.ProfileAccountPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:QueueApp.Features.Profile"
+             xmlns:helpers="clr-namespace:QueueApp.Features.Profile.Helpers"
+             xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
+             x:DataType="vm:ProfileAccountPageViewModel"
+             Title="{Binding Title}"
+             Style="{StaticResource NavigationPageStyle}">
+
+    <Grid RowDefinitions="Auto,*">
+        <templates:AlzowSubPageHeader Grid.Row="0"
+                                      Title="{Binding Title}"
+                                      BackCommand="{Binding GoBackCommand}"/>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="20,4,20,32" Spacing="10">
+
+                <Label Text="YOUR DATA" Style="{StaticResource SectionTitle}" Margin="2,8,0,2"/>
+
+                <helpers:ProfileRowView Title="Download my data"
+                                        Detail="Everything Queue holds about you"
+                                        Command="{Binding DownloadMyDataCommand}"
+                                        IsVisible="{Binding HasDataRequest}"/>
+
+                <helpers:ProfileRowView Title="What shops can see"
+                                        Detail="Name, phone, and your visits to them"
+                                        Command="{Binding ShowWhatShopsSeeCommand}"/>
+
+                <Label Text="LEGAL" Style="{StaticResource SectionTitle}" Margin="2,16,0,2"
+                       IsVisible="{Binding HasLegalSection}"/>
+
+                <helpers:ProfileRowView Title="Privacy policy"
+                                        Detail="How we handle your information"
+                                        Command="{Binding OpenPrivacyPolicyCommand}"
+                                        IsVisible="{Binding HasPrivacyPolicy}"/>
+
+                <helpers:ProfileRowView Title="Terms of use"
+                                        Detail="{Binding TermsDetail}"
+                                        Command="{Binding OpenTermsCommand}"
+                                        IsVisible="{Binding HasTermsOfUse}"/>
+
+                <Label Text="ACCOUNT" Style="{StaticResource SectionTitle}" Margin="2,16,0,2"/>
+
+                <helpers:ProfileRowView Title="Delete my account"
+                                        Detail="Permanent, and cancels anything booked"
+                                        TitleStyle="{StaticResource lbl15_Bold_DangerText}"
+                                        Command="{Binding DeleteAccountCommand}"/>
+
+                <Label Text="Shops keep their own record of visits you made, the way any business keeps its books."
+                       Style="{StaticResource lbl11_Regular_TextFaint}"
+                       Margin="2,18,2,0"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

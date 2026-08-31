@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
+             x:Name="Root"
+             x:Class="QueueApp.Features.Profile.Helpers.ProfileRowView">
+
+    <Border Style="{StaticResource brd16_White}" Padding="16,13" MinimumHeightRequest="68">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+
+            <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
+                <Label Text="{Binding Title, Source={x:Reference Root}}"
+                       Style="{Binding TitleStyle, Source={x:Reference Root}}"/>
+                <Label Text="{Binding Detail, Source={x:Reference Root}}"
+                       Style="{StaticResource lbl12_Regular_TextMuted}"
+                       IsVisible="{Binding Detail, Source={x:Reference Root}, Converter={StaticResource IsNotNullOrEmptyConverter}}"/>
+            </VerticalStackLayout>
+
+            <tpl:ThemedIcon Grid.Column="1"
+                            Icon="ic_chevron_right"
+                            WidthRequest="14" HeightRequest="14"
+                            Opacity="0.65"
+                            VerticalOptions="Center"
+                            IsVisible="{Binding ShowChevron, Source={x:Reference Root}}"/>
+
+        </Grid>
+
+        <Border.GestureRecognizers>
+            <TapGestureRecognizer Command="{Binding Command, Source={x:Reference Root}}"/>
+        </Border.GestureRecognizers>
+    </Border>
+
+</ContentView>

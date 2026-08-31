@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
+             x:Name="Root"
+             x:Class="QueueApp.Features.Profile.Helpers.AppearanceRowView">
+
+    <Border Style="{StaticResource brd16_White}" Padding="16,13" MinimumHeightRequest="68">
+        <Border.Triggers>
+            <DataTrigger TargetType="Border" Binding="{Binding IsSelected, Source={x:Reference Root}}" Value="True">
+                <Setter Property="Style" Value="{StaticResource brd16_Row_Selected}"/>
+            </DataTrigger>
+        </Border.Triggers>
+
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+            <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
+                <Label Text="{Binding Title, Source={x:Reference Root}}"
+                       Style="{StaticResource lbl15_Bold_TextDark}"/>
+                <Label Text="{Binding Detail, Source={x:Reference Root}}"
+                       Style="{StaticResource lbl12_Regular_TextMuted}"/>
+            </VerticalStackLayout>
+
+            <tpl:ThemedIcon Grid.Column="1" Icon="ic_check"
+                            WidthRequest="18" HeightRequest="18"
+                            VerticalOptions="Center"
+                            IsVisible="{Binding IsSelected, Source={x:Reference Root}}"/>
+        </Grid>
+
+        <Border.GestureRecognizers>
+            <TapGestureRecognizer Command="{Binding Command, Source={x:Reference Root}}"
+                                  CommandParameter="{Binding CommandParameter, Source={x:Reference Root}}"/>
+        </Border.GestureRecognizers>
+    </Border>
+
+</ContentView>

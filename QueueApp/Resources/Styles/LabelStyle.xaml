@@ -329,6 +329,22 @@
         <Setter Property="LineBreakMode" Value="NoWrap"/>
     </Style>
 
+    <!--
+        Profile's status-block headline. Green when the app can reach the customer, red when the
+        phone has blocked it — the *Text variants, never the fills, because both sit on a tint.
+    -->
+    <Style x:Key="lbl15_Bold_AccentText" TargetType="Label">
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
+    </Style>
+
+    <Style x:Key="lbl15_Bold_DangerText" TargetType="Label">
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightDangerText}, Dark={StaticResource DarkDangerText}}"/>
+    </Style>
+
     <Style x:Key="lbl12_Regular_Danger" TargetType="Label">
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightDangerText}, Dark={StaticResource DarkDangerText}}"/>

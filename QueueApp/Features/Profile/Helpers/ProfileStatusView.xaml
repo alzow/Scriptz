@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Name="Root"
+             x:Class="QueueApp.Features.Profile.Helpers.ProfileStatusView">
+
+    <Border Style="{StaticResource brd13_Success}">
+        <Border.Triggers>
+            <DataTrigger TargetType="Border" Binding="{Binding IsAllowed, Source={x:Reference Root}}" Value="True">
+                <Setter Property="Style" Value="{StaticResource brd13_Success}"/>
+            </DataTrigger>
+            <DataTrigger TargetType="Border" Binding="{Binding IsAllowed, Source={x:Reference Root}}" Value="False">
+                <Setter Property="Style" Value="{StaticResource brd13_Danger}"/>
+            </DataTrigger>
+        </Border.Triggers>
+
+        <VerticalStackLayout Spacing="5">
+
+            <Label Text="{Binding Headline, Source={x:Reference Root}}"
+                   Style="{StaticResource lbl15_Bold_AccentText}">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding IsAllowed, Source={x:Reference Root}}" Value="True">
+                        <Setter Property="Style" Value="{StaticResource lbl15_Bold_AccentText}"/>
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label" Binding="{Binding IsAllowed, Source={x:Reference Root}}" Value="False">
+                        <Setter Property="Style" Value="{StaticResource lbl15_Bold_DangerText}"/>
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+
+            <Label Text="{Binding Detail, Source={x:Reference Root}}"
+                   Style="{StaticResource lbl12_Regular_TextMuted}"
+                   IsVisible="{Binding Detail, Source={x:Reference Root}, Converter={StaticResource IsNotNullOrEmptyConverter}}"/>
+
+            <Button Text="{Binding ActionText, Source={x:Reference Root}}"
+                    Command="{Binding ActionCommand, Source={x:Reference Root}}"
+                    Style="{StaticResource btn13_Bold_Green}"
+                    HeightRequest="56"
+                    Margin="0,9,0,0"
+                    IsVisible="{Binding ActionText, Source={x:Reference Root}, Converter={StaticResource IsNotNullOrEmptyConverter}}"/>
+
+        </VerticalStackLayout>
+    </Border>
+
+</ContentView>

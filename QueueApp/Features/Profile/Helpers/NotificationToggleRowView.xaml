@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Name="Root"
+             x:Class="QueueApp.Features.Profile.Helpers.NotificationToggleRowView">
+
+    <Border Style="{StaticResource brd16_White}"
+            Padding="16,13"
+            MinimumHeightRequest="70"
+            Opacity="{Binding IsAvailable, Source={x:Reference Root}, Converter={StaticResource BoolToOpacityConverter}}">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+
+            <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
+                <Label Text="{Binding Title, Source={x:Reference Root}}"
+                       Style="{StaticResource lbl14_Bold_Row}"/>
+                <Label Text="{Binding Detail, Source={x:Reference Root}}"
+                       Style="{StaticResource lbl12_Regular_TextMuted}"
+                       IsVisible="{Binding Detail, Source={x:Reference Root}, Converter={StaticResource IsNotNullOrEmptyConverter}}"/>
+            </VerticalStackLayout>
+
+            <Switch Grid.Column="1"
+                    IsToggled="{Binding IsOn, Source={x:Reference Root}}"
+                    IsEnabled="{Binding IsAvailable, Source={x:Reference Root}}"
+                    VerticalOptions="Center"/>
+
+        </Grid>
+    </Border>
+
+</ContentView>
