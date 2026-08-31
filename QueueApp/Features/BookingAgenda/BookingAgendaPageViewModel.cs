@@ -726,18 +726,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         item.IsDeclining = true;
         try
         {
-            var reason = await _popupService.ShowPromptAsync(
-                "Decline request",
-                $"Why can't {item.CustomerName}'s {item.Booking.TimeRangeDisplay} booking happen? They will see this.",
-                accept: "Decline",
-                cancel: "Keep it",
-                placeholder: "Fully booked, closed that day…");
-
-            if (reason is null)
-                return;
-
-            await CancelWithReasonAsync(item.Booking, reason);
-            await RefreshAsync();
+            await ConfirmDeclineAsync(item.Booking);
         }
         catch (Exception ex)
         {
@@ -747,6 +736,17 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         {
             item.IsDeclining = false;
         }
+    }
+
+    // Tapping a request opens the same sheet its row in the day opens, so the note the customer left
+    // and the move actions are reachable from the banner instead of only from further down the list.
+    [RelayCommand]
+    public async Task OpenRequestAsync(BookingRequestItem? item)
+    {
+        if (item is null || item.IsBusy)
+            return;
+
+        await OpenBookingActionsAsync(item.Booking);
     }
 
     [RelayCommand]
@@ -866,6 +866,15 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
 
             switch (result.Action)
             {
+                case BookingAction.Confirm:
+                    await _bookingService.ConfirmBookingAsync(booking.Id);
+                    await RefreshAsync();
+                    break;
+
+                case BookingAction.Decline:
+                    await ConfirmDeclineAsync(booking);
+                    break;
+
                 case BookingAction.Complete:
                     await _bookingService.CompleteBookingAsync(booking.Id);
                     await RefreshAsync();
@@ -899,6 +908,24 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         {
             await HandleExceptionAsync(ex);
         }
+    }
+
+    // Declining is cancelling a booking that was never accepted, so it takes the same reason the
+    // customer would have seen for a cancellation — only the wording differs.
+    public async Task ConfirmDeclineAsync(AgendaBookingResponse booking)
+    {
+        var reason = await _popupService.ShowPromptAsync(
+            "Decline request",
+            $"Why can't {booking.CustomerName}'s {booking.TimeRangeDisplay} booking happen? They will see this.",
+            accept: "Decline",
+            cancel: "Keep it",
+            placeholder: "Fully booked, closed that day…");
+
+        if (reason is null)
+            return;
+
+        await CancelWithReasonAsync(booking, reason);
+        await RefreshAsync();
     }
 
     public async Task ConfirmCancelAsync(AgendaBookingResponse booking)

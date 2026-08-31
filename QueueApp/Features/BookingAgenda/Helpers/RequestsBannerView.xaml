@@ -45,7 +45,16 @@
                                  BindableLayout.ItemsSource="{Binding Requests, Source={x:Reference Root}}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="models:BookingRequestItem">
+                        <!-- The card itself opens the booking, the same as its row further down the
+                             day does, so the note the customer left is reachable from here too. The
+                             two buttons swallow their own taps, so Confirm and Decline still answer
+                             the request outright instead of opening the sheet. -->
                         <Border Style="{StaticResource brd14_White}" Padding="13" Margin="0,8,0,0">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding OpenRequestCommand, Source={x:Reference Root}}"
+                                    CommandParameter="{Binding .}"/>
+                            </Border.GestureRecognizers>
                             <VerticalStackLayout Spacing="5">
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                                     <Label Grid.Column="0" Text="{Binding CustomerName}"
