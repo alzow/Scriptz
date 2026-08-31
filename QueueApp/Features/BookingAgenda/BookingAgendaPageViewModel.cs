@@ -844,7 +844,9 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.NavigateAsync(NavigationPaths.BusinessSettingsPage);
+             await NavigationService.NavigateAsync(
+                $"NavigationPage/{NavigationPaths.BusinessSettingsPage}",
+                modal: true, animated: false);
         }
         catch (Exception ex)
         {
