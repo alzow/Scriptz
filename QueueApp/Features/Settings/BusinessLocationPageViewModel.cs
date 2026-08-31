@@ -68,14 +68,15 @@ public partial class BusinessLocationPageViewModel : BaseViewModel
         IsCapturing = true;
         try
         {
-            var location = await _locationService.RefreshLocationAsync();
-            if (location is null)
+            var result = await _locationService.RefreshLocationAsync();
+            if (result.Location is null)
             {
                 await _popupService.ShowAlertAsync("Couldn't get your location",
                     "Check that location permission is granted for this app and that location services are on, then try again.");
                 return;
             }
 
+            var location = result.Location;
             await _businessService.UpdateLocationAsync(_businessId, location.Latitude, location.Longitude);
             ApplyBusiness(location.Latitude, location.Longitude);
             await _popupService.ShowAlertAsync("Location saved",

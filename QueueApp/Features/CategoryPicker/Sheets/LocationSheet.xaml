@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<bottomsheet:BottomSheetPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                        xmlns:sheets="clr-namespace:QueueApp.Features.CategoryPicker.Sheets"
+                        xmlns:bottomsheet="clr-namespace:QueueApp.Shared.Templates.BottomSheet"
+                        xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
+                        x:Name="Root"
+                        x:Class="QueueApp.Features.CategoryPicker.Sheets.LocationSheet"
+                        x:DataType="sheets:LocationSheet">
+
+    <Border VerticalOptions="End"
+            Style="{StaticResource brd22_Sheet}" Padding="16,10,16,26">
+        <VerticalStackLayout Spacing="0">
+
+            <Border Style="{StaticResource brd2_Grabber}"
+                    WidthRequest="38" HeightRequest="4" Margin="0,0,0,16"
+                    HorizontalOptions="Center"/>
+
+            <Label Text="Your location" Style="{StaticResource lbl18_Bold_TextDark}"/>
+
+            <BoxView HeightRequest="1" Style="{StaticResource bx_Divider}" Margin="0,14"/>
+
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12"
+                  IsVisible="{Binding HasCurrentLocation, Source={x:Reference Root}}">
+                <tpl:ThemedIcon Grid.Column="0" Icon="ic_pin" WidthRequest="18" HeightRequest="18"
+                       VerticalOptions="Start" Margin="0,2,0,0"/>
+                <VerticalStackLayout Grid.Column="1" Spacing="3">
+                    <Label Text="{Binding CurrentLabel, Source={x:Reference Root}}" Style="{StaticResource lbl15_Bold_TextDark}"/>
+                    <Label Text="{Binding UpdatedAgoText, Source={x:Reference Root}}" Style="{StaticResource lbl12_Regular_TextLight}"/>
+                </VerticalStackLayout>
+            </Grid>
+
+            <Label Text="Without location we can't sort by distance or estimate when to leave."
+                   Style="{StaticResource lbl13_Regular_TextLight}" Margin="0,0,0,4"
+                   IsVisible="{Binding IsDenied, Source={x:Reference Root}}"/>
+
+            <Button Text="{Binding PrimaryButtonText, Source={x:Reference Root}}"
+                    HeightRequest="56" Margin="0,16,0,0"
+                    Style="{StaticResource btn16_Bold_Green}"
+                    IsVisible="{Binding IsDenied, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}"
+                    IsEnabled="{Binding IsRefreshing, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}"
+                    Clicked="OnUseCurrentLocationClicked"/>
+
+            <ActivityIndicator IsRunning="{Binding IsRefreshing, Source={x:Reference Root}}"
+                                IsVisible="{Binding IsRefreshing, Source={x:Reference Root}}"
+                                Style="{StaticResource ai_Accent}" Margin="0,10,0,0"/>
+
+            <Button Text="Open settings" HeightRequest="56" Margin="0,16,0,0"
+                    Style="{StaticResource btn16_Bold_Green}"
+                    IsVisible="{Binding IsDenied, Source={x:Reference Root}}"
+                    Clicked="OnOpenSettingsClicked"/>
+
+            <Button Text="Close" HeightRequest="48" Margin="0,10,0,0"
+                    Style="{StaticResource TertiaryButtonStyle}"
+                    Clicked="OnCloseClicked"/>
+
+        </VerticalStackLayout>
+    </Border>
+
+</bottomsheet:BottomSheetPage>

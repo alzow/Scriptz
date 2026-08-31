@@ -32,6 +32,19 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
     </Style>
 
+    <!-- Browse header location bar: a resolved location is content, not an invitation, so it takes
+         TextInk at medium weight rather than the search field's TextMuted placeholder. -->
+    <Style x:Key="lbl15_Medium_TextInk" TargetType="Label">
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="FontFamily" Value="RobotoMedium"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
+    </Style>
+
+    <!-- Location bar's Denied/Failed states. -->
+    <Style x:Key="lbl15_Medium_Danger" TargetType="Label" BasedOn="{StaticResource lbl15_Medium_TextInk}">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightDangerText}, Dark={StaticResource DarkDangerText}}"/>
+    </Style>
+
     <!--
         Tracked "mono" lines. There is no monospace family in Resources/Fonts, so the look comes
         from RobotoMedium plus letter spacing rather than a second typeface.

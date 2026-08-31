@@ -6,12 +6,12 @@ using MPowerKit.Navigation;
 using QueueApp.Constants;
 using QueueApp.Features.CategoryPicker.Helpers;
 using QueueApp.Features.CategoryPicker.Models;
+using QueueApp.Features.CategoryPicker.Sheets;
 using QueueApp.Framework.Base;
 using QueueApp.Services.Api.Booking;
 using QueueApp.Services.Api.Booking.Models;
 using QueueApp.Services.Api.Business;
 using QueueApp.Services.Api.Business.Models;
-using QueueApp.Services.Api.Profile;
 using QueueApp.Services.Api.Queue;
 using QueueApp.Services.Api.Queue.Models;
 using QueueApp.Services.Auth;
@@ -24,24 +24,20 @@ namespace QueueApp.Features.CategoryPicker;
 
 public partial class CategoryPickerPageViewModel : BaseViewModel
 {
-    private List<BrowseBusinessSummaryResponse> _allBusinesses = new();
-    private Guid _customerId;
-    private double? _customerLatitude;
-    private double? _customerLongitude;
-    private readonly SemaphoreSlim _realtimeLock = new(1, 1);
-    private bool _isVisible;
-    private bool _hasAppeared;
+    private static readonly TimeSpan CacheFreshWindow = TimeSpan.FromMinutes(30);
+    private static readonly TimeSpan MinimumResolvingDisplay = TimeSpan.FromMilliseconds(400);
+    private static readonly TimeSpan ResolvingTimeout = TimeSpan.FromSeconds(4);
     private const int UpcomingBookingsShown = 3;
+
     public IReadOnlyList<ServiceCategory> Categories { get; } = CategoryCatalog.All.Where(c => c.Available).ToList();
-    public string? CustomerDisplayName { get; set; }
     public bool IsLoading { get; set; }
     public bool IsRefreshing { get; set; }
     public string SearchText { get; set; } = string.Empty;
     public ServiceCategory? SelectedCategory { get; set; }
     public MyActiveQueueEntryResponse? ActiveEntry { get; set; }
     public bool IsLeavingQueue { get; set; }
-    public string LocationLabel { get; set; } = "Lenasia";
-    public bool IsResolvingLocation { get; set; }
+    public LocationBarState LocationState { get; set; } = LocationBarState.Resolving;
+    public string LocationBarText { get; set; } = "Finding your location…";
     public ObservableCollection<BrowseBusinessSummaryResponse> Businesses { get; } = new();
     public ObservableCollection<UpcomingBookingResponse> UpcomingBookings { get; } = new();
     public ObservableCollection<FrequentBusinessItem> FrequentBusinesses { get; } = new();
@@ -51,10 +47,18 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     public bool HasFrequentBusinesses => FrequentBusinesses.Count > 0;
     public bool IsBusinessesEmpty => Businesses.Count == 0 && !IsLoading;
 
+    private List<BrowseBusinessSummaryResponse> _allBusinesses = new();
+    private Guid _customerId;
+    private double? _customerLatitude;
+    private double? _customerLongitude;
+    private CustomerLocation? _lastKnownLocation;
+    private readonly SemaphoreSlim _realtimeLock = new(1, 1);
+    private bool _isVisible;
+    private bool _hasAppeared;
+
     private readonly IBusinessService _businessService;
     private readonly IQueueService _queueService;
     private readonly IBookingService _bookingService;
-    private readonly IProfileService _profileService;
     private readonly IAuthService _authService;
     private readonly IQueuePopupService _popupService;
     private readonly IQueueRealtimeService _realtimeService;
@@ -66,7 +70,6 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         IBusinessService businessService,
         IQueueService queueService,
         IBookingService bookingService,
-        IProfileService profileService,
         IAuthService authService,
         IQueuePopupService popupService,
         IQueueRealtimeService realtimeService,
@@ -76,7 +79,6 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         _businessService = businessService;
         _queueService = queueService;
         _bookingService = bookingService;
-        _profileService = profileService;
         _authService = authService;
         _popupService = popupService;
         _realtimeService = realtimeService;
@@ -110,62 +112,144 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
                 _customerId = Guid.Parse(userId);
 
             var cached = await _locationService.GetCachedLocationAsync();
+            var cacheIsFresh = false;
             if (cached is not null)
             {
                 _customerLatitude = cached.Latitude;
                 _customerLongitude = cached.Longitude;
-                LocationLabel = cached.Label;
+                _lastKnownLocation = cached;
+                ApplyLocationState(cached.IsCoarse ? LocationBarState.Coarse : LocationBarState.Resolved, cached.Label);
+                cacheIsFresh = DateTimeOffset.UtcNow - cached.ResolvedAt < CacheFreshWindow;
             }
 
             await LoadAsync();
 
             // Not awaited: a live fix is a permission prompt on a cold install and up to twelve
             // seconds of GPS after that, and the dashboard is already on screen from the cached
-            // location. It reloads itself only if the fix says the customer actually moved.
-            _ = RefreshLocationAsync(silent: true);
+            // location. A fresh cache renders immediately above and only refreshes quietly in the
+            // background here; a stale or absent one shows the animated Resolving state itself.
+            _ = ResolveLocationAsync(showAnimation: !cacheIsFresh);
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
+        }
+    }
+
+    public void ApplyLocationState(LocationBarState state, string text)
+    {
+        LocationState = state;
+        LocationBarText = text;
+    }
+
+    // The bar's own patience, separate from ILocationService's 12s GPS timeout: past 4s of
+    // Resolving the bar gives up and reads Failed, while the underlying fix (and, if it lands,
+    // the businesses list) still updates quietly once it actually completes.
+    public async Task ResolveLocationAsync(bool showAnimation)
+    {
+        if (showAnimation)
+            ApplyLocationState(LocationBarState.Resolving, "Finding your location…");
+
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        var refreshTask = _locationService.RefreshLocationAsync();
+
+        if (showAnimation)
+        {
+            var completedInTime = await Task.WhenAny(refreshTask, Task.Delay(ResolvingTimeout)) == refreshTask;
+            if (!completedInTime)
+            {
+                ApplyLocationState(LocationBarState.Failed, "Couldn't find you — tap to set");
+                _ = ApplyLocationResultWhenReadyAsync(refreshTask);
+                return;
+            }
+
+            var elapsed = stopwatch.Elapsed;
+            if (elapsed < MinimumResolvingDisplay)
+                await Task.Delay(MinimumResolvingDisplay - elapsed);
+        }
+
+        await ApplyLocationResultWhenReadyAsync(refreshTask);
+    }
+
+    public async Task ApplyLocationResultWhenReadyAsync(Task<LocationResolution> refreshTask)
+    {
+        try
+        {
+            await ApplyLocationResultAsync(await refreshTask);
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    public async Task ApplyLocationResultAsync(LocationResolution result)
+    {
+        switch (result.Outcome)
+        {
+            case LocationOutcome.Resolved:
+            case LocationOutcome.Coarse:
+                var location = result.Location!;
+                var moved = location.HasMovedFrom(_customerLatitude, _customerLongitude);
+                _customerLatitude = location.Latitude;
+                _customerLongitude = location.Longitude;
+                _lastKnownLocation = location;
+                ApplyLocationState(
+                    result.Outcome == LocationOutcome.Coarse ? LocationBarState.Coarse : LocationBarState.Resolved,
+                    location.Label);
+                if (moved)
+                    await LoadAsync();
+                break;
+            case LocationOutcome.Denied:
+                ApplyLocationState(LocationBarState.Denied, "Set your location");
+                break;
+            case LocationOutcome.Failed:
+                ApplyLocationState(LocationBarState.Failed, "Couldn't find you — tap to set");
+                break;
         }
     }
 
     [RelayCommand]
-    public Task RefreshLocationAsync() => RefreshLocationAsync(silent: false);
-
-    public async Task RefreshLocationAsync(bool silent)
+    public async Task OpenLocationSheetAsync()
     {
-        IsResolvingLocation = true;
         try
         {
-            var location = await _locationService.RefreshLocationAsync();
-            if (location is null)
-            {
-                if (!silent)
-                {
-                    await _popupService.ShowAlertAsync("Location unavailable",
-                        "Couldn't get your location — showing businesses in Lenasia instead.");
-                }
-                return;
-            }
+            var sheet = new LocationSheet(
+                _locationService,
+                _popupService,
+                _lastKnownLocation?.Label ?? string.Empty,
+                _lastKnownLocation is not null ? FormatUpdatedAgo(_lastKnownLocation.ResolvedAt) : string.Empty,
+                hasCurrentLocation: _lastKnownLocation is not null,
+                isDenied: LocationState == LocationBarState.Denied,
+                isRetryingAfterFailure: LocationState == LocationBarState.Failed);
 
-            var moved = location.HasMovedFrom(_customerLatitude, _customerLongitude);
-            _customerLatitude = location.Latitude;
-            _customerLongitude = location.Longitude;
-            LocationLabel = location.Label;
+            await _popupService.ShowSheetAsync(sheet);
+            var result = await sheet.Completion;
 
-            if (moved)
-                await LoadAsync();
+            if (result is not null)
+                await ApplyLocationResultAsync(result);
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
         }
-        finally
-        {
-            IsResolvingLocation = false;
-        }
     }
+
+    public static string FormatUpdatedAgo(DateTimeOffset resolvedAt)
+    {
+        var elapsed = DateTimeOffset.UtcNow - resolvedAt;
+
+        if (elapsed < TimeSpan.FromMinutes(1))
+            return "Updated just now";
+        if (elapsed < TimeSpan.FromHours(1))
+            return $"Updated {Plural((int)elapsed.TotalMinutes, "minute")} ago";
+        if (elapsed < TimeSpan.FromDays(1))
+            return $"Updated {Plural((int)elapsed.TotalHours, "hour")} ago";
+
+        return $"Updated {Plural((int)elapsed.TotalDays, "day")} ago";
+    }
+
+    private static string Plural(int count, string noun) => $"{count} {noun}{(count == 1 ? "" : "s")}";
 
     public override async Task OnAppearingAsync()
     {
@@ -185,8 +269,8 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
             // the time. The feed was released while that page was up, so the ticket and the upcoming
             // list are as old as the moment the dashboard left, and the thing the customer just did
             // is exactly what is missing from them. The rest of the dashboard (businesses nearby,
-            // the display name, frequently visited) does not go stale on a detour, so this refreshes
-            // the two live things rather than reloading the whole screen.
+            // frequently visited) does not go stale on a detour, so this refreshes the two live
+            // things rather than reloading the whole screen.
             //
             // The first Appearing runs before Loaded on Android, and Loaded does the full load, so
             // there is nothing to refresh on that pass.
@@ -328,9 +412,13 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
             var isSignedIn = _customerId != Guid.Empty;
 
             var entryTask = _queueService.GetMyActiveEntryAsync();
+            // A resolved location writes to the coordinate pair only, which drives haversine_km()
+            // and the distance sort — the suburb filter itself stays on the "Lenasia" default,
+            // since the app is single-suburb for now. Deriving the filter from wherever the
+            // customer's GPS resolves to is the "browse elsewhere" feature (remote join for a
+            // different suburb), which is a bigger, deliberately separate piece of work.
             var businessesTask = _businessService.GetBrowseBusinessesAsync(
                 SelectedCategory?.Key, customerLatitude: _customerLatitude, customerLongitude: _customerLongitude);
-            var nameTask = isSignedIn ? _profileService.GetMyDisplayNameAsync(_customerId) : null;
             var bookingsTask = isSignedIn ? _bookingService.GetMyUpcomingBookingsAsync(_customerId) : null;
             var visitsTask = isSignedIn ? _queueService.GetMyVisitsAsync(_customerId) : null;
 
@@ -339,12 +427,6 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
 
             ActiveEntry = await entryTask;
             OnPropertyChanged(nameof(HasActiveEntry));
-
-            if (nameTask is not null)
-            {
-                var displayName = await nameTask;
-                CustomerDisplayName = string.IsNullOrWhiteSpace(displayName) ? null : displayName;
-            }
 
             if (bookingsTask is not null)
                 ApplyUpcomingBookings(await bookingsTask);
