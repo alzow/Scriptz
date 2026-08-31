@@ -56,15 +56,6 @@
                 <Label Text="You sign in with this. Contact us to change it."
                        Style="{StaticResource lbl11_Regular_TextFaint}" Margin="2,6,2,0"/>
 
-                <Border Style="{StaticResource brd12_AccentTint}" Margin="0,20,0,0">
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="ON THE BOARD YOU'LL SHOW AS" Style="{StaticResource SectionTitle}"/>
-                        <Label Text="{Binding BoardName, Source={x:Reference Root}}"
-                               Style="{StaticResource lbl15_Bold_TextDark}" Margin="0,2,0,0"/>
-                        <Label Text="Position 3 · Haircut" Style="{StaticResource lbl11_Regular_TextFaint}"/>
-                    </VerticalStackLayout>
-                </Border>
-
                 <Label Text="{Binding ErrorMessage, Source={x:Reference Root}}"
                        Style="{StaticResource lbl12_Regular_Danger}"
                        Margin="2,14,2,0"

@@ -17,7 +17,4 @@ public interface IAuthService
 
     // Signs out of this device only — a GoTrue-side revoke is left for later, see AuthService.
     Task SignOutAsync();
-
-    // See IAuthApi.DeleteMyAccountAsync: the backend RPC this calls doesn't exist yet.
-    Task DeleteAccountAsync();
 }

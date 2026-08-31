@@ -12,32 +12,16 @@ public partial class YourDetailsSheet : BottomSheetPage
     private readonly Guid _userId;
     private readonly TaskCompletionSource<bool> _completion = new();
 
-    private string _name = "";
     private bool _saved;
 
     public IValidator NameValidator { get; } = new RequiredValidator("Enter the name shops should see.");
     public IValidator PhoneValidator { get; } = new SaPhoneValidator("Enter a valid SA mobile number.");
 
-    public string Name
-    {
-        get => _name;
-        set
-        {
-            if (_name == value)
-                return;
-
-            _name = value;
-            OnPropertyChanged(nameof(Name));
-            OnPropertyChanged(nameof(BoardName));
-        }
-    }
-
+    public string Name { get; set; }
     public string Phone { get; set; }
     public string Email { get; }
     public string ErrorMessage { get; private set; } = "";
     public bool IsSaving { get; private set; }
-
-    public string BoardName => BoardNameOf(Name);
 
     public Task<bool> Completion => _completion.Task;
 
@@ -56,23 +40,11 @@ public partial class YourDetailsSheet : BottomSheetPage
         _profileService = profileService;
         _popupService = popupService;
         _userId = userId;
-        _name = name;
+        Name = name;
         Phone = phone;
         Email = email;
 
         InitializeComponent();
-    }
-
-    public static string BoardNameOf(string name)
-    {
-        var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-        return parts.Length switch
-        {
-            0 => "Your name",
-            1 => parts[0],
-            _ => $"{parts[0]} {char.ToUpperInvariant(parts[^1][0])}.",
-        };
     }
 
     protected override void OnDisappearing()

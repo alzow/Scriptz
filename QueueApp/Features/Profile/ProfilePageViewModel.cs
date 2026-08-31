@@ -228,7 +228,8 @@ public partial class ProfilePageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.NavigateAsync(NavigationPaths.ProfileNotificationsPage);
+            await NavigationService.NavigateAsync(
+                $"NavigationPage/{NavigationPaths.ProfileNotificationsPage}", modal: true, animated: false);
         }
         catch (Exception ex)
         {
@@ -257,7 +258,8 @@ public partial class ProfilePageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.NavigateAsync(NavigationPaths.ProfileAccountPage);
+            await NavigationService.NavigateAsync(
+                $"NavigationPage/{NavigationPaths.ProfileAccountPage}", modal: true, animated: false);
         }
         catch (Exception ex)
         {

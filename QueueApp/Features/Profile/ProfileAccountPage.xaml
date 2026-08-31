@@ -41,13 +41,6 @@
                                         Command="{Binding OpenTermsCommand}"
                                         IsVisible="{Binding HasTermsOfUse}"/>
 
-                <Label Text="ACCOUNT" Style="{StaticResource SectionTitle}" Margin="2,16,0,2"/>
-
-                <helpers:ProfileRowView Title="Delete my account"
-                                        Detail="Permanent, and cancels anything booked"
-                                        TitleStyle="{StaticResource lbl15_Bold_DangerText}"
-                                        Command="{Binding DeleteAccountCommand}"/>
-
                 <Label Text="Shops keep their own record of visits you made, the way any business keeps its books."
                        Style="{StaticResource lbl11_Regular_TextFaint}"
                        Margin="2,18,2,0"/>

@@ -63,7 +63,7 @@
                                     Command="{Binding OpenAppearanceCommand}"/>
 
             <helpers:ProfileRowView Title="Account and privacy"
-                                    Detail="Your data, delete account"
+                                    Detail="Your data and what shops can see"
                                     Command="{Binding OpenAccountCommand}"/>
 
             <Button Text="Sign out"

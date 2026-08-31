@@ -132,14 +132,8 @@ public class AuthService : IAuthService
     public Task<bool> IsAuthenticatedAsync() => EnsureValidSessionAsync();
 
     // TODO: no GoTrue /auth/v1/logout call yet, so the refresh token stays valid server-side after
-    // this — device-local sign-out only, same gap IAuthApi.DeleteMyAccountAsync's TODO flags.
+    // this — device-local sign-out only.
     public Task SignOutAsync() => ClearSessionAsync();
-
-    public async Task DeleteAccountAsync()
-    {
-        await _authApi.DeleteMyAccountAsync();
-        await ClearSessionAsync();
-    }
 
     private async Task PersistSessionAsync(AuthTokenResponse response)
     {

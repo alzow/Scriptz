@@ -269,19 +269,6 @@
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
     </Style>
 
-    <!-- The board-preview well on Your details: what the barber will actually read off their screen. -->
-    <Style x:Key="brd12_AccentTint" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightAccentTint}, Dark={StaticResource DarkAccentTint}}"/>
-        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccentBorder}, Dark={StaticResource DarkAccentBorder}}"/>
-        <Setter Property="StrokeThickness" Value="1"/>
-        <Setter Property="Padding" Value="14,12"/>
-        <Setter Property="StrokeShape">
-            <Setter.Value>
-                <RoundRectangle CornerRadius="12"/>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
     <Style x:Key="brd12_Danger" TargetType="Border">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightDangerTint}, Dark={StaticResource DarkDangerTint}}"/>
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightDangerBorder}, Dark={StaticResource DarkDangerBorder}}"/>
