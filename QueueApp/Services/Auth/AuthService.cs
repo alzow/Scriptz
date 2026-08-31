@@ -22,6 +22,21 @@ public class AuthService : IAuthService
 
     public Task<string?> GetUserIdAsync() => _secureStorage.GetAsync(SupabaseConfig.UserIdKey);
 
+    // Cached at sign-in/sign-up; falls back to GoTrue for a session that predates that caching.
+    public async Task<string?> GetUserEmailAsync()
+    {
+        var cached = await _secureStorage.GetAsync(SupabaseConfig.UserEmailKey);
+        if (!string.IsNullOrWhiteSpace(cached))
+            return cached;
+
+        var user = await _authApi.GetUserAsync();
+        if (string.IsNullOrWhiteSpace(user.Email))
+            return null;
+
+        await _secureStorage.SetAsync(SupabaseConfig.UserEmailKey, user.Email);
+        return user.Email;
+    }
+
     public async Task<AuthTokenResponse> SignInAsync(string email, string password)
     {
         var response = await _authApi.SignInAsync(new SignInRequest { Email = email, Password = password });
@@ -111,9 +126,14 @@ public class AuthService : IAuthService
         await _secureStorage.RemoveAsync(SupabaseConfig.RefreshTokenKey);
         await _secureStorage.RemoveAsync(SupabaseConfig.TokenExpiryKey);
         await _secureStorage.RemoveAsync(SupabaseConfig.UserIdKey);
+        await _secureStorage.RemoveAsync(SupabaseConfig.UserEmailKey);
     }
 
     public Task<bool> IsAuthenticatedAsync() => EnsureValidSessionAsync();
+
+    // TODO: no GoTrue /auth/v1/logout call yet, so the refresh token stays valid server-side after
+    // this — device-local sign-out only.
+    public Task SignOutAsync() => ClearSessionAsync();
 
     private async Task PersistSessionAsync(AuthTokenResponse response)
     {
@@ -123,6 +143,10 @@ public class AuthService : IAuthService
         await SetSessionAsync(response.AccessToken, response.RefreshToken, response.ExpiresIn);
 
         if (response.User is not null)
+        {
             await _secureStorage.SetAsync(SupabaseConfig.UserIdKey, response.User.Id.ToString());
+            if (!string.IsNullOrWhiteSpace(response.User.Email))
+                await _secureStorage.SetAsync(SupabaseConfig.UserEmailKey, response.User.Email);
+        }
     }
 }

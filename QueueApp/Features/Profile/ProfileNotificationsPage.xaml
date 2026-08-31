@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="QueueApp.Features.Profile.ProfileNotificationsPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:QueueApp.Features.Profile"
+             xmlns:helpers="clr-namespace:QueueApp.Features.Profile.Helpers"
+             xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
+             x:DataType="vm:ProfileNotificationsPageViewModel"
+             Title="{Binding Title}"
+             Style="{StaticResource NavigationPageStyle}">
+
+    <Grid RowDefinitions="Auto,*">
+        <templates:AlzowSubPageHeader Grid.Row="0"
+                                      Title="{Binding Title}"
+                                      BackCommand="{Binding GoBackCommand}"/>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="20,4,20,32" Spacing="10">
+
+                <Border Style="{StaticResource brd13_Success}">
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsAllowed}" Value="True">
+                            <Setter Property="Style" Value="{StaticResource brd13_Success}"/>
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsAllowed}" Value="False">
+                            <Setter Property="Style" Value="{StaticResource brd13_Danger}"/>
+                        </DataTrigger>
+                    </Border.Triggers>
+
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="{Binding StatusHeadline}" Style="{StaticResource lbl15_Bold_AccentText}">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding IsAllowed}" Value="True">
+                                    <Setter Property="Style" Value="{StaticResource lbl15_Bold_AccentText}"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Label" Binding="{Binding IsAllowed}" Value="False">
+                                    <Setter Property="Style" Value="{StaticResource lbl15_Bold_DangerText}"/>
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+
+                        <Label Text="{Binding StatusDetail}" Style="{StaticResource lbl12_Regular_TextMuted}"/>
+
+                        <VerticalStackLayout Spacing="4" Margin="0,10,0,0" IsVisible="{Binding IsBlocked}">
+                            <Label Text="•  No warning when it's time to leave"
+                                   Style="{StaticResource lbl12_Regular_TextMuted}"/>
+                            <Label Text="•  No word when a booking is confirmed"
+                                   Style="{StaticResource lbl12_Regular_TextMuted}"/>
+                            <Label Text="•  No word if a shop cancels on you"
+                                   Style="{StaticResource lbl12_Regular_TextMuted}"/>
+                        </VerticalStackLayout>
+
+                        <Button Text="{Binding StatusActionText}"
+                                Command="{Binding OpenPhoneSettingsCommand}"
+                                Style="{StaticResource btn13_Bold_Green}"
+                                HeightRequest="56"
+                                Margin="0,12,0,0"
+                                IsVisible="{Binding IsBlocked}"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label Text="Everything below stays as you set it and starts working again once you allow notifications."
+                       Style="{StaticResource lbl11_Regular_TextFaint}"
+                       Margin="2,2,2,4"
+                       IsVisible="{Binding IsBlocked}"/>
+
+                <Label Text="WHILE YOU'RE IN A QUEUE" Style="{StaticResource SectionTitle}" Margin="2,12,0,2"/>
+
+                <helpers:NotificationToggleRowView Title="Time to leave"
+                                                   Detail="The one that makes remote joining work"
+                                                   IsOn="{Binding TimeToLeave}"
+                                                   IsAvailable="{Binding IsAllowed}"/>
+
+                <helpers:NotificationToggleRowView Title="You're next"
+                                                   Detail="When the person ahead of you starts"
+                                                   IsOn="{Binding YoureNext}"
+                                                   IsAvailable="{Binding IsAllowed}"/>
+
+                <helpers:NotificationToggleRowView Title="The queue changed"
+                                                   Detail="Someone left, or the shop paused joining"
+                                                   IsOn="{Binding QueueChanged}"
+                                                   IsAvailable="{Binding IsAllowed}"/>
+
+                <Label Text="NUDGE ME THIS LONG BEFORE I SHOULD LEAVE"
+                       Style="{StaticResource SectionTitle}" Margin="2,18,0,2"/>
+
+                <HorizontalStackLayout Spacing="8"
+                                       Opacity="{Binding IsAllowed, Converter={StaticResource BoolToOpacityConverter}}"
+                                       IsEnabled="{Binding IsAllowed}">
+                    <helpers:LeaveAtChipView Minutes="5" SelectedMinutes="{Binding LeaveAtMinutes}"
+                                             Command="{Binding SetLeaveAtCommand}"/>
+                    <helpers:LeaveAtChipView Minutes="10" SelectedMinutes="{Binding LeaveAtMinutes}"
+                                             Command="{Binding SetLeaveAtCommand}"/>
+                    <helpers:LeaveAtChipView Minutes="15" SelectedMinutes="{Binding LeaveAtMinutes}"
+                                             Command="{Binding SetLeaveAtCommand}"/>
+                    <helpers:LeaveAtChipView Minutes="20" SelectedMinutes="{Binding LeaveAtMinutes}"
+                                             Command="{Binding SetLeaveAtCommand}"/>
+                    <helpers:LeaveAtChipView Minutes="30" SelectedMinutes="{Binding LeaveAtMinutes}"
+                                             Command="{Binding SetLeaveAtCommand}"/>
+                </HorizontalStackLayout>
+
+                <Label Text="Based on how long it takes you to get there. You can change it per shop later."
+                       Style="{StaticResource lbl11_Regular_TextFaint}"
+                       Margin="2,6,2,0"/>
+
+                <Label Text="BOOKINGS" Style="{StaticResource SectionTitle}" Margin="2,18,0,2"/>
+
+                <helpers:NotificationToggleRowView Title="Confirmed or declined"
+                                                   Detail="When a shop answers your request"
+                                                   IsOn="{Binding BookingConfirmed}"
+                                                   IsAvailable="{Binding IsAllowed}"/>
+
+                <helpers:NotificationToggleRowView Title="Reminders"
+                                                   Detail="The evening before, and an hour ahead"
+                                                   IsOn="{Binding BookingReminders}"
+                                                   IsAvailable="{Binding IsAllowed}"/>
+
+                <Label Text="A shop cancelling always reaches you, with their reason. That one can't be turned off."
+                       Style="{StaticResource lbl11_Regular_TextFaint}"
+                       Margin="2,18,2,0"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

@@ -35,6 +35,10 @@ public static class NavigationPaths
     public const string QueueFlowPage        = "QueueFlowPage";
     public const string ConfirmationPage     = "ConfirmationPage";
 
+    // ── Profile (customer-facing) ─────────────────────────────────────────────
+    public const string ProfileNotificationsPage  = "ProfileNotificationsPage";
+    public const string ProfileAccountPage        = "ProfileAccountPage";
+
     // ── Main tabbed shell ──────────────────────────────────────────────────────
     public const string MainTabbedPage       = "MainTabbedPage";
     public const string CategoryPickerPage   = "CategoryPickerPage";

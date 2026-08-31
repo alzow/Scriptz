@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
+             x:Name="Root"
+             x:Class="QueueApp.Shared.Templates.TopBar.BackButtonView">
+
+    <!-- 36px tile inside a 44px target: the flow's chrome, with a thumb-sized hit area. -->
+    <Grid WidthRequest="44" HeightRequest="44"
+          HorizontalOptions="Start" VerticalOptions="Center">
+        <Grid.GestureRecognizers>
+            <TapGestureRecognizer Command="{Binding Command, Source={x:Reference Root}}"/>
+        </Grid.GestureRecognizers>
+
+        <Border WidthRequest="36" HeightRequest="36" Padding="0"
+                HorizontalOptions="Center" VerticalOptions="Center"
+                Style="{StaticResource brd16_Surface}">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="11"/>
+            </Border.StrokeShape>
+            <tpl:ThemedIcon Icon="ic_chevron_left" WidthRequest="18" HeightRequest="18"
+                            HorizontalOptions="Center" VerticalOptions="Center"/>
+        </Border>
+    </Grid>
+
+</ContentView>

@@ -10,4 +10,7 @@ public class StubProfileService : IProfileService
 
     public Task<ProfileResponse?> GetMyProfileAsync(Guid userId)
         => Task.FromResult<ProfileResponse?>(new ProfileResponse { Id = userId, DisplayName = "Customer" });
+
+    public Task UpdateMyProfileAsync(Guid userId, string? displayName, string? phone)
+        => Task.CompletedTask;
 }

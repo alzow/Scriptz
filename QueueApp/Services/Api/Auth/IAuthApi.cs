@@ -16,4 +16,7 @@ public interface IAuthApi
 
     [Post("/rest/v1/rpc/is_phone_available")]
     Task<bool> IsPhoneAvailableAsync([Body] PhoneCheckRequest request);
+
+    [Get("/auth/v1/user")]
+    Task<AuthUser> GetUserAsync();
 }

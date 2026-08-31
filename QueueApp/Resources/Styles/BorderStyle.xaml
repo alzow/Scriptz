@@ -241,6 +241,34 @@
         </Setter>
     </Style>
 
+    <!--
+        Profile's status block. The readiness pair: green when the app can actually reach the
+        customer, red when the phone has blocked it. Same 13px shape as brd13_Warning so the two
+        states are the same box with a different meaning, never a different box.
+    -->
+    <Style x:Key="brd13_Success" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightAccentTint}, Dark={StaticResource DarkAccentTint}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccentBorder}, Dark={StaticResource DarkAccentBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="Padding" Value="14,13"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="13"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd13_Danger" TargetType="Border" BasedOn="{StaticResource brd13_Warning}">
+        <Setter Property="Padding" Value="14,13"/>
+    </Style>
+
+    <!-- The picked appearance row. Tint plus an accent stroke, the same "this is the one" language
+         the selectable chips and day tiles already speak. -->
+    <Style x:Key="brd16_Row_Selected" TargetType="Border" BasedOn="{StaticResource brd16_White}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightAccentTint}, Dark={StaticResource DarkAccentTint}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
+    </Style>
+
     <Style x:Key="brd12_Danger" TargetType="Border">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightDangerTint}, Dark={StaticResource DarkDangerTint}}"/>
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightDangerBorder}, Dark={StaticResource DarkDangerBorder}}"/>
@@ -691,6 +719,17 @@
 
     <Style x:Key="brd16_Entry_Error" TargetType="Border" BasedOn="{StaticResource brd16_Entry}">
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightDangerText}, Dark={StaticResource DarkDangerText}}"/>
+    </Style>
+
+    <!--
+        A locked field. Same 16px shape as brd16_Entry, dropped to the page colour so it reads as
+        something the app is showing rather than something the customer can type into.
+
+        Must stay *after* brd16_Entry: StaticResource in a ResourceDictionary only sees keys already
+        parsed above it, so a BasedOn that points further down the file throws at load.
+    -->
+    <Style x:Key="brd16_Entry_Locked" TargetType="Border" BasedOn="{StaticResource brd16_Entry}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightBg}, Dark={StaticResource DarkBg}}"/>
     </Style>
 
 </ResourceDictionary>

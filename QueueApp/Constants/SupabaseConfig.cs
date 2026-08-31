@@ -15,4 +15,5 @@ public static class SupabaseConfig
     public const string RefreshTokenKey = "sb_refresh_token";
     public const string TokenExpiryKey = "sb_token_expiry_utc";
     public const string UserIdKey = "sb_user_id";
+    public const string UserEmailKey = "sb_user_email";
 }
