@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <bottomsheet:BottomSheetPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
                              xmlns:bottomsheet="clr-namespace:QueueApp.Shared.Templates.BottomSheet"
                              xmlns:sheets="clr-namespace:QueueApp.Features.BookingAgenda.Sheets"
                              xmlns:models="clr-namespace:QueueApp.Features.BookingAgenda.Models"
@@ -12,8 +13,7 @@
         <ScrollView>
             <VerticalStackLayout Spacing="0">
 
-                <Border Style="{StaticResource brd6_Tag}"
-                        BackgroundColor="{StaticResource Line}"
+                <Border Style="{StaticResource brd2_Grabber}"
                         WidthRequest="38" HeightRequest="4" Margin="0,0,0,16"
                         HorizontalOptions="Center"/>
 
@@ -30,22 +30,10 @@
                                            BindableLayout.ItemsSource="{Binding Resources, Source={x:Reference Root}}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="models:BayFilterOption">
-                                <Border Style="{StaticResource brd11_Chip}"
+                                <Border Style="{StaticResource brd11_Chip_Selectable}"
                                         MinimumHeightRequest="42" Padding="14,0">
-                                    <Border.Triggers>
-                                        <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                            <Setter Property="Stroke" Value="{StaticResource Green}"/>
-                                            <Setter Property="BackgroundColor" Value="{StaticResource GreenSelectedFill}"/>
-                                        </DataTrigger>
-                                    </Border.Triggers>
                                     <Label Text="{Binding Label}" VerticalOptions="Center"
-                                           Style="{StaticResource lbl13_Regular_TextMid}">
-                                        <Label.Triggers>
-                                            <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
-                                                <Setter Property="TextColor" Value="{StaticResource Green}"/>
-                                            </DataTrigger>
-                                        </Label.Triggers>
-                                    </Label>
+                                           Style="{StaticResource lbl13_Regular_TextMid_Selectable}"/>
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer
                                             Command="{Binding ToggleResourceCommand, Source={x:Reference Root}}"
@@ -87,7 +75,7 @@
                 <Border Style="{StaticResource brd13_Warning}" Margin="0,16,0,0" Padding="13,12"
                         IsVisible="{Binding HasWarning, Source={x:Reference Root}}">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-                        <Image Grid.Column="0" Source="ic_alert" WidthRequest="16" HeightRequest="16"
+                        <tpl:ThemedIcon Grid.Column="0" Icon="ic_alert" WidthRequest="16" HeightRequest="16"
                                VerticalOptions="Start" Margin="0,2,0,0"/>
                         <Label Grid.Column="1" Text="{Binding WarningText, Source={x:Reference Root}}"
                                Style="{StaticResource lbl12_Regular_TextMuted}"/>

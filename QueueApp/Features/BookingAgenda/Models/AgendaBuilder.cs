@@ -62,7 +62,10 @@ public static class AgendaBuilder
         var stroke = AgendaPalette.Line;
         var tagInk = AgendaPalette.Ink;
         var tagFill = Colors.Transparent;
-        var opacity = 1d;
+        var titleInk = AgendaPalette.Ink;
+        var timeInk = AgendaPalette.Ink;
+        var subtitleInk = AgendaPalette.Muted;
+        var metaInk = AgendaPalette.Dim;
         DoubleCollection? dash = null;
         var tag = string.Empty;
 
@@ -85,8 +88,13 @@ public static class AgendaBuilder
         }
         else if (booking.IsFinished || booking.LocalEnd <= now)
         {
-            bar = AgendaPalette.Dim;
-            opacity = AgendaConstants.FinishedRowOpacity;
+            // Finished: the bar goes to the plain border colour and every line steps down one
+            // token. No opacity on the row itself.
+            bar = AgendaPalette.Line;
+            titleInk = AgendaPalette.Dim;
+            timeInk = AgendaPalette.Dim;
+            subtitleInk = AgendaPalette.Dim;
+            metaInk = AgendaPalette.Dim;
 
             if (booking.IsNoShow)
             {
@@ -114,7 +122,10 @@ public static class AgendaBuilder
             RowBackgroundColor = background,
             RowStrokeColor = stroke,
             RowStrokeDash = dash,
-            RowOpacity = opacity,
+            TitleColor = titleInk,
+            TimeColor = timeInk,
+            SubtitleColor = subtitleInk,
+            MetaColor = metaInk,
         };
     }
 
@@ -156,10 +167,14 @@ public static class AgendaBuilder
                 TimeText = start.ToString("HH:mm"),
                 Title = group.Key.Reason.Length > 0 ? group.Key.Reason : "Blocked",
                 Subtitle = who.Length > 0 ? $"{who} blocked · {duration}" : $"Blocked · {duration}",
-                BarColor = AgendaPalette.Dim,
+                // Blocked time is not cancelled work, just unavailable, so it reads dim rather
+                // than faded out.
+                BarColor = AgendaPalette.Line,
                 RowBackgroundColor = AgendaPalette.SurfaceRaised,
                 RowStrokeColor = Colors.Transparent,
-                RowOpacity = AgendaConstants.BlockedRowOpacity,
+                TitleColor = AgendaPalette.Muted,
+                TimeColor = AgendaPalette.Muted,
+                SubtitleColor = AgendaPalette.Dim,
             });
         }
 
@@ -196,6 +211,7 @@ public static class AgendaBuilder
                 RowStrokeColor = AgendaPalette.Line,
                 RowStrokeDash = AgendaConstants.Dashed(),
                 TitleColor = AgendaPalette.Muted,
+                TimeColor = AgendaPalette.Muted,
             });
         }
 

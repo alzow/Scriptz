@@ -12,19 +12,13 @@
         <ScrollView>
         <VerticalStackLayout Spacing="0">
 
-            <Border BackgroundColor="{StaticResource Line}" StrokeThickness="0"
+            <Border Style="{StaticResource brd2_Grabber}"
                     WidthRequest="38" HeightRequest="4" Margin="0,0,0,16"
-                    HorizontalOptions="Center">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="2"/>
-                </Border.StrokeShape>
-            </Border>
+                    HorizontalOptions="Center"/>
 
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="0,0,0,14">
                 <Border Grid.Column="0" WidthRequest="48" HeightRequest="48"
-                        BackgroundColor="{StaticResource SurfaceRaised}"
-                        Stroke="{StaticResource Line}" StrokeThickness="1"
-                        StrokeShape="Ellipse">
+                        Style="{StaticResource brd_Avatar_Ellipse}">
                     <Label Text="{Binding Initials, Source={x:Reference Root}}"
                            Style="{StaticResource lbl12_Mono_TextPrimary}"
                            HorizontalOptions="Center" VerticalOptions="Center"/>
@@ -39,7 +33,7 @@
 
             </Grid>
 
-            <BoxView HeightRequest="1" Color="{StaticResource Line}" Margin="0,0,0,14"/>
+            <BoxView HeightRequest="1" Style="{StaticResource bx_Divider}" Margin="0,0,0,14"/>
 
             <Button Text="Serve now"
                     Style="{StaticResource btn15_Bold_SheetGo}"
@@ -59,7 +53,7 @@
                     Style="{StaticResource btn15_Regular_SheetRow}"
                     Clicked="OnChangeServiceClicked"/>
 
-            <BoxView HeightRequest="1" Color="{StaticResource Line}" Margin="0,16,0,4"/>
+            <BoxView HeightRequest="1" Style="{StaticResource bx_Divider}" Margin="0,16,0,4"/>
 
             <Button Text="Mark no-show" Margin="0,9,0,0"
                     Style="{StaticResource btn15_Regular_SheetBad}"

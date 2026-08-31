@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
              xmlns:models="clr-namespace:QueueApp.Shared.Domain.Models"
              x:Name="Root"
              x:Class="QueueApp.Features.Flow.Helpers.OperatorStepView">
@@ -12,17 +13,7 @@
             <DataTemplate x:DataType="models:OperatorChoiceItem">
                 <VerticalStackLayout Spacing="0">
                     <Border Padding="12" Margin="0,0,0,8"
-                            BackgroundColor="{StaticResource Surface}"
-                            Stroke="{StaticResource Line}" StrokeThickness="1">
-                        <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="15"/>
-                        </Border.StrokeShape>
-                        <Border.Triggers>
-                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                <Setter Property="Stroke" Value="{StaticResource Green}"/>
-                                <Setter Property="BackgroundColor" Value="{StaticResource GreenSelectedFill}"/>
-                            </DataTrigger>
-                        </Border.Triggers>
+                            Style="{StaticResource brd15_Row_Selectable}">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer
                                 Command="{Binding SelectOperatorCommand, Source={x:Reference Root}}"
@@ -30,26 +21,11 @@
                         </Border.GestureRecognizers>
 
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                            <Border Grid.Column="0" WidthRequest="42" HeightRequest="42" Padding="0"
-                                    BackgroundColor="{StaticResource SurfaceRaised}"
-                                    Stroke="{StaticResource Line}" StrokeThickness="1">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="21"/>
-                                </Border.StrokeShape>
-                                <Border.Triggers>
-                                    <DataTrigger TargetType="Border" Binding="{Binding IsAnyAvailable}" Value="True">
-                                        <Setter Property="Stroke" Value="{StaticResource GreenDim}"/>
-                                    </DataTrigger>
-                                </Border.Triggers>
+                            <Border Grid.Column="0" WidthRequest="42" HeightRequest="42"
+                                    Style="{StaticResource brd21_Avatar_Available}">
                                 <Label Text="{Binding Initials}"
                                        HorizontalOptions="Center" VerticalOptions="Center"
-                                       Style="{StaticResource lbl13_Mono_TextPrimary}">
-                                    <Label.Triggers>
-                                        <DataTrigger TargetType="Label" Binding="{Binding IsAnyAvailable}" Value="True">
-                                            <Setter Property="TextColor" Value="{StaticResource Green}"/>
-                                        </DataTrigger>
-                                    </Label.Triggers>
-                                </Label>
+                                       Style="{StaticResource lbl13_Mono_Available}"/>
                             </Border>
 
                             <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
@@ -57,31 +33,18 @@
                                     <Label Text="{Binding Name}" Style="{StaticResource lbl14_Bold_TextDark}"
                                            VerticalOptions="Center"/>
                                     <Border Padding="6,3" IsVisible="{Binding ShowFastestTag}"
-                                            BackgroundColor="{StaticResource GreenSelectedFill}"
-                                            Stroke="Transparent" StrokeThickness="0"
+                                            Style="{StaticResource brd6_AccentTag}"
                                             VerticalOptions="Center">
-                                        <Border.StrokeShape>
-                                            <RoundRectangle CornerRadius="6"/>
-                                        </Border.StrokeShape>
                                         <Label Text="FASTEST" Style="{StaticResource lbl9_Mono_Green}"/>
                                     </Border>
                                 </HorizontalStackLayout>
                                 <Label Text="{Binding SubLabel}" Style="{StaticResource lbl12_Regular_TextLight}"/>
                             </VerticalStackLayout>
 
-                            <Border Grid.Column="2" WidthRequest="22" HeightRequest="22" Padding="0"
-                                    BackgroundColor="Transparent"
-                                    Stroke="{StaticResource Line}" StrokeThickness="1"
+                            <Border Grid.Column="2" WidthRequest="22" HeightRequest="22"
+                                    Style="{StaticResource brd11_Radio_Selectable}"
                                     VerticalOptions="Center">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="11"/>
-                                </Border.StrokeShape>
-                                <Border.Triggers>
-                                    <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                        <Setter Property="Stroke" Value="{StaticResource Green}"/>
-                                    </DataTrigger>
-                                </Border.Triggers>
-                                <Image Source="ic_check" WidthRequest="12" HeightRequest="12"
+                                <tpl:ThemedIcon Icon="ic_check" WidthRequest="12" HeightRequest="12"
                                        HorizontalOptions="Center" VerticalOptions="Center"
                                        IsVisible="{Binding IsSelected}"/>
                             </Border>
@@ -94,7 +57,7 @@
                         <Label Grid.Column="0" Text="OR CHOOSE" Style="{StaticResource lbl9_Mono_TextFaint}"
                                VerticalOptions="Center"/>
                         <BoxView Grid.Column="1" HeightRequest="1" VerticalOptions="Center"
-                                 BackgroundColor="{StaticResource Line}"/>
+                                 Style="{StaticResource bx_Divider}"/>
                     </Grid>
                 </VerticalStackLayout>
             </DataTemplate>

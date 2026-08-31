@@ -14,7 +14,7 @@
                        HorizontalOptions="Center"/>
             </VerticalStackLayout>
             <BoxView Grid.Column="1" WidthRequest="1" HeightRequest="22"
-                     Color="{StaticResource Line}" VerticalOptions="Center"/>
+                     Style="{StaticResource bx_Divider}" VerticalOptions="Center"/>
             <VerticalStackLayout Grid.Column="2" Spacing="4" HorizontalOptions="Center">
                 <Label Text="{Binding ServingCountText, Source={x:Reference Root}}" Style="{StaticResource lbl16_Mono_TextPrimary}"
                        HorizontalOptions="Center"/>
@@ -22,7 +22,7 @@
                        HorizontalOptions="Center"/>
             </VerticalStackLayout>
             <BoxView Grid.Column="3" WidthRequest="1" HeightRequest="22"
-                     Color="{StaticResource Line}" VerticalOptions="Center"/>
+                     Style="{StaticResource bx_Divider}" VerticalOptions="Center"/>
             <VerticalStackLayout Grid.Column="4" Spacing="4" HorizontalOptions="Center">
                 <Label Text="{Binding DoneTodayText, Source={x:Reference Root}}" Style="{StaticResource lbl16_Mono_TextPrimary}"
                        HorizontalOptions="Center"/>
@@ -30,7 +30,7 @@
                        HorizontalOptions="Center"/>
             </VerticalStackLayout>
             <BoxView Grid.Column="5" WidthRequest="1" HeightRequest="22"
-                     Color="{StaticResource Line}" VerticalOptions="Center"/>
+                     Style="{StaticResource bx_Divider}" VerticalOptions="Center"/>
             <VerticalStackLayout Grid.Column="6" Spacing="4" HorizontalOptions="Center">
                 <Label Text="{Binding AvgText, Source={x:Reference Root}}" Style="{StaticResource lbl16_Mono_TextMuted}"
                        HorizontalOptions="Center"/>

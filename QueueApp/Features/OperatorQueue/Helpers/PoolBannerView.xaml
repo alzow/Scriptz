@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
              xmlns:models="clr-namespace:QueueApp.Features.OperatorQueue.Models"
              x:Name="Root"
              VerticalOptions="Start"
@@ -17,12 +18,12 @@
                   Padding="14,13" MinimumHeightRequest="60"
                   BackgroundColor="Transparent">
                 <Border Grid.Column="0" WidthRequest="38" HeightRequest="38"
-                        BackgroundColor="{StaticResource PurpleBadgeFill}" StrokeThickness="0"
+                        Style="{StaticResource brd8_PurpleTag}"
                         VerticalOptions="Center">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="12"/>
                     </Border.StrokeShape>
-                    <Image Source="ic_users" WidthRequest="18" HeightRequest="18"
+                    <tpl:ThemedIcon Icon="ic_users" WidthRequest="18" HeightRequest="18"
                            HorizontalOptions="Center" VerticalOptions="Center"/>
                 </Border>
 
@@ -31,7 +32,7 @@
                     <Label Text="{Binding PoolAgeText, Source={x:Reference Root}}" Style="{StaticResource lbl11_Regular_TextLight}"/>
                 </VerticalStackLayout>
 
-                <Image Grid.Column="2" Source="{Binding PoolChevron, Source={x:Reference Root}}"
+                <tpl:ThemedIcon Grid.Column="2" Icon="{Binding PoolChevron, Source={x:Reference Root}}"
                        WidthRequest="18" HeightRequest="18" Opacity="0.65"
                        VerticalOptions="Center"/>
 
@@ -45,7 +46,7 @@
                                  BindableLayout.ItemsSource="{Binding PoolRows, Source={x:Reference Root}}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="models:QueueRowItem">
-                        <Border BackgroundColor="{StaticResource Surface}" StrokeThickness="0"
+                        <Border Style="{StaticResource brd_Surface_Flat}"
                                 Padding="12,10" Margin="0,8,0,0" MinimumHeightRequest="62">
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="13"/>

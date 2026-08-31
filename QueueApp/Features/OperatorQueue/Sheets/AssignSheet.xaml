@@ -13,22 +13,15 @@
         <ScrollView>
             <VerticalStackLayout Spacing="0">
 
-                <Border BackgroundColor="{StaticResource Line}" StrokeThickness="0"
+                <Border Style="{StaticResource brd2_Grabber}"
                         WidthRequest="38" HeightRequest="4" Margin="0,0,0,16"
-                        HorizontalOptions="Center">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="2"/>
-                    </Border.StrokeShape>
-                </Border>
+                        HorizontalOptions="Center"/>
 
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="0,0,0,14">
                     <Border Grid.Column="0" WidthRequest="48" HeightRequest="48"
-                            BackgroundColor="{StaticResource SurfaceRaised}"
-                            Stroke="{StaticResource PurpleDim}" StrokeThickness="1"
-                            StrokeShape="Ellipse">
+                            Style="{StaticResource brd_Avatar_Purple}">
                         <Label Text="{Binding Initials, Source={x:Reference Root}}"
-                               Style="{StaticResource lbl12_Mono_TextPrimary}"
-                               TextColor="{StaticResource Purple}"
+                               Style="{StaticResource lbl12_Mono_Purple}"
                                HorizontalOptions="Center" VerticalOptions="Center"/>
                     </Border>
 
@@ -40,7 +33,7 @@
                     </VerticalStackLayout>
                 </Grid>
 
-                <BoxView HeightRequest="1" Color="{StaticResource Line}" Margin="0,0,0,14"/>
+                <BoxView HeightRequest="1" Style="{StaticResource bx_Divider}" Margin="0,0,0,14"/>
 
                 <Label Text="{Binding PromptText, Source={x:Reference Root}}"
                        Style="{StaticResource lbl9_Mono_TextMuted}"
@@ -52,37 +45,31 @@
                         <DataTemplate x:DataType="models:AssignTargetItem">
                             <Border Style="{StaticResource brd13_Raised}"
                                     Padding="11" Margin="0,0,0,9"
-                                    MinimumHeightRequest="66"
-                                    Opacity="{Binding RowOpacity}">
+                                    MinimumHeightRequest="66">
                                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                                     <Grid Grid.Column="0" VerticalOptions="Center">
-                                        <Border WidthRequest="40" HeightRequest="40" Padding="0"
-                                                BackgroundColor="{StaticResource SurfaceRaised}"
-                                                Stroke="{StaticResource Line}" StrokeThickness="1"
-                                                StrokeShape="Ellipse">
+                                        <Border WidthRequest="40" HeightRequest="40"
+                                                Style="{StaticResource brd_Avatar_Ellipse}">
                                             <Label Text="{Binding Initials}"
                                                    Style="{StaticResource lbl12_Mono_TextPrimary}"
                                                    HorizontalOptions="Center" VerticalOptions="Center"/>
                                         </Border>
-                                        <Ellipse Fill="{StaticResource Green}"
+                                        <Ellipse Style="{StaticResource ell_AccentDot_OnRaised}"
                                                  WidthRequest="11" HeightRequest="11"
-                                                 Stroke="{StaticResource SurfaceRaised}"
-                                                 StrokeThickness="2.5"
                                                  IsVisible="{Binding ShowPresenceDot}"
                                                  HorizontalOptions="End" VerticalOptions="End"/>
                                     </Grid>
 
                                     <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
-                                        <Label Text="{Binding Name}" Style="{StaticResource lbl16_Bold_TextDark}"/>
-                                        <Label Text="{Binding SubLabel}" Style="{StaticResource lbl11_Regular_TextLight}"/>
+                                        <Label Text="{Binding Name}" Style="{StaticResource lbl16_Bold_TextDark}"
+                                               TextColor="{Binding NameColor}"/>
+                                        <Label Text="{Binding SubLabel}" Style="{StaticResource lbl11_Regular_TextLight}"
+                                               TextColor="{Binding SubLabelColor}"/>
                                     </VerticalStackLayout>
 
                                     <Border Grid.Column="2" IsVisible="{Binding ShowSoonestTag}"
-                                            BackgroundColor="{StaticResource SoonestBadgeFill}" StrokeThickness="0"
+                                            Style="{StaticResource brd6_AccentTag}"
                                             Padding="8,5" VerticalOptions="Center">
-                                        <Border.StrokeShape>
-                                            <RoundRectangle CornerRadius="6"/>
-                                        </Border.StrokeShape>
                                         <Label Text="SOONEST" Style="{StaticResource lbl9_Mono_Green}"/>
                                     </Border>
                                 </Grid>
@@ -97,7 +84,7 @@
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
 
-                <BoxView HeightRequest="1" Color="{StaticResource Line}" Margin="0,16,0,4"
+                <BoxView HeightRequest="1" Style="{StaticResource bx_Divider}" Margin="0,16,0,4"
                          IsVisible="{Binding ShowNoShow, Source={x:Reference Root}}"/>
 
                 <Button Text="Mark no-show" Margin="0,9,0,0"

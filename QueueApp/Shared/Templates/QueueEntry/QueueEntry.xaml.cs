@@ -138,7 +138,7 @@ public partial class QueueEntry : ContentView, IValidationView
 
     private void OnEntryFocused(object sender, FocusEventArgs e)
     {
-        QueueEntryBorder.Stroke = (Color)Application.Current.Resources["Purple"];
+        QueueEntryBorder.Style = (Style)Application.Current!.Resources["brd16_Entry_Focused"];
     }
 
     private void OnEntryUnfocused(object sender, FocusEventArgs e)
@@ -184,7 +184,7 @@ public partial class QueueEntry : ContentView, IValidationView
             ErrorMessage = Validator.ErrorMessage;
             ErrorLabel.Text = ErrorMessage;
             ErrorLabel.IsVisible = true;
-            QueueEntryBorder.Stroke = (Color)Application.Current.Resources["Danger"];
+            QueueEntryBorder.Style = (Style)Application.Current!.Resources["brd16_Entry_Error"];
         }
 
         ValidationChanged?.Invoke(this, IsValid);
@@ -195,7 +195,7 @@ public partial class QueueEntry : ContentView, IValidationView
     {
         ErrorLabel.Text = string.Empty;
         ErrorLabel.IsVisible = false;
-        QueueEntryBorder.Stroke = (Color)Application.Current.Resources["Line"];
+        QueueEntryBorder.Style = (Style)Application.Current!.Resources["brd16_Entry"];
 
         if (isReset)
         {

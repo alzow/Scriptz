@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
              xmlns:models="clr-namespace:QueueApp.Features.OperatorQueue.Models"
              xmlns:helpers="clr-namespace:QueueApp.Features.OperatorQueue.Helpers"
              x:Name="Root"
@@ -10,8 +11,7 @@
 
     <Border Style="{StaticResource brd16_White}"
             Margin="18,12,18,0" Padding="0"
-            VerticalOptions="Start"
-            Opacity="{Binding SectionOpacity}">
+            VerticalOptions="Start">
         <Grid VerticalOptions="Start">
 
             <VerticalStackLayout Spacing="0" Padding="12" IsVisible="{Binding IsExpanded}">
@@ -21,14 +21,15 @@
                                         Initials="{Binding Initials}"
                                         ShowDot="{Binding IsOnShift}"/>
                     <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
-                        <Label Text="{Binding Name}" Style="{StaticResource lbl16_Bold_TextDark}"/>
+                        <Label Text="{Binding Name}" Style="{StaticResource lbl16_Bold_TextDark}"
+                               TextColor="{Binding NameColor}"/>
                         <Label Text="{Binding StatusText}"
                                TextColor="{Binding StatusColor}"
                                Style="{StaticResource lbl11_Regular_TextLight}"/>
                     </VerticalStackLayout>
                 </Grid>
 
-                <BoxView HeightRequest="1" Color="{StaticResource Line}" Margin="0,0,0,11"/>
+                <BoxView HeightRequest="1" Style="{StaticResource bx_Divider}" Margin="0,0,0,11"/>
 
                 <Border Style="{StaticResource brd14_Serving}" Padding="13"
                         IsVisible="{Binding HasServing}">
@@ -53,13 +54,13 @@
                             </VerticalStackLayout>
                         </Grid>
 
-                        <Border BackgroundColor="{StaticResource Surface}" StrokeThickness="0"
+                        <Border Style="{StaticResource brd_Surface_Flat}"
                                 Padding="11,9" Margin="0,11,0,0" MinimumHeightRequest="44">
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="10"/>
                             </Border.StrokeShape>
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="7">
-                                <Image Grid.Column="0" Source="ic_edit" WidthRequest="14" HeightRequest="14"
+                                <tpl:ThemedIcon Grid.Column="0" Icon="ic_edit" WidthRequest="14" HeightRequest="14"
                                        VerticalOptions="Center"/>
                                 <Label Grid.Column="1" Text="{Binding NoteText}"
                                        Style="{StaticResource lbl11_Regular_TextLight}"
@@ -89,7 +90,7 @@
                                     Padding="10" Margin="0,9,0,0" MinimumHeightRequest="66">
                                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="11">
                                     <Border Grid.Column="0" WidthRequest="26" HeightRequest="26"
-                                            BackgroundColor="{StaticResource Surface}" StrokeThickness="0"
+                                            Style="{StaticResource brd_Surface_Flat}"
                                             VerticalOptions="Center"
                                             IsVisible="{Binding ShowPosition}">
                                         <Border.StrokeShape>
@@ -150,7 +151,7 @@
                 </VerticalStackLayout>
                 <Border Grid.Column="2" WidthRequest="44" HeightRequest="44"
                         Style="{StaticResource brd13_Ghost}" VerticalOptions="Center">
-                    <Image Source="ic_plus" WidthRequest="18" HeightRequest="18"
+                    <tpl:ThemedIcon Icon="ic_plus" WidthRequest="18" HeightRequest="18"
                            HorizontalOptions="Center" VerticalOptions="Center"/>
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer

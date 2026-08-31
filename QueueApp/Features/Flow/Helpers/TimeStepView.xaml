@@ -10,7 +10,7 @@
 
             <ActivityIndicator IsRunning="{Binding IsLoadingSlots, Source={x:Reference Root}}"
                                IsVisible="{Binding IsLoadingSlots, Source={x:Reference Root}}"
-                               Color="{StaticResource Green}"/>
+                               Style="{StaticResource ai_Accent}"/>
 
             <helpers:SlotPeriodView Period="{Binding Morning, Source={x:Reference Root}}"
                                     SelectSlotCommand="{Binding SelectSlotCommand, Source={x:Reference Root}}"/>

@@ -27,7 +27,7 @@
                                        Style="{StaticResource lbl9_Mono_TextMuted}"
                                        HorizontalOptions="Center"/>
                             </VerticalStackLayout>
-                            <BoxView Grid.Column="1" Color="{StaticResource Line}"/>
+                            <BoxView Grid.Column="1" Style="{StaticResource bx_Divider}"/>
                         </Grid>
 
                         <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
@@ -43,19 +43,8 @@
 
                             <!-- Confirmed is the default; a pending request is the exception, so it
                                  is the one the trigger repaints. -->
-                            <Border Style="{StaticResource brd20_StatusPill}">
-                                <Border.Triggers>
-                                    <DataTrigger TargetType="Border" Binding="{Binding Status}" Value="pending">
-                                        <Setter Property="BackgroundColor" Value="{StaticResource PurpleBadgeFill}"/>
-                                    </DataTrigger>
-                                </Border.Triggers>
-                                <Label Text="{Binding StatusLabel}" Style="{StaticResource lbl10_Bold_Green}">
-                                    <Label.Triggers>
-                                        <DataTrigger TargetType="Label" Binding="{Binding Status}" Value="pending">
-                                            <Setter Property="TextColor" Value="{StaticResource Purple}"/>
-                                        </DataTrigger>
-                                    </Label.Triggers>
-                                </Label>
+                            <Border Style="{StaticResource brd20_StatusPill_Selectable}">
+                                <Label Text="{Binding StatusLabel}" Style="{StaticResource lbl10_Bold_StatusPill}"/>
                             </Border>
 
                             <controls:AlzowLoadingButton

@@ -5,10 +5,7 @@
             xmlns:android="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific;assembly=Microsoft.Maui.Controls"
             android:TabbedPage.ToolbarPlacement="Bottom" android:TabbedPage.IsSwipePagingEnabled="False"
             xmlns:ios="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific;assembly=Microsoft.Maui.Controls" ios:Page.UseSafeArea="True"
-            BarBackgroundColor="{StaticResource Surface}"
-            BarTextColor="{StaticResource TextPrimary}"
-            UnselectedTabColor="{StaticResource TextMuted}"
-            SelectedTabColor="{StaticResource Green}">
+            Style="{StaticResource MainTabbedPageStyle}">
     <!--
         Tabs are created dynamically by MPowerKit via the TabbedPage navigation URI.
         Do NOT add children here.

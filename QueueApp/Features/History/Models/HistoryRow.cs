@@ -1,4 +1,5 @@
 using QueueApp.Features.CategoryPicker.Models;
+using QueueApp.Framework.Theming;
 using QueueApp.Services.Api.Booking.Models;
 using QueueApp.Services.Api.Queue.Models;
 
@@ -108,19 +109,20 @@ public sealed class HistoryRow
 
 internal static class HistoryStatusPalette
 {
-    private static Color Resource(string key) => (Color)Application.Current!.Resources[key];
+    public static Color RaisedFill => ThemePalette.Raised;
+    public static Color MutedInk => ThemePalette.TextMuted;
+    public static Color DimInk => ThemePalette.TextDim;
+    public static Color OutlineStroke => ThemePalette.Border;
 
-    public static Color RaisedFill => Resource("SurfaceRaised");
-    public static Color MutedInk => Resource("TextMuted");
-    public static Color DimInk => Resource("TextFaint");
-    public static Color OutlineStroke => Resource("Line");
+    // The pill fills are solid tint tokens now. They used to be the ink at 13-15% alpha, which
+    // over a light surface is barely a colour at all, and composited differently on a card than
+    // on the page.
+    public static Color LiveInk => ThemePalette.AccentText;
+    public static Color LiveFill => ThemePalette.AccentTint;
 
-    public static Color LiveInk => Resource("Green");
-    public static Color LiveFill => LiveInk.WithAlpha(0.13f);
+    public static Color InfoInk => ThemePalette.PurpleText;
+    public static Color InfoFill => ThemePalette.PurpleTint;
 
-    public static Color InfoInk => Resource("Purple");
-    public static Color InfoFill => InfoInk.WithAlpha(0.15f);
-
-    public static Color BadInk => Resource("Danger");
-    public static Color BadFill => BadInk.WithAlpha(0.13f);
+    public static Color BadInk => ThemePalette.DangerText;
+    public static Color BadFill => ThemePalette.DangerTint;
 }

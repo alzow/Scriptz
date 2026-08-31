@@ -6,14 +6,13 @@
              x:Class="QueueApp.Features.BusinessDetail.Helpers.LiveCardView">
 
     <Border x:Name="LiveCardBorder" Margin="20,18,20,0" Padding="15"
-            BackgroundColor="{StaticResource Surface}"
-            Stroke="{StaticResource Line}" StrokeThickness="1">
-        <Border.StrokeShape>
-            <RoundRectangle CornerRadius="18"/>
-        </Border.StrokeShape>
+            Style="{StaticResource brd18_LiveCard}">
         <Border.Triggers>
+            <DataTrigger TargetType="Border" Binding="{Binding IsBookingMode, Source={x:Reference Root}}" Value="False">
+                <Setter Property="Style" Value="{StaticResource brd18_LiveCard}"/>
+            </DataTrigger>
             <DataTrigger TargetType="Border" Binding="{Binding IsBookingMode, Source={x:Reference Root}}" Value="True">
-                <Setter Property="Stroke" Value="{StaticResource PurpleDim}"/>
+                <Setter Property="Style" Value="{StaticResource brd18_LiveCard_Booking}"/>
             </DataTrigger>
         </Border.Triggers>
 
@@ -24,15 +23,15 @@
                        Style="{StaticResource lbl9_Mono_TextMuted}" VerticalOptions="Center"/>
                 <HorizontalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
                     <Ellipse WidthRequest="6" HeightRequest="6" VerticalOptions="Center"
-                             Fill="{StaticResource Green}"
+                             Style="{StaticResource ell_AccentDot}"
                              IsVisible="{Binding ShowLiveDot, Source={x:Reference Root}}"/>
-                    <Label Text="{Binding LiveCardStatus, Source={x:Reference Root}}" Style="{StaticResource lbl10_Mono_Green}">
+                    <Label Text="{Binding LiveCardStatus, Source={x:Reference Root}}" Style="{StaticResource lbl10_Mono_LiveStatus}">
                         <Label.Triggers>
                             <DataTrigger TargetType="Label" Binding="{Binding IsBookingMode, Source={x:Reference Root}}" Value="True">
-                                <Setter Property="TextColor" Value="{StaticResource Purple}"/>
+                                <Setter Property="Style" Value="{StaticResource lbl10_Mono_LiveStatus_Booking}"/>
                             </DataTrigger>
                             <DataTrigger TargetType="Label" Binding="{Binding IsOpen, Source={x:Reference Root}}" Value="False">
-                                <Setter Property="TextColor" Value="{StaticResource TextFaint}"/>
+                                <Setter Property="Style" Value="{StaticResource lbl10_Mono_LiveStatus_Closed}"/>
                             </DataTrigger>
                         </Label.Triggers>
                     </Label>
@@ -47,7 +46,7 @@
                            Style="{StaticResource lbl12_Regular_TextLight}"/>
                 </VerticalStackLayout>
                 <BoxView Grid.Column="1" WidthRequest="1" HeightRequest="30"
-                         BackgroundColor="{StaticResource Line}" VerticalOptions="Center"/>
+                         Style="{StaticResource bx_Divider}" VerticalOptions="Center"/>
                 <VerticalStackLayout Grid.Column="2" Spacing="6">
                     <Label Text="{Binding SecondaryStatValue, Source={x:Reference Root}}" HorizontalOptions="Center"
                            Style="{StaticResource lbl22_Mono_TextPrimary}"/>
@@ -55,7 +54,7 @@
                            Style="{StaticResource lbl12_Regular_TextLight}"/>
                 </VerticalStackLayout>
                 <BoxView Grid.Column="3" WidthRequest="1" HeightRequest="30"
-                         BackgroundColor="{StaticResource Line}" VerticalOptions="Center"/>
+                         Style="{StaticResource bx_Divider}" VerticalOptions="Center"/>
                 <VerticalStackLayout Grid.Column="4" Spacing="6">
                     <Label Text="{Binding TertiaryStatValue, Source={x:Reference Root}}" HorizontalOptions="Center"
                            Style="{StaticResource lbl22_Mono_TextPrimary}"/>

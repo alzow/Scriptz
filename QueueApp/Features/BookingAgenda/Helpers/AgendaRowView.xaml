@@ -14,7 +14,7 @@
             <Label Grid.Column="0" Text="{Binding NowText}"
                    Style="{StaticResource lbl9_Mono_Green}" VerticalOptions="Center"/>
             <BoxView Grid.Column="1" HeightRequest="1"
-                     Color="{StaticResource Green}" VerticalOptions="Center"/>
+                     Style="{StaticResource bx_NowLine}" VerticalOptions="Center"/>
         </Grid>
 
         <Border Grid.Row="1" Style="{StaticResource brd14_Row}"
@@ -23,14 +23,15 @@
                 BackgroundColor="{Binding RowBackgroundColor}"
                 Stroke="{Binding RowStrokeColor}"
                 StrokeDashArray="{Binding RowStrokeDash}"
-                Opacity="{Binding RowOpacity}"
                 InputTransparent="{Binding IsNotTappable}">
 
             <Grid ColumnDefinitions="46,3,*,Auto" ColumnSpacing="11">
                 <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
-                    <Label Text="{Binding TimeText}" Style="{StaticResource lbl13_Mono_TextPrimary}"/>
+                    <Label Text="{Binding TimeText}" Style="{StaticResource lbl13_Mono_TextPrimary}"
+                           TextColor="{Binding TimeColor}"/>
                     <Label Text="{Binding DurationText}" IsVisible="{Binding ShowDuration}"
-                           Style="{StaticResource lbl9_Mono_TextFaint}"/>
+                           Style="{StaticResource lbl9_Mono_TextFaint}"
+                           TextColor="{Binding MetaColor}"/>
                 </VerticalStackLayout>
 
                 <BoxView Grid.Column="1" WidthRequest="3" CornerRadius="2"
@@ -50,7 +51,8 @@
                                    TextColor="{Binding TagTextColor}"/>
                         </Border>
                     </HorizontalStackLayout>
-                    <Label Text="{Binding Subtitle}" Style="{StaticResource lbl11_Regular_TextLight}"/>
+                    <Label Text="{Binding Subtitle}" Style="{StaticResource lbl11_Regular_TextLight}"
+                           TextColor="{Binding SubtitleColor}"/>
                 </VerticalStackLayout>
 
                 <Border Grid.Column="3" Style="{StaticResource brd6_Tag}" Padding="7,5"
@@ -78,7 +80,7 @@
             <Label Grid.Column="0" Text="{Binding NowText}"
                    Style="{StaticResource lbl9_Mono_Green}" VerticalOptions="Center"/>
             <BoxView Grid.Column="1" HeightRequest="1"
-                     Color="{StaticResource Green}" VerticalOptions="Center"/>
+                     Style="{StaticResource bx_NowLine}" VerticalOptions="Center"/>
         </Grid>
 
     </Grid>

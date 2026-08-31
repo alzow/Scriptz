@@ -10,7 +10,7 @@
              x:DataType="vm:ConfirmationPageViewModel"
              Style="{StaticResource NavigationPageStyle}">
 
-    <Grid BackgroundColor="{StaticResource DeepBackground}"
+    <Grid Style="{StaticResource grid_Page}"
           RowDefinitions="Auto,*">
 
         <topbar:TopBarView Grid.Row="0"
@@ -53,7 +53,7 @@
         </ScrollView>
 
         <ActivityIndicator Grid.Row="1" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
-                           Color="{StaticResource Green}"
+                           Style="{StaticResource ai_Accent}"
                            HorizontalOptions="Center" VerticalOptions="Center"/>
 
     </Grid>

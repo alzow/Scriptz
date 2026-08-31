@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Linq;
+using QueueApp.Framework.Theming;
 
 namespace QueueApp.Converters;
 
@@ -148,33 +149,66 @@ public class EdgeItemToMarginConverter : IMultiValueConverter
 }
 
 // Maps a BrowseBusinessSummaryResponse.WaitBucket string ("go"|"wait"|"busy"|"book"|"off"|"unknown")
-// to a color, keyed off a "|"-separated hex-color parameter matching that same order (6 entries).
-public class WaitBucketToColorConverter : IValueConverter
+// to a themed token.
+//
+// This used to take a "|"-separated list of hex colours as a ConverterParameter, which put six
+// literal colours into the page and could not survive a theme switch — three of them were alpha
+// tints, which composite differently over a card than over the page and vanish over a light one.
+// The mapping lives here now and resolves through ThemePalette, so the page names a role and not
+// a colour.
+public abstract class WaitBucketConverterBase : IValueConverter
 {
+    protected abstract string GoToken { get; }
+    protected abstract string WaitToken { get; }
+    protected abstract string BusyToken { get; }
+    protected abstract string NeutralToken { get; }
+
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (value is not string bucket || parameter is not string hexColors)
-            return Colors.Transparent;
-
-        var parts = hexColors.Split('|');
-        if (parts.Length != 6)
-            return Colors.Transparent;
-
-        var index = bucket switch
+        var token = (value as string) switch
         {
-            "go" => 0,
-            "wait" => 1,
-            "busy" => 2,
-            "book" => 3,
-            "off" => 4,
-            _ => 5, // "unknown"
+            "go" => GoToken,
+            "wait" => WaitToken,
+            "busy" => BusyToken,
+            // "book", "off" and anything unrecognised are not a wait state, so they stay neutral.
+            _ => NeutralToken,
         };
 
-        return Color.FromArgb(parts[index]);
+        var color = ThemePalette.Get(token);
+
+        // Border.Stroke is a Brush, every other consumer wants the Color itself.
+        return targetType == typeof(Brush) ? new SolidColorBrush(color) : color;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
         throw new NotImplementedException();
     }
+}
+
+// The tile behind a category icon: a solid tint, never alpha.
+public sealed class WaitBucketToTintConverter : WaitBucketConverterBase
+{
+    protected override string GoToken => "AccentTint";
+    protected override string WaitToken => "PurpleTint";
+    protected override string BusyToken => "DangerTint";
+    protected override string NeutralToken => "Raised";
+}
+
+// That tile's 1px edge. A thin stroke takes the text variant — the vivid green is 1.22:1 on light.
+public sealed class WaitBucketToStrokeConverter : WaitBucketConverterBase
+{
+    protected override string GoToken => "AccentText";
+    protected override string WaitToken => "PurpleText";
+    protected override string BusyToken => "DangerText";
+    protected override string NeutralToken => "Border";
+}
+
+// The wait bar itself is a fill, so it keeps the vivid brand colour in both themes.
+public sealed class WaitBucketToBarConverter : WaitBucketConverterBase
+{
+    protected override string GoToken => "Accent";
+    protected override string WaitToken => "Purple";
+    protected override string BusyToken => "Danger";
+    protected override string NeutralToken => "Border";
 }

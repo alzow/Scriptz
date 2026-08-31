@@ -5,9 +5,9 @@
     <Style x:Key="SearchFrame"
             TargetType="Frame">
         <Setter Property="BackgroundColor"
-                Value="{StaticResource Surface}"/>
+                Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
         <Setter Property="BorderColor"
-                Value="{StaticResource Line}"/>
+                Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
         <Setter Property="CornerRadius"
                 Value="16"/>
         <Setter Property="Padding"

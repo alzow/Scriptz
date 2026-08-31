@@ -3,82 +3,74 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Name="Root"
              x:Class="QueueApp.Features.History.Helpers.HistoryFilterBar">
-    <ContentView.Resources>
-        <Style x:Key="ChipBorder" TargetType="Border" BasedOn="{StaticResource brd16_White}">
-            <Setter Property="Padding" Value="15,7"/>
-        </Style>
-        <Style x:Key="ChipLabel" TargetType="Label">
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="FontAttributes" Value="Bold"/>
-            <Setter Property="TextColor" Value="{StaticResource TextMuted}"/>
-        </Style>
-    </ContentView.Resources>
-
     <HorizontalStackLayout Spacing="8" Margin="20,16,20,4">
-        <Border Style="{StaticResource ChipBorder}">
+        <Border Style="{StaticResource brd16_Chip}">
             <Border.Triggers>
                 <DataTrigger TargetType="Border" Binding="{Binding IsAllSelected, Source={x:Reference Root}}" Value="True">
-                    <Setter Property="BackgroundColor" Value="{StaticResource GreenSelectedFill}"/>
-                    <Setter Property="Stroke" Value="{StaticResource Green}"/>
+                    <Setter Property="Style" Value="{StaticResource brd16_Chip_Selected}"/>
                 </DataTrigger>
                 <DataTrigger TargetType="Border" Binding="{Binding IsAllSelected, Source={x:Reference Root}}" Value="False">
-                    <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
-                    <Setter Property="Stroke" Value="{StaticResource Line}"/>
+                    <Setter Property="Style" Value="{StaticResource brd16_Chip}"/>
                 </DataTrigger>
             </Border.Triggers>
             <Border.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding SetFilterCommand, Source={x:Reference Root}}" CommandParameter="All"/>
             </Border.GestureRecognizers>
-            <Label Text="All" Style="{StaticResource ChipLabel}">
+            <Label Text="All" Style="{StaticResource lbl13_Chip}">
                 <Label.Triggers>
                     <DataTrigger TargetType="Label" Binding="{Binding IsAllSelected, Source={x:Reference Root}}" Value="True">
-                        <Setter Property="TextColor" Value="{StaticResource Green}"/>
+                        <Setter Property="Style" Value="{StaticResource lbl13_Chip_Selected}"/>
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label" Binding="{Binding IsAllSelected, Source={x:Reference Root}}" Value="False">
+                        <Setter Property="Style" Value="{StaticResource lbl13_Chip}"/>
                     </DataTrigger>
                 </Label.Triggers>
             </Label>
         </Border>
 
-        <Border Style="{StaticResource ChipBorder}">
+        <Border Style="{StaticResource brd16_Chip}">
             <Border.Triggers>
                 <DataTrigger TargetType="Border" Binding="{Binding IsVisitsSelected, Source={x:Reference Root}}" Value="True">
-                    <Setter Property="BackgroundColor" Value="{StaticResource GreenSelectedFill}"/>
-                    <Setter Property="Stroke" Value="{StaticResource Green}"/>
+                    <Setter Property="Style" Value="{StaticResource brd16_Chip_Selected}"/>
                 </DataTrigger>
                 <DataTrigger TargetType="Border" Binding="{Binding IsVisitsSelected, Source={x:Reference Root}}" Value="False">
-                    <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
-                    <Setter Property="Stroke" Value="{StaticResource Line}"/>
+                    <Setter Property="Style" Value="{StaticResource brd16_Chip}"/>
                 </DataTrigger>
             </Border.Triggers>
             <Border.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding SetFilterCommand, Source={x:Reference Root}}" CommandParameter="Visits"/>
             </Border.GestureRecognizers>
-            <Label Text="Visits" Style="{StaticResource ChipLabel}">
+            <Label Text="Visits" Style="{StaticResource lbl13_Chip}">
                 <Label.Triggers>
                     <DataTrigger TargetType="Label" Binding="{Binding IsVisitsSelected, Source={x:Reference Root}}" Value="True">
-                        <Setter Property="TextColor" Value="{StaticResource Green}"/>
+                        <Setter Property="Style" Value="{StaticResource lbl13_Chip_Selected}"/>
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label" Binding="{Binding IsVisitsSelected, Source={x:Reference Root}}" Value="False">
+                        <Setter Property="Style" Value="{StaticResource lbl13_Chip}"/>
                     </DataTrigger>
                 </Label.Triggers>
             </Label>
         </Border>
 
-        <Border Style="{StaticResource ChipBorder}">
+        <Border Style="{StaticResource brd16_Chip}">
             <Border.Triggers>
                 <DataTrigger TargetType="Border" Binding="{Binding IsBookingsSelected, Source={x:Reference Root}}" Value="True">
-                    <Setter Property="BackgroundColor" Value="{StaticResource GreenSelectedFill}"/>
-                    <Setter Property="Stroke" Value="{StaticResource Green}"/>
+                    <Setter Property="Style" Value="{StaticResource brd16_Chip_Selected}"/>
                 </DataTrigger>
                 <DataTrigger TargetType="Border" Binding="{Binding IsBookingsSelected, Source={x:Reference Root}}" Value="False">
-                    <Setter Property="BackgroundColor" Value="{StaticResource Surface}"/>
-                    <Setter Property="Stroke" Value="{StaticResource Line}"/>
+                    <Setter Property="Style" Value="{StaticResource brd16_Chip}"/>
                 </DataTrigger>
             </Border.Triggers>
             <Border.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding SetFilterCommand, Source={x:Reference Root}}" CommandParameter="Bookings"/>
             </Border.GestureRecognizers>
-            <Label Text="Bookings" Style="{StaticResource ChipLabel}">
+            <Label Text="Bookings" Style="{StaticResource lbl13_Chip}">
                 <Label.Triggers>
                     <DataTrigger TargetType="Label" Binding="{Binding IsBookingsSelected, Source={x:Reference Root}}" Value="True">
-                        <Setter Property="TextColor" Value="{StaticResource Green}"/>
+                        <Setter Property="Style" Value="{StaticResource lbl13_Chip_Selected}"/>
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label" Binding="{Binding IsBookingsSelected, Source={x:Reference Root}}" Value="False">
+                        <Setter Property="Style" Value="{StaticResource lbl13_Chip}"/>
                     </DataTrigger>
                 </Label.Triggers>
             </Label>

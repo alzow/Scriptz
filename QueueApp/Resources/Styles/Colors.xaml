@@ -3,89 +3,90 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <!-- Queue Design Tokens -->
-    <Color x:Key="DeepBackground">#141821</Color>
-    <Color x:Key="Surface">#1C222D</Color>
-    <Color x:Key="SurfaceRaised">#252C39</Color>
-    <Color x:Key="Line">#343D4D</Color>
-    <Color x:Key="Green">#39FF7A</Color>
-    <Color x:Key="GreenDim">#1F8A47</Color>
-    <Color x:Key="GreenSelectedFill">#1839FF7A</Color>
-    <Color x:Key="Purple">#A45EFF</Color>
-    <Color x:Key="PurpleDim">#5B3499</Color>
-    <Color x:Key="Danger">#FF3B5C</Color>
-    <Color x:Key="DangerDim">#7A1F30</Color>
-    <Color x:Key="TextPrimary">#F2F4F7</Color>
-    <Color x:Key="TextMuted">#8A8F98</Color>
-    <Color x:Key="TextFaint">#565C68</Color>
-    <Color x:Key="PurpleBadgeFill">#24A45EFF</Color>
-    <Color x:Key="LiveBadgeFill">#1F39FF7A</Color>
-    <Color x:Key="SoonestBadgeFill">#2139FF7A</Color>
-    <Color x:Key="ScrimBackground">#B80A0D12</Color>
+    <!--
+        Raw theme values. Nothing semantic lives here and nothing outside Styles.xaml and its
+        sibling dictionaries may reference these keys: pages reference styles, styles reference
+        tokens through AppThemeBinding, tokens reference these raw values.
 
-    <!-- Legacy aliases mapped to the dark design system -->
-    <Color x:Key="Cream">#F2F4F7</Color>
-    <Color x:Key="CreamDark">#EAF0F4</Color>
-    <Color x:Key="CreamBorder">#343D4D</Color>
-    <Color x:Key="Orange">#A45EFF</Color>
-    <Color x:Key="OrangeLight">#5B3499</Color>
-    <Color x:Key="OrangePale">#2A2338</Color>
-    <Color x:Key="Brown">#1C222D</Color>
-    <Color x:Key="BrownMid">#8A8F98</Color>
-    <Color x:Key="BrownLight">#565C68</Color>
-    <Color x:Key="GreenPale">#193524</Color>
-    <Color x:Key="Teal">#39FF7A</Color>
-    <Color x:Key="TealPale">#183833</Color>
-    <Color x:Key="Red">#FF3B5C</Color>
-    <Color x:Key="RedPale">#3A1D29</Color>
-    <Color x:Key="Gold">#A45EFF</Color>
-    <Color x:Key="GoldPale">#2A2338</Color>
-    <Color x:Key="White">#F2F4F7</Color>
-    <Color x:Key="TextDark">#F2F4F7</Color>
-    <Color x:Key="TextMid">#8A8F98</Color>
-    <Color x:Key="TextLight">#8A8F98</Color>
+        Dark is the primary aesthetic. Light is the same product with the lights on — the same
+        elevation model, the same borders, the same meanings, different values.
+    -->
 
-    <Color x:Key="Primary">#39FF7A</Color>
-    <Color x:Key="PrimaryDark">#1F8A47</Color>
-    <Color x:Key="PrimaryDarkText">#F2F4F7</Color>
-    <Color x:Key="Secondary">#A45EFF</Color>
-    <Color x:Key="SecondaryDarkText">#F2F4F7</Color>
-    <Color x:Key="Tertiary">#12151D</Color>
-    <Color x:Key="Black">#141821</Color>
-    <Color x:Key="OffBlack">#1C222D</Color>
-    <Color x:Key="MidnightBlue">#141821</Color>
-    <Color x:Key="Magenta">#A45EFF</Color>
+    <!--
+        Neutrals. Elevation runs the same direction in both themes: higher is lighter.
+        Page to card separation is 1.113 on dark and 1.137 on light, so light is marginally more
+        separated and nothing flattens out.
+    -->
+    <Color x:Key="DarkBg">#141821</Color>
+    <Color x:Key="LightBg">#E4E9F1</Color>
+    <Color x:Key="DarkSurface">#1C222D</Color>
+    <Color x:Key="LightSurface">#F5F7FB</Color>
+    <Color x:Key="DarkRaised">#252C39</Color>
+    <Color x:Key="LightRaised">#FFFFFF</Color>
+    <Color x:Key="DarkBorder">#343D4D</Color>
+    <Color x:Key="LightBorder">#BFCAD9</Color>
 
-    <Color x:Key="Gray25">#141821</Color>
-    <Color x:Key="Gray50">#1C222D</Color>
-    <Color x:Key="Gray100">#252C39</Color>
-    <Color x:Key="Gray200">#343D4D</Color>
-    <Color x:Key="Gray300">#414B5D</Color>
-    <Color x:Key="Gray400">#565C68</Color>
-    <Color x:Key="Gray500">#8A8F98</Color>
-    <Color x:Key="Gray600">#A9AFB6</Color>
-    <Color x:Key="Gray700">#C0C6CD</Color>
-    <Color x:Key="Gray900">#F2F4F7</Color>
-    <Color x:Key="Gray950">#F2F4F7</Color>
+    <!--
+        Text. TextDim sits deliberately below 4.5:1 in both themes — it is for decorative labels
+        and timestamps only, never for anything the operator has to read.
+    -->
+    <Color x:Key="DarkTextInk">#E2E9F5</Color>
+    <Color x:Key="LightTextInk">#161C27</Color>
+    <Color x:Key="DarkTextMuted">#8A96A6</Color>
+    <Color x:Key="LightTextMuted">#586376</Color>
+    <Color x:Key="DarkTextDim">#5D6879</Color>
+    <Color x:Key="LightTextDim">#788496</Color>
+    <Color x:Key="DarkTextOnAccent">#0E1219</Color>
+    <Color x:Key="LightTextOnAccent">#0E1219</Color>
 
-    <Color x:Key="Success">#39FF7A</Color>
-    <Color x:Key="Warning">#A45EFF</Color>
-    <Color x:Key="Error">#FF3B5C</Color>
+    <!--
+        Accent fills. Identical in both themes — these are the brand. Buttons, bars, dots.
+        Green means active / commit / your turn, purple means awaiting resolution, red means
+        destructive, and that holds in both themes.
+    -->
+    <Color x:Key="DarkAccent">#39FF7A</Color>
+    <Color x:Key="LightAccent">#39FF7A</Color>
+    <Color x:Key="DarkPurple">#A45EFF</Color>
+    <Color x:Key="LightPurple">#A45EFF</Color>
+    <Color x:Key="DarkDanger">#FF3B5C</Color>
+    <Color x:Key="LightDanger">#FF3B5C</Color>
 
-    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Green}"/>
-    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Purple}"/>
-    <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Surface}"/>
-    <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource TextPrimary}"/>
-    <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource DeepBackground}"/>
+    <!--
+        Accent text and thin strokes. The brand green as text on a light page is 1.22:1, so each
+        accent splits into a fill and a legible text/stroke variant. On dark the text variant is
+        the vivid colour for green and a lifted one for purple and red, which is the §4 correction:
+        #A45EFF and #FF3B5C both fail as text on Raised.
+    -->
+    <Color x:Key="DarkAccentText">#39FF7A</Color>
+    <Color x:Key="LightAccentText">#097430</Color>
+    <Color x:Key="DarkPurpleText">#B47CFF</Color>
+    <Color x:Key="LightPurpleText">#7A2FD6</Color>
+    <Color x:Key="DarkDangerText">#FF5E78</Color>
+    <Color x:Key="LightDangerText">#C81939</Color>
 
-    <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="{StaticResource Green}" Offset="0"/>
-        <GradientStop Color="{StaticResource Purple}" Offset="1"/>
-    </LinearGradientBrush>
+    <!--
+        Tints and tint borders. Solid, never alpha: 7% neon green over #F5F7FB is invisible and
+        slightly acid, and an alpha tint composites to two different colours depending on whether
+        it lands on Bg or on Surface.
+    -->
+    <Color x:Key="DarkAccentTint">#15291E</Color>
+    <Color x:Key="LightAccentTint">#DFF9E8</Color>
+    <Color x:Key="DarkPurpleTint">#231B33</Color>
+    <Color x:Key="LightPurpleTint">#F0E6FF</Color>
+    <Color x:Key="DarkDangerTint">#2B161E</Color>
+    <Color x:Key="LightDangerTint">#FFE4E9</Color>
+    <Color x:Key="DarkAccentBorder">#2E5F42</Color>
+    <Color x:Key="LightAccentBorder">#8ADCA8</Color>
+    <Color x:Key="DarkPurpleBorder">#4A3670</Color>
+    <Color x:Key="LightPurpleBorder">#C9A6F5</Color>
+    <Color x:Key="DarkDangerBorder">#5E2E3C</Color>
+    <Color x:Key="LightDangerBorder">#F5A8B7</Color>
 
-    <LinearGradientBrush x:Key="BrownGradient" StartPoint="0,0" EndPoint="1,1">
-        <GradientStop Color="{StaticResource Surface}" Offset="0"/>
-        <GradientStop Color="{StaticResource SurfaceRaised}" Offset="1"/>
-    </LinearGradientBrush>
+    <!--
+        Scrim behind a bottom sheet. The one place alpha is correct: it is an overlay dimming live
+        content underneath, not a tint standing in for one.
+    -->
+    <Color x:Key="DarkScrim">#B80A0D12</Color>
+    <Color x:Key="LightScrim">#8C2B3242</Color>
 
 </ResourceDictionary>

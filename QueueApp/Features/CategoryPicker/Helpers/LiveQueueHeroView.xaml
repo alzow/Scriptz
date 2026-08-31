@@ -12,8 +12,8 @@
             <!-- Kicker row -->
             <Grid ColumnDefinitions="*,Auto" Padding="16,13,16,0">
                 <HorizontalStackLayout Grid.Column="0" Spacing="7">
-                    <Ellipse Fill="{StaticResource Green}" WidthRequest="6" HeightRequest="6" VerticalOptions="Center"/>
-                    <Label Text="YOU'RE IN THE QUEUE" Style="{StaticResource SectionTitle}" TextColor="{StaticResource Green}">
+                    <Ellipse Style="{StaticResource ell_AccentDot}" WidthRequest="6" HeightRequest="6" VerticalOptions="Center"/>
+                    <Label Text="YOU'RE IN THE QUEUE" Style="{StaticResource SectionTitle_Accent}">
                         <Label.Triggers>
                             <DataTrigger TargetType="Label"
                                          Binding="{Binding ActiveEntry.IsBeingServed, Source={x:Reference Root}}"
@@ -33,15 +33,13 @@
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16" Padding="16,10,16,4">
                 <Border Grid.Column="0"
                         WidthRequest="92" HeightRequest="92"
-                        BackgroundColor="{StaticResource Surface}"
-                        Stroke="{StaticResource Green}" StrokeThickness="6"
+                        Style="{StaticResource brd_Hero_AccentRing}"
                         StrokeShape="Ellipse"
                         Padding="0">
                     <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="2">
                         <Label x:Name="CountdownLabel"
                                HorizontalOptions="Center"
-                               FontFamily="RobotoBold" FontSize="18"
-                               TextColor="{StaticResource TextPrimary}"/>
+                               Style="{StaticResource lbl18_Bold_Countdown}"/>
                         <Label Text="TO GO" Style="{StaticResource SectionTitle}" FontSize="8" HorizontalOptions="Center">
                             <Label.Triggers>
                                 <DataTrigger TargetType="Label"
@@ -71,10 +69,9 @@
                     </Label>
                     <VerticalStackLayout Spacing="1"
                            IsVisible="{Binding ActiveEntry.HasProgress, Source={x:Reference Root}}">
-                        <Label Text="LATEST UPDATE" Style="{StaticResource SectionTitle}" FontSize="8" TextColor="{StaticResource Green}"/>
+                        <Label Text="LATEST UPDATE" Style="{StaticResource SectionTitle_Accent}" FontSize="8"/>
                         <Label Text="{Binding ActiveEntry.ProgressStatus, Source={x:Reference Root}}"
-                               Style="{StaticResource lbl13_Regular_TextLight}"
-                               TextColor="{StaticResource Green}"/>
+                               Style="{StaticResource lbl13_Regular_Accent}"/>
                     </VerticalStackLayout>
                     <Label Style="{StaticResource lbl18_Bold_TextDark}"
                            IsVisible="{Binding ActiveEntry.IsBeingServed, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}">

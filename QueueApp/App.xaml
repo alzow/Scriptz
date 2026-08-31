@@ -13,13 +13,8 @@
                 <ResourceDictionary Source="Resources/Styles/BorderStyle.xaml"/>
                 <ResourceDictionary Source="Resources/Styles/FrameStyle.xaml"/>
                 <ResourceDictionary Source="Resources/Styles/EntryStyle.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/ShapeStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-
-            <!-- Navigation bar styling -->
-            <Style TargetType="NavigationPage">
-                <Setter Property="BarBackgroundColor" Value="{StaticResource DeepBackground}"/>
-                <Setter Property="BarTextColor" Value="{StaticResource TextPrimary}"/>
-            </Style>
 
             <!-- Converters -->
             <converters:IsNotNullOrEmptyConverter x:Key="IsNotNullOrEmptyConverter"/>
@@ -30,7 +25,9 @@
             <converters:ActiveToLabelConverter x:Key="ActiveToLabelConverter"/>
             <converters:ItemEqualsSelectedConverter x:Key="ItemEqualsSelectedConverter"/>
             <converters:ItemSelectionOpacityConverter x:Key="ItemSelectionOpacityConverter"/>
-            <converters:WaitBucketToColorConverter x:Key="WaitBucketToColorConverter"/>
+            <converters:WaitBucketToTintConverter x:Key="WaitBucketToTintConverter"/>
+            <converters:WaitBucketToStrokeConverter x:Key="WaitBucketToStrokeConverter"/>
+            <converters:WaitBucketToBarConverter x:Key="WaitBucketToBarConverter"/>
             <converters:EdgeItemToMarginConverter x:Key="EdgeItemToMarginConverter"/>
 
         </ResourceDictionary>

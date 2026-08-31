@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
              x:Name="Root"
              VerticalOptions="Start"
              x:Class="QueueApp.Features.OperatorQueue.Helpers.ShopHeaderView">
@@ -10,14 +11,11 @@
             <Label Text="{Binding BusinessName, Source={x:Reference Root}}"
                    Style="{StaticResource lbl24_Bold_TextDark}"
                    VerticalOptions="Center"/>
-            <Border BackgroundColor="{StaticResource LiveBadgeFill}" StrokeThickness="0"
+            <Border Style="{StaticResource brd7_AccentTag}"
                     Padding="8,4" VerticalOptions="Center"
                     IsVisible="{Binding IsLive, Source={x:Reference Root}}">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="7"/>
-                </Border.StrokeShape>
                 <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                    <Ellipse Fill="{StaticResource Green}" WidthRequest="6" HeightRequest="6"
+                    <Ellipse Style="{StaticResource ell_AccentDot}" WidthRequest="6" HeightRequest="6"
                              VerticalOptions="Center"/>
                     <Label Text="LIVE" Style="{StaticResource lbl9_Mono_Green}"
                            VerticalOptions="Center"/>
@@ -27,7 +25,7 @@
 
         <Border Grid.Column="1" WidthRequest="40" HeightRequest="40"
                 Style="{StaticResource brd12_White}">
-            <Image Source="ic_settings" WidthRequest="20" HeightRequest="20"
+            <tpl:ThemedIcon Icon="ic_settings" WidthRequest="20" HeightRequest="20"
                    HorizontalOptions="Center" VerticalOptions="Center"/>
             <Border.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding OpenSettingsCommand, Source={x:Reference Root}}"/>

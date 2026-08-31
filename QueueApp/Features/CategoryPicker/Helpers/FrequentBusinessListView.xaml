@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
              xmlns:models="clr-namespace:QueueApp.Features.CategoryPicker.Models"
              x:Name="Root"
              x:Class="QueueApp.Features.CategoryPicker.Helpers.FrequentBusinessListView">
@@ -17,13 +18,12 @@
                     <Grid ColumnDefinitions="52,*" ColumnSpacing="13">
                         <Border Grid.Column="0"
                                 WidthRequest="52" HeightRequest="52"
-                                BackgroundColor="{StaticResource SurfaceRaised}"
-                                Stroke="{StaticResource Line}" StrokeThickness="1"
+                                Style="{StaticResource brd_Raised_Lined}"
                                 Padding="0" VerticalOptions="Start">
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="14"/>
                             </Border.StrokeShape>
-                            <Image Source="ic_refresh" WidthRequest="24" HeightRequest="24"
+                            <tpl:ThemedIcon Icon="ic_refresh" WidthRequest="24" HeightRequest="24"
                                    HorizontalOptions="Center" VerticalOptions="Center"/>
                         </Border>
                         <VerticalStackLayout Grid.Column="1" Spacing="3">
@@ -31,17 +31,13 @@
                                 <Label Grid.Column="0" Text="{Binding BusinessName}"
                                        Style="{StaticResource lbl15_Bold_TextDark}"/>
                                 <Border Grid.Column="1"
-                                        BackgroundColor="{StaticResource SurfaceRaised}"
-                                        StrokeThickness="0" Padding="8,4" VerticalOptions="Center">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="7"/>
-                                    </Border.StrokeShape>
-                                    <Label Text="{Binding VisitCountText}" FontFamily="RobotoBold" FontSize="10"
-                                           TextColor="{StaticResource TextMuted}"/>
+                                        Style="{StaticResource brd7_Raised_Tag}"
+                                        Padding="8,4" VerticalOptions="Center">
+                                    <Label Text="{Binding VisitCountText}" Style="{StaticResource lbl10_Bold_TextMuted}"/>
                                 </Border>
                             </Grid>
                             <Label Text="{Binding LastVisitText}" Style="{StaticResource lbl12_Regular_TextLight}"/>
-                            <Label Text="{Binding UsualText}" FontSize="10.5" TextColor="{StaticResource TextMuted}" Margin="0,1,0,0"/>
+                            <Label Text="{Binding UsualText}" Style="{StaticResource lbl10_Regular_TextMuted}" Margin="0,1,0,0"/>
                         </VerticalStackLayout>
                     </Grid>
                 </Border>

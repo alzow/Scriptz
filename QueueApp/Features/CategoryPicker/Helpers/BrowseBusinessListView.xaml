@@ -25,13 +25,11 @@
                             </Border.StrokeShape>
                             <Border.BackgroundColor>
                                 <Binding Path="WaitBucket"
-                                         Converter="{StaticResource WaitBucketToColorConverter}"
-                                         ConverterParameter="#1439FF7A|#17A45EFF|#14FF3B5C|#252C39|#252C39|#252C39"/>
+                                         Converter="{StaticResource WaitBucketToTintConverter}"/>
                             </Border.BackgroundColor>
                             <Border.Stroke>
                                 <Binding Path="WaitBucket"
-                                         Converter="{StaticResource WaitBucketToColorConverter}"
-                                         ConverterParameter="#39FF7A|#A45EFF|#FF3B5C|#343D4D|#343D4D|#343D4D"/>
+                                         Converter="{StaticResource WaitBucketToStrokeConverter}"/>
                             </Border.Stroke>
                             <Image Source="{Binding CategoryIcon}"
                                    WidthRequest="26" HeightRequest="26"
@@ -48,18 +46,16 @@
                             <ProgressBar Progress="{Binding WaitFraction}"
                                          HeightRequest="3"
                                          Margin="0,2,0,0"
-                                         BackgroundColor="{StaticResource SurfaceRaised}"
+                                         Style="{StaticResource pb_WaitTrack}"
                                          IsVisible="{Binding AvgWaitMinutes, Converter={StaticResource IsNotNullConverter}}">
                                 <ProgressBar.ProgressColor>
                                     <Binding Path="WaitBucket"
-                                             Converter="{StaticResource WaitBucketToColorConverter}"
-                                             ConverterParameter="#39FF7A|#A45EFF|#FF3B5C|#343D4D|#343D4D|#343D4D"/>
+                                             Converter="{StaticResource WaitBucketToBarConverter}"/>
                                 </ProgressBar.ProgressColor>
                             </ProgressBar>
 
                             <Label Text="{Binding SubText}"
-                                   FontFamily="RobotoRegular" FontSize="10.5"
-                                   TextColor="{StaticResource TextMuted}"
+                                   Style="{StaticResource lbl10_Regular_TextMuted}"
                                    Margin="0,1,0,0"/>
                         </VerticalStackLayout>
                     </Grid>

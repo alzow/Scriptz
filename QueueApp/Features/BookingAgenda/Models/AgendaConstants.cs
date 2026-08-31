@@ -18,8 +18,6 @@ public static class AgendaConstants
     public const int FallbackOpenHour = 9;
     public const int FallbackCloseHour = 17;
 
-    public const double FinishedRowOpacity = 0.62;
-    public const double BlockedRowOpacity = 0.72;
 
     public const string ChevronDown = "ic_chevron_down";
     public const string ChevronUp = "ic_chevron_up";

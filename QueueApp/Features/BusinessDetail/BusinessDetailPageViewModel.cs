@@ -432,7 +432,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                     SubLabel = subLabel,
                     ShowSubLabel = !IsBookingMode,
                     IsOnShift = op.IsAvailable,
-                    RowOpacity = op.IsAvailable ? 1 : 0.4,
                 });
             }
 

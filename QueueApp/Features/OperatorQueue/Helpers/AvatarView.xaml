@@ -5,20 +5,14 @@
              x:Class="QueueApp.Features.OperatorQueue.Helpers.AvatarView">
 
     <Grid HorizontalOptions="Start" VerticalOptions="Center">
-        <Border BackgroundColor="{StaticResource SurfaceRaised}"
-                Stroke="{StaticResource Line}"
-                StrokeThickness="1"
-                StrokeShape="Ellipse"
-                Padding="0"
+        <Border Style="{StaticResource brd_Avatar_Ellipse}"
                 WidthRequest="{Binding Size, Source={x:Reference Root}}"
                 HeightRequest="{Binding Size, Source={x:Reference Root}}">
             <Label Text="{Binding Initials, Source={x:Reference Root}}"
                    Style="{StaticResource lbl12_Mono_TextPrimary}"
                    HorizontalOptions="Center" VerticalOptions="Center"/>
         </Border>
-        <Ellipse Fill="{StaticResource Green}"
-                 Stroke="{StaticResource Surface}"
-                 StrokeThickness="2.5"
+        <Ellipse Style="{StaticResource ell_AccentDot_OnSurface}"
                  WidthRequest="11" HeightRequest="11"
                  IsVisible="{Binding ShowDot, Source={x:Reference Root}}"
                  HorizontalOptions="End" VerticalOptions="End"/>

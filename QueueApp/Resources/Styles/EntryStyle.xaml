@@ -6,16 +6,16 @@
         <Setter Property="FontSize"
                 Value="16"/>
         <Setter Property="TextColor"
-                Value="{StaticResource TextPrimary}"/>
+                Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
         <Setter Property="PlaceholderColor"
-                Value="{StaticResource TextMuted}"/>
+                Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
         <Setter Property="HeightRequest"
                 Value="60"/>
     </Style>
     <Style x:Key="entry14_Sheet" TargetType="Entry">
         <Setter Property="BackgroundColor" Value="Transparent"/>
-        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
-        <Setter Property="PlaceholderColor" Value="{StaticResource TextFaint}"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
+        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource LightTextDim}, Dark={StaticResource DarkTextDim}}"/>
         <Setter Property="FontSize" Value="14.5"/>
         <Setter Property="HeightRequest" Value="52"/>
     </Style>
@@ -27,14 +27,14 @@
 
     <Style x:Key="picker14_Sheet" TargetType="DatePicker">
         <Setter Property="BackgroundColor" Value="Transparent"/>
-        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
         <Setter Property="FontSize" Value="14.5"/>
         <Setter Property="Format" Value="ddd d MMM"/>
     </Style>
 
     <Style x:Key="timepicker13_Sheet" TargetType="TimePicker">
         <Setter Property="BackgroundColor" Value="Transparent"/>
-        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
         <Setter Property="FontFamily" Value="RobotoMedium"/>
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="Format" Value="HH:mm"/>
@@ -42,11 +42,24 @@
 
     <Style x:Key="editor14_Sheet" TargetType="Editor">
         <Setter Property="BackgroundColor" Value="Transparent"/>
-        <Setter Property="TextColor" Value="{StaticResource TextPrimary}"/>
-        <Setter Property="PlaceholderColor" Value="{StaticResource TextFaint}"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
+        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource LightTextDim}, Dark={StaticResource DarkTextDim}}"/>
         <Setter Property="FontSize" Value="14.5"/>
         <Setter Property="HeightRequest" Value="90"/>
         <Setter Property="AutoSize" Value="TextChanges"/>
+    </Style>
+
+    <!-- Settings pages put a picker straight onto the page rather than inside a sheet. -->
+    <Style x:Key="picker14_Inline" TargetType="DatePicker">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
+        <Setter Property="FontSize" Value="14"/>
+    </Style>
+
+    <Style x:Key="timepicker14_Inline" TargetType="TimePicker">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
+        <Setter Property="FontSize" Value="14"/>
     </Style>
 
 </ResourceDictionary>

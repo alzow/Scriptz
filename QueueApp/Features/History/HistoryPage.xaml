@@ -9,12 +9,11 @@
              IconImageSource="icon_history"
              Title="History"
              Style="{StaticResource NavigationPageStyle}">
-    <Grid RowDefinitions="Auto,Auto,*" BackgroundColor="{StaticResource DeepBackground}">
+    <Grid RowDefinitions="Auto,Auto,*" Style="{StaticResource grid_Page}">
 
         <Label Grid.Row="0" Text="History"
                Margin="20,16,20,0"
-               FontFamily="RobotoBold" FontSize="26" CharacterSpacing="-0.3"
-               TextColor="{StaticResource TextPrimary}"/>
+               Style="{StaticResource lbl26_Bold_PageTitle}"/>
 
         <helpers:HistoryFilterBar Grid.Row="1"
                                    IsAllSelected="{Binding IsAllSelected}"

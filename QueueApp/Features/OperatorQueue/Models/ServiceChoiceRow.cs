@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using QueueApp.Framework.Theming;
 
 namespace QueueApp.Features.OperatorQueue.Models;
 
@@ -13,11 +14,7 @@ public sealed class ServiceChoiceRow : ObservableObject
 
     public Brush BorderBrush => IsSelected ? BoardPalette.GreenStroke : BoardPalette.LineStroke;
 
-    public Color FillColor => IsSelected
-        ? (Color)Application.Current!.Resources["GreenSelectedFill"]
-        : (Color)Application.Current!.Resources["Surface"];
+    public Color FillColor => IsSelected ? ThemePalette.AccentTint : ThemePalette.Surface;
 
-    public Color NameColor => IsSelected
-        ? (Color)Application.Current!.Resources["Green"]
-        : (Color)Application.Current!.Resources["TextPrimary"];
+    public Color NameColor => IsSelected ? ThemePalette.AccentText : ThemePalette.TextInk;
 }

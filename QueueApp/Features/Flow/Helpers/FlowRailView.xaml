@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
              xmlns:models="clr-namespace:QueueApp.Shared.Domain.Models"
              x:Name="Root"
              VerticalOptions="Start"
@@ -18,16 +19,7 @@
                 <DataTemplate x:DataType="models:RailSegment">
                     <BoxView HeightRequest="3" CornerRadius="2" Margin="2,0"
                              FlexLayout.Grow="1" FlexLayout.Basis="0"
-                             BackgroundColor="{StaticResource Line}">
-                        <BoxView.Triggers>
-                            <DataTrigger TargetType="BoxView" Binding="{Binding IsDone}" Value="True">
-                                <Setter Property="BackgroundColor" Value="{StaticResource GreenDim}"/>
-                            </DataTrigger>
-                            <DataTrigger TargetType="BoxView" Binding="{Binding IsCurrent}" Value="True">
-                                <Setter Property="BackgroundColor" Value="{StaticResource Green}"/>
-                            </DataTrigger>
-                        </BoxView.Triggers>
-                    </BoxView>
+                             Style="{StaticResource bx3_Rail}"/>
                 </DataTemplate>
             </BindableLayout.ItemTemplate>
         </FlexLayout>
@@ -46,8 +38,7 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:CrumbChip">
                     <Border Padding="9,5" VerticalOptions="Center"
-                            BackgroundColor="{StaticResource SurfaceRaised}"
-                            Stroke="{StaticResource Line}" StrokeThickness="1">
+                            Style="{StaticResource brd_Raised_Lined}">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="9"/>
                         </Border.StrokeShape>
@@ -59,7 +50,7 @@
                         <HorizontalStackLayout Spacing="6">
                             <Label Text="{Binding Text}" Style="{StaticResource lbl12_Regular_Cream}"
                                    VerticalOptions="Center"/>
-                            <Image Source="ic_close" WidthRequest="10" HeightRequest="10"
+                            <tpl:ThemedIcon Icon="ic_close" WidthRequest="10" HeightRequest="10"
                                    VerticalOptions="Center"/>
                         </HorizontalStackLayout>
                     </Border>

@@ -1,4 +1,5 @@
 using MPowerKit.Popups;
+using QueueApp.Framework.Theming;
 
 namespace QueueApp.Shared.Templates.BottomSheet;
 
@@ -9,7 +10,7 @@ public abstract class BottomSheetPage : PopupPage
     protected BottomSheetPage()
     {
         CloseOnBackgroundClick = true;
-        BackgroundColor = (Color)Application.Current!.Resources["ScrimBackground"];
+        BackgroundColor = ThemePalette.Scrim;
         SizeChanged += OnSizeChanged;
     }
 

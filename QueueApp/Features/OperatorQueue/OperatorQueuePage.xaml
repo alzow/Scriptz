@@ -11,7 +11,7 @@
              x:DataType="vm:OperatorQueuePageViewModel"
              Style="{StaticResource NavigationPageStyle}">
 
-    <Grid BackgroundColor="{StaticResource DeepBackground}"
+    <Grid Style="{StaticResource grid_Page}"
           RowDefinitions="Auto,*">
 
         <VerticalStackLayout Grid.Row="0" Spacing="0">

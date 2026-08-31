@@ -40,8 +40,14 @@ public sealed class AgendaRow : ObservableObject
     public Color BarColor { get; init; } = AgendaPalette.Line;
     public Color RowBackgroundColor { get; init; } = AgendaPalette.Surface;
     public Color RowStrokeColor { get; init; } = AgendaPalette.Line;
+
+    // A row that is done or blocked is de-emphasised by dropping each line to a dimmer token, not
+    // by fading the container. Fading toward #141821 reads as receded; fading toward #E4E9F1 reads
+    // as broken, because text loses contrast far faster going up than going down.
     public Color TitleColor { get; init; } = AgendaPalette.Ink;
-    public double RowOpacity { get; init; } = 1;
+    public Color TimeColor { get; init; } = AgendaPalette.Ink;
+    public Color SubtitleColor { get; init; } = AgendaPalette.Muted;
+    public Color MetaColor { get; init; } = AgendaPalette.Dim;
 
     public DoubleCollection? RowStrokeDash { get; init; }
 
