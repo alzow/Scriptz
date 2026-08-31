@@ -3,28 +3,31 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
              x:Name="Root"
+             VerticalOptions="Start"
              x:Class="QueueApp.Features.CategoryPicker.Helpers.LocationBarView">
 
-    <!-- Tap to (re)resolve the customer's device location — the Mr-Delivery-style "deliver to"
-         bar. Falls back to whatever LocationLabel is bound to (the fixed suburb, by default)
-         when GPS/permission isn't available; see ILocationService. -->
-    <HorizontalStackLayout Spacing="5">
-        <HorizontalStackLayout.GestureRecognizers>
-            <TapGestureRecognizer Command="{Binding RefreshCommand, Source={x:Reference Root}}"/>
-        </HorizontalStackLayout.GestureRecognizers>
+    <Border Style="{StaticResource brd16_Surface}" HeightRequest="52" Padding="14,0">
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
 
-        <tpl:ThemedIcon Icon="ic_pin" WidthRequest="12" HeightRequest="12" VerticalOptions="Center"/>
-        <Label Text="{Binding LocationLabel, Source={x:Reference Root}}"
-               Style="{StaticResource lbl12_Regular_TextLight}"
-               VerticalOptions="Center"/>
-        <tpl:ThemedIcon Icon="ic_chevron_down" WidthRequest="11" HeightRequest="11"
-               VerticalOptions="Center"
-               IsVisible="{Binding IsResolving, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}"/>
-        <ActivityIndicator IsRunning="{Binding IsResolving, Source={x:Reference Root}}"
-                            IsVisible="{Binding IsResolving, Source={x:Reference Root}}"
-                            Style="{StaticResource ai_Muted}"
-                            WidthRequest="12" HeightRequest="12"
-                            VerticalOptions="Center"/>
-    </HorizontalStackLayout>
+            <tpl:ThemedIcon Grid.Column="0" Icon="ic_pin" WidthRequest="16" HeightRequest="16"
+                   VerticalOptions="Center"/>
+
+            <Label x:Name="LocationLabel" Grid.Column="1"
+                   Text="{Binding Text, Source={x:Reference Root}}"
+                   Style="{Binding TextStyle, Source={x:Reference Root}}"
+                   LineBreakMode="TailTruncation" MaxLines="1"
+                   VerticalOptions="Center"/>
+
+            <tpl:ThemedIcon Grid.Column="2" Icon="{Binding TrailingIcon, Source={x:Reference Root}}"
+                   WidthRequest="14" HeightRequest="14" Opacity="0.65"
+                   IsVisible="{Binding ShowTrailingIcon, Source={x:Reference Root}}"
+                   VerticalOptions="Center"/>
+
+        </Grid>
+
+        <Border.GestureRecognizers>
+            <TapGestureRecognizer Command="{Binding RefreshCommand, Source={x:Reference Root}}"/>
+        </Border.GestureRecognizers>
+    </Border>
 
 </ContentView>
