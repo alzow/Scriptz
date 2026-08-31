@@ -13,6 +13,9 @@ namespace QueueApp.Features.Settings;
 
 public partial class OperatorHoursPageViewModel : BaseViewModel
 {
+    public List<OperatorResponse> Operators { get; set; } = new();
+    public bool IsLoading { get; set; } = true;
+
     private readonly IOperatorService _operatorService;
     private readonly IBusinessService _businessService;
 
@@ -27,9 +30,6 @@ public partial class OperatorHoursPageViewModel : BaseViewModel
         _businessService = businessService;
         Title = "Hours";
     }
-
-    public List<OperatorResponse> Operators { get; set; } = new();
-    public bool IsLoading { get; set; } = true;
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
@@ -60,14 +60,21 @@ public partial class OperatorHoursPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task SelectOperatorAsync(OperatorResponse op)
+    public async Task SelectOperatorAsync(OperatorResponse op)
     {
-        await NavigationService.NavigateAsync(NavigationPaths.WeeklyHoursPage,
-            new NavigationParameters { [NavigationKeys.OperatorId] = op.Id, [NavigationKeys.OperatorName] = op.DisplayName });
+        try
+        {
+            await NavigationService.NavigateAsync(NavigationPaths.WeeklyHoursPage,
+                new NavigationParameters { [NavigationKeys.OperatorId] = op.Id, [NavigationKeys.OperatorName] = op.DisplayName });
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
 
     [RelayCommand]
-    private async Task GoBackAsync()
+    public async Task GoBackAsync()
     {
         try
         {

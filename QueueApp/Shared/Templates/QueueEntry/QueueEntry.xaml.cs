@@ -7,6 +7,7 @@ public partial class QueueEntry : ContentView, IValidationView
     public static readonly BindableProperty TextProperty = BindableProperty.Create(nameof(Text), typeof(string), typeof(QueueEntry), default(string), BindingMode.TwoWay, propertyChanged: OnTextPropertyChanged);
     public static readonly BindableProperty PlaceholderProperty = BindableProperty.Create(nameof(Placeholder), typeof(string), typeof(QueueEntry), default(string));
     public static readonly BindableProperty LeftIconProperty = BindableProperty.Create(nameof(LeftIcon), typeof(string), typeof(QueueEntry), default(string), propertyChanged: OnLeftIconChanged);
+    public static readonly BindableProperty PrefixProperty = BindableProperty.Create(nameof(Prefix), typeof(string), typeof(QueueEntry), default(string), propertyChanged: OnPrefixChanged);
     public static readonly BindableProperty ShowClearTextButtonProperty = BindableProperty.Create(nameof(ShowClearTextButton), typeof(bool), typeof(QueueEntry), default(bool));
     public static readonly BindableProperty InputTypeProperty = BindableProperty.Create(nameof(InputType), typeof(Keyboard), typeof(QueueEntry), Keyboard.Plain);
     public static readonly BindableProperty IsPasswordProperty = BindableProperty.Create(nameof(IsPassword), typeof(bool), typeof(QueueEntry), default(bool), propertyChanged: OnIsPasswordChanged);
@@ -37,6 +38,16 @@ public partial class QueueEntry : ContentView, IValidationView
     }
 
     public bool HasLeftIcon => !string.IsNullOrEmpty(LeftIcon);
+
+    // A currency symbol ahead of a numeric field (e.g. "R" on a price entry) — plain text rather
+    // than LeftIcon's image, since no icon in the pack is a currency glyph.
+    public string Prefix
+    {
+        get => (string)GetValue(PrefixProperty);
+        set => SetValue(PrefixProperty, value);
+    }
+
+    public bool HasPrefix => !string.IsNullOrEmpty(Prefix);
 
     public bool ShowClearTextButton
     {
@@ -116,6 +127,11 @@ public partial class QueueEntry : ContentView, IValidationView
     private static void OnLeftIconChanged(BindableObject bindable, object oldValue, object newValue)
     {
         ((QueueEntry)bindable).OnPropertyChanged(nameof(HasLeftIcon));
+    }
+
+    private static void OnPrefixChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        ((QueueEntry)bindable).OnPropertyChanged(nameof(HasPrefix));
     }
 
     private static void OnSharedStateManagerChanged(BindableObject bindable, object oldValue, object newValue)

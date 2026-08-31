@@ -2,47 +2,77 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.Settings"
-             xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
+             xmlns:helpers="clr-namespace:QueueApp.Features.Settings.Helpers"
              x:Class="QueueApp.Features.Settings.BusinessSettingsPage"
              x:DataType="vm:BusinessSettingsPageViewModel"
              Title="{Binding Title}"
              Style="{StaticResource NavigationPageStyle}">
 
     <Grid RowDefinitions="Auto,*">
-        <templates:AlzowSubPageHeader Grid.Row="0"
-                                       Title="{Binding Title}"
-                                       BackCommand="{Binding GoBackCommand}"/>
+        <helpers:SettingsHeaderView Grid.Row="0"
+                                     Title="Business settings"
+                                     ShowClose="True"
+                                     Command="{Binding CloseCommand}"/>
 
-        <VerticalStackLayout Grid.Row="1" Padding="20" Spacing="12">
+        <Grid Grid.Row="1">
+            <ScrollView IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
+                <VerticalStackLayout Padding="20,0,20,24" Spacing="18">
 
-            <Border Style="{StaticResource brd16_White}" Padding="16">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding OpenServicesCommand}"/>
-                </Border.GestureRecognizers>
-                <Label Text="Services" Style="{StaticResource lbl15_Bold_TextDark}"/>
-            </Border>
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{Binding BusinessName}" Style="{StaticResource lbl24_Bold_TextDark}"/>
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                            <Label Text="{Binding CategoryDisplay}" Style="{StaticResource lbl13_Regular_TextLight}" VerticalOptions="Center"/>
+                            <Border Style="{StaticResource brd7_AccentTag}" Padding="8,4" VerticalOptions="Center"
+                                    IsVisible="{Binding IsBookingMode, Converter={StaticResource InvertedBoolConverter}}">
+                                <Label Text="QUEUE MODE" Style="{StaticResource lbl9_Mono_Green}"/>
+                            </Border>
+                            <Border Style="{StaticResource brd8_PurpleTag}" Padding="8,4" VerticalOptions="Center"
+                                    IsVisible="{Binding IsBookingMode}">
+                                <Label Text="BOOKING MODE" Style="{StaticResource lbl10_Mono_Purple}"/>
+                            </Border>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
 
-            <Border Style="{StaticResource brd16_White}" Padding="16">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding OpenStaffCommand}"/>
-                </Border.GestureRecognizers>
-                <Label Text="Staff" Style="{StaticResource lbl15_Bold_TextDark}"/>
-            </Border>
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="WHAT YOU OFFER" Style="{StaticResource SectionTitle}" Margin="4,0,0,0"/>
+                        <Border Style="{StaticResource brd16_White}" Padding="14,4">
+                            <VerticalStackLayout Spacing="0">
+                                <helpers:SettingsHubRowView Icon="ic_ticket" Label="Services"
+                                        ValueText="{Binding ServicesValueText}"
+                                        IsValueMissing="{Binding ServicesValueIsMissing}"
+                                        Command="{Binding OpenServicesCommand}"/>
+                                <BoxView HeightRequest="1" Style="{StaticResource bx_Divider}"/>
+                                <helpers:SettingsHubRowView Icon="ic_users" Label="Staff"
+                                        ValueText="{Binding StaffValueText}"
+                                        IsValueMissing="{Binding StaffValueIsMissing}"
+                                        Command="{Binding OpenStaffCommand}"/>
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
 
-            <Border Style="{StaticResource brd16_White}" Padding="16">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding OpenHoursCommand}"/>
-                </Border.GestureRecognizers>
-                <Label Text="Hours" Style="{StaticResource lbl15_Bold_TextDark}"/>
-            </Border>
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="YOUR SHOP" Style="{StaticResource SectionTitle}" Margin="4,0,0,0"/>
+                        <Border Style="{StaticResource brd16_White}" Padding="14,4">
+                            <VerticalStackLayout Spacing="0">
+                                <helpers:SettingsHubRowView Icon="ic_clock" Label="Hours"
+                                        ValueText="{Binding HoursValueText}"
+                                        IsValueMissing="{Binding HoursValueIsMissing}"
+                                        Command="{Binding OpenHoursCommand}"/>
+                                <BoxView HeightRequest="1" Style="{StaticResource bx_Divider}"/>
+                                <helpers:SettingsHubRowView Icon="ic_pin" Label="Location"
+                                        ValueText="{Binding LocationValueText}"
+                                        IsValueMissing="{Binding LocationValueIsMissing}"
+                                        Command="{Binding OpenLocationCommand}"/>
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
 
-            <Border Style="{StaticResource brd16_White}" Padding="16">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding OpenLocationCommand}"/>
-                </Border.GestureRecognizers>
-                <Label Text="Location" Style="{StaticResource lbl15_Bold_TextDark}"/>
-            </Border>
+                </VerticalStackLayout>
+            </ScrollView>
 
-        </VerticalStackLayout>
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                               Style="{StaticResource ai_Accent}"
+                               HorizontalOptions="Center" VerticalOptions="Center"/>
+        </Grid>
     </Grid>
 </ContentPage>

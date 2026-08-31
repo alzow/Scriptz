@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
+             x:Name="Root"
+             VerticalOptions="Start"
+             x:Class="QueueApp.Features.Settings.Helpers.SettingsHeaderView">
+
+    <Grid ColumnDefinitions="44,*,44" Padding="16,20,16,16">
+
+        <Border Grid.Column="0" WidthRequest="44" HeightRequest="44"
+                Style="{StaticResource brd16_Surface}"
+                IsVisible="{Binding ShowClose, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="12"/>
+            </Border.StrokeShape>
+            <tpl:ThemedIcon Icon="ic_chevron_left" WidthRequest="18" HeightRequest="18"
+                   HorizontalOptions="Center" VerticalOptions="Center"/>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding Command, Source={x:Reference Root}}"/>
+            </Border.GestureRecognizers>
+        </Border>
+
+        <Label Grid.Column="1"
+               Text="{Binding Title, Source={x:Reference Root}}"
+               Style="{StaticResource lbl18_Bold_TextDark}"
+               HorizontalOptions="Center"
+               VerticalOptions="Center"/>
+
+        <Border Grid.Column="2" WidthRequest="44" HeightRequest="44"
+                Style="{StaticResource brd16_Surface}"
+                IsVisible="{Binding ShowClose, Source={x:Reference Root}}">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="12"/>
+            </Border.StrokeShape>
+            <tpl:ThemedIcon Icon="ic_close" WidthRequest="16" HeightRequest="16"
+                   HorizontalOptions="Center" VerticalOptions="Center"/>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding Command, Source={x:Reference Root}}"/>
+            </Border.GestureRecognizers>
+        </Border>
+
+    </Grid>
+</ContentView>

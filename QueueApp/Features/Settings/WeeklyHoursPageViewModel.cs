@@ -8,6 +8,7 @@ using QueueApp.Framework.Base;
 using QueueApp.Services.Api.Operator;
 using QueueApp.Services.Api.Operator.Models;
 using QueueApp.Services.Storage;
+using QueueApp.Shared.Domain;
 
 namespace QueueApp.Features.Settings;
 
@@ -16,6 +17,7 @@ public class DayGroup
     public int DayOfWeek { get; set; }
     public string Label { get; set; } = "";
     public ObservableCollection<OperatorAvailabilityResponse> Windows { get; } = new();
+    public bool IsOpen => Windows.Count > 0;
 }
 
 public partial class WeeklyHoursPageViewModel : BaseViewModel
@@ -23,8 +25,17 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
     private static readonly string[] DayLabels =
         { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
 
-    private readonly IOperatorService _operatorService;
+    private static readonly TimeSpan DefaultOpen = new(8, 0, 0);
+    private static readonly TimeSpan DefaultClose = new(18, 0, 0);
+
+    public ObservableCollection<DayGroup> Days { get; } = new();
+    public string OperatorName { get; set; } = "";
+    public string SummaryText { get; set; } = "";
+    public bool IsLoading { get; set; }
+
     private Guid _operatorId;
+
+    private readonly IOperatorService _operatorService;
 
     public WeeklyHoursPageViewModel(
         INavigationService navigationService,
@@ -34,10 +45,6 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
     {
         _operatorService = operatorService;
     }
-
-    public ObservableCollection<DayGroup> Days { get; } = new();
-    public string OperatorName { get; set; } = "";
-    public bool IsLoading { get; set; }
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
@@ -67,7 +74,7 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task LoadAsync()
+    public async Task LoadAsync()
     {
         IsLoading = true;
         try
@@ -78,10 +85,13 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
             for (var dow = 0; dow <= 6; dow++)
             {
                 var group = new DayGroup { DayOfWeek = dow, Label = DayLabels[dow] };
-                foreach (var w in windows.Where(w => w.DayOfWeek == dow))
+                foreach (var w in windows.Where(w => w.DayOfWeek == dow).OrderBy(w => w.StartTime))
                     group.Windows.Add(w);
                 Days.Add(group);
             }
+
+            var hours = BusinessHours.FromAvailability(windows);
+            SummaryText = hours.HasData ? hours.SummaryText : "Closed every day";
         }
         catch (Exception ex)
         {
@@ -94,14 +104,80 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task AddWindowAsync(int dayOfWeek)
+    public async Task ToggleDayOpenAsync(DayGroup day)
     {
-        await NavigationService.NavigateAsync(NavigationPaths.AddAvailabilityWindowPage,
-            new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId, [NavigationKeys.DayOfWeek] = dayOfWeek });
+        try
+        {
+            if (day.IsOpen)
+            {
+                foreach (var window in day.Windows.ToList())
+                    await _operatorService.DeleteAvailabilityAsync(window.Id);
+            }
+            else
+            {
+                await _operatorService.CreateAvailabilityAsync(new CreateAvailabilityRequest
+                {
+                    OperatorId = _operatorId,
+                    DayOfWeek = day.DayOfWeek,
+                    StartTime = DefaultOpen,
+                    EndTime = DefaultClose,
+                });
+            }
+
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
 
     [RelayCommand]
-    private async Task DeleteWindowAsync(OperatorAvailabilityResponse window)
+    public async Task CopyToAllDaysAsync(DayGroup source)
+    {
+        try
+        {
+            foreach (var day in Days.Where(d => d.DayOfWeek != source.DayOfWeek))
+            {
+                foreach (var window in day.Windows.ToList())
+                    await _operatorService.DeleteAvailabilityAsync(window.Id);
+
+                foreach (var window in source.Windows)
+                {
+                    await _operatorService.CreateAvailabilityAsync(new CreateAvailabilityRequest
+                    {
+                        OperatorId = _operatorId,
+                        DayOfWeek = day.DayOfWeek,
+                        StartTime = window.StartTime,
+                        EndTime = window.EndTime,
+                    });
+                }
+            }
+
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    [RelayCommand]
+    public async Task AddWindowAsync(int dayOfWeek)
+    {
+        try
+        {
+            await NavigationService.NavigateAsync(NavigationPaths.AddAvailabilityWindowPage,
+                new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId, [NavigationKeys.DayOfWeek] = dayOfWeek });
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    [RelayCommand]
+    public async Task DeleteWindowAsync(OperatorAvailabilityResponse window)
     {
         window.IsDeleting = true;
         try
@@ -120,14 +196,21 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task GoToBlockedDatesAsync()
+    public async Task GoToBlockedDatesAsync()
     {
-        await NavigationService.NavigateAsync(NavigationPaths.BlockedDatesPage,
-            new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId, [NavigationKeys.OperatorName] = OperatorName });
+        try
+        {
+            await NavigationService.NavigateAsync(NavigationPaths.BlockedDatesPage,
+                new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId, [NavigationKeys.OperatorName] = OperatorName });
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
 
     [RelayCommand]
-    private async Task GoBackAsync()
+    public async Task GoBackAsync()
     {
         try
         {

@@ -2,8 +2,8 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using MPowerKit;
 using MPowerKit.Navigation;
-using MPowerKit.Navigation.Interfaces;
 using QueueApp.Constants;
+using QueueApp.Features.Settings.Models;
 using QueueApp.Framework.Base;
 using QueueApp.Services.Api.Business;
 using QueueApp.Services.Api.Operator;
@@ -14,9 +14,19 @@ namespace QueueApp.Features.Settings;
 
 public partial class StaffManagementPageViewModel : BaseViewModel
 {
+    public ObservableCollection<StaffRow> ActiveStaff { get; } = new();
+    public ObservableCollection<StaffRow> InactiveStaff { get; } = new();
+    public bool IsLoading { get; set; }
+    public bool IsEmpty => ActiveStaff.Count == 0 && InactiveStaff.Count == 0 && !IsLoading;
+    public bool HasInactive => InactiveStaff.Count > 0;
+    public bool IsInactiveExpanded { get; set; }
+    public string InactiveHeaderText { get; set; } = string.Empty;
+    public string InactiveChevron => IsInactiveExpanded ? "ic_chevron_up" : "ic_chevron_down";
+
+    private Guid _businessId;
+
     private readonly IOperatorService _operatorService;
     private readonly IBusinessService _businessService;
-    private Guid _businessId;
 
     public StaffManagementPageViewModel(
         INavigationService navigationService,
@@ -29,11 +39,6 @@ public partial class StaffManagementPageViewModel : BaseViewModel
         _businessService = businessService;
         Title = "Staff";
     }
-
-    public ObservableCollection<OperatorResponse> Operators { get; } = new();
-    public bool IsLoading { get; set; }
-    public bool IsAddingOperator { get; set; }
-    public bool IsEmpty => Operators.Count == 0 && !IsLoading;
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
@@ -57,15 +62,21 @@ public partial class StaffManagementPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task LoadAsync()
+    public async Task LoadAsync()
     {
         IsLoading = true;
         try
         {
             var operators = await _operatorService.GetAllOperatorsForManagementAsync(_businessId);
-            Operators.Clear();
-            foreach (var o in operators)
-                Operators.Add(o);
+
+            ActiveStaff.Clear();
+            InactiveStaff.Clear();
+            foreach (var op in operators.Where(o => o.IsActive).OrderBy(o => o.SortOrder))
+                ActiveStaff.Add(new StaffRow(op));
+            foreach (var op in operators.Where(o => !o.IsActive).OrderBy(o => o.SortOrder))
+                InactiveStaff.Add(new StaffRow(op));
+
+            InactiveHeaderText = $"Not on the team right now ({InactiveStaff.Count})";
         }
         catch (Exception ex)
         {
@@ -78,9 +89,8 @@ public partial class StaffManagementPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task AddOperatorAsync()
+    public async Task AddOperatorAsync()
     {
-        IsAddingOperator = true;
         try
         {
             await NavigationService.NavigateAsync(NavigationPaths.AddEditOperatorPage,
@@ -90,26 +100,29 @@ public partial class StaffManagementPageViewModel : BaseViewModel
         {
             await HandleExceptionAsync(ex);
         }
-        finally
+    }
+
+    [RelayCommand]
+    public async Task EditOperatorAsync(StaffRow row)
+    {
+        try
         {
-            IsAddingOperator = false;
+            await NavigationService.NavigateAsync(NavigationPaths.AddEditOperatorPage,
+                new NavigationParameters { [NavigationKeys.BusinessId] = _businessId, [NavigationKeys.OperatorId] = row.Id });
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
         }
     }
 
     [RelayCommand]
-    private async Task EditOperatorAsync(OperatorResponse op)
+    public async Task ReactivateAsync(StaffRow row)
     {
-        await NavigationService.NavigateAsync(NavigationPaths.AddEditOperatorPage,
-            new NavigationParameters { [NavigationKeys.BusinessId] = _businessId, [NavigationKeys.OperatorId] = op.Id });
-    }
-
-    [RelayCommand]
-    private async Task ToggleActiveAsync(OperatorResponse op)
-    {
-        op.IsToggling = true;
+        row.IsReactivating = true;
         try
         {
-            await _operatorService.SetOperatorActiveAsync(op.Id, !op.IsActive);
+            await _operatorService.SetOperatorActiveAsync(row.Id, true);
             await LoadAsync();
         }
         catch (Exception ex)
@@ -118,12 +131,41 @@ public partial class StaffManagementPageViewModel : BaseViewModel
         }
         finally
         {
-            op.IsToggling = false;
+            row.IsReactivating = false;
+        }
+    }
+
+    public async Task ReorderAsync(StaffRow moved, int targetIndex)
+    {
+        try
+        {
+            var fromIndex = ActiveStaff.IndexOf(moved);
+            if (fromIndex < 0 || targetIndex < 0 || targetIndex >= ActiveStaff.Count || fromIndex == targetIndex)
+                return;
+
+            ActiveStaff.Move(fromIndex, targetIndex);
+
+            for (var i = 0; i < ActiveStaff.Count; i++)
+                ActiveStaff[i].SortOrder = i;
+
+            await Task.WhenAll(ActiveStaff.Select(row => _operatorService.UpdateOperatorAsync(row.Id,
+                new UpdateOperatorRequest { DisplayName = row.DisplayName, SortOrder = row.SortOrder })));
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+            await LoadAsync();
         }
     }
 
     [RelayCommand]
-    private async Task GoBackAsync()
+    public void ToggleInactiveExpanded()
+    {
+        IsInactiveExpanded = !IsInactiveExpanded;
+    }
+
+    [RelayCommand]
+    public async Task GoBackAsync()
     {
         try
         {

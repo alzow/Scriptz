@@ -844,7 +844,10 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.NavigateAsync(NavigationPaths.BusinessSettingsPage);
+            // Modal, so the agenda (and its tab bar) stays standing underneath — settings is a task
+            // you enter and leave, not a place in the app.
+            await NavigationService.NavigateAsync(
+                $"NavigationPage/{NavigationPaths.BusinessSettingsPage}", modal: true, animated: false);
         }
         catch (Exception ex)
         {

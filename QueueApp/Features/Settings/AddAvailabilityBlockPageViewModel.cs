@@ -12,8 +12,17 @@ public partial class AddAvailabilityBlockPageViewModel : BaseViewModel
 {
     private static readonly TimeSpan SastOffset = TimeSpan.FromHours(2);
 
-    private readonly IOperatorService _operatorService;
+    public DateTime MinimumDate { get; } = DateTime.Today;
+    public DateTime Date { get; set; } = DateTime.Today.AddDays(1);
+    public bool IsAllDay { get; set; } = true;
+    public TimeSpan StartTime { get; set; } = new(9, 0, 0);
+    public TimeSpan EndTime { get; set; } = new(17, 0, 0);
+    public string Reason { get; set; } = "";
+    public bool IsSaving { get; set; }
+
     private Guid _operatorId;
+
+    private readonly IOperatorService _operatorService;
 
     public AddAvailabilityBlockPageViewModel(
         INavigationService navigationService,
@@ -24,14 +33,6 @@ public partial class AddAvailabilityBlockPageViewModel : BaseViewModel
         _operatorService = operatorService;
         Title = "Block a Date";
     }
-
-    public DateTime MinimumDate { get; } = DateTime.Today;
-    public DateTime Date { get; set; } = DateTime.Today.AddDays(1);
-    public bool IsAllDay { get; set; } = true;
-    public TimeSpan StartTime { get; set; } = new(9, 0, 0);
-    public TimeSpan EndTime { get; set; } = new(17, 0, 0);
-    public string Reason { get; set; } = "";
-    public bool IsSaving { get; set; }
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
@@ -50,7 +51,7 @@ public partial class AddAvailabilityBlockPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task GoBackAsync()
+    public async Task GoBackAsync()
     {
         try
         {
@@ -63,7 +64,7 @@ public partial class AddAvailabilityBlockPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task SaveAsync()
+    public async Task SaveAsync()
     {
         DateTimeOffset startsAt, endsAt;
 

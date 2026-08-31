@@ -3,15 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.Settings"
              xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
-             xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
+             xmlns:helpers="clr-namespace:QueueApp.Features.Settings.Helpers"
              x:Class="QueueApp.Features.Settings.AddAvailabilityWindowPage"
              x:DataType="vm:AddAvailabilityWindowPageViewModel"
              Title="{Binding Title}"
              Style="{StaticResource NavigationPageStyle}">
     <Grid RowDefinitions="Auto,*">
-        <templates:AlzowSubPageHeader Grid.Row="0"
-                                       Title="{Binding Title}"
-                                       BackCommand="{Binding GoBackCommand}"/>
+        <helpers:SettingsHeaderView Grid.Row="0" Title="{Binding Title}" Command="{Binding GoBackCommand}"/>
 
         <VerticalStackLayout Grid.Row="1" Padding="20" Spacing="16">
 

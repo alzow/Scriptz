@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using MPowerKit;
 using MPowerKit.Navigation;
-using MPowerKit.Navigation.Interfaces;
 using QueueApp.Constants;
 using QueueApp.Framework.Base;
 using QueueApp.Services.Api.Business;
@@ -14,9 +13,19 @@ namespace QueueApp.Features.Settings;
 
 public partial class ServicesManagementPageViewModel : BaseViewModel
 {
+    public ObservableCollection<ServiceResponse> ActiveServices { get; } = new();
+    public ObservableCollection<ServiceResponse> InactiveServices { get; } = new();
+    public bool IsLoading { get; set; }
+    public bool IsEmpty => ActiveServices.Count == 0 && InactiveServices.Count == 0 && !IsLoading;
+    public bool HasInactive => InactiveServices.Count > 0;
+    public bool IsInactiveExpanded { get; set; }
+    public string InactiveHeaderText { get; set; } = string.Empty;
+    public string InactiveChevron => IsInactiveExpanded ? "ic_chevron_up" : "ic_chevron_down";
+
+    private Guid _businessId;
+
     private readonly IServiceOfferingsService _serviceOfferingsService;
     private readonly IBusinessService _businessService;
-    private Guid _businessId;
 
     public ServicesManagementPageViewModel(
         INavigationService navigationService,
@@ -29,11 +38,6 @@ public partial class ServicesManagementPageViewModel : BaseViewModel
         _businessService = businessService;
         Title = "Services";
     }
-
-    public ObservableCollection<ServiceResponse> Services { get; } = new();
-    public bool IsLoading { get; set; }
-    public bool IsAddingService { get; set; }
-    public bool IsEmpty => Services.Count == 0 && !IsLoading;
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
@@ -57,15 +61,21 @@ public partial class ServicesManagementPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task LoadAsync()
+    public async Task LoadAsync()
     {
         IsLoading = true;
         try
         {
             var services = await _serviceOfferingsService.GetServicesAsync(_businessId);
-            Services.Clear();
-            foreach (var s in services)
-                Services.Add(s);
+
+            ActiveServices.Clear();
+            InactiveServices.Clear();
+            foreach (var service in services.Where(s => s.IsActive))
+                ActiveServices.Add(service);
+            foreach (var service in services.Where(s => !s.IsActive))
+                InactiveServices.Add(service);
+
+            InactiveHeaderText = $"Not offered right now ({InactiveServices.Count})";
         }
         catch (Exception ex)
         {
@@ -78,9 +88,8 @@ public partial class ServicesManagementPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task AddServiceAsync()
+    public async Task AddServiceAsync()
     {
-        IsAddingService = true;
         try
         {
             await NavigationService.NavigateAsync(NavigationPaths.AddEditServicePage,
@@ -90,26 +99,29 @@ public partial class ServicesManagementPageViewModel : BaseViewModel
         {
             await HandleExceptionAsync(ex);
         }
-        finally
+    }
+
+    [RelayCommand]
+    public async Task EditServiceAsync(ServiceResponse service)
+    {
+        try
         {
-            IsAddingService = false;
+            await NavigationService.NavigateAsync(NavigationPaths.AddEditServicePage,
+                new NavigationParameters { [NavigationKeys.BusinessId] = _businessId, [NavigationKeys.ServiceId] = service.Id });
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
         }
     }
 
     [RelayCommand]
-    private async Task EditServiceAsync(ServiceResponse service)
-    {
-        await NavigationService.NavigateAsync(NavigationPaths.AddEditServicePage,
-            new NavigationParameters { [NavigationKeys.BusinessId] = _businessId, [NavigationKeys.ServiceId] = service.Id });
-    }
-
-    [RelayCommand]
-    private async Task ToggleActiveAsync(ServiceResponse service)
+    public async Task ReactivateAsync(ServiceResponse service)
     {
         service.IsToggling = true;
         try
         {
-            await _serviceOfferingsService.SetServiceActiveAsync(service.Id, !service.IsActive);
+            await _serviceOfferingsService.SetServiceActiveAsync(service.Id, true);
             await LoadAsync();
         }
         catch (Exception ex)
@@ -123,7 +135,13 @@ public partial class ServicesManagementPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task GoBackAsync()
+    public void ToggleInactiveExpanded()
+    {
+        IsInactiveExpanded = !IsInactiveExpanded;
+    }
+
+    [RelayCommand]
+    public async Task GoBackAsync()
     {
         try
         {

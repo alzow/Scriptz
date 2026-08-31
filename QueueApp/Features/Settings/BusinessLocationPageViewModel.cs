@@ -8,16 +8,18 @@ using QueueApp.Services.Storage;
 
 namespace QueueApp.Features.Settings;
 
-// Captures the business's map location via device GPS — the owner is presumably standing in
-// their shop when they do this, so there's no manual pin-drop/address entry, just "use my
-// current location". Writes to the already-existing (but previously unused) businesses.latitude
-// / longitude columns, which is what lets the customer-facing Browse dashboard compute distance.
 public partial class BusinessLocationPageViewModel : BaseViewModel
 {
+    public bool IsLoading { get; set; }
+    public bool IsCapturing { get; set; }
+    public bool HasLocation { get; set; }
+    public string CoordinatesText { get; set; } = string.Empty;
+
+    private Guid _businessId;
+
     private readonly IBusinessService _businessService;
     private readonly ILocationService _locationService;
     private readonly IQueuePopupService _popupService;
-    private Guid _businessId;
 
     public BusinessLocationPageViewModel(
         INavigationService navigationService,
@@ -32,11 +34,6 @@ public partial class BusinessLocationPageViewModel : BaseViewModel
         _popupService = popupService;
         Title = "Location";
     }
-
-    public bool IsLoading { get; set; }
-    public bool IsCapturing { get; set; }
-    public bool HasLocation { get; set; }
-    public string CoordinatesText { get; set; } = string.Empty;
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
@@ -59,14 +56,14 @@ public partial class BusinessLocationPageViewModel : BaseViewModel
         }
     }
 
-    private void ApplyBusiness(double? latitude, double? longitude)
+    public void ApplyBusiness(double? latitude, double? longitude)
     {
         HasLocation = latitude.HasValue && longitude.HasValue;
         CoordinatesText = HasLocation ? $"{latitude:0.00000}, {longitude:0.00000}" : string.Empty;
     }
 
     [RelayCommand]
-    private async Task CaptureLocationAsync()
+    public async Task CaptureLocationAsync()
     {
         IsCapturing = true;
         try
@@ -95,7 +92,7 @@ public partial class BusinessLocationPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task GoBackAsync()
+    public async Task GoBackAsync()
     {
         try
         {

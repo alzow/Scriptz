@@ -4,36 +4,44 @@
              xmlns:vm="clr-namespace:QueueApp.Features.Settings"
              xmlns:entry="clr-namespace:QueueApp.Shared.Templates.QueueEntry"
              xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
-             xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
+             xmlns:helpers="clr-namespace:QueueApp.Features.Settings.Helpers"
              x:Class="QueueApp.Features.Settings.AddEditOperatorPage"
              x:DataType="vm:AddEditOperatorPageViewModel"
              Title="{Binding PageTitle}"
              Style="{StaticResource NavigationPageStyle}">
     <Grid RowDefinitions="Auto,*">
-        <templates:AlzowSubPageHeader Grid.Row="0"
-                                       Title="{Binding PageTitle}"
-                                       BackCommand="{Binding GoBackCommand}"/>
+        <helpers:SettingsHeaderView Grid.Row="0" Title="{Binding PageTitle}" Command="{Binding GoBackCommand}"/>
 
-        <VerticalStackLayout Grid.Row="1" Padding="20" Spacing="16">
+        <VerticalStackLayout Grid.Row="1" Padding="20" Spacing="20">
 
-            <entry:QueueEntry
-                Placeholder="Staff member's name"
-                Text="{Binding DisplayName}"
-                Validator="{Binding NameValidator}"
-                ValidateOnTextChanged="True" />
-
-            <entry:QueueEntry
-                Placeholder="Display order (0 = first)"
-                Text="{Binding SortOrderText}"
-                InputType="Numeric" />
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Staff member's name" Style="{StaticResource lbl13_Bold_FieldLabel}"/>
+                <entry:QueueEntry Placeholder="e.g. Thabo"
+                        Text="{Binding DisplayName}"
+                        Validator="{Binding NameValidator}"
+                        ValidateOnTextChanged="True"/>
+            </VerticalStackLayout>
 
             <controls:AlzowLoadingButton
-                Text="Save"
-                LoadingText="Saving…"
-                Margin="0" HeightRequest="54"
-                Command="{Binding SaveCommand}"
-                IsLoading="{Binding IsSaving}"
-                ButtonStyle="{StaticResource PrimaryButtonStyle}" />
+                    Text="Save"
+                    LoadingText="Saving…"
+                    Margin="0" HeightRequest="56"
+                    Command="{Binding SaveCommand}"
+                    IsLoading="{Binding IsSaving}"
+                    IsEnabled="{Binding IsSaveEnabled}"
+                    ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
+
+            <BoxView HeightRequest="1" Style="{StaticResource bx_Divider}" Margin="0,4"
+                     IsVisible="{Binding IsEditMode}"/>
+
+            <controls:AlzowLoadingButton
+                    Text="Deactivate"
+                    LoadingText="Deactivating…"
+                    Margin="0"
+                    Command="{Binding DeactivateCommand}"
+                    IsLoading="{Binding IsDeactivating}"
+                    IsVisible="{Binding IsEditMode}"
+                    ButtonStyle="{StaticResource btn15_Regular_SheetBad}"/>
 
         </VerticalStackLayout>
     </Grid>

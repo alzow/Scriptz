@@ -10,9 +10,14 @@ namespace QueueApp.Features.Settings;
 
 public partial class AddAvailabilityWindowPageViewModel : BaseViewModel
 {
-    private readonly IOperatorService _operatorService;
+    public TimeSpan StartTime { get; set; } = new(9, 0, 0);
+    public TimeSpan EndTime { get; set; } = new(17, 0, 0);
+    public bool IsSaving { get; set; }
+
     private Guid _operatorId;
     private int _dayOfWeek;
+
+    private readonly IOperatorService _operatorService;
 
     public AddAvailabilityWindowPageViewModel(
         INavigationService navigationService,
@@ -23,10 +28,6 @@ public partial class AddAvailabilityWindowPageViewModel : BaseViewModel
         _operatorService = operatorService;
         Title = "Add Time Window";
     }
-
-    public TimeSpan StartTime { get; set; } = new(9, 0, 0);
-    public TimeSpan EndTime { get; set; } = new(17, 0, 0);
-    public bool IsSaving { get; set; }
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
@@ -47,7 +48,7 @@ public partial class AddAvailabilityWindowPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task GoBackAsync()
+    public async Task GoBackAsync()
     {
         try
         {
@@ -60,7 +61,7 @@ public partial class AddAvailabilityWindowPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task SaveAsync()
+    public async Task SaveAsync()
     {
         if (EndTime <= StartTime)
         {

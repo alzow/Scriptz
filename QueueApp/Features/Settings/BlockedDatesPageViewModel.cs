@@ -13,8 +13,14 @@ namespace QueueApp.Features.Settings;
 
 public partial class BlockedDatesPageViewModel : BaseViewModel
 {
-    private readonly IOperatorService _operatorService;
+    public ObservableCollection<AvailabilityBlockResponse> Blocks { get; } = new();
+    public string OperatorName { get; set; } = "";
+    public bool IsLoading { get; set; }
+    public bool IsEmpty => Blocks.Count == 0 && !IsLoading;
+
     private Guid _operatorId;
+
+    private readonly IOperatorService _operatorService;
 
     public BlockedDatesPageViewModel(
         INavigationService navigationService,
@@ -25,11 +31,6 @@ public partial class BlockedDatesPageViewModel : BaseViewModel
         _operatorService = operatorService;
         Title = "Blocked Dates";
     }
-
-    public ObservableCollection<AvailabilityBlockResponse> Blocks { get; } = new();
-    public string OperatorName { get; set; } = "";
-    public bool IsLoading { get; set; }
-    public bool IsEmpty => Blocks.Count == 0 && !IsLoading;
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
@@ -59,7 +60,7 @@ public partial class BlockedDatesPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task LoadAsync()
+    public async Task LoadAsync()
     {
         IsLoading = true;
         try
@@ -80,14 +81,21 @@ public partial class BlockedDatesPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task AddBlockAsync()
+    public async Task AddBlockAsync()
     {
-        await NavigationService.NavigateAsync(NavigationPaths.AddAvailabilityBlockPage,
-            new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId });
+        try
+        {
+            await NavigationService.NavigateAsync(NavigationPaths.AddAvailabilityBlockPage,
+                new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId });
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
 
     [RelayCommand]
-    private async Task DeleteBlockAsync(AvailabilityBlockResponse block)
+    public async Task DeleteBlockAsync(AvailabilityBlockResponse block)
     {
         block.IsDeleting = true;
         try
@@ -106,7 +114,7 @@ public partial class BlockedDatesPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task GoBackAsync()
+    public async Task GoBackAsync()
     {
         try
         {

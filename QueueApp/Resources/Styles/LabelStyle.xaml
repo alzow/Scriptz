@@ -19,6 +19,19 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
     </Style>
 
+    <!-- QueueEntry's currency prefix (e.g. "R" on a price field). Same size as the entry text itself. -->
+    <Style x:Key="lbl16_Regular_EntryPrefix" TargetType="Label">
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
+    </Style>
+
+    <!-- A field label above an entry — §7's fix for placeholder-as-label. -->
+    <Style x:Key="lbl13_Bold_FieldLabel" TargetType="Label">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
+    </Style>
+
     <!--
         Tracked "mono" lines. There is no monospace family in Resources/Fonts, so the look comes
         from RobotoMedium plus letter spacing rather than a second typeface.

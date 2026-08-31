@@ -2,17 +2,15 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.Settings"
-             xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
              xmlns:models="clr-namespace:QueueApp.Services.Api.Operator.Models"
+             xmlns:helpers="clr-namespace:QueueApp.Features.Settings.Helpers"
              x:Name="Root"
              x:Class="QueueApp.Features.Settings.OperatorHoursPage"
              x:DataType="vm:OperatorHoursPageViewModel"
              Title="{Binding Title}"
              Style="{StaticResource NavigationPageStyle}">
     <Grid RowDefinitions="Auto,*">
-        <templates:AlzowSubPageHeader Grid.Row="0"
-                                       Title="{Binding Title}"
-                                       BackCommand="{Binding GoBackCommand}"/>
+        <helpers:SettingsHeaderView Grid.Row="0" Title="{Binding Title}" Command="{Binding GoBackCommand}"/>
 
         <Grid Grid.Row="1">
             <CollectionView ItemsSource="{Binding Operators}" Margin="12,6">
