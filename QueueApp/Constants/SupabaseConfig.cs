@@ -8,9 +8,9 @@ public static class SupabaseConfig
     public const string AuthUrl = ProjectUrl; // GoTrue paths are /auth/v1/... off the project root
     public const string AnonKey = "sb_publishable_DtRAQzD-2sSOpD5NR6s_1A_wF7ITIbB"; // publishable/anon key — safe in-app; RLS protects data
 
-    // SecureStorage keys for the current session, shared between AuthService and SupabaseAuthHeaderHandler
-    // so the handler can read the token without depending on IAuthService (which itself depends on the
-    // Refit-backed IAuthApi and would otherwise create a circular HttpClientFactory resolution).
+    // SecureStorage keys for the current session. SessionRefreshService owns them — it is the only
+    // thing that writes a token, and both AuthService and SupabaseAuthHeaderHandler read through it,
+    // so a token that expires mid-session is renewed in one place rather than at each call site.
     public const string AccessTokenKey = "sb_access_token";
     public const string RefreshTokenKey = "sb_refresh_token";
     public const string TokenExpiryKey = "sb_token_expiry_utc";

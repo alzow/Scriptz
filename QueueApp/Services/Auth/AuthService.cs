@@ -11,14 +11,33 @@ public class AuthService : IAuthService
 {
     private readonly ISecureStorageService _secureStorage;
     private readonly IAuthApi _authApi;
+    private readonly ISessionRefreshService _sessionRefresh;
 
-    public AuthService(ISecureStorageService secureStorage, IAuthApi authApi)
+    public AuthService(
+        ISecureStorageService secureStorage,
+        IAuthApi authApi,
+        ISessionRefreshService sessionRefresh)
     {
         _secureStorage = secureStorage;
         _authApi = authApi;
+        _sessionRefresh = sessionRefresh;
     }
 
-    public Task<string?> GetAccessTokenAsync() => _secureStorage.GetAsync(SupabaseConfig.AccessTokenKey);
+    public event EventHandler? SessionExpired
+    {
+        add => _sessionRefresh.SessionExpired += value;
+        remove => _sessionRefresh.SessionExpired -= value;
+    }
+
+    public event EventHandler<string>? SessionRefreshed
+    {
+        add => _sessionRefresh.SessionRefreshed += value;
+        remove => _sessionRefresh.SessionRefreshed -= value;
+    }
+
+    // Renews first if the token has expired or is about to, so a caller holding this token for a
+    // long-lived connection (the realtime socket) isn't handed a dead one mid-session.
+    public Task<string?> GetAccessTokenAsync() => _sessionRefresh.GetValidAccessTokenAsync();
 
     public Task<string?> GetUserIdAsync() => _secureStorage.GetAsync(SupabaseConfig.UserIdKey);
 
@@ -77,54 +96,24 @@ public class AuthService : IAuthService
         }
     }
 
+    // Startup check. Expiry during the session is handled where the calls are made — see
+    // SupabaseAuthHeaderHandler — so this no longer has to be the only place a token is renewed.
     public async Task<bool> EnsureValidSessionAsync()
     {
-        var token = await _secureStorage.GetAsync(SupabaseConfig.AccessTokenKey);
         var refreshToken = await _secureStorage.GetAsync(SupabaseConfig.RefreshTokenKey);
-        var expiryRaw = await _secureStorage.GetAsync(SupabaseConfig.TokenExpiryKey);
-
-        if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(refreshToken))
+        if (string.IsNullOrEmpty(refreshToken))
             return false;
 
-        var stillValid = DateTime.TryParse(
-            expiryRaw,
-            null,
-            System.Globalization.DateTimeStyles.RoundtripKind,
-            out var expiryUtc)
-            && expiryUtc > DateTime.UtcNow.AddSeconds(60);
-
-        if (stillValid)
-            return true;
-
-        try
-        {
-            var response = await _authApi.RefreshTokenAsync(new RefreshTokenRequest { RefreshToken = refreshToken });
-            await SetSessionAsync(response.AccessToken, response.RefreshToken, response.ExpiresIn);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Token refresh failed: {ex.Message}");
-            await ClearSessionAsync();
-            return false;
-        }
+        var token = await _sessionRefresh.GetValidAccessTokenAsync();
+        return !string.IsNullOrEmpty(token);
     }
 
-    public async Task SetSessionAsync(string accessToken, string? refreshToken, int expiresInSeconds)
-    {
-        await _secureStorage.SetAsync(SupabaseConfig.AccessTokenKey, accessToken);
-        if (!string.IsNullOrEmpty(refreshToken))
-            await _secureStorage.SetAsync(SupabaseConfig.RefreshTokenKey, refreshToken);
-
-        var expiryUtc = DateTime.UtcNow.AddSeconds(expiresInSeconds);
-        await _secureStorage.SetAsync(SupabaseConfig.TokenExpiryKey, expiryUtc.ToString("O"));
-    }
+    public Task SetSessionAsync(string accessToken, string? refreshToken, int expiresInSeconds)
+        => _sessionRefresh.StoreSessionAsync(accessToken, refreshToken, expiresInSeconds);
 
     public async Task ClearSessionAsync()
     {
-        await _secureStorage.RemoveAsync(SupabaseConfig.AccessTokenKey);
-        await _secureStorage.RemoveAsync(SupabaseConfig.RefreshTokenKey);
-        await _secureStorage.RemoveAsync(SupabaseConfig.TokenExpiryKey);
+        await _sessionRefresh.ClearSessionAsync();
         await _secureStorage.RemoveAsync(SupabaseConfig.UserIdKey);
         await _secureStorage.RemoveAsync(SupabaseConfig.UserEmailKey);
     }
