@@ -30,15 +30,15 @@
                     </Ellipse.Triggers>
                 </Ellipse>
                 <Label Text="{Binding OpenLabel, Source={x:Reference Root}}"
-                       Style="{StaticResource lbl9_Mono_ClosedNow}">
+                       Style="{StaticResource lbl11_Mono_Closed}">
                     <Label.Triggers>
                         <DataTrigger TargetType="Label"
                                      Binding="{Binding IsOpenNow, Source={x:Reference Root}}" Value="False">
-                            <Setter Property="Style" Value="{StaticResource lbl9_Mono_ClosedNow}"/>
+                            <Setter Property="Style" Value="{StaticResource lbl11_Mono_Closed}"/>
                         </DataTrigger>
                         <DataTrigger TargetType="Label"
                                      Binding="{Binding IsOpenNow, Source={x:Reference Root}}" Value="True">
-                            <Setter Property="Style" Value="{StaticResource lbl9_Mono_OpenNow}"/>
+                            <Setter Property="Style" Value="{StaticResource lbl11_Mono_Open}"/>
                         </DataTrigger>
                     </Label.Triggers>
                 </Label>

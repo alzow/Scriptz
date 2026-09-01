@@ -7,6 +7,6 @@
     <Grid HeightRequest="40" Padding="16,0" Style="{StaticResource grid_Page}">
         <Label Text="{Binding Title}"
                VerticalOptions="Center"
-               Style="{StaticResource lbl10_Bold_GroupHeader}"/>
+               Style="{StaticResource lbl11_Bold_GroupHeader}"/>
     </Grid>
 </ContentView>

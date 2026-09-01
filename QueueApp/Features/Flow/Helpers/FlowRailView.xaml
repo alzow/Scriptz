@@ -25,8 +25,8 @@
         </FlexLayout>
 
         <Grid ColumnDefinitions="*,Auto" Padding="20,9,20,0">
-            <Label Grid.Column="0" Text="{Binding RailStepLabel, Source={x:Reference Root}}" Style="{StaticResource lbl10_Mono_Green}"/>
-            <Label Grid.Column="1" Text="{Binding RailCountText, Source={x:Reference Root}}" Style="{StaticResource lbl10_Mono_TextFaint}"/>
+            <Label Grid.Column="0" Text="{Binding RailStepLabel, Source={x:Reference Root}}" Style="{StaticResource lbl11_Mono_Green}"/>
+            <Label Grid.Column="1" Text="{Binding RailCountText, Source={x:Reference Root}}" Style="{StaticResource lbl11_Mono_TextFaint}"/>
         </Grid>
 
         <!-- Crumbs: completed steps, tappable to jump back -->

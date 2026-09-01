@@ -8,6 +8,12 @@
         e.g. lbl12_Regular_Gray100, lbl24_Bold_TextDark
         Only add a new key here when an existing one doesn't already cover the combination.
 
+        11 is the floor. Nothing renders below it — not a style here, not an inline FontSize on a
+        Label. Captions, eyebrows, pills, timestamps and meta lines all sit at 11; the tier above
+        them is 12.5, which is where body-small text lives. If a caption needs to be quieter than
+        the line it labels, take it there with colour (TextMuted, TextDim) or weight, not by
+        dropping the size.
+
         Text never takes an accent *fill* token. Green, purple and red as text resolve to
         AccentText, PurpleText and DangerText, which are the vivid colours on dark and deepened
         ones on light — #39FF7A as text on a light page is 1.22:1.
@@ -35,35 +41,28 @@
     <!--
         Tracked "mono" lines. There is no monospace family in Resources/Fonts, so the look comes
         from RobotoMedium plus letter spacing rather than a second typeface.
+
+        One caption tier, at the 11pt floor. The 9pt and 10pt families that used to live here were
+        the same style at two sizes — same family, same spacing, same colours — so they collapse
+        into this one rather than being lifted to 11 and 12 and keeping a distinction that was
+        never designed.
     -->
-    <Style x:Key="lbl9_Mono_TextMuted" TargetType="Label">
-        <Setter Property="FontSize" Value="9"/>
+    <Style x:Key="lbl11_Mono_TextMuted" TargetType="Label">
+        <Setter Property="FontSize" Value="11"/>
         <Setter Property="FontFamily" Value="RobotoMedium"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
         <Setter Property="CharacterSpacing" Value="1.6"/>
     </Style>
-    <Style x:Key="lbl9_Mono_TextFaint" TargetType="Label" BasedOn="{StaticResource lbl9_Mono_TextMuted}">
+    <Style x:Key="lbl11_Mono_TextFaint" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_TextMuted}">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextDim}, Dark={StaticResource DarkTextDim}}"/>
     </Style>
-    <Style x:Key="lbl9_Mono_Green" TargetType="Label" BasedOn="{StaticResource lbl9_Mono_TextMuted}">
+    <Style x:Key="lbl11_Mono_Green" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_TextMuted}">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
     </Style>
-    <Style x:Key="lbl9_Mono_TextInk" TargetType="Label" BasedOn="{StaticResource lbl9_Mono_TextMuted}">
+    <Style x:Key="lbl11_Mono_TextInk" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_TextMuted}">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
     </Style>
-    <Style x:Key="lbl10_Mono_TextMuted" TargetType="Label">
-        <Setter Property="FontSize" Value="10"/>
-        <Setter Property="FontFamily" Value="RobotoMedium"/>
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
-        <Setter Property="CharacterSpacing" Value="1.6"/>
-    </Style>
-    <Style x:Key="lbl10_Mono_TextFaint" TargetType="Label" BasedOn="{StaticResource lbl10_Mono_TextMuted}">
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextDim}, Dark={StaticResource DarkTextDim}}"/>
-    </Style>
-    <Style x:Key="lbl10_Mono_Green" TargetType="Label" BasedOn="{StaticResource lbl10_Mono_TextMuted}">
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
-    </Style>
-    <Style x:Key="lbl10_Mono_Purple" TargetType="Label" BasedOn="{StaticResource lbl10_Mono_TextMuted}">
+    <Style x:Key="lbl11_Mono_Purple" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_TextMuted}">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightPurpleText}, Dark={StaticResource DarkPurpleText}}"/>
     </Style>
     <Style x:Key="lbl13_Mono_TextPrimary" TargetType="Label">
@@ -82,21 +81,24 @@
     </Style>
 
     <!-- 11 -->
-    <Style x:Key="lbl11_Bold_TextMid" TargetType="Label" BasedOn="{StaticResource SectionTitle}"/>
-    <Style x:Key="lbl11_Bold_White" TargetType="Label">
-        <Setter Property="FontSize" Value="11"/>
+    <!-- Board position badge. SectionTitle stays at the 11pt floor, so this states its own size. -->
+    <Style x:Key="lbl12_Bold_TextMid" TargetType="Label" BasedOn="{StaticResource SectionTitle}">
+        <Setter Property="FontSize" Value="12.5"/>
+    </Style>
+    <Style x:Key="lbl12_Bold_White" TargetType="Label">
+        <Setter Property="FontSize" Value="12.5"/>
         <Setter Property="FontFamily" Value="RobotoBold"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
     </Style>
-    <Style x:Key="lbl11_Medium_White" TargetType="Label">
-        <Setter Property="FontSize" Value="11"/>
+    <Style x:Key="lbl12_Medium_White" TargetType="Label">
+        <Setter Property="FontSize" Value="12.5"/>
         <Setter Property="FontFamily" Value="RobotoMedium"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
     </Style>
 
     <!-- 12 -->
     <Style x:Key="lbl12_Regular_TextLight" TargetType="Label">
-        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontSize" Value="12.5"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
     </Style>
     <Style x:Key="lbl12_Regular_Cream" TargetType="Label">
@@ -209,16 +211,12 @@
         Operator board. Sizes come off the board design's type scale, which runs half-steps
         (11.5, 13.5, 16.5) to keep body text legible at arm's length on a counter phone.
     -->
-    <Style x:Key="lbl9_Regular_TextLight" TargetType="Label">
-        <Setter Property="FontSize" Value="9"/>
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
-    </Style>
     <Style x:Key="lbl11_Regular_TextLight" TargetType="Label">
-        <Setter Property="FontSize" Value="11.5"/>
+        <Setter Property="FontSize" Value="11"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
     </Style>
-    <Style x:Key="lbl11_Regular_TextDark" TargetType="Label">
-        <Setter Property="FontSize" Value="11.5"/>
+    <Style x:Key="lbl12_Regular_TextDark" TargetType="Label">
+        <Setter Property="FontSize" Value="12.5"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
     </Style>
     <Style x:Key="lbl12_Bold_TextDark" TargetType="Label">
@@ -272,8 +270,8 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
     </Style>
 
-    <Style x:Key="lbl11_Regular_TextFaint" TargetType="Label">
-        <Setter Property="FontSize" Value="11.5"/>
+    <Style x:Key="lbl12_Regular_TextFaint" TargetType="Label">
+        <Setter Property="FontSize" Value="12.5"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextDim}, Dark={StaticResource DarkTextDim}}"/>
         <Setter Property="LineHeight" Value="1.45"/>
     </Style>
@@ -284,8 +282,8 @@
         <Setter Property="LineHeight" Value="1.45"/>
     </Style>
 
-    <Style x:Key="lbl11_Mono_Tag" TargetType="Label">
-        <Setter Property="FontSize" Value="11.5"/>
+    <Style x:Key="lbl12_Mono_Tag" TargetType="Label">
+        <Setter Property="FontSize" Value="12.5"/>
         <Setter Property="FontFamily" Value="RobotoMedium"/>
         <Setter Property="CharacterSpacing" Value="1.2"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
@@ -315,15 +313,15 @@
         <Setter Property="LineBreakMode" Value="NoWrap"/>
     </Style>
 
-    <Style x:Key="lbl11_Medium_Green" TargetType="Label">
-        <Setter Property="FontSize" Value="11.5"/>
+    <Style x:Key="lbl12_Medium_Green" TargetType="Label">
+        <Setter Property="FontSize" Value="12.5"/>
         <Setter Property="FontFamily" Value="RobotoMedium"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
     </Style>
 
     <!-- Status pill text. Green is the confirmed default; pending swaps it for purple. -->
-    <Style x:Key="lbl10_Bold_Green" TargetType="Label">
-        <Setter Property="FontSize" Value="10"/>
+    <Style x:Key="lbl11_Bold_Green" TargetType="Label">
+        <Setter Property="FontSize" Value="11"/>
         <Setter Property="FontFamily" Value="RobotoBold"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
         <Setter Property="LineBreakMode" Value="NoWrap"/>
@@ -362,7 +360,7 @@
         ================================================================================
     -->
 
-    <Style x:Key="lbl9_Mono_TextMuted_Selectable" TargetType="Label" BasedOn="{StaticResource lbl9_Mono_TextMuted}">
+    <Style x:Key="lbl11_Mono_TextMuted_Selectable" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_TextMuted}">
         <Style.Triggers>
             <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
                 <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
@@ -415,22 +413,21 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
     </Style>
 
-    <!-- Open / closed pill text on a business landing header. -->
-    <Style x:Key="lbl10_Mono_Open" TargetType="Label" BasedOn="{StaticResource lbl10_Mono_Green}"/>
+    <!--
+        Open / closed text: the business landing header's pill, and the agenda header's line.
+        These were two alias pairs (Open/Closed at 10, OpenNow/ClosedNow at 9) saying the same
+        thing at two sizes; one pair now covers both.
+    -->
+    <Style x:Key="lbl11_Mono_Open" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_Green}"/>
 
-    <Style x:Key="lbl10_Mono_Closed" TargetType="Label" BasedOn="{StaticResource lbl10_Mono_TextFaint}"/>
+    <Style x:Key="lbl11_Mono_Closed" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_TextFaint}"/>
 
     <!-- The live card's status line: green when queueing, purple in booking mode, dim when shut. -->
-    <Style x:Key="lbl10_Mono_LiveStatus" TargetType="Label" BasedOn="{StaticResource lbl10_Mono_Green}"/>
+    <Style x:Key="lbl11_Mono_LiveStatus" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_Green}"/>
 
-    <Style x:Key="lbl10_Mono_LiveStatus_Booking" TargetType="Label" BasedOn="{StaticResource lbl10_Mono_Purple}"/>
+    <Style x:Key="lbl11_Mono_LiveStatus_Booking" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_Purple}"/>
 
-    <Style x:Key="lbl10_Mono_LiveStatus_Closed" TargetType="Label" BasedOn="{StaticResource lbl10_Mono_TextFaint}"/>
-
-    <!-- Agenda header's open/closed line, and the history group header's "today". -->
-    <Style x:Key="lbl9_Mono_OpenNow" TargetType="Label" BasedOn="{StaticResource lbl9_Mono_Green}"/>
-
-    <Style x:Key="lbl9_Mono_ClosedNow" TargetType="Label" BasedOn="{StaticResource lbl9_Mono_TextFaint}"/>
+    <Style x:Key="lbl11_Mono_LiveStatus_Closed" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_TextFaint}"/>
 
     <!--
         ================================================================================
@@ -453,30 +450,30 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
     </Style>
 
-    <Style x:Key="lbl11_Regular_HistoryMeta" TargetType="Label">
-        <Setter Property="FontSize" Value="11.5"/>
+    <Style x:Key="lbl12_Regular_HistoryMeta" TargetType="Label">
+        <Setter Property="FontSize" Value="12.5"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
     </Style>
 
     <!-- The pill's ink is data-bound from the row's status, so this style sets everything but colour. -->
-    <Style x:Key="lbl9_Bold_StatusPill" TargetType="Label">
+    <Style x:Key="lbl11_Bold_StatusPill" TargetType="Label">
         <Setter Property="FontFamily" Value="RobotoBold"/>
-        <Setter Property="FontSize" Value="9.5"/>
+        <Setter Property="FontSize" Value="11"/>
         <Setter Property="CharacterSpacing" Value="0.8"/>
     </Style>
 
     <!-- A timestamp is decorative, which is exactly what TextDim is for. -->
-    <Style x:Key="lbl10_Regular_Timestamp" TargetType="Label">
+    <Style x:Key="lbl11_Regular_Timestamp" TargetType="Label">
         <Setter Property="FontFamily" Value="RobotoRegular"/>
-        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontSize" Value="11"/>
         <Setter Property="CharacterSpacing" Value="0.5"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextDim}, Dark={StaticResource DarkTextDim}}"/>
     </Style>
 
     <!-- Group header: dim for past groups, green for the ones still ahead of you. -->
-    <Style x:Key="lbl10_Bold_GroupHeader" TargetType="Label">
+    <Style x:Key="lbl11_Bold_GroupHeader" TargetType="Label">
         <Setter Property="FontFamily" Value="RobotoBold"/>
-        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontSize" Value="11"/>
         <Setter Property="CharacterSpacing" Value="1.5"/>
         <Setter Property="LineBreakMode" Value="NoWrap"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextDim}, Dark={StaticResource DarkTextDim}}"/>
@@ -497,20 +494,20 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightPurpleText}, Dark={StaticResource DarkPurpleText}}"/>
     </Style>
 
-    <Style x:Key="lbl11_Bold_TextMuted" TargetType="Label" BasedOn="{StaticResource lbl11_Bold_White}">
+    <Style x:Key="lbl12_Bold_TextMuted" TargetType="Label" BasedOn="{StaticResource lbl12_Bold_White}">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
     </Style>
 
     <!-- Browse dashboard. -->
-    <Style x:Key="lbl10_Regular_TextMuted" TargetType="Label">
+    <Style x:Key="lbl11_Regular_TextMuted" TargetType="Label">
         <Setter Property="FontFamily" Value="RobotoRegular"/>
-        <Setter Property="FontSize" Value="10.5"/>
+        <Setter Property="FontSize" Value="11"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
     </Style>
 
-    <Style x:Key="lbl10_Bold_TextMuted" TargetType="Label">
+    <Style x:Key="lbl11_Bold_TextMuted" TargetType="Label">
         <Setter Property="FontFamily" Value="RobotoBold"/>
-        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontSize" Value="11"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
     </Style>
 
@@ -525,7 +522,7 @@
     </Style>
 
     <!-- Upcoming booking status pill: confirmed is green, a pending request is purple. -->
-    <Style x:Key="lbl10_Bold_StatusPill" TargetType="Label" BasedOn="{StaticResource lbl10_Bold_Green}">
+    <Style x:Key="lbl11_Bold_BookingPill" TargetType="Label" BasedOn="{StaticResource lbl11_Bold_Green}">
         <Style.Triggers>
             <DataTrigger TargetType="Label" Binding="{Binding Status}" Value="pending">
                 <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightPurpleText}, Dark={StaticResource DarkPurpleText}}"/>
@@ -538,7 +535,7 @@
         what that token is for — nothing here is something the customer needs to read, because the
         day cannot be picked.
     -->
-    <Style x:Key="lbl9_Mono_Day" TargetType="Label" BasedOn="{StaticResource lbl9_Mono_TextMuted}">
+    <Style x:Key="lbl11_Mono_Day" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_TextMuted}">
         <Style.Triggers>
             <DataTrigger TargetType="Label" Binding="{Binding IsFull}" Value="True">
                 <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextDim}, Dark={StaticResource DarkTextDim}}"/>
@@ -554,7 +551,7 @@
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="lbl9_Regular_Day" TargetType="Label" BasedOn="{StaticResource lbl9_Regular_TextLight}">
+    <Style x:Key="lbl11_Regular_Day" TargetType="Label" BasedOn="{StaticResource lbl11_Regular_TextLight}">
         <Style.Triggers>
             <DataTrigger TargetType="Label" Binding="{Binding IsFull}" Value="True">
                 <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextDim}, Dark={StaticResource DarkTextDim}}"/>

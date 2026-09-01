@@ -24,7 +24,7 @@
                                        Style="{StaticResource lbl19_Bold_TextDark}"
                                        HorizontalOptions="Center"/>
                                 <Label Text="{Binding MonthText}"
-                                       Style="{StaticResource lbl9_Mono_TextMuted}"
+                                       Style="{StaticResource lbl11_Mono_TextMuted}"
                                        HorizontalOptions="Center"/>
                             </VerticalStackLayout>
                             <BoxView Grid.Column="1" Style="{StaticResource bx_Divider}"/>
@@ -35,7 +35,7 @@
                             <Label Text="{Binding ScheduleText}" Style="{StaticResource lbl12_Regular_TextLight}"/>
                             <Label Text="{Binding ProgressStatus}"
                                    IsVisible="{Binding HasProgress}"
-                                   Style="{StaticResource lbl11_Medium_Green}"/>
+                                   Style="{StaticResource lbl12_Medium_Green}"/>
                         </VerticalStackLayout>
 
                         <VerticalStackLayout Grid.Column="2" Spacing="8"
@@ -44,7 +44,7 @@
                             <!-- Confirmed is the default; a pending request is the exception, so it
                                  is the one the trigger repaints. -->
                             <Border Style="{StaticResource brd20_StatusPill_Selectable}">
-                                <Label Text="{Binding StatusLabel}" Style="{StaticResource lbl10_Bold_StatusPill}"/>
+                                <Label Text="{Binding StatusLabel}" Style="{StaticResource lbl11_Bold_BookingPill}"/>
                             </Border>
 
                             <controls:AlzowLoadingButton

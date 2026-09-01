@@ -42,7 +42,7 @@
                                         IsVisible="{Binding HasTermsOfUse}"/>
 
                 <Label Text="Shops keep their own record of visits you made, the way any business keeps its books."
-                       Style="{StaticResource lbl11_Regular_TextFaint}"
+                       Style="{StaticResource lbl12_Regular_TextFaint}"
                        Margin="2,18,2,0"/>
 
             </VerticalStackLayout>

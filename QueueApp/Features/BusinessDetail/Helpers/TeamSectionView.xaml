@@ -11,7 +11,7 @@
         <Grid ColumnDefinitions="*,Auto" Padding="20,22,20,10">
             <Label Grid.Column="0" Text="{Binding TeamSectionTitle, Source={x:Reference Root}}" Style="{StaticResource lbl15_Bold_TextDark}"/>
             <Label Grid.Column="1" Text="{Binding TeamCountText, Source={x:Reference Root}}" VerticalOptions="Center"
-                   Style="{StaticResource lbl9_Mono_TextMuted}"/>
+                   Style="{StaticResource lbl11_Mono_TextMuted}"/>
         </Grid>
 
         <ScrollView Orientation="Horizontal" Margin="20,0">
@@ -37,7 +37,7 @@
                                    TextColor="{Binding NameColor}"/>
                             <Label Text="{Binding SubLabel}" HorizontalOptions="Center" Margin="0,2,0,0"
                                     IsVisible="{Binding ShowSubLabel}"
-                                   Style="{StaticResource lbl12_Regular_TextLight}" FontSize="10"
+                                   Style="{StaticResource lbl11_Regular_TextMuted}"
                                    TextColor="{Binding SubLabelColor}"/>
                         </VerticalStackLayout>
                     </DataTemplate>

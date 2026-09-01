@@ -17,7 +17,7 @@
                 <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
                     <Ellipse Style="{StaticResource ell_AccentDot}" WidthRequest="6" HeightRequest="6"
                              VerticalOptions="Center"/>
-                    <Label Text="LIVE" Style="{StaticResource lbl9_Mono_Green}"
+                    <Label Text="LIVE" Style="{StaticResource lbl11_Mono_Green}"
                            VerticalOptions="Center"/>
                 </HorizontalStackLayout>
             </Border>

@@ -20,18 +20,18 @@
 
             <Grid ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0" Text="{Binding LiveCardTitle, Source={x:Reference Root}}"
-                       Style="{StaticResource lbl9_Mono_TextMuted}" VerticalOptions="Center"/>
+                       Style="{StaticResource lbl11_Mono_TextMuted}" VerticalOptions="Center"/>
                 <HorizontalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
                     <Ellipse WidthRequest="6" HeightRequest="6" VerticalOptions="Center"
                              Style="{StaticResource ell_AccentDot}"
                              IsVisible="{Binding ShowLiveDot, Source={x:Reference Root}}"/>
-                    <Label Text="{Binding LiveCardStatus, Source={x:Reference Root}}" Style="{StaticResource lbl10_Mono_LiveStatus}">
+                    <Label Text="{Binding LiveCardStatus, Source={x:Reference Root}}" Style="{StaticResource lbl11_Mono_LiveStatus}">
                         <Label.Triggers>
                             <DataTrigger TargetType="Label" Binding="{Binding IsBookingMode, Source={x:Reference Root}}" Value="True">
-                                <Setter Property="Style" Value="{StaticResource lbl10_Mono_LiveStatus_Booking}"/>
+                                <Setter Property="Style" Value="{StaticResource lbl11_Mono_LiveStatus_Booking}"/>
                             </DataTrigger>
                             <DataTrigger TargetType="Label" Binding="{Binding IsOpen, Source={x:Reference Root}}" Value="False">
-                                <Setter Property="Style" Value="{StaticResource lbl10_Mono_LiveStatus_Closed}"/>
+                                <Setter Property="Style" Value="{StaticResource lbl11_Mono_LiveStatus_Closed}"/>
                             </DataTrigger>
                         </Label.Triggers>
                     </Label>
@@ -71,7 +71,7 @@
 
             <Label Text="{Binding LiveFootnote, Source={x:Reference Root}}" HorizontalOptions="Center"
                    Margin="0,11,0,0"
-                   Style="{StaticResource lbl9_Mono_TextMuted}"/>
+                   Style="{StaticResource lbl11_Mono_TextMuted}"/>
         </VerticalStackLayout>
     </Border>
 

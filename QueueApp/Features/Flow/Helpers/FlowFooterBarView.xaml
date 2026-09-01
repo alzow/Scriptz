@@ -11,7 +11,7 @@
             IsVisible="{Binding IsFlowActive, Source={x:Reference Root}}">
         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
             <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
-                <Label Text="{Binding FooterLabel, Source={x:Reference Root}}" Style="{StaticResource lbl9_Mono_TextMuted}"
+                <Label Text="{Binding FooterLabel, Source={x:Reference Root}}" Style="{StaticResource lbl11_Mono_TextMuted}"
                        LineBreakMode="TailTruncation"/>
                 <Label Text="{Binding FooterValue, Source={x:Reference Root}}" Style="{StaticResource lbl14_Bold_TextDark}"/>
             </VerticalStackLayout>

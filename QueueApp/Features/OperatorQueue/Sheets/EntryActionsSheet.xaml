@@ -28,7 +28,7 @@
                     <Label Text="{Binding CustomerName, Source={x:Reference Root}}"
                            Style="{StaticResource lbl16_Bold_TextDark}"/>
                     <Label Text="{Binding SubText, Source={x:Reference Root}}"
-                           Style="{StaticResource lbl11_Regular_TextLight}"/>
+                           Style="{StaticResource lbl12_Regular_TextLight}"/>
                 </VerticalStackLayout>
 
             </Grid>

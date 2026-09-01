@@ -72,12 +72,12 @@
                         <Label Text="{Binding OutcomePositionText, Source={x:Reference Root}}"
                                Style="{StaticResource lbl15_Bold_TextDark}"/>
                         <Label Text="{Binding OutcomeTurnText, Source={x:Reference Root}}"
-                               Style="{StaticResource lbl11_Regular_TextLight}"/>
+                               Style="{StaticResource lbl12_Regular_TextLight}"/>
                     </VerticalStackLayout>
                 </Border>
 
                 <Label Text="They won't get a notification — give them a rough time out loud."
-                       Style="{StaticResource lbl11_Regular_TextLight}"
+                       Style="{StaticResource lbl12_Regular_TextLight}"
                        Margin="2,12,2,0"/>
 
                 <Button Text="Add to queue" Margin="0,16,0,0" HeightRequest="56"

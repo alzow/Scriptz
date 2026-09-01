@@ -63,7 +63,7 @@
                             <RoundRectangle CornerRadius="7"/>
                         </Border.StrokeShape>
                         <Label Text="{Binding BookingStatusLabel, Source={x:Reference Root}}"
-                               Style="{StaticResource lbl10_Mono_Purple}"/>
+                               Style="{StaticResource lbl11_Mono_Purple}"/>
                     </Border>
                 </Grid>
             </VerticalStackLayout>
@@ -78,7 +78,7 @@
 
         <!-- bookings_no_overlap covers pending as well as confirmed, so this is true —
              and without saying it, a pending booking feels like it might evaporate. -->
-        <Label Margin="20,14,20,0" Style="{StaticResource lbl11_Regular_TextFaint}">
+        <Label Margin="20,14,20,0" Style="{StaticResource lbl12_Regular_TextFaint}">
             <Label.FormattedText>
                 <FormattedString>
                     <Span Text="The slot is held for you while it's pending, so nobody else can take "/>

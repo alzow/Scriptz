@@ -14,7 +14,7 @@
         <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
             <Label Text="{Binding FlowTitle, Source={x:Reference Root}}" Style="{StaticResource lbl15_Bold_TextDark}"
                    IsVisible="{Binding IsFlowActive, Source={x:Reference Root}}"/>
-            <Label Text="{Binding BusinessName, Source={x:Reference Root}}" Style="{StaticResource lbl11_Bold_TextMuted}"
+            <Label Text="{Binding BusinessName, Source={x:Reference Root}}" Style="{StaticResource lbl12_Bold_TextMuted}"
                    IsVisible="{Binding BusinessName, Source={x:Reference Root}, Converter={StaticResource IsNotNullOrEmptyConverter}}"/>
         </VerticalStackLayout>
     </Grid>

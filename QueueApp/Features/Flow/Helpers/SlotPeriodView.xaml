@@ -9,8 +9,8 @@
     <VerticalStackLayout Spacing="0">
 
         <Grid ColumnDefinitions="*,Auto" Padding="20,20,20,9">
-            <Label Grid.Column="0" Text="{Binding Period.Title, Source={x:Reference Root}}" Style="{StaticResource lbl9_Mono_TextInk}"/>
-            <Label Grid.Column="1" Text="{Binding Period.CountText, Source={x:Reference Root}}" Style="{StaticResource lbl10_Mono_TextFaint}"/>
+            <Label Grid.Column="0" Text="{Binding Period.Title, Source={x:Reference Root}}" Style="{StaticResource lbl11_Mono_TextInk}"/>
+            <Label Grid.Column="1" Text="{Binding Period.CountText, Source={x:Reference Root}}" Style="{StaticResource lbl11_Mono_TextFaint}"/>
         </Grid>
         <CollectionView ItemsSource="{Binding Period.Slots, Source={x:Reference Root}}"
                         HeightRequest="{Binding Period.GridHeight, Source={x:Reference Root}}"
@@ -38,7 +38,7 @@
         <Border Margin="20,0" Padding="14" IsVisible="{Binding Period.IsEmpty, Source={x:Reference Root}}"
                 Style="{StaticResource brd12_Ghost}">
             <Label Text="No slot long enough left in the day" HorizontalOptions="Center"
-                   Style="{StaticResource lbl11_Regular_TextLight}"/>
+                   Style="{StaticResource lbl12_Regular_TextLight}"/>
         </Border>
 
     </VerticalStackLayout>

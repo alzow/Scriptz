@@ -29,7 +29,7 @@
 
                 <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
                     <Label Text="{Binding PoolCountText, Source={x:Reference Root}}" Style="{StaticResource lbl15_Bold_Purple}"/>
-                    <Label Text="{Binding PoolAgeText, Source={x:Reference Root}}" Style="{StaticResource lbl11_Regular_TextLight}"/>
+                    <Label Text="{Binding PoolAgeText, Source={x:Reference Root}}" Style="{StaticResource lbl12_Regular_TextLight}"/>
                 </VerticalStackLayout>
 
                 <tpl:ThemedIcon Grid.Column="2" Icon="{Binding PoolChevron, Source={x:Reference Root}}"
@@ -54,7 +54,7 @@
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="11">
                                 <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
                                     <Label Text="{Binding CustomerName}" Style="{StaticResource lbl14_Bold_TextDark}"/>
-                                    <Label Text="{Binding SubText}" Style="{StaticResource lbl11_Regular_TextLight}"/>
+                                    <Label Text="{Binding SubText}" Style="{StaticResource lbl12_Regular_TextLight}"/>
                                 </VerticalStackLayout>
                                 <Button Grid.Column="1" Text="Assign" HeightRequest="46"
                                         Style="{StaticResource btn14_Bold_PurpleOutline}"

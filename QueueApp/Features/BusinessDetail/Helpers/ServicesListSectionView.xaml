@@ -11,7 +11,7 @@
         <Grid ColumnDefinitions="*,Auto" Padding="20,22,20,10">
             <Label Grid.Column="0" Text="Services" Style="{StaticResource lbl15_Bold_TextDark}"/>
             <Label Grid.Column="1" Text="{Binding ServicesCountText, Source={x:Reference Root}}" VerticalOptions="Center"
-                   Style="{StaticResource lbl9_Mono_TextMuted}"/>
+                   Style="{StaticResource lbl11_Mono_TextMuted}"/>
         </Grid>
 
         <CollectionView ItemsSource="{Binding ServiceRows, Source={x:Reference Root}}"
