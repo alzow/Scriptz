@@ -569,6 +569,50 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    public async Task OpenActiveEntryAsync()
+    {
+        if (ActiveEntry is null) return;
+
+        try
+        {
+            var navParams = new NavigationParameters
+            {
+                [NavigationKeys.EntryId] = ActiveEntry.EntryId,
+                [NavigationKeys.OpenedFromTabs] = true,
+            };
+            await NavigationService.NavigateAsync(
+                $"NavigationPage/{NavigationPaths.VisitPage}", navParams,
+                modal: true, animated: false);
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    [RelayCommand]
+    public async Task OpenBookingAsync(UpcomingBookingResponse booking)
+    {
+        if (booking is null) return;
+
+        try
+        {
+            var navParams = new NavigationParameters
+            {
+                [NavigationKeys.BookingId] = booking.Id,
+                [NavigationKeys.OpenedFromTabs] = true,
+            };
+            await NavigationService.NavigateAsync(
+                $"NavigationPage/{NavigationPaths.VisitPage}", navParams,
+                modal: true, animated: false);
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    [RelayCommand]
     public async Task CancelBookingAsync(UpcomingBookingResponse booking)
     {
         booking.IsCancelling = true;

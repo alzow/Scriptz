@@ -8,7 +8,8 @@
              x:DataType="vm:VisitPageViewModel"
              Style="{StaticResource NavigationPageStyle}">
 
-    <Grid Style="{StaticResource grid_Page}" RowDefinitions="Auto,*">
+    <Grid Style="{StaticResource grid_Page}"
+            RowDefinitions="Auto,*,Auto">
 
         <helpers:VisitHeaderView Grid.Row="0"
                                  BusinessName="{Binding BusinessName}"
@@ -20,7 +21,8 @@
                                  CallCommand="{Binding CallShopCommand}"/>
 
         <ScrollView Grid.Row="1">
-            <VerticalStackLayout Spacing="14" Padding="16,4,16,28">
+            <VerticalStackLayout Spacing="14"
+                    Padding="16,4,16,16">
 
                 <Border Style="{StaticResource brd13_Success}"
                         IsVisible="{Binding ShowJustJoined}">
@@ -39,9 +41,6 @@
                                        RelativeText="{Binding HeroRelative}"
                                        DetailText="{Binding HeroDetail}"/>
 
-                <helpers:VisitQueueStripView IsVisible="{Binding ShowTicketStrip}"
-                                             Dots="{Binding QueueDots}"
-                                             PositionText="{Binding PositionText}"/>
 
                 <helpers:VisitFactsSectionView IsVisible="{Binding HasFacts}"
                                                SectionTitle="{Binding FactsTitle}"
@@ -60,20 +59,6 @@
                                             NoteText="{Binding ShopNoteText}"
                                             IsFromShop="True"/>
 
-                <helpers:VisitFooterView IsVisible="{Binding HasRecord}"
-                                         PrimaryActionText="{Binding PrimaryActionText}"
-                                         PrimaryActionCommand="{Binding PrimaryActionCommand}"
-                                         OptionsCommand="{Binding OpenOptionsCommand}"
-                                         ShowPaymentLine="{Binding ShowPaymentLine}"/>
-
-                <Border Style="{StaticResource brd13_Ghost}" Padding="18,26"
-                        IsVisible="{Binding ShowMissing}">
-                    <Label Text="That visit isn't there any more."
-                           Style="{StaticResource lbl12_Regular_TextMuted}"
-                           HorizontalTextAlignment="Center"
-                           HorizontalOptions="Center"/>
-                </Border>
-
             </VerticalStackLayout>
         </ScrollView>
 
@@ -81,7 +66,27 @@
                            IsRunning="{Binding IsLoading}"
                            IsVisible="{Binding IsLoading}"
                            Style="{StaticResource ai_Accent}"
-                           HorizontalOptions="Center" VerticalOptions="Center"/>
+                           HorizontalOptions="Center"
+                VerticalOptions="Center"/>
+
+        <helpers:VisitFooterView Grid.Row="2"
+                                 Margin="16"
+                                 IsVisible="{Binding HasRecord}"
+                                 PrimaryActionText="{Binding PrimaryActionText}"
+                                 PrimaryActionCommand="{Binding PrimaryActionCommand}"
+                                 OptionsCommand="{Binding OpenOptionsCommand}"
+                                 ShowPaymentLine="{Binding ShowPaymentLine}"/>
+
+        <Border Grid.Row="2"
+                Style="{StaticResource brd13_Ghost}"
+                Padding="18,26"
+                Margin="16,0,16,16"
+                IsVisible="{Binding ShowMissing}">
+            <Label Text="That visit isn't there any more."
+                   Style="{StaticResource lbl12_Regular_TextMuted}"
+                   HorizontalTextAlignment="Center"
+                   HorizontalOptions="Center"/>
+        </Border>
 
     </Grid>
 

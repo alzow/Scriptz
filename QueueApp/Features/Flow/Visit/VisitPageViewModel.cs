@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Maui.ApplicationModel.Communication;
 using Microsoft.Maui.ApplicationModel.DataTransfer;
+using MPowerKit;
 using MPowerKit.Navigation;
 using QueueApp.Constants;
 using QueueApp.Features.Flow.Visit.Models;
@@ -26,7 +27,6 @@ public partial class VisitPageViewModel : BaseViewModel
 {
     public const string QueueTable = "queue_entries";
     public const string BookingsTable = "bookings";
-    public const int MaximumDotsAhead = 8;
     public const int NoticeWindowHours = 2;
     private const int TickSeconds = 30;
 
@@ -61,10 +61,6 @@ public partial class VisitPageViewModel : BaseViewModel
     public string HeroTime { get; set; } = string.Empty;
     public string HeroRelative { get; set; } = string.Empty;
     public string HeroDetail { get; set; } = string.Empty;
-
-    public bool ShowTicketStrip => IsLive && Record?.IsQueue == true && Record.Position > 0;
-    public ObservableCollection<VisitQueueDot> QueueDots { get; } = new();
-    public string PositionText { get; set; } = string.Empty;
 
     public string FactsTitle => IsLive ? "YOUR PLACE" : "WHAT HAPPENED";
     public ObservableCollection<VisitFactRow> Facts { get; } = new();
@@ -297,7 +293,6 @@ public partial class VisitPageViewModel : BaseViewModel
         {
             BuildAddressLine();
             BuildHero();
-            BuildQueueDots();
             BuildFacts();
             BuildTimeline();
             BuildReasonBlock();
@@ -327,7 +322,6 @@ public partial class VisitPageViewModel : BaseViewModel
             OnPropertyChanged(nameof(HasPhone));
             OnPropertyChanged(nameof(ShowJustJoined));
             OnPropertyChanged(nameof(ShowHero));
-            OnPropertyChanged(nameof(ShowTicketStrip));
             OnPropertyChanged(nameof(FactsTitle));
             OnPropertyChanged(nameof(HasFacts));
             OnPropertyChanged(nameof(HasTimeline));
@@ -460,28 +454,6 @@ public partial class VisitPageViewModel : BaseViewModel
             HeroDetail = travel is { } minutes
                 ? $"{minutes} min to get there · with {record.OperatorName}"
                 : $"with {record.OperatorName}";
-        }
-        catch (Exception ex)
-        {
-            _ = HandleExceptionAsync(ex);
-        }
-    }
-
-    public void BuildQueueDots()
-    {
-        try
-        {
-            QueueDots.Clear();
-
-            if (Record is not { IsLive: true, IsQueue: true } record || record.Position <= 0)
-                return;
-
-            var ahead = Math.Min(record.Position - 1, MaximumDotsAhead);
-            for (var i = 0; i < ahead; i++)
-                QueueDots.Add(new VisitQueueDot { IsYou = false });
-
-            QueueDots.Add(new VisitQueueDot { IsYou = true });
-            PositionText = OrdinalOf(record.Position);
         }
         catch (Exception ex)
         {

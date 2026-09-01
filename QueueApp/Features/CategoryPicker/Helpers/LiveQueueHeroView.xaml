@@ -7,6 +7,9 @@
              x:Class="QueueApp.Features.CategoryPicker.Helpers.LiveQueueHeroView">
 
     <Border Style="{StaticResource brd18_OrangePale}" Padding="0">
+        <Border.GestureRecognizers>
+            <TapGestureRecognizer Command="{Binding OpenCommand, Source={x:Reference Root}}"/>
+        </Border.GestureRecognizers>
         <VerticalStackLayout Spacing="0">
 
             <!-- Kicker row -->

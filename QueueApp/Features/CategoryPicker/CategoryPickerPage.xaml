@@ -43,6 +43,7 @@
                     <helpers:LiveQueueHeroView Margin="0,16,0,0"
                                                IsVisible="{Binding HasActiveEntry}"
                                                ActiveEntry="{Binding ActiveEntry}"
+                                               OpenCommand="{Binding OpenActiveEntryCommand}"
                                                DirectionsCommand="{Binding OpenDirectionsCommand}"
                                                LeaveCommand="{Binding LeaveQueueCommand}"
                                                IsLeaving="{Binding IsLeavingQueue}"/>
@@ -58,6 +59,7 @@
                     <helpers:UpcomingBookingsListView
                         IsVisible="{Binding HasUpcomingBookings}"
                         Items="{Binding UpcomingBookings}"
+                        OpenCommand="{Binding OpenBookingCommand}"
                         CancelCommand="{Binding CancelBookingCommand}"/>
 
                     <!-- Categories -->
