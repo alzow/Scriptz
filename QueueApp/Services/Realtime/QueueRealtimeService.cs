@@ -63,6 +63,24 @@ public class QueueRealtimeService : IQueueRealtimeService
     public QueueRealtimeService(IAuthService authService)
     {
         _authService = authService;
+
+        // The socket outlives the token it was opened with, and a channel stays authorised against
+        // whatever token the client last held — so a renewal that happens while a feed is up has to
+        // be pushed down to it, or RLS-filtered rows quietly stop arriving until the next subscribe.
+        _authService.SessionRefreshed += OnSessionRefreshed;
+    }
+
+    private void OnSessionRefreshed(object? sender, string accessToken)
+    {
+        try
+        {
+            _client?.SetAuth(accessToken);
+            Debug.WriteLine("[Realtime] pushed renewed token to the live socket");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[Realtime] could not push renewed token: {ex.Message}");
+        }
     }
 
     public async Task SubscribeAsync(object owner, string filterColumn, string filterValue, Func<Task> onChange, string table = "queue_entries")

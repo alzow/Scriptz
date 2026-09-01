@@ -81,6 +81,9 @@ internal static class NavigationStartup
 
     private static void RegisterApiServices(IServiceCollection services)
     {
+        // Registered before IAuthService because everything that needs a token — the API pipeline
+        // and IAuthService alike — goes through it, and it is the only thing that renews one.
+        services.AddSingleton<ISessionRefreshService, SessionRefreshService>();
         services.AddSingleton<IAuthService, AuthService>();
         services.ConfigureRefitApi();
 

@@ -15,6 +15,7 @@ public static class RefitConfiguration
     public static IServiceCollection ConfigureRefitApi(this IServiceCollection services)
     {
         services.AddTransient<SupabaseAuthHeaderHandler>();
+        services.AddTransient<SupabaseAnonKeyHandler>();
         services.AddTransient<HttpLoggingHandler>();
 
         services.AddApiClient<IQueueApi>(SupabaseConfig.RestUrl);
@@ -25,18 +26,27 @@ public static class RefitConfiguration
         services.AddApiClient<IServiceOfferingsApi>(SupabaseConfig.RestUrl);
         services.AddApiClient<IBookingApi>(SupabaseConfig.RestUrl);
 
+        // The one client that must not go through SupabaseAuthHeaderHandler: that handler renews the
+        // token by calling this, so sending this through it would be a cycle. See ITokenRefreshApi.
+        services.AddApiClient<ITokenRefreshApi, SupabaseAnonKeyHandler>(SupabaseConfig.AuthUrl);
+
         return services;
     }
+
+    private static void AddApiClient<T>(this IServiceCollection services, string baseUrl)
+        where T : class
+        => services.AddApiClient<T, SupabaseAuthHeaderHandler>(baseUrl);
 
     // HttpLoggingHandler reads every request and response body into a string and writes the lot to
     // logcat, on the calling thread, before the deserialiser ever sees it. That is worth paying while
     // debugging and worth nothing in a release build, so it is only in the pipeline for one of them.
-    private static void AddApiClient<T>(this IServiceCollection services, string baseUrl)
-        where T : class
+    private static void AddApiClient<TApi, THandler>(this IServiceCollection services, string baseUrl)
+        where TApi : class
+        where THandler : DelegatingHandler
     {
-        var builder = services.AddRefitClient<T>()
+        var builder = services.AddRefitClient<TApi>()
             .ConfigureHttpClient(client => client.BaseAddress = new Uri(baseUrl))
-            .AddHttpMessageHandler<SupabaseAuthHeaderHandler>();
+            .AddHttpMessageHandler<THandler>();
 
 #if DEBUG
         builder.AddHttpMessageHandler<HttpLoggingHandler>();

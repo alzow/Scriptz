@@ -4,6 +4,14 @@ namespace QueueApp.Services.Auth;
 
 public interface IAuthService
 {
+    // The session could not be renewed and has been cleared — the user has to sign in again.
+    event EventHandler? SessionExpired;
+
+    // The access token was renewed mid-session; carries the new one for anything holding a
+    // connection that was authorised with the old token.
+    event EventHandler<string>? SessionRefreshed;
+
+    // Renews the token first if it has expired or is about to.
     Task<string?> GetAccessTokenAsync();
     Task<string?> GetUserIdAsync();
     Task<string?> GetUserEmailAsync();
