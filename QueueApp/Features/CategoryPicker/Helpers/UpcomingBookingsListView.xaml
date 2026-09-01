@@ -50,15 +50,6 @@
                             <Border Style="{StaticResource brd20_StatusPill_Selectable}">
                                 <Label Text="{Binding StatusLabel}" Style="{StaticResource lbl11_Bold_BookingPill}"/>
                             </Border>
-
-                            <controls:AlzowLoadingButton
-                                    Text="Cancel"
-                                    LoadingText="Cancelling…"
-                                    IsVisible="{Binding IsCancellable}"
-                                    Command="{Binding CancelCommand, Source={x:Reference Root}}"
-                                    CommandParameter="{Binding .}"
-                                    IsLoading="{Binding IsCancelling}"
-                                    ButtonStyle="{StaticResource btn12_Bold_RowAction}"/>
                         </VerticalStackLayout>
                     </Grid>
                 </Border>

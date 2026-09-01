@@ -33,7 +33,7 @@
                             CommandParameter="{Binding .}"/>
                     </VerticalStackLayout.GestureRecognizers>
                     <Image Source="{Binding IconSource}"
-                           WidthRequest="48" HeightRequest="48"
+                           WidthRequest="52" HeightRequest="52"
                            HorizontalOptions="Center" VerticalOptions="Center"
                            AnchorX="0.5" AnchorY="0.5">
                         <Image.Triggers>
