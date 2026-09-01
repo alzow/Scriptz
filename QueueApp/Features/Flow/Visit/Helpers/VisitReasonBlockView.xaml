@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Name="Root"
+             x:Class="QueueApp.Features.Flow.Visit.Helpers.VisitReasonBlockView">
+
+    <Border Style="{StaticResource brd12_Danger}" Padding="14,13">
+        <VerticalStackLayout Spacing="7">
+            <Label Text="{Binding ReasonTitle, Source={x:Reference Root}}"
+                   Style="{StaticResource lbl11_Mono_Danger}"/>
+
+            <Label Text="{Binding ReasonQuote, Source={x:Reference Root}}"
+                   Style="{StaticResource lbl15_Bold_DangerText}"
+                   IsVisible="{Binding ReasonQuote, Source={x:Reference Root}, Converter={StaticResource IsNotNullOrEmptyConverter}}"/>
+
+            <Label Text="{Binding ReasonBody, Source={x:Reference Root}}"
+                   Style="{StaticResource lbl13_Regular_Danger}"/>
+        </VerticalStackLayout>
+    </Border>
+
+</ContentView>

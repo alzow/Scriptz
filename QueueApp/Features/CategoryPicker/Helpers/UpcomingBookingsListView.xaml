@@ -10,6 +10,10 @@
         <BindableLayout.ItemTemplate>
             <DataTemplate x:DataType="bookingModels:UpcomingBookingResponse">
                 <Border Style="{StaticResource brd16_White}" Padding="14" Margin="0,5">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenCommand, Source={x:Reference Root}}"
+                                               CommandParameter="{Binding .}"/>
+                    </Border.GestureRecognizers>
 
                     <!-- Date rail, then the booking, then what you can do about it. The rail is Auto
                          so a two-digit day sets its own width instead of being squeezed. -->
@@ -46,15 +50,6 @@
                             <Border Style="{StaticResource brd20_StatusPill_Selectable}">
                                 <Label Text="{Binding StatusLabel}" Style="{StaticResource lbl11_Bold_BookingPill}"/>
                             </Border>
-
-                            <controls:AlzowLoadingButton
-                                    Text="Cancel"
-                                    LoadingText="Cancelling…"
-                                    IsVisible="{Binding IsCancellable}"
-                                    Command="{Binding BindingContext.CancelCommand, Source={x:Reference Root}}"
-                                    CommandParameter="{Binding .}"
-                                    IsLoading="{Binding IsCancelling}"
-                                    ButtonStyle="{StaticResource btn12_Bold_RowAction}"/>
                         </VerticalStackLayout>
                     </Grid>
                 </Border>

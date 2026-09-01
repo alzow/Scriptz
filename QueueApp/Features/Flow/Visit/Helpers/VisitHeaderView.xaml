@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
+             xmlns:topbar="clr-namespace:QueueApp.Shared.Templates.TopBar"
+             x:Name="Root"
+             x:Class="QueueApp.Features.Flow.Visit.Helpers.VisitHeaderView">
+
+    <VerticalStackLayout Spacing="0">
+
+        <Grid ColumnDefinitions="Auto,*,Auto" Padding="20,14,20,6">
+
+            <topbar:BackButtonView Grid.Column="0"
+                                   Command="{Binding BackCommand, Source={x:Reference Root}}"/>
+
+            <Grid Grid.Column="2"
+                  WidthRequest="44" HeightRequest="44"
+                  IsVisible="{Binding HasPhone, Source={x:Reference Root}}">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding CallCommand, Source={x:Reference Root}}"/>
+                </Grid.GestureRecognizers>
+                <Border WidthRequest="36" HeightRequest="36" Padding="0"
+                        HorizontalOptions="Center" VerticalOptions="Center"
+                        Style="{StaticResource brd16_Surface}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="11"/>
+                    </Border.StrokeShape>
+                    <tpl:ThemedIcon Icon="ic_phone" WidthRequest="18" HeightRequest="18"
+                                    HorizontalOptions="Center" VerticalOptions="Center"/>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Padding="20,4,20,14">
+            <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
+                <Label Text="{Binding BusinessName, Source={x:Reference Root}}"
+                       Style="{StaticResource lbl19_Bold_TextDark}"
+                       LineBreakMode="TailTruncation"/>
+                <Label Text="{Binding AddressLine, Source={x:Reference Root}}"
+                       Style="{StaticResource lbl12_Regular_TextMuted}"
+                       IsVisible="{Binding AddressLine, Source={x:Reference Root}, Converter={StaticResource IsNotNullOrEmptyConverter}}"
+                       LineBreakMode="TailTruncation"/>
+            </VerticalStackLayout>
+
+            <Border Grid.Column="1"
+                    VerticalOptions="Center"
+                    Style="{StaticResource brd20_StatusPill}"
+                    IsVisible="{Binding StatusText, Source={x:Reference Root}, Converter={StaticResource IsNotNullOrEmptyConverter}}">
+                <Border.Triggers>
+                    <DataTrigger TargetType="Border"
+                                 Binding="{Binding StatusTone, Source={x:Reference Root}}"
+                                 Value="Settled">
+                        <Setter Property="Style" Value="{StaticResource brd20_StatusPill_Neutral}"/>
+                    </DataTrigger>
+                    <DataTrigger TargetType="Border"
+                                 Binding="{Binding StatusTone, Source={x:Reference Root}}"
+                                 Value="Bad">
+                        <Setter Property="Style" Value="{StaticResource brd20_StatusPill_Danger}"/>
+                    </DataTrigger>
+                </Border.Triggers>
+                <Label Text="{Binding StatusText, Source={x:Reference Root}}"
+                       Style="{StaticResource lbl11_Mono_VisitPill}">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding StatusTone, Source={x:Reference Root}}"
+                                     Value="Settled">
+                            <Setter Property="Style" Value="{StaticResource lbl11_Mono_VisitPill_Settled}"/>
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding StatusTone, Source={x:Reference Root}}"
+                                     Value="Bad">
+                            <Setter Property="Style" Value="{StaticResource lbl11_Mono_VisitPill_Bad}"/>
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+            </Border>
+        </Grid>
+    </VerticalStackLayout>
+
+</ContentView>

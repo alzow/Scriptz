@@ -110,6 +110,11 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
     private readonly Dictionary<DateTime, List<SlotResponse>> _slotCache = new();
     private Guid _businessId;
 
+    // What the submit just created. The visit page loads from an id rather than a handed-over
+    // model, so the flow has to keep the one it was given back.
+    private Guid _submittedRecordId;
+    private bool _submittedIsBooking;
+
     public Guid BusinessId => _businessId;
     private BusinessHours _hours = BusinessHours.Unknown;
     private CategoryLabelSet _labels = CategoryLabels.Resolve(null);
@@ -321,10 +326,24 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
     // being issued from a view model whose page had already gone, which is why the confirmation
     // never appeared. The committed flow stays on the stack below, and back from the confirmation
     // cannot walk into it because both routes out of that page dismiss the whole modal.
-    public async Task GoToConfirmationAsync() =>
+    public async Task GoToVisitAsync()
+    {
+        if (_submittedRecordId == Guid.Empty)
+        {
+            await ReturnToTabsAsync();
+            return;
+        }
+
+        var key = _submittedIsBooking ? NavigationKeys.BookingId : NavigationKeys.EntryId;
+
         await NavigationService.NavigateAsync(
-            NavigationPaths.ConfirmationPage,
-            new NavigationParameters { { NavigationKeys.BusinessId, BusinessId } });
+            NavigationPaths.VisitPage,
+            new NavigationParameters
+            {
+                { key, _submittedRecordId },
+                { NavigationKeys.JustJoined, true },
+            });
+    }
 
     // The tabs are still standing behind this modal, so leaving is a dismissal and selectTab is a
     // message to the tabbed page rather than a whole shell rebuilt around the tab we want.
@@ -1189,12 +1208,15 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
 
             var customerName = await _profileService.GetMyDisplayNameAsync(Guid.Parse(userId));
 
-            await _queueService.JoinQueueAsync(
+            var entry = await _queueService.JoinQueueAsync(
                 _businessId,
                 SelectedOperatorChoice?.OperatorId,
                 Guid.Parse(userId),
                 customerName,
                 SelectedServiceRow.Service.Id);
+
+            _submittedRecordId = entry.Id;
+            _submittedIsBooking = false;
 
             ResetFlowState();
             await OnSubmittedAsync();
@@ -1274,6 +1296,9 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
             }
 
             await StampBookingCustomerNameAsync(booking.Id, Guid.Parse(userId));
+
+            _submittedRecordId = booking.Id;
+            _submittedIsBooking = true;
 
             ResetFlowState();
             await OnSubmittedAsync();

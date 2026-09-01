@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:QueueApp.Features.Flow.Visit.Models"
+             x:Name="Root"
+             x:Class="QueueApp.Features.Flow.Visit.Helpers.VisitFactsSectionView">
+
+    <VerticalStackLayout Spacing="8">
+        <Label Text="{Binding SectionTitle, Source={x:Reference Root}}"
+               Style="{StaticResource lbl11_Mono_TextMuted}"/>
+
+        <Border Style="{StaticResource brd13_Raised}" Padding="14,4">
+            <VerticalStackLayout Spacing="0"
+                                 BindableLayout.ItemsSource="{Binding Facts, Source={x:Reference Root}}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="models:VisitFactRow">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="0,10">
+                            <Label Grid.Column="0"
+                                   Text="{Binding Label}"
+                                   Style="{StaticResource lbl13_Regular_TextLight}"
+                                   VerticalOptions="Center"/>
+                            <Label Grid.Column="1"
+                                   Text="{Binding Value}"
+                                   Style="{StaticResource lbl13_Mono_Fact}"
+                                   HorizontalTextAlignment="End"
+                                   VerticalOptions="Center"/>
+                        </Grid>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+        </Border>
+    </VerticalStackLayout>
+
+</ContentView>

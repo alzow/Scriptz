@@ -49,7 +49,7 @@
                                WidthRequest="18" HeightRequest="18" VerticalOptions="Center"/>
                     </Grid>
                     <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding OpenConfirmationCommand}"/>
+                        <TapGestureRecognizer Command="{Binding OpenVisitCommand}"/>
                     </Border.GestureRecognizers>
                 </Border>
 

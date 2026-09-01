@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Name="Root"
+             x:Class="QueueApp.Features.Flow.Visit.Helpers.VisitFooterView">
+
+    <VerticalStackLayout Spacing="10">
+        <Label Text="Queue doesn't handle payment — that was settled at the shop."
+               Style="{StaticResource lbl12_Regular_TextMuted}"
+               HorizontalTextAlignment="Center"
+               IsVisible="{Binding ShowPaymentLine, Source={x:Reference Root}}"/>
+
+        <Button Text="{Binding PrimaryActionText, Source={x:Reference Root}}"
+                Style="{StaticResource PrimaryButtonStyle}"
+                HeightRequest="56"
+                Command="{Binding PrimaryActionCommand, Source={x:Reference Root}}"
+                IsVisible="{Binding PrimaryActionText, Source={x:Reference Root}, Converter={StaticResource IsNotNullOrEmptyConverter}}"/>
+
+        <Button Text="Options"
+                Style="{StaticResource btn15_Regular_SheetRow}"
+                HeightRequest="56"
+                Command="{Binding OptionsCommand, Source={x:Reference Root}}"/>
+    </VerticalStackLayout>
+
+</ContentView>

@@ -40,7 +40,7 @@ public partial class QueueFlowPageViewModel : FlowPageViewModelBase
     {
         try
         {
-            await GoToConfirmationAsync();
+            await GoToVisitAsync();
         }
         catch (Exception ex)
         {

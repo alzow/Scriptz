@@ -1,6 +1,8 @@
 using System.Globalization;
 using System.Text.Json.Serialization;
+using QueueApp.Framework.Extensions;
 using QueueApp.Services.Api.Queue.Models;
+using QueueApp.Shared.Domain;
 
 namespace QueueApp.Services.Api.Booking.Models;
 
@@ -18,6 +20,7 @@ public class UpcomingBookingResponse
     [JsonPropertyName("starts_at")] public DateTimeOffset StartsAt { get; set; }
     [JsonPropertyName("ends_at")] public DateTimeOffset EndsAt { get; set; }
     [JsonPropertyName("status")] public string Status { get; set; } = "";
+    [JsonPropertyName("created_at")] public DateTimeOffset CreatedAt { get; set; }
     [JsonPropertyName("business")] public UpcomingBookingBusinessRef? Business { get; set; }
     [JsonPropertyName("operator")] public VisitOperatorRef? Operator { get; set; }
     [JsonPropertyName("service")] public VisitServiceRef? Service { get; set; }
@@ -38,6 +41,10 @@ public class UpcomingBookingResponse
     // Why the business called it off, if they gave a reason. Without it a cancellation is just a
     // booking that vanished.
     [JsonIgnore] public string? CancellationReason => Details?.CancellationReason;
+    [JsonIgnore] public string? CancelledBy => Details?.CancelledBy;
+    [JsonIgnore] public DateTimeOffset? CancelledAt => Details?.CancelledAt;
+    [JsonIgnore] public bool WasCancelledByCustomer => CancelledBy == CancelledByValues.Customer;
+    [JsonIgnore] public string PriceText => MoneyFormat.Format(Service?.PriceCents);
     [JsonIgnore] public bool HasCancellationReason => !string.IsNullOrWhiteSpace(CancellationReason);
     [JsonIgnore] public string CancellationReasonText => $"Cancelled — {CancellationReason}";
 

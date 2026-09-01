@@ -41,7 +41,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     private List<ServiceResponse> _services = new();
     private List<OperatorResponse> _selectableOperators = new();
     private int _servingCount;
-    private bool _hasActiveBooking;
+    private MyBookingSummaryResponse? _activeBooking;
     private string _nextFreeSlotText = "—";
     private string _slotsLeftTodayText = "—";
     public BusinessResponse? Business { get; set; }
@@ -51,8 +51,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
 
     // The three top-level states are mutually exclusive: exactly one of these renders at a time.
     // A live ticket or a booking awaiting confirmation is a strip on the landing that taps
-    // through to ConfirmationPage, which owns the detail.
-    public bool HasSomethingActive => IsInQueue || _hasActiveBooking;
+    // through to VisitPage, which owns the detail.
+    public bool HasSomethingActive => IsInQueue || _activeBooking is not null;
     public string ActiveStripText => IsInQueue ? "You're in the queue" : "Your booking is with the shop";
 
     // Landing — header
@@ -331,14 +331,25 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         }
     }
 
+    // The strip on the landing taps through to the visit page, which owns the detail. It opens on
+    // the row itself, so whichever of the two is live decides which id is handed over.
     [RelayCommand]
-    public async Task OpenConfirmationAsync()
+    public async Task OpenVisitAsync()
     {
         try
         {
-            await NavigationService.NavigateAsync(
-                NavigationPaths.ConfirmationPage,
-                new NavigationParameters { { NavigationKeys.BusinessId, _businessId } });
+            if (MyStatus is { } status)
+            {
+                await NavigationService.NavigateAsync(
+                    NavigationPaths.VisitPage,
+                    new NavigationParameters { { NavigationKeys.EntryId, status.EntryId } });
+                return;
+            }
+
+            if (_activeBooking is { } booking)
+                await NavigationService.NavigateAsync(
+                    NavigationPaths.VisitPage,
+                    new NavigationParameters { { NavigationKeys.BookingId, booking.Id } });
         }
         catch (Exception ex)
         {
@@ -457,10 +468,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             if (here is null)
                 return;
 
-            var km = HaversineKm(here.Latitude, here.Longitude, lat, lon);
-            DistanceText = km < 1
-                ? $"{km * 1000:0} m away"
-                : $"{km:0.#} km away";
+            var km = GeoDistance.Kilometres(here.Latitude, here.Longitude, lat, lon);
+            DistanceText = $"{GeoDistance.Describe(km)} away";
         }
         catch (Exception ex)
         {
@@ -560,8 +569,10 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 return;
 
             var bookings = await _bookingService.GetMyBookingsAsync(_businessId, Guid.Parse(userId));
-            _hasActiveBooking = bookings
-                .Any(b => b.IsCancellable && b.EndsAt > DateTimeOffset.UtcNow);
+            _activeBooking = bookings
+                .Where(b => b.IsCancellable && b.EndsAt > DateTimeOffset.UtcNow)
+                .OrderBy(b => b.StartsAt)
+                .FirstOrDefault();
 
             OnPropertyChanged(nameof(HasSomethingActive));
             OnPropertyChanged(nameof(ActiveStripText));
@@ -734,24 +745,5 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         _ when value % 10 == 3 => $"{value}rd",
         _ => $"{value}th",
     };
-    // Static, so there is no HandleExceptionAsync to reach. A distance of 0 reads as "no distance
-    // known" to the one caller, which is the honest answer if the maths ever fails.
-    public static double HaversineKm(double lat1, double lon1, double lat2, double lon2)
-    {
-        try
-        {
-            const double earthRadiusKm = 6371;
-            var dLat = (lat2 - lat1) * Math.PI / 180;
-            var dLon = (lon2 - lon1) * Math.PI / 180;
-            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2)
-                    + Math.Cos(lat1 * Math.PI / 180) * Math.Cos(lat2 * Math.PI / 180)
-                    * Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
-            return earthRadiusKm * 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-        }
-        catch (Exception)
-        {
-            return 0;
-        }
-    }
     #endregion
 }

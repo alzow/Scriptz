@@ -345,6 +345,12 @@ public class StubBookingService : IBookingService
         return Task.FromResult(upcoming);
     }
 
+    public Task<UpcomingBookingResponse?> GetBookingAsync(Guid bookingId)
+        => Task.FromResult<UpcomingBookingResponse?>(null);
+
+    public Task<AgendaBookingResponse?> MarkCancelledByCustomerAsync(Guid bookingId, BookingDetails? existing)
+        => Task.FromResult<AgendaBookingResponse?>(null);
+
     public Task<List<UpcomingBookingResponse>> GetMyBookingHistoryAsync(Guid customerId)
     {
         var history = _bookings

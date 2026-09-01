@@ -33,7 +33,7 @@ public static class NavigationPaths
     public const string BusinessDetailPage   = "BusinessDetailPage";
     public const string BookingFlowPage      = "BookingFlowPage";
     public const string QueueFlowPage        = "QueueFlowPage";
-    public const string ConfirmationPage     = "ConfirmationPage";
+    public const string VisitPage            = "VisitPage";
 
     // ── Profile (customer-facing) ─────────────────────────────────────────────
     public const string ProfileNotificationsPage  = "ProfileNotificationsPage";

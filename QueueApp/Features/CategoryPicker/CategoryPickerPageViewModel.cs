@@ -420,7 +420,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
             var businessesTask = _businessService.GetBrowseBusinessesAsync(
                 SelectedCategory?.Key, customerLatitude: _customerLatitude, customerLongitude: _customerLongitude);
             var bookingsTask = isSignedIn ? _bookingService.GetMyUpcomingBookingsAsync(_customerId) : null;
-            var visitsTask = isSignedIn ? _queueService.GetMyVisitsAsync(_customerId) : null;
+            var visitsTask = isSignedIn ? _queueService.GetMyEntriesAsync(_customerId) : null;
 
             _allBusinesses = await businessesTask;
             ApplyBusinessFilter();
@@ -456,21 +456,23 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         }
     }
 
-    public static IEnumerable<FrequentBusinessItem> BuildFrequentBusinesses(List<VisitResponse> visits) =>
+    // Finished entries only: somewhere the customer joined and then left is not somewhere they go
+    // often, and done_at is the one stamp that says a visit actually happened.
+    public static IEnumerable<FrequentBusinessItem> BuildFrequentBusinesses(List<MyQueueEntryResponse> visits) =>
         visits
-            .Where(v => v.BusinessId != Guid.Empty)
+            .Where(v => v.BusinessId != Guid.Empty && v.DoneAt is not null)
             .GroupBy(v => v.BusinessId)
             .Select(g =>
             {
-                var latest = g.OrderByDescending(v => v.VisitedAt).First();
+                var latest = g.OrderByDescending(v => v.DoneAt).First();
                 return new FrequentBusinessItem
                 {
                     BusinessId = g.Key,
                     BusinessName = latest.BusinessName,
                     VisitCount = g.Count(),
-                    LastVisitedAt = latest.VisitedAt,
+                    LastVisitedAt = latest.DoneAt!.Value,
                     LastOperatorName = latest.OperatorName,
-                    LastServiceLabel = latest.ServiceLabel,
+                    LastServiceLabel = latest.ServiceName,
                 };
             })
             .OrderByDescending(f => f.VisitCount)
@@ -558,6 +560,50 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
             // back is a dismissal rather than a shell rebuilt from scratch.
             await NavigationService.NavigateAsync(
                 $"NavigationPage/{NavigationPaths.BusinessDetailPage}", navParams,
+                modal: true, animated: false);
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    [RelayCommand]
+    public async Task OpenActiveEntryAsync()
+    {
+        if (ActiveEntry is null) return;
+
+        try
+        {
+            var navParams = new NavigationParameters
+            {
+                [NavigationKeys.EntryId] = ActiveEntry.EntryId,
+                [NavigationKeys.OpenedFromTabs] = true,
+            };
+            await NavigationService.NavigateAsync(
+                $"NavigationPage/{NavigationPaths.VisitPage}", navParams,
+                modal: true, animated: false);
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    [RelayCommand]
+    public async Task OpenBookingAsync(UpcomingBookingResponse booking)
+    {
+        if (booking is null) return;
+
+        try
+        {
+            var navParams = new NavigationParameters
+            {
+                [NavigationKeys.BookingId] = booking.Id,
+                [NavigationKeys.OpenedFromTabs] = true,
+            };
+            await NavigationService.NavigateAsync(
+                $"NavigationPage/{NavigationPaths.VisitPage}", navParams,
                 modal: true, animated: false);
         }
         catch (Exception ex)

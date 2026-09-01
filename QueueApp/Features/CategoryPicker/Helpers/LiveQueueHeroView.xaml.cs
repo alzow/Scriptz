@@ -11,6 +11,8 @@ public partial class LiveQueueHeroView : ContentView
         default(MyActiveQueueEntryResponse), propertyChanged: OnActiveEntryChanged);
     public static readonly BindableProperty DirectionsCommandProperty = BindableProperty.Create(
         nameof(DirectionsCommand), typeof(ICommand), typeof(LiveQueueHeroView), default(ICommand));
+    public static readonly BindableProperty OpenCommandProperty = BindableProperty.Create(
+        nameof(OpenCommand), typeof(ICommand), typeof(LiveQueueHeroView), default(ICommand));
     public static readonly BindableProperty LeaveCommandProperty = BindableProperty.Create(
         nameof(LeaveCommand), typeof(ICommand), typeof(LiveQueueHeroView), default(ICommand));
     public static readonly BindableProperty IsLeavingProperty = BindableProperty.Create(
@@ -26,6 +28,12 @@ public partial class LiveQueueHeroView : ContentView
     {
         get => (ICommand)GetValue(DirectionsCommandProperty);
         set => SetValue(DirectionsCommandProperty, value);
+    }
+
+    public ICommand OpenCommand
+    {
+        get => (ICommand)GetValue(OpenCommandProperty);
+        set => SetValue(OpenCommandProperty, value);
     }
 
     public ICommand LeaveCommand

@@ -20,29 +20,6 @@ namespace QueueApp.Features.History;
 
 public partial class HistoryPageViewModel : BaseViewModel
 {
-    private readonly IMessenger _messenger;
-    private readonly IQueueService _queueService;
-    private readonly IBookingService _bookingService;
-    private readonly IAuthService _authService;
-
-    private List<VisitResponse> _visits = new();
-    private List<UpcomingBookingResponse> _bookings = new();
-
-    public HistoryPageViewModel(
-        INavigationService navigationService,
-        ISecureStorageService secureStorageService,
-        IMessenger messenger,
-        IQueueService queueService,
-        IBookingService bookingService,
-        IAuthService authService)
-        : base(navigationService, secureStorageService)
-    {
-        _messenger = messenger;
-        _queueService = queueService;
-        _bookingService = bookingService;
-        _authService = authService;
-    }
-
     public ObservableCollection<HistoryGroup> Groups { get; } = new();
     public bool IsLoading { get; set; }
     public bool IsEmpty => Groups.Count == 0 && !IsLoading;
@@ -66,24 +43,60 @@ public partial class HistoryPageViewModel : BaseViewModel
         _ => "Once you've joined a queue or made a booking, it shows up here.",
     };
 
+    private List<MyQueueEntryResponse> _visits = new();
+    private List<UpcomingBookingResponse> _bookings = new();
     private bool _isLoaded;
     private readonly SemaphoreSlim _refreshLock = new(1, 1);
 
+    private readonly IMessenger _messenger;
+    private readonly IQueueService _queueService;
+    private readonly IBookingService _bookingService;
+    private readonly IAuthService _authService;
+
+    public HistoryPageViewModel(
+        INavigationService navigationService,
+        ISecureStorageService secureStorageService,
+        IMessenger messenger,
+        IQueueService queueService,
+        IBookingService bookingService,
+        IAuthService authService)
+        : base(navigationService, secureStorageService)
+    {
+        _messenger = messenger;
+        _queueService = queueService;
+        _bookingService = bookingService;
+        _authService = authService;
+    }
+
     public override async Task OnAppearingAsync()
     {
-        await base.OnAppearingAsync();
+        try
+        {
+            await base.OnAppearingAsync();
 
-        if (!_isLoaded)
-            return;
+            if (!_isLoaded)
+                return;
 
-        await RefreshAsync();
-    }  
+            await RefreshAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
-        await base.OnLoadedAsync(parameters);
-        _isLoaded = true;
-        await RefreshAsync();
+        try
+        {
+            await base.OnLoadedAsync(parameters);
+            _isLoaded = true;
+            await RefreshAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
     }
 
     public async Task RefreshAsync()
@@ -102,7 +115,7 @@ public partial class HistoryPageViewModel : BaseViewModel
 
             var customerId = Guid.Parse(userId);
 
-            _visits = await _queueService.GetMyVisitsAsync(customerId);
+            _visits = await _queueService.GetMyEntriesAsync(customerId);
             _bookings = await _bookingService.GetMyBookingHistoryAsync(customerId);
             Debug.WriteLine($"[History] fetched {_visits.Count} visits, {_bookings.Count} bookings for user {customerId}");
 
@@ -126,14 +139,15 @@ public partial class HistoryPageViewModel : BaseViewModel
         {
             IEnumerable<HistoryRow> rows = SelectedFilter switch
             {
-                HistoryFilter.Visits => _visits.Select(HistoryRow.FromVisit),
+                HistoryFilter.Visits => _visits.Select(HistoryRow.FromEntry),
                 HistoryFilter.Bookings => _bookings.Select(HistoryRow.FromBooking),
-                _ => _visits.Select(HistoryRow.FromVisit).Concat(_bookings.Select(HistoryRow.FromBooking)),
+                _ => _visits.Select(HistoryRow.FromEntry).Concat(_bookings.Select(HistoryRow.FromBooking)),
             };
 
             var now = DateTimeOffset.UtcNow;
             var upcoming = rows
-                .Where(r => r.Kind == HistoryRowKind.Booking && r.OccurredAt >= now && (r.StatusText is "CONFIRMED" or "PENDING"))
+                .Where(r => (r.StatusText is "CONFIRMED" or "PENDING" or "IN THE QUEUE" or "IN THE CHAIR")
+                            && (r.Kind == HistoryRowKind.Visit || r.OccurredAt >= now))
                 .OrderBy(r => r.OccurredAt)
                 .ToList();
             var past = rows.Except(upcoming).OrderByDescending(r => r.OccurredAt).ToList();
@@ -201,18 +215,19 @@ public partial class HistoryPageViewModel : BaseViewModel
     {
         try
         {
-            if (row.BusinessId == Guid.Empty)
+            if (row.RecordId == Guid.Empty)
                 return;
+
+            var key = row.Kind == HistoryRowKind.Booking ? NavigationKeys.BookingId : NavigationKeys.EntryId;
 
             var navParams = new NavigationParameters
             {
-                [NavigationKeys.BusinessId] = row.BusinessId,
+                [key] = row.RecordId,
                 [NavigationKeys.OpenedFromTabs] = true,
             };
-            // Modal, so the tabbed page and every tab's feed stay standing underneath and the way
-            // back is a dismissal rather than a shell rebuilt from scratch.
+
             await NavigationService.NavigateAsync(
-                $"NavigationPage/{NavigationPaths.BusinessDetailPage}", navParams,
+                $"NavigationPage/{NavigationPaths.VisitPage}", navParams,
                 modal: true, animated: false);
         }
         catch (Exception ex)
@@ -226,8 +241,6 @@ public partial class HistoryPageViewModel : BaseViewModel
     {
         try
         {
-            // Browse is the tab next door, not a new screen — this used to navigate to a bare
-            // CategoryPickerPage, which threw the whole tabbed shell away to show a tab it already had.
             _messenger.Send(new SelectTabMessage(NavigationPaths.CategoryPickerPage));
         }
         catch (Exception ex)

@@ -22,6 +22,9 @@ public class BusinessResponse
     [JsonPropertyName("address")]
     public string? Address { get; set; }
 
+    [JsonPropertyName("phone")]
+    public string? Phone { get; set; }
+
     [JsonPropertyName("latitude")]
     public double? Latitude { get; set; }
 
@@ -39,6 +42,9 @@ public class BusinessResponse
 
     [JsonPropertyName("last_seen_at")]
     public DateTime? LastSeenAt { get; set; }
+
+    [JsonIgnore]
+    public bool HasPhone => !string.IsNullOrWhiteSpace(Phone);
 
     [JsonIgnore]
     public bool IsAvailableNow =>

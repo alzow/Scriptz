@@ -45,7 +45,7 @@ public partial class BookingFlowPageViewModel : FlowPageViewModelBase
             if (IsOperatorFlow)
                 await ReturnToTabsAsync(NavigationPaths.BookingAgendaPage);
             else
-                await GoToConfirmationAsync();
+                await GoToVisitAsync();
         }
         catch (Exception ex)
         {
