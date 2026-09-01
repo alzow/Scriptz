@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:QueueApp.Features.Flow.Visit"
+             xmlns:helpers="clr-namespace:QueueApp.Features.Flow.Visit.Helpers"
+             x:Name="Root"
+             x:Class="QueueApp.Features.Flow.Visit.VisitPage"
+             x:DataType="vm:VisitPageViewModel"
+             Style="{StaticResource NavigationPageStyle}">
+
+    <Grid Style="{StaticResource grid_Page}" RowDefinitions="Auto,*">
+
+        <helpers:VisitHeaderView Grid.Row="0"
+                                 BusinessName="{Binding BusinessName}"
+                                 AddressLine="{Binding AddressLine}"
+                                 StatusText="{Binding StatusText}"
+                                 StatusTone="{Binding StatusTone}"
+                                 HasPhone="{Binding HasPhone}"
+                                 BackCommand="{Binding DoneCommand}"
+                                 CallCommand="{Binding CallShopCommand}"/>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="14" Padding="16,4,16,28">
+
+                <Border Style="{StaticResource brd13_Success}"
+                        IsVisible="{Binding ShowJustJoined}">
+                    <Label Text="{Binding JustJoinedText}"
+                           Style="{StaticResource lbl13_Regular_Accent}"/>
+                </Border>
+
+                <helpers:VisitReasonBlockView IsVisible="{Binding ShowReasonBlock}"
+                                              ReasonTitle="{Binding ReasonTitle}"
+                                              ReasonBody="{Binding ReasonBody}"
+                                              ReasonQuote="{Binding ReasonQuote}"/>
+
+                <helpers:VisitHeroView IsVisible="{Binding ShowHero}"
+                                       Caption="{Binding HeroCaption}"
+                                       TimeText="{Binding HeroTime}"
+                                       RelativeText="{Binding HeroRelative}"
+                                       DetailText="{Binding HeroDetail}"/>
+
+                <helpers:VisitQueueStripView IsVisible="{Binding ShowTicketStrip}"
+                                             Dots="{Binding QueueDots}"
+                                             PositionText="{Binding PositionText}"/>
+
+                <helpers:VisitFactsSectionView IsVisible="{Binding HasFacts}"
+                                               SectionTitle="{Binding FactsTitle}"
+                                               Facts="{Binding Facts}"/>
+
+                <helpers:VisitTimelineView IsVisible="{Binding HasTimeline}"
+                                           Steps="{Binding Steps}"/>
+
+                <helpers:VisitNoteBlockView IsVisible="{Binding HasCustomerNote}"
+                                            NoteTitle="WHAT YOU TOLD THEM"
+                                            NoteText="{Binding CustomerNoteText}"
+                                            IsFromShop="False"/>
+
+                <helpers:VisitNoteBlockView IsVisible="{Binding HasShopNote}"
+                                            NoteTitle="A NOTE FROM THE SHOP"
+                                            NoteText="{Binding ShopNoteText}"
+                                            IsFromShop="True"/>
+
+                <helpers:VisitFooterView IsVisible="{Binding HasRecord}"
+                                         PrimaryActionText="{Binding PrimaryActionText}"
+                                         PrimaryActionCommand="{Binding PrimaryActionCommand}"
+                                         OptionsCommand="{Binding OpenOptionsCommand}"
+                                         ShowPaymentLine="{Binding ShowPaymentLine}"/>
+
+                <Border Style="{StaticResource brd13_Ghost}" Padding="18,26"
+                        IsVisible="{Binding ShowMissing}">
+                    <Label Text="That visit isn't there any more."
+                           Style="{StaticResource lbl12_Regular_TextMuted}"
+                           HorizontalTextAlignment="Center"
+                           HorizontalOptions="Center"/>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <ActivityIndicator Grid.Row="1"
+                           IsRunning="{Binding IsLoading}"
+                           IsVisible="{Binding IsLoading}"
+                           Style="{StaticResource ai_Accent}"
+                           HorizontalOptions="Center" VerticalOptions="Center"/>
+
+    </Grid>
+
+</ContentPage>

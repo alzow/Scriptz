@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Name="Root"
+             x:Class="QueueApp.Features.Flow.Visit.Helpers.VisitHeroView">
+
+    <Border Style="{StaticResource brd18_VisitHero}" Padding="18,20">
+        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+            <Label Text="{Binding Caption, Source={x:Reference Root}}"
+                   Style="{StaticResource lbl11_Mono_Green}"
+                   HorizontalTextAlignment="Center"
+                   HorizontalOptions="Center"/>
+            <Label Text="{Binding TimeText, Source={x:Reference Root}}"
+                   Style="{StaticResource lbl34_Mono_TextInk}"
+                   HorizontalTextAlignment="Center"
+                   HorizontalOptions="Center"/>
+            <Label Text="{Binding RelativeText, Source={x:Reference Root}}"
+                   Style="{StaticResource lbl13_Regular_TextLight}"
+                   HorizontalTextAlignment="Center"
+                   HorizontalOptions="Center"
+                   IsVisible="{Binding RelativeText, Source={x:Reference Root}, Converter={StaticResource IsNotNullOrEmptyConverter}}"/>
+            <Label Text="{Binding DetailText, Source={x:Reference Root}}"
+                   Style="{StaticResource lbl12_Regular_TextMuted}"
+                   Margin="0,6,0,0"
+                   HorizontalTextAlignment="Center"
+                   HorizontalOptions="Center"
+                   IsVisible="{Binding DetailText, Source={x:Reference Root}, Converter={StaticResource IsNotNullOrEmptyConverter}}"/>
+        </VerticalStackLayout>
+    </Border>
+
+</ContentView>

@@ -111,4 +111,58 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
     </Style>
 
+    <!--
+        ================================================================================
+        VisitPage. The timeline rail, its dots, and the queue strip that stands in for a ticket
+        sequence the schema does not have yet.
+        ================================================================================
+    -->
+
+    <!-- Left rule on a note block: purple is information waiting on someone, green is the shop acting. -->
+    <Style x:Key="bx3_RulePurple" TargetType="BoxView">
+        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource LightPurpleText}, Dark={StaticResource DarkPurpleText}}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightPurpleText}, Dark={StaticResource DarkPurpleText}}"/>
+    </Style>
+
+    <Style x:Key="bx3_RuleGreen" TargetType="BoxView">
+        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
+    </Style>
+
+    <!-- The connector between two timeline dots. A hairline, so it takes Border rather than a fill. -->
+    <Style x:Key="bx_StepConnector" TargetType="BoxView">
+        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+    </Style>
+
+    <!-- Timeline dot. Done is filled, pending is hollow, failed is filled in the danger ink. -->
+    <Style x:Key="ell_StepDot" TargetType="Ellipse">
+        <Setter Property="Fill" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
+        <Setter Property="StrokeThickness" Value="1.5"/>
+        <Style.Triggers>
+            <DataTrigger TargetType="Ellipse" Binding="{Binding IsPending}" Value="True">
+                <Setter Property="Fill" Value="Transparent"/>
+                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+            </DataTrigger>
+            <DataTrigger TargetType="Ellipse" Binding="{Binding IsFailed}" Value="True">
+                <Setter Property="Fill" Value="{AppThemeBinding Light={StaticResource LightDangerText}, Dark={StaticResource DarkDangerText}}"/>
+                <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightDangerText}, Dark={StaticResource DarkDangerText}}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--
+        Queue strip. queue_entries has no per-day ticket sequence, so the strip degrades to the one
+        fact that does exist: how many people are ahead of you, and which dot is yours.
+    -->
+    <Style x:Key="ell_QueueDot" TargetType="Ellipse">
+        <Setter Property="Fill" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Style.Triggers>
+            <DataTrigger TargetType="Ellipse" Binding="{Binding IsYou}" Value="True">
+                <Setter Property="Fill" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
 </ResourceDictionary>

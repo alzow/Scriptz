@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Name="Root"
+             x:Class="QueueApp.Features.Flow.Visit.Helpers.VisitNoteBlockView">
+
+    <Grid ColumnDefinitions="3,*" ColumnSpacing="10">
+        <BoxView Grid.Column="0"
+                 Style="{StaticResource bx3_RulePurple}"
+                 WidthRequest="3">
+            <BoxView.Triggers>
+                <DataTrigger TargetType="BoxView"
+                             Binding="{Binding IsFromShop, Source={x:Reference Root}}"
+                             Value="True">
+                    <Setter Property="Style" Value="{StaticResource bx3_RuleGreen}"/>
+                </DataTrigger>
+            </BoxView.Triggers>
+        </BoxView>
+
+        <Border Grid.Column="1" Style="{StaticResource brd13_Raised_Note}">
+            <VerticalStackLayout Spacing="6">
+                <Label Text="{Binding NoteTitle, Source={x:Reference Root}}"
+                       Style="{StaticResource lbl11_Mono_Purple}">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label"
+                                     Binding="{Binding IsFromShop, Source={x:Reference Root}}"
+                                     Value="True">
+                            <Setter Property="Style" Value="{StaticResource lbl11_Mono_Green}"/>
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+                <Label Text="{Binding NoteText, Source={x:Reference Root}}"
+                       Style="{StaticResource lbl13_Regular_TextMid}"/>
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
+
+</ContentView>

@@ -16,7 +16,14 @@ public interface IQueueService
     Task<MyActiveQueueEntryResponse?> GetMyActiveEntryAsync();
     Task<decimal?> GetEntryWaitMinutesAsync(Guid entryId);
     Task<QueueEntryResponse> SetQueueProgressAsync(Guid entryId, string? status);
-    Task<List<VisitResponse>> GetMyVisitsAsync(Guid customerId);
+    // The customer's own queue entries, newest first — served, cancelled, no-showed and still
+    // live alike. Replaces the `visits` read: a visits row has a visited_at and nothing else, so
+    // no page built on it can say how long anyone waited.
+    Task<List<MyQueueEntryResponse>> GetMyEntriesAsync(Guid customerId);
+    Task<MyQueueEntryResponse?> GetEntryAsync(Guid entryId);
+
+    // cancel_entry takes no "who", so the customer stamps their own leaving into details.
+    Task StampEntryCancelledByCustomerAsync(Guid entryId);
 
     // Operator-board writes. AssignEntryAsync takes a nullable operator id on purpose: null returns
     // the entry to the shared pool, which is a real destination, not an absence of one.

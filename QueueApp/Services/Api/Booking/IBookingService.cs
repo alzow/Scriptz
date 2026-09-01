@@ -23,4 +23,9 @@ public interface IBookingService
     Task<AgendaBookingResponse?> CreateOperatorBookingAsync(CreateOperatorBookingRequest request);
     Task<List<UpcomingBookingResponse>> GetMyUpcomingBookingsAsync(Guid customerId);
     Task<List<UpcomingBookingResponse>> GetMyBookingHistoryAsync(Guid customerId);
+    Task<UpcomingBookingResponse?> GetBookingAsync(Guid bookingId);
+
+    // cancel_booking takes no "who", so the customer stamps their own cancellation into details
+    // before the RPC runs — the shop's path already writes the reason the same way.
+    Task<AgendaBookingResponse?> MarkCancelledByCustomerAsync(Guid bookingId, BookingDetails? existing);
 }

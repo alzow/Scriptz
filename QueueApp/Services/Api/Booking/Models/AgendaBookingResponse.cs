@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using QueueApp.Framework.Extensions;
+using QueueApp.Shared.Domain;
 
 namespace QueueApp.Services.Api.Booking.Models;
 
@@ -50,6 +51,17 @@ public class BookingDetails
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? CancellationReason { get; set; }
 
+    // Who called it off, and when. bookings has neither column, and a cancellation the customer
+    // made themselves must never read as "the shop cancelled on you", so both live here alongside
+    // the reason.
+    [JsonPropertyName("cancelled_by")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? CancelledBy { get; set; }
+
+    [JsonPropertyName("cancelled_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public DateTimeOffset? CancelledAt { get; set; }
+
     // A PATCH replaces the whole jsonb value, so anything already in there has to be carried across
     // or it is silently dropped.
     public static BookingDetails WithCancellationReason(BookingDetails? existing, string? reason) => new()
@@ -58,6 +70,18 @@ public class BookingDetails
         CustomerPhone = existing?.CustomerPhone,
         CreatedBy = existing?.CreatedBy,
         CancellationReason = string.IsNullOrWhiteSpace(reason) ? null : reason.Trim(),
+        CancelledBy = CancelledByValues.Business,
+        CancelledAt = DateTimeOffset.UtcNow,
+    };
+
+    public static BookingDetails CancelledByCustomer(BookingDetails? existing) => new()
+    {
+        CustomerName = existing?.CustomerName,
+        CustomerPhone = existing?.CustomerPhone,
+        CreatedBy = existing?.CreatedBy,
+        CancellationReason = existing?.CancellationReason,
+        CancelledBy = CancelledByValues.Customer,
+        CancelledAt = DateTimeOffset.UtcNow,
     };
 }
 

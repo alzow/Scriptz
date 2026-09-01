@@ -61,6 +61,11 @@ public interface IQueueApi
         [AliasAs("done_at")] string doneAtGte,
         [AliasAs("select")] string select = "id,serving_at,done_at");
 
-    [Get("/visits?select=id,visited_at,business:businesses(id,name,category),operator:operators(display_name),service:services(name)&order=visited_at.desc")]
-    Task<List<VisitResponse>> GetMyVisitsAsync([AliasAs("customer_id")] string customerIdEq);
+    // `*` rather than a column list on purpose: the schema doc's queue_entries table predates
+    // progress_status, and naming a column PostgREST can't find fails the whole query with a 400.
+    [Get("/queue_entries?select=*,business:businesses(id,name,category),operator:operators(display_name),service:services(name,price_cents)&order=joined_at.desc")]
+    Task<List<MyQueueEntryResponse>> GetMyEntriesAsync([AliasAs("customer_id")] string customerIdEq);
+
+    [Get("/queue_entries?select=*,business:businesses(id,name,category),operator:operators(display_name),service:services(name,price_cents)")]
+    Task<List<MyQueueEntryResponse>> GetEntryAsync([AliasAs("id")] string idEq);
 }

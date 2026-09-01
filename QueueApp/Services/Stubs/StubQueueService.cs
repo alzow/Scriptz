@@ -176,8 +176,14 @@ public class StubQueueService : IQueueService
         return Task.FromResult(entry ?? new QueueEntryResponse { Id = entryId, ProgressStatus = status });
     }
 
-    public Task<List<VisitResponse>> GetMyVisitsAsync(Guid customerId)
-        => Task.FromResult(new List<VisitResponse>());
+    public Task<List<MyQueueEntryResponse>> GetMyEntriesAsync(Guid customerId)
+        => Task.FromResult(new List<MyQueueEntryResponse>());
+
+    public Task<MyQueueEntryResponse?> GetEntryAsync(Guid entryId)
+        => Task.FromResult<MyQueueEntryResponse?>(null);
+
+    public Task StampEntryCancelledByCustomerAsync(Guid entryId)
+        => Task.CompletedTask;
 
     public Task AssignEntryAsync(Guid entryId, Guid? operatorId)
     {

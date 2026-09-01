@@ -134,4 +134,13 @@ public class BookingService : BaseService, IBookingService
 
     public Task<List<UpcomingBookingResponse>> GetMyBookingHistoryAsync(Guid customerId) =>
         ExecuteApiCallAsync(_api.GetMyBookingHistoryAsync($"eq.{customerId}"));
+
+    public async Task<UpcomingBookingResponse?> GetBookingAsync(Guid bookingId)
+    {
+        var rows = await ExecuteApiCallAsync(_api.GetBookingAsync($"eq.{bookingId}"));
+        return rows.FirstOrDefault();
+    }
+
+    public Task<AgendaBookingResponse?> MarkCancelledByCustomerAsync(Guid bookingId, BookingDetails? existing) =>
+        PatchAsync(bookingId, new UpdateBookingRequest { Details = BookingDetails.CancelledByCustomer(existing) });
 }

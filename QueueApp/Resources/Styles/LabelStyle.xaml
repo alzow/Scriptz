@@ -559,4 +559,68 @@
         </Style.Triggers>
     </Style>
 
+    <!--
+        ================================================================================
+        VisitPage. Every time, duration and position on this page is mono, and the timeline's two
+        lines carry their state in triggers so the page never names a colour.
+        ================================================================================
+    -->
+
+    <Style x:Key="lbl34_Mono_TextInk" TargetType="Label">
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="FontSize" Value="34"/>
+        <Setter Property="CharacterSpacing" Value="-0.5"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
+    </Style>
+
+    <Style x:Key="lbl11_Mono_Danger" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_TextMuted}">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightDangerText}, Dark={StaticResource DarkDangerText}}"/>
+    </Style>
+
+    <Style x:Key="lbl13_Mono_TextMuted" TargetType="Label" BasedOn="{StaticResource lbl13_Mono_TextPrimary}">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
+    </Style>
+
+    <Style x:Key="lbl11_Mono_Step" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_TextMuted}">
+        <Style.Triggers>
+            <DataTrigger TargetType="Label" Binding="{Binding IsPending}" Value="True">
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextDim}, Dark={StaticResource DarkTextDim}}"/>
+            </DataTrigger>
+            <DataTrigger TargetType="Label" Binding="{Binding IsFailed}" Value="True">
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightDangerText}, Dark={StaticResource DarkDangerText}}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="lbl13_Regular_Step" TargetType="Label">
+        <Setter Property="FontFamily" Value="RobotoRegular"/>
+        <Setter Property="FontSize" Value="13.5"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
+        <Style.Triggers>
+            <DataTrigger TargetType="Label" Binding="{Binding IsPending}" Value="True">
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
+            </DataTrigger>
+            <DataTrigger TargetType="Label" Binding="{Binding IsFailed}" Value="True">
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightDangerText}, Dark={StaticResource DarkDangerText}}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- A fact's value is mono when it is a time, a duration, a position or a price, and plain
+         when it is a name — the row model says which, so the page does not have to. -->
+    <Style x:Key="lbl13_Mono_Fact" TargetType="Label" BasedOn="{StaticResource lbl13_Mono_TextPrimary}">
+        <Style.Triggers>
+            <DataTrigger TargetType="Label" Binding="{Binding IsMono}" Value="False">
+                <Setter Property="FontFamily" Value="RobotoRegular"/>
+                <Setter Property="CharacterSpacing" Value="0"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="lbl11_Mono_VisitPill" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_Green}"/>
+
+    <Style x:Key="lbl11_Mono_VisitPill_Settled" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_TextMuted}"/>
+
+    <Style x:Key="lbl11_Mono_VisitPill_Bad" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_Danger}"/>
+
 </ResourceDictionary>

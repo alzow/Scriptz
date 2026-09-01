@@ -732,4 +732,34 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightBg}, Dark={StaticResource DarkBg}}"/>
     </Style>
 
+    <!--
+        ================================================================================
+        VisitPage. Solid tint tokens throughout — the hero, the two note rules and the danger
+        reason block are fills, never alpha over whatever happens to be underneath.
+        ================================================================================
+    -->
+
+    <Style x:Key="brd18_VisitHero" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightAccentTint}, Dark={StaticResource DarkAccentTint}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccentBorder}, Dark={StaticResource DarkAccentBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="18"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd20_StatusPill_Neutral" TargetType="Border" BasedOn="{StaticResource brd20_StatusPill}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
+    </Style>
+
+    <Style x:Key="brd20_StatusPill_Danger" TargetType="Border" BasedOn="{StaticResource brd20_StatusPill}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightDangerTint}, Dark={StaticResource DarkDangerTint}}"/>
+    </Style>
+
+    <Style x:Key="brd13_Raised_Note" TargetType="Border" BasedOn="{StaticResource brd13_Raised}">
+        <Setter Property="Padding" Value="13,12"/>
+    </Style>
+
 </ResourceDictionary>

@@ -68,8 +68,20 @@ public class QueueService : BaseService, IQueueService
     public Task<QueueEntryResponse> SetQueueProgressAsync(Guid entryId, string? status) =>
         ExecuteApiCallAsync(_api.SetQueueProgressAsync(new SetProgressRequest { EntryId = entryId, Status = status }));
 
-    public Task<List<VisitResponse>> GetMyVisitsAsync(Guid customerId) =>
-        ExecuteApiCallAsync(_api.GetMyVisitsAsync($"eq.{customerId}"));
+    public Task<List<MyQueueEntryResponse>> GetMyEntriesAsync(Guid customerId) =>
+        ExecuteApiCallAsync(_api.GetMyEntriesAsync($"eq.{customerId}"));
+
+    public async Task<MyQueueEntryResponse?> GetEntryAsync(Guid entryId)
+    {
+        var rows = await ExecuteApiCallAsync(_api.GetEntryAsync($"eq.{entryId}"));
+        return rows.FirstOrDefault();
+    }
+
+    // The "owner or self manage" update policy already covers the customer writing to their own
+    // row, so attributing a cancellation needs no new SQL.
+    public Task StampEntryCancelledByCustomerAsync(Guid entryId) =>
+        ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
+            new Dictionary<string, object?> { ["details"] = QueueEntryDetails.CancelledByCustomer() }));
 
     public Task AssignEntryAsync(Guid entryId, Guid? operatorId) =>
         ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",

@@ -10,6 +10,14 @@ public static class NavigationKeys
     public const string DayOfWeek       = "dayOfWeek";
     public const string OpenedFromTabs  = "openedFromTabs";
 
+    // VisitPage loads from an id rather than a handed-over model: the History row that opened it
+    // may be stale by the time it is tapped.
+    public const string EntryId         = "entryId";
+    public const string BookingId       = "bookingId";
+
+    // Set only by the join/booking flow, which lands on the same page the History row opens.
+    public const string JustJoined      = "justJoined";
+
     // Set when the shop itself is driving the booking flow from the agenda rather than a customer
     // booking for themselves. Changes who the booking is for, not how the slots are worked out.
     public const string IsOperatorFlow  = "isOperatorFlow";
