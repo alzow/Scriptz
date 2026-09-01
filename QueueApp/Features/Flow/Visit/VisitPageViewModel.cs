@@ -125,8 +125,11 @@ public partial class VisitPageViewModel : BaseViewModel
 
             _isVisible = true;
             IsLoading = true;
+
+            var locationTask = _locationService.GetCachedLocationAsync();
             await RefreshAsync();
-            await LoadDistanceAsync();
+            await ApplyDistanceAsync(locationTask);
+
             RefreshView();
             StartTimer();
         }
@@ -205,14 +208,17 @@ public partial class VisitPageViewModel : BaseViewModel
     {
         try
         {
+            Task<BusinessResponse?>? businessTask = null;
+
             Record = _kind == VisitKind.Queue
-                ? await LoadEntryAsync()
+                ? await LoadEntryAsync(id => businessTask = _businessService.GetBusinessAsync(id))
                 : await LoadBookingAsync();
 
             if (Record is null)
                 return;
 
-            Business ??= await _businessService.GetBusinessAsync(Record.BusinessId);
+            businessTask ??= _businessService.GetBusinessAsync(Record.BusinessId);
+            Business ??= await businessTask;
             Title = Record.BusinessName;
 
             if (!Record.IsLive)
@@ -226,7 +232,7 @@ public partial class VisitPageViewModel : BaseViewModel
         }
     }
 
-    public async Task<VisitRecord?> LoadEntryAsync()
+    public async Task<VisitRecord?> LoadEntryAsync(Action<Guid>? onBusinessIdKnown = null)
     {
         try
         {
@@ -235,6 +241,8 @@ public partial class VisitPageViewModel : BaseViewModel
                 return null;
 
             var record = VisitRecord.FromEntry(entry);
+            onBusinessIdKnown?.Invoke(record.BusinessId);
+
             if (!record.IsLive)
                 return record;
 
@@ -272,10 +280,22 @@ public partial class VisitPageViewModel : BaseViewModel
     {
         try
         {
+            await ApplyDistanceAsync(_locationService.GetCachedLocationAsync());
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    public async Task ApplyDistanceAsync(Task<CustomerLocation?> locationTask)
+    {
+        try
+        {
             if (Business?.Latitude is not { } lat || Business.Longitude is not { } lon)
                 return;
 
-            var here = await _locationService.GetCachedLocationAsync();
+            var here = await locationTask;
             if (here is null)
                 return;
 
