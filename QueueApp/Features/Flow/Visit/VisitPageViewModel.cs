@@ -43,12 +43,14 @@ public partial class VisitPageViewModel : BaseViewModel
     public string BusinessName => Record?.BusinessName ?? Business?.Name ?? string.Empty;
     public string StatusText => Record?.StatusText ?? string.Empty;
 
+    // The tones the shared business header knows: accent while it is live, a plain outline once it
+    // is done with, red when it went wrong.
     public string StatusTone => Record switch
     {
-        null => "Settled",
+        null => "Muted",
         { WasNoShow: true } or { WasCancelled: true } => "Bad",
-        { IsLive: true } => "Live",
-        _ => "Settled",
+        { IsLive: true } => "Good",
+        _ => "Muted",
     };
     public bool HasPhone => Business?.HasPhone == true;
 

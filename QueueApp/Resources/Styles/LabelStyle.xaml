@@ -414,7 +414,7 @@
     </Style>
 
     <!--
-        Open / closed text: the business landing header's pill, and the agenda header's line.
+        Open / closed text: the shared business header's pill, and the agenda header's line.
         These were two alias pairs (Open/Closed at 10, OpenNow/ClosedNow at 9) saying the same
         thing at two sizes; one pair now covers both.
     -->
@@ -616,11 +616,5 @@
             </DataTrigger>
         </Style.Triggers>
     </Style>
-
-    <Style x:Key="lbl11_Mono_VisitPill" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_Green}"/>
-
-    <Style x:Key="lbl11_Mono_VisitPill_Settled" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_TextMuted}"/>
-
-    <Style x:Key="lbl11_Mono_VisitPill_Bad" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_Danger}"/>
 
 </ResourceDictionary>

@@ -462,7 +462,7 @@
         </Setter>
     </Style>
 
-    <!-- Open / closed pill on a business landing header. Closed drops the tint for a plain outline. -->
+    <!-- The shared business header's pill. Muted drops the tint for a plain outline; bad goes red. -->
     <Style x:Key="brd8_OpenPill" TargetType="Border" BasedOn="{StaticResource brd8_AccentTag}"/>
 
     <Style x:Key="brd8_ClosedPill" TargetType="Border">
@@ -474,6 +474,10 @@
                 <RoundRectangle CornerRadius="8"/>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style x:Key="brd8_DangerPill" TargetType="Border" BasedOn="{StaticResource brd8_AccentTag}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightDangerTint}, Dark={StaticResource DarkDangerTint}}"/>
     </Style>
 
     <Style x:Key="brd8_PurpleTag" TargetType="Border">
@@ -748,14 +752,6 @@
                 <RoundRectangle CornerRadius="18"/>
             </Setter.Value>
         </Setter>
-    </Style>
-
-    <Style x:Key="brd20_StatusPill_Neutral" TargetType="Border" BasedOn="{StaticResource brd20_StatusPill}">
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
-    </Style>
-
-    <Style x:Key="brd20_StatusPill_Danger" TargetType="Border" BasedOn="{StaticResource brd20_StatusPill}">
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightDangerTint}, Dark={StaticResource DarkDangerTint}}"/>
     </Style>
 
     <Style x:Key="brd13_Raised_Note" TargetType="Border" BasedOn="{StaticResource brd13_Raised}">

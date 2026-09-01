@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.Flow.Visit"
              xmlns:helpers="clr-namespace:QueueApp.Features.Flow.Visit.Helpers"
+             xmlns:header="clr-namespace:QueueApp.Shared.Templates.BusinessHeader"
              x:Name="Root"
              x:Class="QueueApp.Features.Flow.Visit.VisitPage"
              x:DataType="vm:VisitPageViewModel"
@@ -11,14 +12,15 @@
     <Grid Style="{StaticResource grid_Page}"
             RowDefinitions="Auto,*,Auto">
 
-        <helpers:VisitHeaderView Grid.Row="0"
-                                 BusinessName="{Binding BusinessName}"
-                                 AddressLine="{Binding AddressLine}"
-                                 StatusText="{Binding StatusText}"
-                                 StatusTone="{Binding StatusTone}"
-                                 HasPhone="{Binding HasPhone}"
-                                 BackCommand="{Binding DoneCommand}"
-                                 CallCommand="{Binding CallShopCommand}"/>
+        <header:BusinessHeaderView Grid.Row="0"
+                                   BusinessName="{Binding BusinessName}"
+                                   AddressLine="{Binding AddressLine}"
+                                   PillText="{Binding StatusText}"
+                                   PillTone="{Binding StatusTone}"
+                                   HasAction="{Binding HasPhone}"
+                                   ActionIcon="ic_phone"
+                                   ActionCommand="{Binding CallShopCommand}"
+                                   GoBackCommand="{Binding DoneCommand}"/>
 
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Spacing="14"
