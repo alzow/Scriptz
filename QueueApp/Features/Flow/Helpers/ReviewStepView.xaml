@@ -11,14 +11,14 @@
                  and number are the only way to know whose slot this is or to reach them. -->
             <VerticalStackLayout Spacing="0" Margin="0,0,0,18"
                                  IsVisible="{Binding ShowCustomerCapture, Source={x:Reference Root}}">
-                <Label Text="NAME" Style="{StaticResource lbl9_Mono_TextMuted}" Margin="20,0,20,8"/>
+                <Label Text="NAME" Style="{StaticResource lbl11_Mono_TextMuted}" Margin="20,0,20,8"/>
                 <Border Margin="20,0" Padding="4,0" Style="{StaticResource brd12_Cream}">
                     <Entry Text="{Binding CustomerName, Source={x:Reference Root}}"
                            Placeholder="Who's coming in?"
                            Style="{StaticResource entry14_Sheet}"/>
                 </Border>
 
-                <Label Text="PHONE — OPTIONAL" Style="{StaticResource lbl9_Mono_TextMuted}" Margin="20,14,20,8"/>
+                <Label Text="PHONE — OPTIONAL" Style="{StaticResource lbl11_Mono_TextMuted}" Margin="20,14,20,8"/>
                 <Border Margin="20,0" Padding="4,0" Style="{StaticResource brd12_Cream}">
                     <Entry Text="{Binding CustomerPhone, Source={x:Reference Root}}"
                            Placeholder="082 000 0000"
@@ -68,7 +68,7 @@
             </Border>
 
             <Label Text="{Binding NoteLabelText, Source={x:Reference Root}}"
-                   Style="{StaticResource lbl9_Mono_TextMuted}"
+                   Style="{StaticResource lbl11_Mono_TextMuted}"
                    Margin="20,18,20,8"/>
             <Border Margin="20,0" Padding="10,4" Style="{StaticResource brd12_Cream}">
                 <Editor Text="{Binding BookingNote, Source={x:Reference Root}}"

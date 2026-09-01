@@ -30,7 +30,7 @@
                                   Validator="{Binding NameValidator, Source={x:Reference Root}}"
                                   ValidateOnTextChanged="True"/>
                 <Label Text="Barbers see this on their board. A first name and initial is plenty."
-                       Style="{StaticResource lbl11_Regular_TextFaint}" Margin="2,6,2,0"/>
+                       Style="{StaticResource lbl12_Regular_TextFaint}" Margin="2,6,2,0"/>
 
                 <Label Text="PHONE" Style="{StaticResource SectionTitle}" Margin="0,18,0,6"/>
                 <entry:QueueEntry Placeholder="082 555 0148"
@@ -38,7 +38,7 @@
                                   Validator="{Binding PhoneValidator, Source={x:Reference Root}}"
                                   InputType="Telephone"/>
                 <Label Text="How a shop reaches you if something changes. Only shared with shops you join."
-                       Style="{StaticResource lbl11_Regular_TextFaint}" Margin="2,6,2,0"/>
+                       Style="{StaticResource lbl12_Regular_TextFaint}" Margin="2,6,2,0"/>
 
                 <Label Text="EMAIL" Style="{StaticResource SectionTitle}" Margin="0,18,0,6"/>
                 <Border Style="{StaticResource brd16_Entry_Locked}" Padding="14,0">
@@ -54,7 +54,7 @@
                     </Grid>
                 </Border>
                 <Label Text="You sign in with this. Contact us to change it."
-                       Style="{StaticResource lbl11_Regular_TextFaint}" Margin="2,6,2,0"/>
+                       Style="{StaticResource lbl12_Regular_TextFaint}" Margin="2,6,2,0"/>
 
                 <Label Text="{Binding ErrorMessage, Source={x:Reference Root}}"
                        Style="{StaticResource lbl12_Regular_Danger}"

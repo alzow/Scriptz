@@ -55,7 +55,7 @@
                             </ProgressBar>
 
                             <Label Text="{Binding SubText}"
-                                   Style="{StaticResource lbl10_Regular_TextMuted}"
+                                   Style="{StaticResource lbl11_Regular_TextMuted}"
                                    Margin="0,1,0,0"/>
                         </VerticalStackLayout>
                     </Grid>

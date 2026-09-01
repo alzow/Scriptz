@@ -35,7 +35,7 @@
                                     <Border Padding="6,3" IsVisible="{Binding ShowFastestTag}"
                                             Style="{StaticResource brd6_AccentTag}"
                                             VerticalOptions="Center">
-                                        <Label Text="FASTEST" Style="{StaticResource lbl9_Mono_Green}"/>
+                                        <Label Text="FASTEST" Style="{StaticResource lbl11_Mono_Green}"/>
                                     </Border>
                                 </HorizontalStackLayout>
                                 <Label Text="{Binding SubLabel}" Style="{StaticResource lbl12_Regular_TextLight}"/>
@@ -54,7 +54,7 @@
                     <!-- "or choose" separates the pinned any-available row from named operators -->
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="0,4,0,12"
                           IsVisible="{Binding IsAnyAvailable}">
-                        <Label Grid.Column="0" Text="OR CHOOSE" Style="{StaticResource lbl9_Mono_TextFaint}"
+                        <Label Grid.Column="0" Text="OR CHOOSE" Style="{StaticResource lbl11_Mono_TextFaint}"
                                VerticalOptions="Center"/>
                         <BoxView Grid.Column="1" HeightRequest="1" VerticalOptions="Center"
                                  Style="{StaticResource bx_Divider}"/>

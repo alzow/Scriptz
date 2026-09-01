@@ -20,11 +20,11 @@
                 <VerticalStackLayout Spacing="3">
                     <Label Text="Block time" Style="{StaticResource lbl16_Bold_TextDark}"/>
                     <Label Text="{Binding DayText, Source={x:Reference Root}}"
-                           Style="{StaticResource lbl11_Regular_TextLight}"/>
+                           Style="{StaticResource lbl12_Regular_TextLight}"/>
                 </VerticalStackLayout>
 
                 <Label Text="{Binding ResourceLabel, Source={x:Reference Root}}"
-                       Style="{StaticResource lbl9_Mono_TextMuted}" Margin="0,16,0,9"/>
+                       Style="{StaticResource lbl11_Mono_TextMuted}" Margin="0,16,0,9"/>
                 <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
                     <HorizontalStackLayout Spacing="8"
                                            BindableLayout.ItemsSource="{Binding Resources, Source={x:Reference Root}}">
@@ -45,7 +45,7 @@
                     </HorizontalStackLayout>
                 </ScrollView>
 
-                <Label Text="FROM" Style="{StaticResource lbl9_Mono_TextMuted}" Margin="0,16,0,8"/>
+                <Label Text="FROM" Style="{StaticResource lbl11_Mono_TextMuted}" Margin="0,16,0,8"/>
                 <Border Style="{StaticResource brd12_Cream}" Padding="10,4">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                         <DatePicker Grid.Column="0" Date="{Binding FromDate, Source={x:Reference Root}}"
@@ -55,7 +55,7 @@
                     </Grid>
                 </Border>
 
-                <Label Text="UNTIL" Style="{StaticResource lbl9_Mono_TextMuted}" Margin="0,16,0,8"/>
+                <Label Text="UNTIL" Style="{StaticResource lbl11_Mono_TextMuted}" Margin="0,16,0,8"/>
                 <Border Style="{StaticResource brd12_Cream}" Padding="10,4">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                         <DatePicker Grid.Column="0" Date="{Binding UntilDate, Source={x:Reference Root}}"
@@ -65,7 +65,7 @@
                     </Grid>
                 </Border>
 
-                <Label Text="REASON — OPTIONAL" Style="{StaticResource lbl9_Mono_TextMuted}" Margin="0,16,0,8"/>
+                <Label Text="REASON — OPTIONAL" Style="{StaticResource lbl11_Mono_TextMuted}" Margin="0,16,0,8"/>
                 <Border Style="{StaticResource brd12_Cream}" Padding="4,0">
                     <Entry Text="{Binding Reason, Source={x:Reference Root}}"
                            Placeholder="Parts delivery"

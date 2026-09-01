@@ -60,7 +60,7 @@
                 </Border>
 
                 <Label Text="Everything below stays as you set it and starts working again once you allow notifications."
-                       Style="{StaticResource lbl11_Regular_TextFaint}"
+                       Style="{StaticResource lbl12_Regular_TextFaint}"
                        Margin="2,2,2,4"
                        IsVisible="{Binding IsBlocked}"/>
 
@@ -100,7 +100,7 @@
                 </HorizontalStackLayout>
 
                 <Label Text="Based on how long it takes you to get there. You can change it per shop later."
-                       Style="{StaticResource lbl11_Regular_TextFaint}"
+                       Style="{StaticResource lbl12_Regular_TextFaint}"
                        Margin="2,6,2,0"/>
 
                 <Label Text="BOOKINGS" Style="{StaticResource SectionTitle}" Margin="2,18,0,2"/>
@@ -116,7 +116,7 @@
                                                    IsAvailable="{Binding IsAllowed}"/>
 
                 <Label Text="A shop cancelling always reaches you, with their reason. That one can't be turned off."
-                       Style="{StaticResource lbl11_Regular_TextFaint}"
+                       Style="{StaticResource lbl12_Regular_TextFaint}"
                        Margin="2,18,2,0"/>
 
             </VerticalStackLayout>

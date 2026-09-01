@@ -29,14 +29,14 @@
                         <Label Text="{Binding CustomerName, Source={x:Reference Root}}"
                                Style="{StaticResource lbl16_Bold_TextDark}"/>
                         <Label Text="{Binding SubText, Source={x:Reference Root}}"
-                               Style="{StaticResource lbl11_Regular_TextLight}"/>
+                               Style="{StaticResource lbl12_Regular_TextLight}"/>
                     </VerticalStackLayout>
                 </Grid>
 
                 <BoxView HeightRequest="1" Style="{StaticResource bx_Divider}" Margin="0,0,0,14"/>
 
                 <Label Text="{Binding PromptText, Source={x:Reference Root}}"
-                       Style="{StaticResource lbl9_Mono_TextMuted}"
+                       Style="{StaticResource lbl11_Mono_TextMuted}"
                        Margin="0,0,0,10"/>
 
                 <VerticalStackLayout Spacing="0"
@@ -63,14 +63,14 @@
                                     <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
                                         <Label Text="{Binding Name}" Style="{StaticResource lbl16_Bold_TextDark}"
                                                TextColor="{Binding NameColor}"/>
-                                        <Label Text="{Binding SubLabel}" Style="{StaticResource lbl11_Regular_TextLight}"
+                                        <Label Text="{Binding SubLabel}" Style="{StaticResource lbl12_Regular_TextLight}"
                                                TextColor="{Binding SubLabelColor}"/>
                                     </VerticalStackLayout>
 
                                     <Border Grid.Column="2" IsVisible="{Binding ShowSoonestTag}"
                                             Style="{StaticResource brd6_AccentTag}"
                                             Padding="8,5" VerticalOptions="Center">
-                                        <Label Text="SOONEST" Style="{StaticResource lbl9_Mono_Green}"/>
+                                        <Label Text="SOONEST" Style="{StaticResource lbl11_Mono_Green}"/>
                                     </Border>
                                 </Grid>
 

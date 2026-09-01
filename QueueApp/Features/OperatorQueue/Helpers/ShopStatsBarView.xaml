@@ -10,7 +10,7 @@
             <VerticalStackLayout Grid.Column="0" Spacing="4" HorizontalOptions="Center">
                 <Label Text="{Binding WaitingCountText, Source={x:Reference Root}}" Style="{StaticResource lbl16_Mono_TextPrimary}"
                        HorizontalOptions="Center"/>
-                <Label Text="Waiting" Style="{StaticResource lbl9_Regular_TextLight}"
+                <Label Text="Waiting" Style="{StaticResource lbl11_Regular_TextLight}"
                        HorizontalOptions="Center"/>
             </VerticalStackLayout>
             <BoxView Grid.Column="1" WidthRequest="1" HeightRequest="22"
@@ -18,7 +18,7 @@
             <VerticalStackLayout Grid.Column="2" Spacing="4" HorizontalOptions="Center">
                 <Label Text="{Binding ServingCountText, Source={x:Reference Root}}" Style="{StaticResource lbl16_Mono_TextPrimary}"
                        HorizontalOptions="Center"/>
-                <Label Text="Serving" Style="{StaticResource lbl9_Regular_TextLight}"
+                <Label Text="Serving" Style="{StaticResource lbl11_Regular_TextLight}"
                        HorizontalOptions="Center"/>
             </VerticalStackLayout>
             <BoxView Grid.Column="3" WidthRequest="1" HeightRequest="22"
@@ -26,7 +26,7 @@
             <VerticalStackLayout Grid.Column="4" Spacing="4" HorizontalOptions="Center">
                 <Label Text="{Binding DoneTodayText, Source={x:Reference Root}}" Style="{StaticResource lbl16_Mono_TextPrimary}"
                        HorizontalOptions="Center"/>
-                <Label Text="Done today" Style="{StaticResource lbl9_Regular_TextLight}"
+                <Label Text="Done today" Style="{StaticResource lbl11_Regular_TextLight}"
                        HorizontalOptions="Center"/>
             </VerticalStackLayout>
             <BoxView Grid.Column="5" WidthRequest="1" HeightRequest="22"
@@ -34,7 +34,7 @@
             <VerticalStackLayout Grid.Column="6" Spacing="4" HorizontalOptions="Center">
                 <Label Text="{Binding AvgText, Source={x:Reference Root}}" Style="{StaticResource lbl16_Mono_TextMuted}"
                        HorizontalOptions="Center"/>
-                <Label Text="Avg" Style="{StaticResource lbl9_Regular_TextLight}"
+                <Label Text="Avg" Style="{StaticResource lbl11_Regular_TextLight}"
                        HorizontalOptions="Center"/>
             </VerticalStackLayout>
         </Grid>

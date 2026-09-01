@@ -25,7 +25,7 @@
                                TextColor="{Binding NameColor}"/>
                         <Label Text="{Binding StatusText}"
                                TextColor="{Binding StatusColor}"
-                               Style="{StaticResource lbl11_Regular_TextLight}"/>
+                               Style="{StaticResource lbl12_Regular_TextLight}"/>
                     </VerticalStackLayout>
                 </Grid>
 
@@ -38,7 +38,7 @@
 
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                             <VerticalStackLayout Grid.Column="0" Spacing="0">
-                                <Label Text="NOW SERVING" Style="{StaticResource lbl9_Mono_Green}"
+                                <Label Text="NOW SERVING" Style="{StaticResource lbl11_Mono_Green}"
                                        Margin="0,0,0,6"/>
                                 <Label Text="{Binding CustomerName}" Style="{StaticResource lbl17_Bold_TextDark}"/>
                                 <Label Text="{Binding ServiceText}" Style="{StaticResource lbl12_Regular_TextLight}"
@@ -48,7 +48,7 @@
                             <VerticalStackLayout Grid.Column="1" Spacing="3" HorizontalOptions="End">
                                 <Label Text="{Binding ElapsedText}" Style="{StaticResource lbl20_Mono_Green}"
                                        HorizontalOptions="End"/>
-                                <Label Text="{Binding EstimateText}" Style="{StaticResource lbl9_Mono_TextFaint}"
+                                <Label Text="{Binding EstimateText}" Style="{StaticResource lbl11_Mono_TextFaint}"
                                        IsVisible="{Binding HasEstimate}"
                                        HorizontalOptions="End"/>
                             </VerticalStackLayout>
@@ -63,7 +63,7 @@
                                 <tpl:ThemedIcon Grid.Column="0" Icon="ic_edit" WidthRequest="14" HeightRequest="14"
                                        VerticalOptions="Center"/>
                                 <Label Grid.Column="1" Text="{Binding NoteText}"
-                                       Style="{StaticResource lbl11_Regular_TextLight}"
+                                       Style="{StaticResource lbl12_Regular_TextLight}"
                                        VerticalOptions="Center"/>
                             </Grid>
                             <Border.GestureRecognizers>
@@ -97,13 +97,13 @@
                                             <RoundRectangle CornerRadius="9"/>
                                         </Border.StrokeShape>
                                         <Label Text="{Binding PositionText}"
-                                               Style="{StaticResource lbl11_Bold_TextMid}"
+                                               Style="{StaticResource lbl12_Bold_TextMid}"
                                                HorizontalOptions="Center" VerticalOptions="Center"/>
                                     </Border>
 
                                     <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
                                         <Label Text="{Binding CustomerName}" Style="{StaticResource lbl15_Bold_TextDark}"/>
-                                        <Label Text="{Binding SubText}" Style="{StaticResource lbl11_Regular_TextLight}"/>
+                                        <Label Text="{Binding SubText}" Style="{StaticResource lbl12_Regular_TextLight}"/>
                                     </VerticalStackLayout>
 
                                     <Button Grid.Column="2" Text="Serve" HeightRequest="46"
@@ -147,7 +147,7 @@
                     <Label Text="{Binding Name}" Style="{StaticResource lbl16_Bold_TextDark}"/>
                     <Label Text="{Binding StatusText}"
                            TextColor="{Binding StatusColor}"
-                           Style="{StaticResource lbl11_Regular_TextLight}"/>
+                           Style="{StaticResource lbl12_Regular_TextLight}"/>
                 </VerticalStackLayout>
                 <Border Grid.Column="2" WidthRequest="44" HeightRequest="44"
                         Style="{StaticResource brd13_Ghost}" VerticalOptions="Center">
@@ -168,7 +168,7 @@
                                     Initials="{Binding Initials}"/>
                 <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
                     <Label Text="{Binding Name}" Style="{StaticResource lbl16_Bold_TextDark}"/>
-                    <Label Text="{Binding StatusText}" Style="{StaticResource lbl11_Regular_TextLight}"/>
+                    <Label Text="{Binding StatusText}" Style="{StaticResource lbl12_Regular_TextLight}"/>
                 </VerticalStackLayout>
                 <Button Grid.Column="2" Text="On shift" HeightRequest="44"
                         Style="{StaticResource btn12_Bold_Neutral}"

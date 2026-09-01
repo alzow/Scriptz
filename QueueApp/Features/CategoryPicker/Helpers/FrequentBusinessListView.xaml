@@ -33,11 +33,11 @@
                                 <Border Grid.Column="1"
                                         Style="{StaticResource brd7_Raised_Tag}"
                                         Padding="8,4" VerticalOptions="Center">
-                                    <Label Text="{Binding VisitCountText}" Style="{StaticResource lbl10_Bold_TextMuted}"/>
+                                    <Label Text="{Binding VisitCountText}" Style="{StaticResource lbl11_Bold_TextMuted}"/>
                                 </Border>
                             </Grid>
                             <Label Text="{Binding LastVisitText}" Style="{StaticResource lbl12_Regular_TextLight}"/>
-                            <Label Text="{Binding UsualText}" Style="{StaticResource lbl10_Regular_TextMuted}" Margin="0,1,0,0"/>
+                            <Label Text="{Binding UsualText}" Style="{StaticResource lbl11_Regular_TextMuted}" Margin="0,1,0,0"/>
                         </VerticalStackLayout>
                     </Grid>
                 </Border>

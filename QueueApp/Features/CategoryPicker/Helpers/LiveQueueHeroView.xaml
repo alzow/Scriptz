@@ -25,7 +25,7 @@
                 </HorizontalStackLayout>
                 <Label Grid.Column="1"
                        Text="{Binding ActiveEntry.BusinessName, Source={x:Reference Root}}"
-                       Style="{StaticResource lbl11_Bold_TextMid}"
+                       Style="{StaticResource lbl12_Bold_TextMid}"
                        VerticalOptions="Center"/>
             </Grid>
 
@@ -40,7 +40,7 @@
                         <Label x:Name="CountdownLabel"
                                HorizontalOptions="Center"
                                Style="{StaticResource lbl18_Bold_Countdown}"/>
-                        <Label Text="TO GO" Style="{StaticResource SectionTitle}" FontSize="8" HorizontalOptions="Center">
+                        <Label Text="TO GO" Style="{StaticResource SectionTitle}" HorizontalOptions="Center">
                             <Label.Triggers>
                                 <DataTrigger TargetType="Label"
                                              Binding="{Binding ActiveEntry.IsBeingServed, Source={x:Reference Root}}"
@@ -69,7 +69,7 @@
                     </Label>
                     <VerticalStackLayout Spacing="1"
                            IsVisible="{Binding ActiveEntry.HasProgress, Source={x:Reference Root}}">
-                        <Label Text="LATEST UPDATE" Style="{StaticResource SectionTitle_Accent}" FontSize="8"/>
+                        <Label Text="LATEST UPDATE" Style="{StaticResource SectionTitle_Accent}"/>
                         <Label Text="{Binding ActiveEntry.ProgressStatus, Source={x:Reference Root}}"
                                Style="{StaticResource lbl13_Regular_Accent}"/>
                     </VerticalStackLayout>

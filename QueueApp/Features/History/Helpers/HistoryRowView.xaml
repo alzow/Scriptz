@@ -33,7 +33,7 @@
                        Style="{StaticResource lbl14_Bold_HistoryRow}"
                        LineBreakMode="TailTruncation"/>
                 <Label Text="{Binding MetaLine}"
-                       Style="{StaticResource lbl11_Regular_HistoryMeta}"
+                       Style="{StaticResource lbl12_Regular_HistoryMeta}"
                        LineBreakMode="TailTruncation"/>
             </VerticalStackLayout>
 
@@ -50,12 +50,12 @@
                         <tpl:ThemedIcon Icon="ic_alert" WidthRequest="10" HeightRequest="10"
                                IsVisible="{Binding ShowWarningIcon}" VerticalOptions="Center"/>
                         <Label Text="{Binding StatusText}"
-                               Style="{StaticResource lbl9_Bold_StatusPill}"
+                               Style="{StaticResource lbl11_Bold_StatusPill}"
                                TextColor="{Binding StatusInk}"/>
                     </HorizontalStackLayout>
                 </Border>
                 <Label Text="{Binding TimeText}"
-                       Style="{StaticResource lbl10_Regular_Timestamp}"
+                       Style="{StaticResource lbl11_Regular_Timestamp}"
                        HorizontalOptions="End"/>
             </VerticalStackLayout>
         </Grid>

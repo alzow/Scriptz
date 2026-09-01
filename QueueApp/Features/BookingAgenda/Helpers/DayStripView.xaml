@@ -16,7 +16,7 @@
                         <Grid>
                             <VerticalStackLayout Spacing="4" VerticalOptions="Center">
                                 <Label Text="{Binding DayText}" HorizontalOptions="Center"
-                                       Style="{StaticResource lbl9_Mono_TextMuted_Selectable}"/>
+                                       Style="{StaticResource lbl11_Mono_TextMuted_Selectable}"/>
                                 <Label Text="{Binding DateText}" HorizontalOptions="Center"
                                        Style="{StaticResource lbl18_Mono_TextPrimary_Selectable}"/>
                             </VerticalStackLayout>

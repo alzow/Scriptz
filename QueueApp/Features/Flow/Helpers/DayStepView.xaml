@@ -23,12 +23,12 @@
                             </Border.GestureRecognizers>
                             <VerticalStackLayout Spacing="5">
                                 <Label Text="{Binding DayOfWeekText}" HorizontalOptions="Center"
-                                       Style="{StaticResource lbl9_Mono_Day}"/>
+                                       Style="{StaticResource lbl11_Mono_Day}"/>
                                 <Label Text="{Binding DayNumberText}" HorizontalOptions="Center"
                                        Style="{StaticResource lbl18_Bold_Day}"/>
                                 <Label Text="{Binding FreeText}" HorizontalOptions="Center"
                                        LineBreakMode="TailTruncation"
-                                       Style="{StaticResource lbl9_Regular_Day}"/>
+                                       Style="{StaticResource lbl11_Regular_Day}"/>
                             </VerticalStackLayout>
                         </Border>
                     </DataTemplate>
@@ -54,7 +54,7 @@
             </Border>
 
             <Label Text="{Binding DayFineprint, Source={x:Reference Root}}" Margin="20,14,20,20"
-                   Style="{StaticResource lbl11_Regular_TextLight}"/>
+                   Style="{StaticResource lbl12_Regular_TextLight}"/>
         </VerticalStackLayout>
     </ScrollView>
 

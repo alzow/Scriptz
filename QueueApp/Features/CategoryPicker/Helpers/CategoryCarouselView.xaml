@@ -53,7 +53,7 @@
                             </DataTrigger>
                         </Image.Triggers>
                     </Image>
-                    <Label Text="{Binding Display}" Style="{StaticResource lbl11_Medium_White}"
+                    <Label Text="{Binding Display}" Style="{StaticResource lbl12_Medium_White}"
                            HorizontalOptions="Center" HorizontalTextAlignment="Center"
                            LineBreakMode="TailTruncation"/>
                 </VerticalStackLayout>

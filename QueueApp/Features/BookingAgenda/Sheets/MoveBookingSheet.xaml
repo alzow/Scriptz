@@ -21,12 +21,12 @@
                     <Label Text="{Binding TitleText, Source={x:Reference Root}}"
                            Style="{StaticResource lbl16_Bold_TextDark}"/>
                     <Label Text="{Binding CurrentText, Source={x:Reference Root}}"
-                           Style="{StaticResource lbl11_Regular_TextLight}"/>
+                           Style="{StaticResource lbl12_Regular_TextLight}"/>
                     <Label Text="{Binding ServiceText, Source={x:Reference Root}}"
-                           Style="{StaticResource lbl10_Mono_TextFaint}" Margin="0,3,0,0"/>
+                           Style="{StaticResource lbl11_Mono_TextFaint}" Margin="0,3,0,0"/>
                 </VerticalStackLayout>
 
-                <Label Text="DAY" Style="{StaticResource lbl9_Mono_TextMuted}" Margin="0,16,0,8"/>
+                <Label Text="DAY" Style="{StaticResource lbl11_Mono_TextMuted}" Margin="0,16,0,8"/>
                 <Border Style="{StaticResource brd12_Cream}" Padding="10,4">
                     <DatePicker Date="{Binding Date, Source={x:Reference Root}}"
                                 MinimumDate="{Binding MinimumDate, Source={x:Reference Root}}"
@@ -53,7 +53,7 @@
                     </HorizontalStackLayout>
                 </ScrollView>
 
-                <Label Text="WHEN" Style="{StaticResource lbl9_Mono_TextMuted}" Margin="0,16,0,9"/>
+                <Label Text="WHEN" Style="{StaticResource lbl11_Mono_TextMuted}" Margin="0,16,0,9"/>
 
                 <ActivityIndicator IsRunning="{Binding IsLoadingSlots, Source={x:Reference Root}}"
                                    IsVisible="{Binding IsLoadingSlots, Source={x:Reference Root}}"

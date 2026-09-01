@@ -10,14 +10,14 @@
             <VerticalStackLayout Grid.Column="0" Spacing="4" HorizontalOptions="Center">
                 <Label Text="{Binding BookedCountText, Source={x:Reference Root}}"
                        Style="{StaticResource lbl16_Mono_TextPrimary}" HorizontalOptions="Center"/>
-                <Label Text="Booked" Style="{StaticResource lbl9_Regular_TextLight}" HorizontalOptions="Center"/>
+                <Label Text="Booked" Style="{StaticResource lbl11_Regular_TextLight}" HorizontalOptions="Center"/>
             </VerticalStackLayout>
             <BoxView Grid.Column="1" WidthRequest="1" HeightRequest="22"
                      Style="{StaticResource bx_Divider}" VerticalOptions="Center"/>
             <VerticalStackLayout Grid.Column="2" Spacing="4" HorizontalOptions="Center">
                 <Label Text="{Binding FreeText, Source={x:Reference Root}}"
                        Style="{StaticResource lbl16_Mono_TextPrimary}" HorizontalOptions="Center"/>
-                <Label Text="Free" Style="{StaticResource lbl9_Regular_TextLight}" HorizontalOptions="Center"/>
+                <Label Text="Free" Style="{StaticResource lbl11_Regular_TextLight}" HorizontalOptions="Center"/>
             </VerticalStackLayout>
             <BoxView Grid.Column="3" WidthRequest="1" HeightRequest="22"
                      Style="{StaticResource bx_Divider}" VerticalOptions="Center"/>
@@ -25,7 +25,7 @@
                 <Label Text="{Binding RevenueText, Source={x:Reference Root}}"
                        Style="{StaticResource lbl16_Mono_TextPrimary}" HorizontalOptions="Center"/>
                 <Label Text="{Binding RevenueLabel, Source={x:Reference Root}}"
-                       Style="{StaticResource lbl9_Regular_TextLight}" HorizontalOptions="Center"/>
+                       Style="{StaticResource lbl11_Regular_TextLight}" HorizontalOptions="Center"/>
             </VerticalStackLayout>
             <BoxView Grid.Column="5" WidthRequest="1" HeightRequest="22"
                      Style="{StaticResource bx_Divider}" VerticalOptions="Center"/>
@@ -33,7 +33,7 @@
                 <Label Text="{Binding ResourceCountText, Source={x:Reference Root}}"
                        Style="{StaticResource lbl16_Mono_TextMuted}" HorizontalOptions="Center"/>
                 <Label Text="{Binding ResourceCountLabel, Source={x:Reference Root}}"
-                       Style="{StaticResource lbl9_Regular_TextLight}" HorizontalOptions="Center"/>
+                       Style="{StaticResource lbl11_Regular_TextLight}" HorizontalOptions="Center"/>
             </VerticalStackLayout>
         </Grid>
     </Border>
