@@ -3,14 +3,20 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.Auth"
              xmlns:helpers="clr-namespace:QueueApp.Features.Auth.Helpers"
+             xmlns:topbar="clr-namespace:QueueApp.Shared.Templates.TopBar"
              x:Class="QueueApp.Features.Auth.LoginPage"
              x:DataType="vm:LoginPageViewModel"
              NavigationPage.HasNavigationBar="False"
              Style="{StaticResource NavigationPageStyle}">
 
-    <Grid Style="{StaticResource grid_Page}">
-        <ScrollView>
-            <VerticalStackLayout Spacing="0" Padding="0,36,0,0">
+    <Grid RowDefinitions="Auto,*" Style="{StaticResource grid_Page}">
+
+        <topbar:TopBarView Grid.Row="0"
+                           GoBackCommand="{Binding GoBackCommand}"
+                           IsVisible="{Binding CanGoBack}"/>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="0" Padding="0,10,0,0">
 
                 <helpers:AuthPageHeaderView TitleText="{Binding HeadingText}"
                                             LeadText="{Binding LeadText}"/>
@@ -24,16 +30,12 @@
                     ErrorMessage="{Binding ErrorMessage}"
                     IsSigningIn="{Binding IsSigningIn}"
                     CanSubmit="{Binding CanSubmit}"
-                    SignInCommand="{Binding LoginCommand}"/>
-
-                <helpers:AuthFooterLinkView
-                    Margin="24,0,24,28"
-                    PromptText="New here?"
-                    ActionText="Create an account"
-                    ActionCommand="{Binding NavigateToRegisterCommand}"/>
+                    SignInCommand="{Binding LoginCommand}"
+                    CreateAccountCommand="{Binding NavigateToRegisterCommand}"/>
 
             </VerticalStackLayout>
         </ScrollView>
+
     </Grid>
 
 </ContentPage>

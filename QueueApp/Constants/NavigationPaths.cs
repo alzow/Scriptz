@@ -9,9 +9,11 @@ public static class NavigationPaths
     public const string Welcome              = "/NavigationPage/WelcomePage";
 
     // ── Auth ───────────────────────────────────────────────────────────────────
-    // Register is pushed onto whatever opened it — the welcome carousel or sign-in. Login is
-    // always absolute: it is the root a signed-out customer belongs on, so it is never stacked.
+    // Both relative names push onto whatever opened them, so the carousel stays underneath and the
+    // back chevron works. Login is also reachable absolutely, which is how the splash, a sign-out
+    // and a finished sign-up put a signed-out customer back on the root they belong on.
     public const string RegisterPage         = "RegisterPage";
+    public const string LoginPage            = "LoginPage";
     public const string Login                = "/NavigationPage/LoginPage";
 
 

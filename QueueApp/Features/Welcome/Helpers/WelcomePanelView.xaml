@@ -4,24 +4,27 @@
              x:Name="Root"
              x:Class="QueueApp.Features.Welcome.Helpers.WelcomePanelView">
 
-    <Grid RowDefinitions="*,Auto" Padding="24,2,24,0">
+    <Grid RowDefinitions="*,Auto">
 
         <Border Grid.Row="0"
-                Style="{StaticResource brd20_WelcomeArt}"
-                Padding="20,16">
+                Style="{StaticResource brd24_WelcomeArt}"
+                Margin="24,12,24,0"
+                Padding="18,22">
             <Image Source="{Binding IllustrationSource, Source={x:Reference Root}}"
                    Aspect="AspectFit"
                    HorizontalOptions="Fill"
                    VerticalOptions="Fill"/>
         </Border>
 
-        <VerticalStackLayout Grid.Row="1" Spacing="9" Margin="0,22,0,0">
+        <VerticalStackLayout Grid.Row="1" Spacing="0" Padding="26,26,26,0">
             <Label Text="{Binding NumberText, Source={x:Reference Root}}"
-                   Style="{StaticResource lbl13_Mono_PanelNumber}"/>
+                   Style="{StaticResource lbl11_Mono_PanelNumber}"
+                   Margin="0,0,0,12"/>
             <Label Text="{Binding HeadlineText, Source={x:Reference Root}}"
                    Style="{StaticResource lbl30_Bold_WelcomeHeadline}"/>
             <Label Text="{Binding BodyText, Source={x:Reference Root}}"
-                   Style="{StaticResource lbl15_Regular_WelcomeBody}"/>
+                   Style="{StaticResource lbl14_Regular_WelcomeBody}"
+                   Margin="0,14,0,0"/>
         </VerticalStackLayout>
 
     </Grid>

@@ -18,23 +18,25 @@ public partial class WelcomePageViewModel : BaseViewModel
     private const string SecondaryCta = "I already have one";
     private const string Footnote = "Free to use. Pay the shop the way you always have.";
 
+    // TODO: the two-line break points below are hand-tuned for English and will not survive a
+    // translation pass — see the welcome spec's note on copy in other languages.
     private const string DiscoverNumber = "01";
-    private const string DiscoverHeadline = "See what's open around you";
+    private const string DiscoverHeadline = "See what's open\naround you";
     private const string DiscoverBody = "Live waits where there's a queue, and the next free slot where there isn't. Barbers, car washes, clinics.";
     private const string DiscoverArt = "art_welcome_discover.png";
 
     private const string JoinNumber = "02";
-    private const string JoinHeadline = "Take your place from your couch";
+    private const string JoinHeadline = "Take your place\nfrom your couch";
     private const string JoinBody = "Walk-in shops let you join from wherever you are and hold your spot. No standing around, no bench.";
     private const string JoinArt = "art_welcome_join.png";
 
     private const string BookNumber = "03";
-    private const string BookHeadline = "Or book a slot, if that's their way";
+    private const string BookHeadline = "Or book a slot,\nif that's their way";
     private const string BookBody = "Some places work on appointments. Pick a time that suits you and they'll confirm it.";
     private const string BookArt = "art_welcome_book.png";
 
     private const string LeaveNumber = "04";
-    private const string LeaveHeadline = "Either way, we'll say when to leave";
+    private const string LeaveHeadline = "Either way, we'll say\nwhen to leave";
     private const string LeaveBody = "A nudge that accounts for how long it takes you to get there. Arrive as your turn comes up.";
     private const string LeaveArt = "art_welcome_leave.png";
 
@@ -251,7 +253,9 @@ public partial class WelcomePageViewModel : BaseViewModel
         try
         {
             RetireAutoAdvance();
-            await NavigationService.NavigateAsync(NavigationPaths.Login);
+            await NavigationService.NavigateAsync(
+                NavigationPaths.LoginPage,
+                new NavigationParameters { { NavigationKeys.CanGoBack, true } });
         }
         catch (Exception exception)
         {

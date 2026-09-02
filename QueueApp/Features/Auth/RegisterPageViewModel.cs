@@ -140,19 +140,6 @@ public partial class RegisterPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    public async Task NavigateToLoginAsync()
-    {
-        try
-        {
-            await NavigationService.NavigateAsync(NavigationPaths.Login);
-        }
-        catch (Exception exception)
-        {
-            await HandleExceptionAsync(exception);
-        }
-    }
-
-    [RelayCommand]
     public async Task GoBackAsync()
     {
         try

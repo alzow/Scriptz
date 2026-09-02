@@ -10,6 +10,7 @@ public partial class QueueEntry : ContentView, IValidationView
     public static readonly BindableProperty ShowClearTextButtonProperty = BindableProperty.Create(nameof(ShowClearTextButton), typeof(bool), typeof(QueueEntry), default(bool));
     public static readonly BindableProperty InputTypeProperty = BindableProperty.Create(nameof(InputType), typeof(Keyboard), typeof(QueueEntry), Keyboard.Plain);
     public static readonly BindableProperty IsPasswordProperty = BindableProperty.Create(nameof(IsPassword), typeof(bool), typeof(QueueEntry), default(bool), propertyChanged: OnIsPasswordChanged);
+    public static readonly BindableProperty ShowRevealButtonProperty = BindableProperty.Create(nameof(ShowRevealButton), typeof(bool), typeof(QueueEntry), default(bool), propertyChanged: OnShowRevealButtonChanged);
     public static readonly BindableProperty ReturnTypeProperty = BindableProperty.Create(nameof(ReturnType), typeof(ReturnType), typeof(QueueEntry), ReturnType.Done);
     public static readonly BindableProperty MaxLengthProperty = BindableProperty.Create(nameof(MaxLength), typeof(int), typeof(QueueEntry), 256);
     public static readonly BindableProperty IsReadOnlyProperty = BindableProperty.Create(nameof(IsReadOnly), typeof(bool), typeof(QueueEntry), default(bool), propertyChanged: OnIsReadOnlyChanged);
@@ -54,6 +55,12 @@ public partial class QueueEntry : ContentView, IValidationView
     {
         get => (bool)GetValue(IsPasswordProperty);
         set => SetValue(IsPasswordProperty, value);
+    }
+
+    public bool ShowRevealButton
+    {
+        get => (bool)GetValue(ShowRevealButtonProperty);
+        set => SetValue(ShowRevealButtonProperty, value);
     }
 
     public ReturnType ReturnType
@@ -128,7 +135,36 @@ public partial class QueueEntry : ContentView, IValidationView
 
     private static void OnIsPasswordChanged(BindableObject bindable, object oldValue, object newValue)
     {
-        ((QueueEntry)bindable).QueueEntryControl.IsPassword = (bool)newValue;
+        var control = (QueueEntry)bindable;
+
+        control.QueueEntryControl.IsPassword = (bool)newValue;
+        control.ApplyRevealButtonState();
+    }
+
+    private static void OnShowRevealButtonChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        ((QueueEntry)bindable).ApplyRevealButtonState();
+    }
+
+    // The eye only exists where there is something hidden to reveal, so it follows IsPassword as
+    // well as the opt-in: a caller that sets the toggle on a plain field gets nothing.
+    private void ApplyRevealButtonState()
+    {
+        RevealButton.IsVisible = ShowRevealButton && IsPassword;
+
+        if (!RevealButton.IsVisible)
+        {
+            QueueEntryControl.IsPassword = IsPassword;
+            RevealButton.Icon = "ic_eye";
+        }
+    }
+
+    private void OnRevealButtonClicked(object sender, EventArgs e)
+    {
+        var isHidden = QueueEntryControl.IsPassword;
+
+        QueueEntryControl.IsPassword = !isHidden;
+        RevealButton.Icon = isHidden ? "ic_eye_off" : "ic_eye";
     }
 
     private static void OnIsReadOnlyChanged(BindableObject bindable, object oldValue, object newValue)

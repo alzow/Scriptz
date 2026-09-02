@@ -24,14 +24,21 @@
                                Validator="{Binding PasswordValidator, Source={x:Reference Root}}"
                                SharedStateManager="{Binding FormStateManager, Source={x:Reference Root}}"/>
 
-        <controls:AlzowLoadingButton
-            Text="Sign in"
-            LoadingText="Signing in…"
-            Command="{Binding SignInCommand, Source={x:Reference Root}}"
-            IsLoading="{Binding IsSigningIn, Source={x:Reference Root}}"
-            IsEnabled="{Binding CanSubmit, Source={x:Reference Root}}"
-            Margin="0,6,0,0"
-            ButtonStyle="{StaticResource btn16_Bold_AuthSubmit}"/>
+        <VerticalStackLayout Spacing="10" Margin="0,6,0,0">
+
+            <controls:AlzowLoadingButton
+                Text="Sign in"
+                LoadingText="Signing in…"
+                Command="{Binding SignInCommand, Source={x:Reference Root}}"
+                IsLoading="{Binding IsSigningIn, Source={x:Reference Root}}"
+                IsEnabled="{Binding CanSubmit, Source={x:Reference Root}}"
+                ButtonStyle="{StaticResource btn16_Bold_AuthSubmit}"/>
+
+            <Button Text="New here? Create an account"
+                    Command="{Binding CreateAccountCommand, Source={x:Reference Root}}"
+                    Style="{StaticResource btn15_Bold_AuthSwap}"/>
+
+        </VerticalStackLayout>
 
     </VerticalStackLayout>
 

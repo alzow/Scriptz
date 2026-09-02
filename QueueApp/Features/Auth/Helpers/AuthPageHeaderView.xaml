@@ -4,11 +4,11 @@
              x:Name="Root"
              x:Class="QueueApp.Features.Auth.Helpers.AuthPageHeaderView">
 
-    <VerticalStackLayout Spacing="8" Padding="24,20,24,0">
+    <VerticalStackLayout Spacing="10" Padding="24,8,24,0">
         <Label Text="{Binding TitleText, Source={x:Reference Root}}"
-               Style="{StaticResource lbl26_Bold_PageTitle}"/>
+               Style="{StaticResource lbl27_Bold_AuthTitle}"/>
         <Label Text="{Binding LeadText, Source={x:Reference Root}}"
-               Style="{StaticResource lbl14_Regular_AuthLead}"
+               Style="{StaticResource lbl13_Regular_AuthLead}"
                IsVisible="{Binding LeadText, Source={x:Reference Root}, Converter={StaticResource IsNotNullOrEmptyConverter}}"/>
     </VerticalStackLayout>
 

@@ -24,6 +24,10 @@ public static class NavigationKeys
     public const string PreferredDate   = "preferredDate";
     public const string PreferredStart  = "preferredStart";
 
+    // Set when sign-in is pushed onto something the customer can return to — the welcome carousel.
+    // Absent when it is the navigation root, where a back chevron would have nowhere to go.
+    public const string CanGoBack       = "canGoBack";
+
     // Set by an entry point that is not a cold first run — a deep link or a notification open.
     // The splash sends a signed-out customer to sign-in rather than the welcome carousel when it
     // is present, because someone who tapped a link to a specific shop did not ask for the pitch.

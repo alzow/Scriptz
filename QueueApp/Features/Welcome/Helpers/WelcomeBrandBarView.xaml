@@ -4,28 +4,17 @@
              x:Name="Root"
              x:Class="QueueApp.Features.Welcome.Helpers.WelcomeBrandBarView">
 
-    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Padding="24,18,24,10">
+    <HorizontalStackLayout Spacing="9" Padding="24,22,24,0">
 
-        <Border Grid.Column="0"
-                Style="{StaticResource brd14_Orange}"
-                WidthRequest="34" HeightRequest="34"
-                VerticalOptions="Center">
-            <Image Source="logo_monogram_reversed"
-                   WidthRequest="19" HeightRequest="19"
-                   HorizontalOptions="Center" VerticalOptions="Center"/>
-        </Border>
+        <Label Text="{Binding BrandText, Source={x:Reference Root}}"
+               Style="{StaticResource lbl19_Bold_Wordmark}"
+               VerticalOptions="End"/>
 
-        <Label Grid.Column="1"
-               Text="{Binding BrandText, Source={x:Reference Root}}"
-               Style="{StaticResource lbl20_Bold_Wordmark}"
-               VerticalOptions="Center"/>
-
-        <Label Grid.Column="2"
-               Text="{Binding EyebrowText, Source={x:Reference Root}}"
-               Style="{StaticResource lbl11_Mono_TextFaint}"
-               VerticalOptions="Center"
+        <Label Text="{Binding EyebrowText, Source={x:Reference Root}}"
+               Style="{StaticResource lbl11_Mono_Wordmark}"
+               VerticalOptions="End"
                IsVisible="{Binding EyebrowText, Source={x:Reference Root}, Converter={StaticResource IsNotNullOrEmptyConverter}}"/>
 
-    </Grid>
+    </HorizontalStackLayout>
 
 </ContentView>

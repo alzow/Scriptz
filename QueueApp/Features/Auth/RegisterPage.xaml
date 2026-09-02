@@ -15,7 +15,7 @@
                            GoBackCommand="{Binding GoBackCommand}"/>
 
         <ScrollView Grid.Row="1">
-            <VerticalStackLayout Spacing="0">
+            <VerticalStackLayout Spacing="0" Padding="0,0,0,28">
 
                 <helpers:AuthPageHeaderView TitleText="{Binding HeadingText}"
                                             LeadText="{Binding LeadText}"/>
@@ -38,12 +38,6 @@
                     IsRegistering="{Binding IsRegistering}"
                     CanSubmit="{Binding CanSubmit}"
                     RegisterCommand="{Binding RegisterCommand}"/>
-
-                <helpers:AuthFooterLinkView
-                    Margin="24,0,24,28"
-                    PromptText="Already have an account?"
-                    ActionText="Sign in"
-                    ActionCommand="{Binding NavigateToLoginCommand}"/>
 
             </VerticalStackLayout>
         </ScrollView>

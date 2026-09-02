@@ -762,13 +762,13 @@
         WelcomePage. The illustration sits in the same Surface card with the same Border stroke as
         every other card in the app — it is not a floating hero with its own treatment.
     -->
-    <Style x:Key="brd20_WelcomeArt" TargetType="Border">
+    <Style x:Key="brd24_WelcomeArt" TargetType="Border">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
         <Setter Property="StrokeThickness" Value="1"/>
         <Setter Property="StrokeShape">
             <Setter.Value>
-                <RoundRectangle CornerRadius="20"/>
+                <RoundRectangle CornerRadius="24"/>
             </Setter.Value>
         </Setter>
     </Style>
@@ -781,9 +781,9 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
         <Setter Property="Stroke" Value="Transparent"/>
         <Setter Property="StrokeThickness" Value="0"/>
-        <Setter Property="StrokeShape" Value="RoundRectangle 3"/>
-        <Setter Property="HeightRequest" Value="6"/>
-        <Setter Property="WidthRequest" Value="6"/>
+        <Setter Property="StrokeShape" Value="RoundRectangle 4"/>
+        <Setter Property="HeightRequest" Value="7"/>
+        <Setter Property="WidthRequest" Value="7"/>
         <Setter Property="VerticalOptions" Value="Center"/>
         <Style.Triggers>
             <DataTrigger TargetType="Border" Binding="{Binding IsActive}" Value="True">

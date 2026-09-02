@@ -4,7 +4,7 @@
              x:Name="Root"
              x:Class="QueueApp.Features.Welcome.Helpers.WelcomeCtaBlockView">
 
-    <VerticalStackLayout Spacing="10" Padding="24,16,24,22">
+    <VerticalStackLayout Spacing="10" Padding="24,20,24,26">
 
         <Button Text="{Binding PrimaryText, Source={x:Reference Root}}"
                 Command="{Binding PrimaryCommand, Source={x:Reference Root}}"
@@ -15,9 +15,9 @@
                 Style="{StaticResource btn15_Bold_WelcomeSecondary}"/>
 
         <Label Text="{Binding FootnoteText, Source={x:Reference Root}}"
-               Style="{StaticResource lbl12_Regular_CtaFootnote}"
+               Style="{StaticResource lbl11_Regular_CtaFootnote}"
                HorizontalOptions="Center"
-               Margin="0,4,0,0"/>
+               Margin="0,6,0,0"/>
 
     </VerticalStackLayout>
 

@@ -15,6 +15,7 @@
                           Text="{Binding Text, Source={x:Reference Root}}"
                           InputType="{Binding InputType, Source={x:Reference Root}}"
                           IsPassword="{Binding IsPassword, Source={x:Reference Root}}"
+                          ShowRevealButton="{Binding IsPassword, Source={x:Reference Root}}"
                           ReturnType="{Binding ReturnType, Source={x:Reference Root}}"
                           Validator="{Binding Validator, Source={x:Reference Root}}"
                           SharedStateManager="{Binding SharedStateManager, Source={x:Reference Root}}"

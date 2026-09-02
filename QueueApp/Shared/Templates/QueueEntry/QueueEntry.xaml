@@ -40,20 +40,38 @@
                     MaxLength="{Binding Source={x:Reference Root}, Path=MaxLength}"
                     ReturnType="{Binding Source={x:Reference Root}, Path=ReturnType}"/>
 
-                <tpl:ThemedIconButton
-                    x:Name="ClearButton"
+                <HorizontalStackLayout
                     Grid.Column="2"
                     Margin="0,0,12,0"
-                    Padding="0"
-                    BackgroundColor="Transparent"
-                    MinimumHeightRequest="16"
-                    MaximumWidthRequest="16"
-                    Aspect="AspectFit"
+                    Spacing="10"
                     HorizontalOptions="End"
-                    VerticalOptions="Center"
-                    IsVisible="False"
-                    Icon="ic_close"
-                    Clicked="OnClearButtonClicked"/>
+                    VerticalOptions="Center">
+
+                    <tpl:ThemedIconButton
+                        x:Name="ClearButton"
+                        Padding="0"
+                        BackgroundColor="Transparent"
+                        MinimumHeightRequest="16"
+                        MaximumWidthRequest="16"
+                        Aspect="AspectFit"
+                        VerticalOptions="Center"
+                        IsVisible="False"
+                        Icon="ic_close"
+                        Clicked="OnClearButtonClicked"/>
+
+                    <tpl:ThemedIconButton
+                        x:Name="RevealButton"
+                        Padding="0"
+                        BackgroundColor="Transparent"
+                        MinimumHeightRequest="18"
+                        MaximumWidthRequest="18"
+                        Aspect="AspectFit"
+                        VerticalOptions="Center"
+                        IsVisible="False"
+                        Icon="ic_eye"
+                        Clicked="OnRevealButtonClicked"/>
+
+                </HorizontalStackLayout>
             </Grid>
         </Border>
 

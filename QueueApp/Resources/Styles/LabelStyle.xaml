@@ -627,44 +627,59 @@
 
     <Style x:Key="lbl30_Bold_WelcomeHeadline" TargetType="Label">
         <Setter Property="FontSize" Value="30"/>
-        <Setter Property="FontFamily" Value="RobotoBold"/>
-        <Setter Property="CharacterSpacing" Value="-0.5"/>
-        <Setter Property="LineHeight" Value="1.12"/>
+        <Setter Property="FontFamily" Value="RobotoBlack"/>
+        <Setter Property="CharacterSpacing" Value="-1.35"/>
+        <Setter Property="LineHeight" Value="1.08"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
     </Style>
 
-    <Style x:Key="lbl15_Regular_WelcomeBody" TargetType="Label">
-        <Setter Property="FontSize" Value="15"/>
-        <Setter Property="LineHeight" Value="1.45"/>
+    <Style x:Key="lbl14_Regular_WelcomeBody" TargetType="Label">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="LineHeight" Value="1.6"/>
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
     </Style>
 
     <!-- 01 / 02 / 03 / 04. Tells someone how long this is before they commit to swiping. -->
-    <Style x:Key="lbl13_Mono_PanelNumber" TargetType="Label" BasedOn="{StaticResource lbl13_Mono_Green}">
-        <Setter Property="CharacterSpacing" Value="2.2"/>
+    <Style x:Key="lbl11_Mono_PanelNumber" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_Green}">
+        <Setter Property="CharacterSpacing" Value="3.1"/>
     </Style>
 
-    <!-- The wordmark on the welcome header. -->
-    <Style x:Key="lbl20_Bold_Wordmark" TargetType="Label" BasedOn="{StaticResource lbl20_Bold_TextDark}">
-        <Setter Property="CharacterSpacing" Value="-0.4"/>
+    <!-- The welcome header's lockup: the wordmark and, beside it on the same baseline, the area. -->
+    <Style x:Key="lbl19_Bold_Wordmark" TargetType="Label">
+        <Setter Property="FontSize" Value="19"/>
+        <Setter Property="FontFamily" Value="RobotoBlack"/>
+        <Setter Property="CharacterSpacing" Value="-0.95"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
+    </Style>
+
+    <Style x:Key="lbl11_Mono_Wordmark" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_TextMuted}">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="CharacterSpacing" Value="2.2"/>
     </Style>
 
     <!--
         "Free to use. Pay the shop the way you always have." TextDim on purpose: it answers a
         question rather than making a claim, and it must not compete with the CTA above it.
     -->
-    <Style x:Key="lbl12_Regular_CtaFootnote" TargetType="Label" BasedOn="{StaticResource lbl12_Regular_TextFaint}">
+    <Style x:Key="lbl11_Regular_CtaFootnote" TargetType="Label">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="LineHeight" Value="1.5"/>
         <Setter Property="HorizontalTextAlignment" Value="Center"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextDim}, Dark={StaticResource DarkTextDim}}"/>
     </Style>
 
     <!-- Auth pages: the one line under the header saying why an account exists at all. -->
-    <Style x:Key="lbl14_Regular_AuthLead" TargetType="Label">
-        <Setter Property="FontSize" Value="14"/>
-        <Setter Property="LineHeight" Value="1.4"/>
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
+    <Style x:Key="lbl27_Bold_AuthTitle" TargetType="Label">
+        <Setter Property="FontSize" Value="27"/>
+        <Setter Property="FontFamily" Value="RobotoBlack"/>
+        <Setter Property="CharacterSpacing" Value="-1.13"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
     </Style>
 
-    <!-- Forgot-password and the create/sign-in swap. A link, so it takes the purple text token. -->
-    <Style x:Key="lbl13_Bold_AuthLink" TargetType="Label" BasedOn="{StaticResource lbl13_Bold_Orange}"/>
+    <Style x:Key="lbl13_Regular_AuthLead" TargetType="Label">
+        <Setter Property="FontSize" Value="13.5"/>
+        <Setter Property="LineHeight" Value="1.55"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
+    </Style>
 
 </ResourceDictionary>

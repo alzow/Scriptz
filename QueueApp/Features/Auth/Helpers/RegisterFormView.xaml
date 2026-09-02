@@ -62,11 +62,10 @@
             Command="{Binding RegisterCommand, Source={x:Reference Root}}"
             IsLoading="{Binding IsRegistering, Source={x:Reference Root}}"
             IsEnabled="{Binding CanSubmit, Source={x:Reference Root}}"
-            Margin="0,6,0,0"
             ButtonStyle="{StaticResource btn16_Bold_AuthSubmit}"/>
 
         <Label Text="{Binding TermsText, Source={x:Reference Root}}"
-               Style="{StaticResource lbl12_Regular_CtaFootnote}"
+               Style="{StaticResource lbl11_Regular_CtaFootnote}"
                HorizontalOptions="Center"/>
 
     </VerticalStackLayout>
