@@ -217,4 +217,30 @@
         <Setter Property="MinimumWidthRequest" Value="76"/>
     </Style>
 
+    <!--
+        The welcome screen's pinned CTA pair. Both are full width and both carry their height here
+        rather than at the use site, because "identical on every panel, to the pixel" is the whole
+        point of the block and a per-panel HeightRequest is exactly how that drifts.
+    -->
+    <Style x:Key="btn17_Bold_WelcomePrimary" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+        <Setter Property="FontSize" Value="16.5"/>
+        <Setter Property="HeightRequest" Value="58"/>
+        <Setter Property="CornerRadius" Value="14"/>
+        <Setter Property="HorizontalOptions" Value="Fill"/>
+    </Style>
+
+    <Style x:Key="btn15_Bold_WelcomeSecondary" TargetType="Button" BasedOn="{StaticResource btn14_Bold_Neutral}">
+        <Setter Property="FontSize" Value="15.5"/>
+        <Setter Property="HeightRequest" Value="54"/>
+        <Setter Property="CornerRadius" Value="14"/>
+        <Setter Property="HorizontalOptions" Value="Fill"/>
+    </Style>
+
+    <!-- Submit on the auth pages, and the quieter swap beneath it. Same pair, same heights. -->
+    <Style x:Key="btn16_Bold_AuthSubmit" TargetType="Button" BasedOn="{StaticResource btn17_Bold_WelcomePrimary}">
+        <Setter Property="HeightRequest" Value="56"/>
+    </Style>
+
+    <Style x:Key="btn15_Bold_AuthSwap" TargetType="Button" BasedOn="{StaticResource btn15_Bold_WelcomeSecondary}"/>
+
 </ResourceDictionary>

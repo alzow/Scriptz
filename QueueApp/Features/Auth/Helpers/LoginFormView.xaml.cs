@@ -32,6 +32,9 @@ public partial class LoginFormView : ContentView
     public static readonly BindableProperty SignInCommandProperty = BindableProperty.Create(
         nameof(SignInCommand), typeof(ICommand), typeof(LoginFormView));
 
+    public static readonly BindableProperty CreateAccountCommandProperty = BindableProperty.Create(
+        nameof(CreateAccountCommand), typeof(ICommand), typeof(LoginFormView));
+
     public string EmailAddress
     {
         get => (string)GetValue(EmailAddressProperty);
@@ -84,6 +87,12 @@ public partial class LoginFormView : ContentView
     {
         get => (ICommand?)GetValue(SignInCommandProperty);
         set => SetValue(SignInCommandProperty, value);
+    }
+
+    public ICommand? CreateAccountCommand
+    {
+        get => (ICommand?)GetValue(CreateAccountCommandProperty);
+        set => SetValue(CreateAccountCommandProperty, value);
     }
 
     public LoginFormView()

@@ -1,5 +1,6 @@
 using System.Net;
 using CommunityToolkit.Mvvm.Input;
+using QueueApp.Constants;
 using QueueApp.Framework.Base;
 using QueueApp.Framework.Navigation;
 using QueueApp.Services.Auth;
@@ -16,6 +17,10 @@ public partial class RegisterPageViewModel : BaseViewModel
     #region Constants
     private const int PasswordMinimumLength = 6;
 
+    private const string Heading = "Create your account";
+    private const string Lead = "So we can hold your place and tell you when to leave.";
+    private const string Terms = "By continuing you agree to our terms and privacy policy.";
+
     private const string EmailTakenMessage = "That email is already registered. Try signing in instead.";
     private const string PhoneTakenMessage = "That mobile number is already registered. Try signing in instead.";
     private const string ShortPasswordMessage = "Your password is too short.";
@@ -27,6 +32,15 @@ public partial class RegisterPageViewModel : BaseViewModel
     #endregion
 
     #region Properties
+    public string HeadingText => Heading;
+    public string LeadText => Lead;
+
+    public string PasswordRuleText => $"At least {PasswordMinimumLength} characters.";
+
+    // TODO: link the two phrases once SupportLinks carries the terms and privacy URLs. A quiet
+    // line rather than a checkbox: a checkbox implies a choice that is not on offer.
+    public string TermsText => Terms;
+
     public ISharedStateManager FormStateManager { get; } = new FormValidators.SharedStateManager();
 
     public IValidator NameValidator { get; } = new FormValidators.RequiredValidator("Enter your name.");
@@ -104,7 +118,7 @@ public partial class RegisterPageViewModel : BaseViewModel
             }
 
             await _popupService.ShowAlertAsync("Almost there", ConfirmEmailMessage);
-            await NavigationService.GoBackAsync();
+            await NavigationService.NavigateAsync(NavigationPaths.Login);
         }
         catch (ApiException exception)
         {
@@ -126,7 +140,7 @@ public partial class RegisterPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    public async Task NavigateToLoginAsync()
+    public async Task GoBackAsync()
     {
         try
         {

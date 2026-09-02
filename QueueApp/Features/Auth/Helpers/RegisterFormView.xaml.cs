@@ -50,6 +50,12 @@ public partial class RegisterFormView : ContentView
     public static readonly BindableProperty RegisterCommandProperty = BindableProperty.Create(
         nameof(RegisterCommand), typeof(ICommand), typeof(RegisterFormView));
 
+    public static readonly BindableProperty PasswordRuleTextProperty = BindableProperty.Create(
+        nameof(PasswordRuleText), typeof(string), typeof(RegisterFormView), string.Empty);
+
+    public static readonly BindableProperty TermsTextProperty = BindableProperty.Create(
+        nameof(TermsText), typeof(string), typeof(RegisterFormView), string.Empty);
+
     public string DisplayName
     {
         get => (string)GetValue(DisplayNameProperty);
@@ -138,6 +144,18 @@ public partial class RegisterFormView : ContentView
     {
         get => (ICommand?)GetValue(RegisterCommandProperty);
         set => SetValue(RegisterCommandProperty, value);
+    }
+
+    public string PasswordRuleText
+    {
+        get => (string)GetValue(PasswordRuleTextProperty);
+        set => SetValue(PasswordRuleTextProperty, value);
+    }
+
+    public string TermsText
+    {
+        get => (string)GetValue(TermsTextProperty);
+        set => SetValue(TermsTextProperty, value);
     }
 
     public RegisterFormView()

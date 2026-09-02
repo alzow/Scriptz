@@ -7,68 +7,65 @@
              x:Name="Root"
              x:Class="QueueApp.Features.Auth.Helpers.RegisterFormView">
 
-    <VerticalStackLayout Padding="24,32,24,24" Spacing="16">
+    <VerticalStackLayout Padding="24,24,24,8" Spacing="18">
 
         <helpers:AuthInlineErrorView Message="{Binding ErrorMessage, Source={x:Reference Root}}"/>
 
-        <entry:QueueEntry
-            Placeholder="Your name"
-            Text="{Binding DisplayName, Source={x:Reference Root}}"
-            Validator="{Binding NameValidator, Source={x:Reference Root}}"
-            SharedStateManager="{Binding FormStateManager, Source={x:Reference Root}}"
-            ValidateOnTextChanged="True"
-            ReturnType="Next"/>
+        <helpers:AuthFieldView LabelText="YOUR NAME"
+                               Placeholder="Your name"
+                               HintText="Shops see this on their board. A first name and initial is plenty."
+                               Text="{Binding DisplayName, Source={x:Reference Root}}"
+                               ReturnType="Next"
+                               Validator="{Binding NameValidator, Source={x:Reference Root}}"
+                               SharedStateManager="{Binding FormStateManager, Source={x:Reference Root}}"/>
 
-        <entry:QueueEntry
-            Placeholder="Email"
-            Text="{Binding EmailAddress, Source={x:Reference Root}}"
-            InputType="Email"
-            Validator="{Binding EmailValidator, Source={x:Reference Root}}"
-            SharedStateManager="{Binding FormStateManager, Source={x:Reference Root}}"
-            ValidateOnTextChanged="True"
-            ReturnType="Next"/>
+        <helpers:AuthFieldView LabelText="EMAIL"
+                               Placeholder="you@example.co.za"
+                               Text="{Binding EmailAddress, Source={x:Reference Root}}"
+                               InputType="Email"
+                               ReturnType="Next"
+                               Validator="{Binding EmailValidator, Source={x:Reference Root}}"
+                               SharedStateManager="{Binding FormStateManager, Source={x:Reference Root}}"/>
 
-        <entry:QueueEntry
-            Placeholder="Mobile number"
-            Text="{Binding PhoneNumber, Source={x:Reference Root}}"
-            InputType="Telephone"
-            Validator="{Binding PhoneValidator, Source={x:Reference Root}}"
-            SharedStateManager="{Binding FormStateManager, Source={x:Reference Root}}"
-            ValidateOnTextChanged="True"
-            ReturnType="Next"/>
+        <helpers:AuthFieldView LabelText="MOBILE NUMBER"
+                               Placeholder="082 555 0148"
+                               HintText="How a shop reaches you if something changes. Only shared with shops you join."
+                               Text="{Binding PhoneNumber, Source={x:Reference Root}}"
+                               InputType="Telephone"
+                               ReturnType="Next"
+                               Validator="{Binding PhoneValidator, Source={x:Reference Root}}"
+                               SharedStateManager="{Binding FormStateManager, Source={x:Reference Root}}"/>
 
-        <entry:QueueEntry
-            Placeholder="Password"
-            Text="{Binding Password, Source={x:Reference Root}}"
-            IsPassword="True"
-            Validator="{Binding PasswordValidator, Source={x:Reference Root}}"
-            SharedStateManager="{Binding FormStateManager, Source={x:Reference Root}}"
-            ValidateOnTextChanged="True"
-            ReturnType="Next"/>
+        <helpers:AuthFieldView LabelText="PASSWORD"
+                               IsPassword="True"
+                               HintText="{Binding PasswordRuleText, Source={x:Reference Root}}"
+                               Text="{Binding Password, Source={x:Reference Root}}"
+                               ReturnType="Next"
+                               Validator="{Binding PasswordValidator, Source={x:Reference Root}}"
+                               SharedStateManager="{Binding FormStateManager, Source={x:Reference Root}}"/>
 
-        <VerticalStackLayout Spacing="4">
-            <entry:QueueEntry
-                Placeholder="Confirm password"
-                Text="{Binding ConfirmPassword, Source={x:Reference Root}}"
-                IsPassword="True"/>
+        <VerticalStackLayout Spacing="6">
+            <Label Text="CONFIRM PASSWORD"
+                   Style="{StaticResource SectionTitle}"
+                   Margin="2,0,0,0"/>
+            <entry:QueueEntry IsPassword="True"
+                              Text="{Binding ConfirmPassword, Source={x:Reference Root}}"/>
             <Label Text="Passwords don't match"
                    Style="{StaticResource lbl12_Regular_Danger}"
-                   Margin="12,0,0,0"
+                   Margin="2,0,2,0"
                    IsVisible="{Binding ShowPasswordMismatch, Source={x:Reference Root}}"/>
         </VerticalStackLayout>
 
         <controls:AlzowLoadingButton
-            Text="Create Account →"
+            Text="Create account"
             LoadingText="Creating account…"
             Command="{Binding RegisterCommand, Source={x:Reference Root}}"
             IsLoading="{Binding IsRegistering, Source={x:Reference Root}}"
             IsEnabled="{Binding CanSubmit, Source={x:Reference Root}}"
-            HeightRequest="54"
-            Margin="0,8,0,0"
-            ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
+            ButtonStyle="{StaticResource btn16_Bold_AuthSubmit}"/>
 
-        <Label Text="Pay on delivery · No upfront cost"
-               Style="{StaticResource lbl12_Regular_TextLight}"
+        <Label Text="{Binding TermsText, Source={x:Reference Root}}"
+               Style="{StaticResource lbl11_Regular_CtaFootnote}"
                HorizontalOptions="Center"/>
 
     </VerticalStackLayout>

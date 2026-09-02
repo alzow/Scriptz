@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Name="Root"
+             x:Class="QueueApp.Features.Welcome.Helpers.WelcomePanelView">
+
+    <Grid RowDefinitions="*,Auto">
+
+        <Border Grid.Row="0"
+                Style="{StaticResource brd24_WelcomeArt}"
+                Margin="24,12,24,0"
+                Padding="18,22">
+            <Image Source="{Binding IllustrationSource, Source={x:Reference Root}}"
+                   Aspect="AspectFit"
+                   HorizontalOptions="Fill"
+                   VerticalOptions="Fill"/>
+        </Border>
+
+        <VerticalStackLayout Grid.Row="1" Spacing="0" Padding="26,26,26,0">
+            <Label Text="{Binding NumberText, Source={x:Reference Root}}"
+                   Style="{StaticResource lbl11_Mono_PanelNumber}"
+                   Margin="0,0,0,12"/>
+            <Label Text="{Binding HeadlineText, Source={x:Reference Root}}"
+                   Style="{StaticResource lbl30_Bold_WelcomeHeadline}"/>
+            <Label Text="{Binding BodyText, Source={x:Reference Root}}"
+                   Style="{StaticResource lbl14_Regular_WelcomeBody}"
+                   Margin="0,14,0,0"/>
+        </VerticalStackLayout>
+
+    </Grid>
+
+</ContentView>

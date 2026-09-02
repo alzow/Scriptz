@@ -5,8 +5,15 @@ public static class NavigationPaths
     // ── App start ──────────────────────────────────────────────────────────────
     public const string AppStart             = "NavigationPage/QueueSplashPage";
 
+    // ── Onboarding ─────────────────────────────────────────────────────────────
+    public const string Welcome              = "/NavigationPage/WelcomePage";
+
     // ── Auth ───────────────────────────────────────────────────────────────────
+    // Both relative names push onto whatever opened them, so the carousel stays underneath and the
+    // back chevron works. Login is also reachable absolutely, which is how the splash, a sign-out
+    // and a finished sign-up put a signed-out customer back on the root they belong on.
     public const string RegisterPage         = "RegisterPage";
+    public const string LoginPage            = "LoginPage";
     public const string Login                = "/NavigationPage/LoginPage";
 
 
