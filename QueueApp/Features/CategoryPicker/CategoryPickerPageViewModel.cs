@@ -434,7 +434,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
             if (visitsTask is not null)
             {
                 FrequentBusinesses.Clear();
-                foreach (var item in BuildFrequentBusinesses(await visitsTask))
+                foreach (var item in BuildFrequentBusinesses(await visitsTask, SelectedCategory?.Key))
                     FrequentBusinesses.Add(item);
                 OnPropertyChanged(nameof(HasFrequentBusinesses));
             }
@@ -458,9 +458,17 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
 
     // Finished entries only: somewhere the customer joined and then left is not somewhere they go
     // often, and done_at is the one stamp that says a visit actually happened.
-    public static IEnumerable<FrequentBusinessItem> BuildFrequentBusinesses(List<MyQueueEntryResponse> visits) =>
+    //
+    // Scoped to the picked category the same way the businesses list is, so the two sections agree
+    // on what the customer is looking for: with Barbers picked, a barber they go to every month is
+    // relevant and the dentist they saw once is not. The filter is applied here rather than by
+    // re-reading the visits, since the entries already carry their business's category.
+    public static IEnumerable<FrequentBusinessItem> BuildFrequentBusinesses(
+        List<MyQueueEntryResponse> visits, string? categoryKey = null) =>
         visits
             .Where(v => v.BusinessId != Guid.Empty && v.DoneAt is not null)
+            .Where(v => string.IsNullOrEmpty(categoryKey)
+                || string.Equals(v.Category, categoryKey, StringComparison.OrdinalIgnoreCase))
             .GroupBy(v => v.BusinessId)
             .Select(g =>
             {
