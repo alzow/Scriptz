@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:QueueApp.Features.Flow.Visit"
              xmlns:helpers="clr-namespace:QueueApp.Features.Flow.Visit.Helpers"
              xmlns:header="clr-namespace:QueueApp.Shared.Templates.BusinessHeader"
+             xmlns:location="clr-namespace:QueueApp.Shared.Templates.LocationCard"
              x:Name="Root"
              x:Class="QueueApp.Features.Flow.Visit.VisitPage"
              x:DataType="vm:VisitPageViewModel"
@@ -19,12 +20,13 @@
                                    PillTone="{Binding StatusTone}"
                                    HasAction="{Binding HasPhone}"
                                    ActionIcon="ic_phone"
+                                   ActionText="Call"
                                    ActionCommand="{Binding CallShopCommand}"
                                    GoBackCommand="{Binding DoneCommand}"/>
 
         <ScrollView Grid.Row="1">
-            <VerticalStackLayout Spacing="14"
-                    Padding="16,4,16,16">
+            <VerticalStackLayout Spacing="16"
+                    Padding="20,4,20,20">
 
                 <Border Style="{StaticResource brd13_Success}"
                         IsVisible="{Binding ShowJustJoined}">
@@ -61,6 +63,12 @@
                                             NoteText="{Binding ShopNoteText}"
                                             IsFromShop="True"/>
 
+                <location:LocationCardView IsVisible="{Binding HasLocation}"
+                                           AddressLine="{Binding LocationAddress}"
+                                           DistanceText="{Binding DistanceText}"
+                                           HasDistance="{Binding HasDistance}"
+                                           OpenDirectionsCommand="{Binding OpenDirectionsCommand}"/>
+
             </VerticalStackLayout>
         </ScrollView>
 
@@ -72,17 +80,23 @@
                 VerticalOptions="Center"/>
 
         <helpers:VisitFooterView Grid.Row="2"
-                                 Margin="16"
+                                 Margin="20,0,20,20"
                                  IsVisible="{Binding HasRecord}"
                                  PrimaryActionText="{Binding PrimaryActionText}"
                                  PrimaryActionCommand="{Binding PrimaryActionCommand}"
-                                 OptionsCommand="{Binding OpenOptionsCommand}"
+                                 CanShare="{Binding CanShare}"
+                                 ShareCommand="{Binding ShareVisitCommand}"
+                                 CanAddToCalendar="{Binding CanAddToCalendar}"
+                                 AddToCalendarCommand="{Binding AddToCalendarCommand}"
+                                 HasDestructiveAction="{Binding HasDestructiveAction}"
+                                 DestructiveActionText="{Binding DestructiveActionText}"
+                                 DestructiveActionCommand="{Binding DestructiveActionCommand}"
                                  ShowPaymentLine="{Binding ShowPaymentLine}"/>
 
         <Border Grid.Row="2"
                 Style="{StaticResource brd13_Ghost}"
                 Padding="18,26"
-                Margin="16,0,16,16"
+                Margin="20,0,20,20"
                 IsVisible="{Binding ShowMissing}">
             <Label Text="That visit isn't there any more."
                    Style="{StaticResource lbl12_Regular_TextMuted}"

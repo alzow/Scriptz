@@ -5,9 +5,9 @@
              x:Name="Root"
              x:Class="QueueApp.Features.Flow.Visit.Helpers.VisitFactsSectionView">
 
-    <VerticalStackLayout Spacing="8">
+    <VerticalStackLayout Spacing="10">
         <Label Text="{Binding SectionTitle, Source={x:Reference Root}}"
-               Style="{StaticResource lbl11_Mono_TextMuted}"/>
+               Style="{StaticResource lbl15_Bold_TextDark}"/>
 
         <Border Style="{StaticResource brd13_Raised}" Padding="14,4">
             <VerticalStackLayout Spacing="0"

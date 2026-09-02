@@ -33,6 +33,9 @@ public partial class BusinessHeaderView : ContentView
     public static readonly BindableProperty ActionIconProperty = BindableProperty.Create(
         nameof(ActionIcon), typeof(string), typeof(BusinessHeaderView), string.Empty);
 
+    public static readonly BindableProperty ActionTextProperty = BindableProperty.Create(
+        nameof(ActionText), typeof(string), typeof(BusinessHeaderView), string.Empty);
+
     public static readonly BindableProperty ActionCommandProperty = BindableProperty.Create(
         nameof(ActionCommand), typeof(ICommand), typeof(BusinessHeaderView));
 
@@ -82,6 +85,12 @@ public partial class BusinessHeaderView : ContentView
     {
         get => (string)GetValue(ActionIconProperty);
         set => SetValue(ActionIconProperty, value);
+    }
+
+    public string ActionText
+    {
+        get => (string)GetValue(ActionTextProperty);
+        set => SetValue(ActionTextProperty, value);
     }
 
     public ICommand? ActionCommand

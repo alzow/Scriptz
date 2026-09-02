@@ -5,6 +5,7 @@
              xmlns:vm="clr-namespace:QueueApp.Features.BusinessDetail"
              xmlns:bdHelpers="clr-namespace:QueueApp.Features.BusinessDetail.Helpers"
              xmlns:header="clr-namespace:QueueApp.Shared.Templates.BusinessHeader"
+             xmlns:location="clr-namespace:QueueApp.Shared.Templates.LocationCard"
              x:Class="QueueApp.Features.BusinessDetail.BusinessDetailPage"
              x:DataType="vm:BusinessDetailPageViewModel"
              Title="{Binding BusinessName}"
@@ -66,7 +67,7 @@
                         TeamCountText="{Binding TeamCountText}"
                         TeamMembers="{Binding TeamMembers}"/>
 
-                <bdHelpers:GettingThereSectionView
+                <location:LocationCardView Margin="20,22,20,0"
                         AddressLine="{Binding AddressLine}"
                         DistanceText="{Binding DistanceText}"
                         HasDistance="{Binding HasDistance}"

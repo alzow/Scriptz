@@ -5,36 +5,43 @@
              x:Name="Root"
              x:Class="QueueApp.Features.Flow.Visit.Helpers.VisitTimelineView">
 
-    <VerticalStackLayout Spacing="8">
-        <Label Text="TIMELINE" Style="{StaticResource lbl11_Mono_TextMuted}"/>
+    <VerticalStackLayout Spacing="10">
+        <Label Text="Timeline" Style="{StaticResource lbl15_Bold_TextDark}"/>
 
-        <Border Style="{StaticResource brd13_Raised}" Padding="14,14">
+        <!-- No bottom padding: every row carries its own 14 below the moment, the last one included. -->
+        <Border Style="{StaticResource brd13_Raised}" Padding="14,14,14,0">
             <VerticalStackLayout Spacing="0"
                                  BindableLayout.ItemsSource="{Binding Steps, Source={x:Reference Root}}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="models:VisitTimelineStep">
-                        <Grid ColumnDefinitions="46,16,*" RowDefinitions="Auto,Auto">
-                            <Label Grid.Row="0" Grid.Column="0"
-                                   Text="{Binding TimeText}"
-                                   Style="{StaticResource lbl11_Mono_Step}"
-                                   VerticalOptions="Center"/>
-
-                            <Ellipse Grid.Row="0" Grid.Column="1"
+                        <!--
+                        The moment sits under its own step rather than in a fixed gutter beside it:
+                        a gutter wide enough for "Yesterday · 20:34" would have swallowed the line.
+                        -->
+                        <Grid ColumnDefinitions="16,*" RowDefinitions="Auto,Auto" ColumnSpacing="10">
+                            <Ellipse Grid.Row="0" Grid.Column="0"
                                      Style="{StaticResource ell_StepDot}"
                                      WidthRequest="9" HeightRequest="9"
-                                     HorizontalOptions="Start" VerticalOptions="Center"/>
+                                     Margin="0,5,0,0"
+                                     HorizontalOptions="Start" VerticalOptions="Start"/>
 
-                            <BoxView Grid.Row="1" Grid.Column="1"
+                            <BoxView Grid.Row="1" Grid.Column="0"
                                      Style="{StaticResource bx_StepConnector}"
-                                     WidthRequest="1" HeightRequest="14"
-                                     Margin="4,0,0,0"
+                                     WidthRequest="1"
+                                     Margin="4,2,0,0"
                                      HorizontalOptions="Start"
+                                     VerticalOptions="Fill"
                                      IsVisible="{Binding IsLast, Converter={StaticResource InvertedBoolConverter}}"/>
 
-                            <Label Grid.Row="0" Grid.Column="2"
+                            <Label Grid.Row="0" Grid.Column="1"
                                    Text="{Binding Text}"
-                                   Style="{StaticResource lbl13_Regular_Step}"
-                                   VerticalOptions="Center"/>
+                                   Style="{StaticResource lbl13_Regular_Step}"/>
+
+                            <Label Grid.Row="1" Grid.Column="1"
+                                   Text="{Binding MomentText}"
+                                   Style="{StaticResource lbl11_Mono_Step}"
+                                   Margin="0,2,0,14"
+                                   IsVisible="{Binding HasMoment}"/>
                         </Grid>
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>

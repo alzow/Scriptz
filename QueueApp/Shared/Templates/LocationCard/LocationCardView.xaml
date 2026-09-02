@@ -4,14 +4,17 @@
              xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
              x:Name="Root"
              VerticalOptions="Start"
-             x:Class="QueueApp.Features.BusinessDetail.Helpers.GettingThereSectionView">
+             x:Class="QueueApp.Shared.Templates.LocationCard.LocationCardView">
 
-    <VerticalStackLayout Spacing="0">
+    <!--
+    Where the shop is and how far off, as one tappable card that opens the map. The landing and the
+    visit page both end on it, so it carries no outer margin — the page places it.
+    -->
+    <VerticalStackLayout Spacing="10">
 
-        <Label Text="Getting there" Style="{StaticResource lbl15_Bold_TextDark}" Padding="20,22,20,10"/>
+        <Label Text="{Binding SectionTitle, Source={x:Reference Root}}" Style="{StaticResource lbl15_Bold_TextDark}"/>
 
-        <Border Margin="20,0" Padding="13"
-                Style="{StaticResource brd16_Surface}">
+        <Border Padding="13" Style="{StaticResource brd16_Surface}">
             <Border.StrokeShape>
                 <RoundRectangle CornerRadius="15"/>
             </Border.StrokeShape>
