@@ -27,7 +27,11 @@ public class MyQueueEntryResponse
     [JsonIgnore] public Guid BusinessId => Business?.Id ?? BusinessIdColumn;
     [JsonIgnore] public string BusinessName => Business?.Name ?? "Unknown business";
     [JsonIgnore] public string Category => Business?.Category ?? "other";
-    [JsonIgnore] public string OperatorName => Operator?.DisplayName ?? "Any available";
+    // "Any available" was the wording of a choice the customer made. join_queue assigns at join
+    // time now, so a queue entry with no operator isn't a preference — it's a shop that had nobody
+    // on shift when this person walked in.
+    [JsonIgnore] public bool HasOperator => OperatorId is not null;
+    [JsonIgnore] public string OperatorName => Operator?.DisplayName ?? "Next available";
     [JsonIgnore] public string ServiceName => Service?.Name ?? string.Empty;
     [JsonIgnore] public int? PriceCents => Service?.PriceCents;
 
@@ -70,9 +74,27 @@ public class QueueEntryDetails
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public DateTimeOffset? CancelledAt { get; set; }
 
-    public static QueueEntryDetails CancelledByCustomer() => new()
+    // Written by join_queue when it resolved the operator itself rather than being handed one.
+    // The board reads it to tell an automatic placement from a customer who asked for that chair
+    // by name, and can reshuffle the automatic ones without overriding anybody's preference.
+    [JsonPropertyName("assigned")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Assigned { get; set; }
+
+    [JsonIgnore] public bool WasAutoAssigned => Assigned == AssignedValues.Auto;
+
+    // Carries the existing details forward: this whole object is PATCHed over the column, so
+    // anything left off is deleted. PostgREST has no jsonb merge to lean on — a PATCH body is
+    // plain column values — so the merge happens here, from what the caller already loaded.
+    public static QueueEntryDetails CancelledByCustomer(QueueEntryDetails? existing = null) => new()
     {
         CancelledBy = CancelledByValues.Customer,
         CancelledAt = DateTimeOffset.UtcNow,
+        Assigned = existing?.Assigned,
     };
+}
+
+public static class AssignedValues
+{
+    public const string Auto = "auto";
 }

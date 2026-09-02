@@ -15,13 +15,15 @@ public class StubQueueService : IQueueService
             .OrderBy(e => e.JoinedAt)
             .ToList());
 
+    // Goes through join_queue for real, so a counter add with nobody named resolves the same way
+    // a customer's join does.
     public Task AddWalkInAsync(Guid businessId, Guid? operatorId, string? name, Guid serviceId)
     {
         _entries.Add(new QueueEntryResponse
         {
             Id = Guid.NewGuid(),
             BusinessId = businessId,
-            OperatorId = operatorId,
+            OperatorId = operatorId ?? PickFastestOperator(businessId),
             ServiceId = serviceId,
             CustomerName = name,
             Status = "waiting",
@@ -64,37 +66,82 @@ public class StubQueueService : IQueueService
         return Task.CompletedTask;
     }
 
+    // Shaped like business_queue_summary, which is a row per active operator — never a row for the
+    // unassigned ones. Grouping by operator_id used to invent an "Any available" row that no real
+    // response contains, which is exactly the row every "shortest wait" read would then have
+    // believed.
     public Task<List<QueueSummaryRow>> GetQueueSummaryAsync(Guid businessId)
     {
-        var rows = _entries
-            .Where(e => e.BusinessId == businessId && e.Status == "waiting")
-            .GroupBy(e => e.OperatorId)
-            .Select(g => new QueueSummaryRow
+        var live = _entries
+            .Where(e => e.BusinessId == businessId && (e.Status == "waiting" || e.Status == "serving"))
+            .ToList();
+
+        var rows = StubOperatorService.Roster
+            .Where(o => o.IsActive)
+            .OrderBy(o => o.SortOrder)
+            .Select(o => new QueueSummaryRow
             {
-                OperatorId = g.Key,
-                OperatorName = g.Key.HasValue ? "Operator" : "Any available",
-                WaitingCount = g.Count(),
-                NewJoinWaitMinutes = g.Count() * 10,
+                OperatorId = o.Id,
+                OperatorName = o.DisplayName,
+                IsAvailable = o.IsAvailable,
+                WaitingCount = live.Count(e => e.OperatorId == o.Id && e.Status == "waiting"),
+                ServingCount = live.Count(e => e.OperatorId == o.Id && e.Status == "serving"),
+                NewJoinWaitMinutes = live.Count(e => e.OperatorId == o.Id && e.Status == "waiting") * 10,
             })
             .ToList();
         return Task.FromResult(rows);
     }
 
+    // Mirrors join_queue: a null operator means "pick for me", not "leave it in the pool", so a
+    // stubbed run and a real one put the customer in the same chair.
     public Task<QueueEntryResponse> JoinQueueAsync(Guid businessId, Guid? operatorId, Guid customerId, string? customerName, Guid serviceId)
     {
+        var resolved = operatorId ?? PickFastestOperator(businessId);
+
         var entry = new QueueEntryResponse
         {
             Id = Guid.NewGuid(),
             BusinessId = businessId,
-            OperatorId = operatorId,
+            OperatorId = resolved,
             ServiceId = serviceId,
             CustomerId = customerId,
             CustomerName = customerName,
             Status = "waiting",
             JoinedAt = DateTime.UtcNow,
+            Details = operatorId is null && resolved is not null
+                ? new QueueEntryDetails { Assigned = AssignedValues.Auto }
+                : null,
         };
         _entries.Add(entry);
         return Task.FromResult(entry);
+    }
+
+    private static string? NameOf(Guid? operatorId) => operatorId is { } id
+        ? StubOperatorService.Roster.FirstOrDefault(o => o.Id == id)?.DisplayName
+        : null;
+
+    // An assigned entry is nth in its operator's line. An unassigned one has no line of its own,
+    // so it counts everyone ahead of it in the shop — a private ranking would call it 1st.
+    private static int PositionOf(QueueEntryResponse mine, List<QueueEntryResponse> shopWide) =>
+        mine.OperatorId is null
+            ? shopWide.Count(e => e.JoinedAt < mine.JoinedAt) + 1
+            : shopWide.Where(e => e.OperatorId == mine.OperatorId).ToList().IndexOf(mine) + 1;
+
+    // Null when the shop has nobody on shift — the one case that still lands unassigned. The
+    // stub's wait is waiting × 10, so ordering on the count is ordering on the wait; sort_order
+    // breaks the tie, as it does in the SQL.
+    private Guid? PickFastestOperator(Guid businessId)
+    {
+        var waiting = _entries
+            .Where(e => e.BusinessId == businessId && e.Status == "waiting")
+            .ToList();
+
+        return StubOperatorService.Roster
+            .Where(o => o.IsActive && o.IsAvailable)
+            .OrderBy(o => waiting.Count(e => e.OperatorId == o.Id))
+            .ThenBy(o => o.SortOrder)
+            .Select(o => (Guid?)o.Id)
+            .FirstOrDefault();
     }
 
     public Task<QueueEntryResponse> CancelEntryAsync(Guid entryId)
@@ -115,17 +162,15 @@ public class StubQueueService : IQueueService
         if (mine is null)
             return Task.FromResult<MyQueueStatusResponse?>(null);
 
-        var position = waiting
-            .Where(e => e.OperatorId == mine.OperatorId)
-            .OrderBy(e => e.JoinedAt)
-            .ToList()
-            .IndexOf(mine) + 1;
+        // Ranked within the operator's own line, or against the whole shop when there is no
+        // operator — the same split my_queue_status makes.
+        var position = PositionOf(mine, waiting);
 
         return Task.FromResult<MyQueueStatusResponse?>(new MyQueueStatusResponse
         {
             EntryId = mine.Id,
             OperatorId = mine.OperatorId,
-            OperatorName = mine.OperatorId.HasValue ? "Operator" : "Any available",
+            OperatorName = NameOf(mine.OperatorId),
             Position = position,
             Status = mine.Status,
             JoinedAt = mine.JoinedAt,
@@ -142,12 +187,10 @@ public class StubQueueService : IQueueService
         if (mine is null)
             return Task.FromResult<MyActiveQueueEntryResponse?>(null);
 
-        var position = _entries
-            .Where(e => e.BusinessId == mine.BusinessId && e.OperatorId == mine.OperatorId
-                        && e.Status is "waiting" or "serving")
+        var position = PositionOf(mine, _entries
+            .Where(e => e.BusinessId == mine.BusinessId && e.Status is "waiting" or "serving")
             .OrderBy(e => e.JoinedAt)
-            .ToList()
-            .IndexOf(mine) + 1;
+            .ToList());
 
         return Task.FromResult<MyActiveQueueEntryResponse?>(new MyActiveQueueEntryResponse
         {
@@ -157,11 +200,13 @@ public class StubQueueService : IQueueService
             BusinessLatitude = -26.3167,
             BusinessLongitude = 27.8500,
             OperatorId = mine.OperatorId,
-            OperatorName = mine.OperatorId.HasValue ? "Operator" : "Any available",
+            OperatorName = NameOf(mine.OperatorId),
             Position = position,
             Status = mine.Status,
             JoinedAt = mine.JoinedAt,
-            WaitMinutes = position * 7,
+            // Null for an unassigned entry, matching queue_entry_wait_minutes on a row that
+            // belongs to nobody's line: there is nothing to add up.
+            WaitMinutes = mine.OperatorId is null ? null : position * 7,
             ProgressStatus = mine.ProgressStatus,
         });
     }
@@ -182,7 +227,7 @@ public class StubQueueService : IQueueService
     public Task<MyQueueEntryResponse?> GetEntryAsync(Guid entryId)
         => Task.FromResult<MyQueueEntryResponse?>(null);
 
-    public Task StampEntryCancelledByCustomerAsync(Guid entryId)
+    public Task StampEntryCancelledByCustomerAsync(Guid entryId, QueueEntryDetails? existing)
         => Task.CompletedTask;
 
     public Task AssignEntryAsync(Guid entryId, Guid? operatorId)

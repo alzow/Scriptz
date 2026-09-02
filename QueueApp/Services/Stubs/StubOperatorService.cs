@@ -13,7 +13,11 @@ public class StubOperatorService : IOperatorService
     public static readonly Guid FirstOperatorId = new("1a2b3c4d-0001-4000-8000-000000000001");
     public static readonly Guid SecondOperatorId = new("1a2b3c4d-0002-4000-8000-000000000002");
 
-    private readonly List<OperatorResponse> _operators = new()
+    // Static so the queue stub can resolve "pick for me" against the same roster this one hands
+    // out. Two stubs disagreeing about who works here would be a bug that only exists in DEBUG.
+    internal static IReadOnlyList<OperatorResponse> Roster => _operators;
+
+    private static readonly List<OperatorResponse> _operators = new()
     {
         new() { Id = FirstOperatorId, DisplayName = "Ahmed", SortOrder = 0, IsAvailable = true, IsActive = true },
         new() { Id = SecondOperatorId, DisplayName = "Yusuf", SortOrder = 1, IsAvailable = true, IsActive = true },

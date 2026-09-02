@@ -79,9 +79,14 @@ public class QueueService : BaseService, IQueueService
 
     // The "owner or self manage" update policy already covers the customer writing to their own
     // row, so attributing a cancellation needs no new SQL.
-    public Task StampEntryCancelledByCustomerAsync(Guid entryId) =>
+    //
+    // The details the entry already has come in from the caller, because this PATCH replaces the
+    // whole column and join_queue now writes an assignment stamp into it. Dropping that stamp on
+    // the way out of the queue would be silent, and only visible much later as a row the board
+    // thinks somebody hand-picked.
+    public Task StampEntryCancelledByCustomerAsync(Guid entryId, QueueEntryDetails? existing) =>
         ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
-            new Dictionary<string, object?> { ["details"] = QueueEntryDetails.CancelledByCustomer() }));
+            new Dictionary<string, object?> { ["details"] = QueueEntryDetails.CancelledByCustomer(existing) }));
 
     public Task AssignEntryAsync(Guid entryId, Guid? operatorId) =>
         ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
