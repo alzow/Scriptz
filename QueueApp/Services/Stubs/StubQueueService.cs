@@ -206,6 +206,13 @@ public class StubQueueService : IQueueService
         return Task.CompletedTask;
     }
 
+    public Task SetEntryNoteAsync(Guid entryId, string? note)
+    {
+        var entry = _entries.FirstOrDefault(e => e.Id == entryId);
+        if (entry != null) entry.ProgressStatus = note;
+        return Task.CompletedTask;
+    }
+
     public Task<List<QueueEntryResponse>> GetCompletedTodayAsync(Guid businessId)
         => Task.FromResult(_entries
             .Where(e => e.BusinessId == businessId && e.DoneAt >= DateTime.UtcNow.Date)

@@ -859,7 +859,9 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
 
     // The waiting-side twin of EditNoteAsync. Same column, same customer-facing "latest update" —
     // the entry just hasn't reached the chair yet, which is exactly when "running late" is worth
-    // saying. The sheet has already trimmed the text and turned an emptied field into null.
+    // saying. Not the same write: set_queue_progress rejects an entry that isn't being served, so
+    // this one goes through SetEntryNoteAsync. The sheet has already trimmed the text and turned an
+    // emptied field into null.
     public async Task SaveRowNoteAsync(QueueRowItem? row, string? note)
     {
         if (row is null || row.IsBusy)
@@ -869,7 +871,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         try
         {
             ApplyLocally(row.EntryId, e => e.ProgressStatus = note);
-            await _queueService.SetQueueProgressAsync(row.EntryId, note);
+            await _queueService.SetEntryNoteAsync(row.EntryId, note);
         }
         catch (Exception ex)
         {

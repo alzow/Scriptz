@@ -30,6 +30,9 @@ public interface IQueueService
     Task AssignEntryAsync(Guid entryId, Guid? operatorId);
     Task MoveEntryToEndAsync(Guid entryId);
     Task ChangeEntryServiceAsync(Guid entryId, Guid serviceId);
+    // The same progress_status set_queue_progress writes, but for an entry that is still waiting —
+    // which that RPC refuses. See the note on the implementation.
+    Task SetEntryNoteAsync(Guid entryId, string? note);
     // Today's completed visits, carrying serving_at/done_at so the caller can derive both the
     // count and the average service time from one read.
     Task<List<QueueEntryResponse>> GetCompletedTodayAsync(Guid businessId);

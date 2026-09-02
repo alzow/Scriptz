@@ -97,6 +97,13 @@ public class QueueService : BaseService, IQueueService
         ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
             new Dictionary<string, object?> { ["service_id"] = serviceId }));
 
+    // set_queue_progress raises "entry not currently being served" on anything but a serving row,
+    // so a note for someone still in the line goes through the same owner-update policy the other
+    // board writes use. Same column, so the customer reads it as the one "latest update" either way.
+    public Task SetEntryNoteAsync(Guid entryId, string? note) =>
+        ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
+            new Dictionary<string, object?> { ["progress_status"] = note }));
+
     // "Today" is the device's local day boundary — the shop reads these tiles standing in its own
     // timezone, not UTC.
     public Task<List<QueueEntryResponse>> GetCompletedTodayAsync(Guid businessId)
