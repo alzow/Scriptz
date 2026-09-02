@@ -7,6 +7,7 @@ public enum EntryAction
     MoveToAnotherOperator,
     MoveToEndOfQueue,
     ChangeService,
+    SaveNote,
     MarkNoShow,
     RemoveFromQueue,
 }

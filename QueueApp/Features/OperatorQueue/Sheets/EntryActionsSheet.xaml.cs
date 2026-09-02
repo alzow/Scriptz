@@ -7,7 +7,7 @@ namespace QueueApp.Features.OperatorQueue.Sheets;
 public partial class EntryActionsSheet : BottomSheetPage
 {
     private readonly IQueuePopupService _popups;
-    private readonly TaskCompletionSource<EntryAction> _completion = new();
+    private readonly TaskCompletionSource<EntryActionResult> _completion = new();
 
     public string CustomerName { get; }
     public string Initials { get; }
@@ -15,7 +15,13 @@ public partial class EntryActionsSheet : BottomSheetPage
     public bool CanServe { get; }
     public bool CanReorder { get; }
 
-    public Task<EntryAction> Completion => _completion.Task;
+    // Two-way bound to the note field, so it carries the edit out of the sheet rather than the
+    // note it came in with.
+    public string NoteText { get; set; }
+
+    public string NoteHeaderText { get; }
+
+    public Task<EntryActionResult> Completion => _completion.Task;
 
     public EntryActionsSheet() : this(null!, string.Empty, string.Empty, string.Empty, false, false)
     {
@@ -27,7 +33,8 @@ public partial class EntryActionsSheet : BottomSheetPage
         string initials,
         string subText,
         bool canServe,
-        bool canReorder)
+        bool canReorder,
+        string? note = null)
     {
         _popups = popups;
         CustomerName = customerName;
@@ -35,6 +42,8 @@ public partial class EntryActionsSheet : BottomSheetPage
         SubText = subText;
         CanServe = canServe;
         CanReorder = canReorder;
+        NoteText = note ?? string.Empty;
+        NoteHeaderText = string.IsNullOrWhiteSpace(note) ? "LEAVE A NOTE" : "NOTE";
 
         InitializeComponent();
     }
@@ -42,7 +51,7 @@ public partial class EntryActionsSheet : BottomSheetPage
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        _completion.TrySetResult(EntryAction.Dismissed);
+        _completion.TrySetResult(EntryActionResult.Dismissed);
     }
 
     private void OnServeClicked(object? sender, EventArgs e) => Close(EntryAction.ServeNow);
@@ -52,9 +61,18 @@ public partial class EntryActionsSheet : BottomSheetPage
     private void OnNoShowClicked(object? sender, EventArgs e) => Close(EntryAction.MarkNoShow);
     private void OnRemoveClicked(object? sender, EventArgs e) => Close(EntryAction.RemoveFromQueue);
 
-    private void Close(EntryAction action)
+    // Null rather than "" when the field is emptied: clearing a note is a real edit, and the board
+    // writes null to take the message back off the customer's screen.
+    private void OnSaveNoteClicked(object? sender, EventArgs e) =>
+        Close(new EntryActionResult(
+            EntryAction.SaveNote,
+            string.IsNullOrWhiteSpace(NoteText) ? null : NoteText.Trim()));
+
+    private void Close(EntryAction action) => Close(new EntryActionResult(action));
+
+    private void Close(EntryActionResult result)
     {
-        _completion.TrySetResult(action);
+        _completion.TrySetResult(result);
         _ = _popups.HideSheetAsync(this);
     }
 }

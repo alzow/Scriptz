@@ -51,6 +51,7 @@
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="13"/>
                             </Border.StrokeShape>
+                            <VerticalStackLayout Spacing="0">
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="11">
                                 <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
                                     <Label Text="{Binding CustomerName}" Style="{StaticResource lbl14_Bold_TextDark}"/>
@@ -63,6 +64,17 @@
                                         Command="{Binding AssignCommand, Source={x:Reference Root}}"
                                         CommandParameter="{Binding .}"/>
                             </Grid>
+
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="7"
+                                  Margin="0,9,0,0"
+                                  IsVisible="{Binding HasNote}">
+                                <tpl:ThemedIcon Grid.Column="0" Icon="ic_edit"
+                                                WidthRequest="12" HeightRequest="12"
+                                                VerticalOptions="Start" Margin="0,2,0,0"/>
+                                <Label Grid.Column="1" Text="{Binding NoteText}"
+                                       Style="{StaticResource lbl12_Regular_TextLight}"/>
+                            </Grid>
+                            </VerticalStackLayout>
 
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer

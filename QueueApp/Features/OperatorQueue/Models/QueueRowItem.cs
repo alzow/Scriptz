@@ -20,6 +20,11 @@ public sealed class QueueRowItem : ObservableObject
 
     public string SubText { get; set; } = string.Empty;
 
+    // The same progress_status the serving card edits, kept on the row so a message left for
+    // someone who is still waiting reads off the board without opening their sheet.
+    public string NoteText { get; init; } = string.Empty;
+    public bool HasNote { get; init; }
+
     public bool SectionIsServing { get; init; }
 
     public bool IsBusy { get; set; }
