@@ -15,7 +15,7 @@ namespace QueueApp.Features.Auth;
 public partial class RegisterPageViewModel : BaseViewModel
 {
     #region Constants
-    private const int PasswordMinimumLength = 8;
+    private const int PasswordMinimumLength = 6;
 
     private const string Heading = "Create your account";
     private const string Lead = "So we can hold your place and tell you when to leave.";
