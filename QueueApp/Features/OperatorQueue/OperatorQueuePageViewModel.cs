@@ -316,6 +316,8 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                     SubText = QueueRowItem.BuildSubText(
                         ServiceNameOf(entry.ServiceId),
                         MinutesSince(entry.JoinedAt)),
+                    NoteText = entry.ProgressStatus ?? string.Empty,
+                    HasNote = !string.IsNullOrWhiteSpace(entry.ProgressStatus),
                     SectionIsServing = serving is not null,
                 });
             }
@@ -389,6 +391,8 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                     ShowPosition = false,
                     ShowAssign = true,
                     SubText = QueueRowItem.BuildSubText(ServiceNameOf(entry.ServiceId), waited),
+                    NoteText = entry.ProgressStatus ?? string.Empty,
+                    HasNote = !string.IsNullOrWhiteSpace(entry.ProgressStatus),
                 });
             }
 
@@ -678,12 +682,13 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                 row.Initials,
                 $"{row.ServiceName} · joined {row.JoinedAtText} · waiting {row.WaitedMinutes}m",
                 canServe: row.OperatorId is not null && !sectionIsServing,
-                canReorder: true);
+                canReorder: true,
+                note: row.HasNote ? row.NoteText : null);
 
             await _popupService.ShowSheetAsync(sheet);
-            var action = await sheet.Completion;
+            var result = await sheet.Completion;
 
-            switch (action)
+            switch (result.Action)
             {
                 case EntryAction.ServeNow:
                     await ServeAsync(row);
@@ -699,6 +704,10 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
 
                 case EntryAction.ChangeService:
                     await ChangeServiceAsync(row);
+                    break;
+
+                case EntryAction.SaveNote:
+                    await SaveRowNoteAsync(row, result.Note);
                     break;
 
                 case EntryAction.MarkNoShow:
@@ -845,6 +854,32 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         catch (Exception ex)
         {
             await ReloadAfterFailureAsync(ex);
+        }
+    }
+
+    // The waiting-side twin of EditNoteAsync. Same column, same customer-facing "latest update" —
+    // the entry just hasn't reached the chair yet, which is exactly when "running late" is worth
+    // saying. Not the same write: set_queue_progress rejects an entry that isn't being served, so
+    // this one goes through SetEntryNoteAsync. The sheet has already trimmed the text and turned an
+    // emptied field into null.
+    public async Task SaveRowNoteAsync(QueueRowItem? row, string? note)
+    {
+        if (row is null || row.IsBusy)
+            return;
+
+        row.IsBusy = true;
+        try
+        {
+            ApplyLocally(row.EntryId, e => e.ProgressStatus = note);
+            await _queueService.SetEntryNoteAsync(row.EntryId, note);
+        }
+        catch (Exception ex)
+        {
+            await ReloadAfterFailureAsync(ex);
+        }
+        finally
+        {
+            row.IsBusy = false;
         }
     }
 
