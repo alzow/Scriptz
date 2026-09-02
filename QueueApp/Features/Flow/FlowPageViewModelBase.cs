@@ -819,15 +819,22 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
             // there — pinned, tagged, and selected by default so the common path is one tap.
             if (IsQueueMode && !IsOperatorFlow)
             {
-                var fastest = QueueSummary.Count > 0 ? QueueSummary.Min(r => r.NewJoinWaitMinutes) : 0;
+                // Not a pooled entry any more: join_queue reads the null id as "pick for me" and
+                // resolves it to whoever has the shortest wait, inside the insert's transaction.
+                // The number here is this app's prediction of that pick, so it has to be computed
+                // the same way — on-shift operators only, same tie-break.
+                var fastest = QueueSummary.FastestWaitMinutes();
                 var any = new OperatorChoiceItem
                 {
                     OperatorId = null,
-                    Name = "Any available",
+                    Name = "Fastest available",
                     Initials = "★",
-                    SubLabel = $"Shortest wait · about {fastest:0} min",
+                    SubLabel = fastest is { } minutes
+                        ? $"Shortest wait · about {minutes:0} min"
+                        : "Nobody on shift right now",
                     IsAnyAvailable = true,
-                    ShowFastestTag = true,
+                    // Nothing to be fastest than when the shop is empty of staff.
+                    ShowFastestTag = fastest is not null,
                     IsSelected = true,
                 };
                 OperatorChoices.Add(any);
@@ -1096,7 +1103,7 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
             if (SelectedServiceRow is null)
                 return;
 
-            ReviewOperatorText = SelectedOperatorChoice?.Name ?? "Any available";
+            ReviewOperatorText = SelectedOperatorChoice?.Name ?? "Fastest available";
             ReviewServiceText = $"{SelectedServiceRow.Name} · {SelectedServiceRow.DurationText}";
             ReviewPriceText = SelectedServiceRow.PriceText;
 
@@ -1112,13 +1119,25 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
 
             var row = SelectedOperatorChoice?.OperatorId is { } operatorId
                 ? QueueSummary.FirstOrDefault(r => r.OperatorId == operatorId)
-                : QueueSummary.OrderBy(r => r.NewJoinWaitMinutes).FirstOrDefault();
+                : QueueSummary.FastestOperator();
 
-            var ahead = row is null ? 0 : row.WaitingCount + row.ServingCount;
-            var waitMinutes = row?.NewJoinWaitMinutes ?? 0;
+            // No row at all means the shop has nobody on shift. The entry still joins — it waits in
+            // the pool for someone to come free — but there is no line to be nth in and no honest
+            // minute count to put against it, so the review says neither.
+            if (row is null)
+            {
+                // Both of these land in a short right-aligned mono column, so they stay short. The
+                // operator step above already says nobody is on shift.
+                ReviewPositionText = "in the queue";
+                ReviewTurnText = "—";
+                OnPropertyChanged(nameof(ReviewOperatorLabel));
+                return;
+            }
+
+            var ahead = row.WaitingCount + row.ServingCount;
 
             ReviewPositionText = Ordinal(ahead + 1) + " in line";
-            var turnAt = LocalTime.Now.AddMinutes(waitMinutes);
+            var turnAt = LocalTime.Now.AddMinutes(row.NewJoinWaitMinutes);
             ReviewTurnText = turnAt.ToString("HH:mm");
 
             OnPropertyChanged(nameof(ReviewOperatorLabel));

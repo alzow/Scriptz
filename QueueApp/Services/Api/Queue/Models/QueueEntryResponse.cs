@@ -21,7 +21,12 @@ public partial class QueueEntryResponse : ObservableObject
 
     [JsonPropertyName("progress_status")] public string? ProgressStatus { get; set; }
 
+    // Carries join_queue's assignment stamp onto the board, so a card can say whether the shop's
+    // own rules put this person in this chair or the customer asked for it by name.
+    [JsonPropertyName("details")] public QueueEntryDetails? Details { get; set; }
+
     [JsonIgnore] public bool HasProgress => !string.IsNullOrWhiteSpace(ProgressStatus);
+    [JsonIgnore] public bool WasAutoAssigned => Details?.WasAutoAssigned == true;
 
     [JsonIgnore] [ObservableProperty] private bool _isServing;
     [JsonIgnore] [ObservableProperty] private bool _isCompleting;

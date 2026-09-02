@@ -29,6 +29,17 @@ public sealed class VisitRecord
     public required string StatusText { get; init; }
     public required string ServiceName { get; init; }
     public required string OperatorName { get; init; }
+
+    // False only when nobody was on shift to assign (queue), or the shop hasn't picked who is
+    // taking it yet (booking). Everything phrased in an operator's terms has to check this first.
+    public required bool HasOperator { get; init; }
+    // Queue only: the booking reads embed the operator by display name alone, and nothing on the
+    // booking side needs the id.
+    public Guid? OperatorId { get; init; }
+
+    // Queue only. Carried so leaving the queue can write its stamp without dropping whatever else
+    // the entry's details already hold.
+    public QueueEntryDetails? Details { get; init; }
     public required string PriceText { get; init; }
 
     public string? ShopUpdate { get; init; }
@@ -85,6 +96,9 @@ public sealed class VisitRecord
             StatusText = EntryStatusText(entry, lifecycle),
             ServiceName = string.IsNullOrWhiteSpace(entry.ServiceName) ? "Not recorded" : entry.ServiceName,
             OperatorName = entry.OperatorName,
+            HasOperator = entry.HasOperator,
+            OperatorId = entry.OperatorId,
+            Details = entry.Details,
             PriceText = MoneyFormat.Format(entry.PriceCents),
             ShopUpdate = entry.ProgressStatus,
             ShopNote = entry.Note,
@@ -111,6 +125,7 @@ public sealed class VisitRecord
             StatusText = BookingStatusText(booking, lifecycle),
             ServiceName = string.IsNullOrWhiteSpace(booking.ServiceName) ? "Not recorded" : booking.ServiceName,
             OperatorName = booking.OperatorName,
+            HasOperator = booking.Operator is not null,
             PriceText = booking.PriceText,
             ShopUpdate = booking.ProgressStatus,
             CustomerNote = booking.Note,

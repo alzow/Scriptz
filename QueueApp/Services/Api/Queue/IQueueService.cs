@@ -22,8 +22,9 @@ public interface IQueueService
     Task<List<MyQueueEntryResponse>> GetMyEntriesAsync(Guid customerId);
     Task<MyQueueEntryResponse?> GetEntryAsync(Guid entryId);
 
-    // cancel_entry takes no "who", so the customer stamps their own leaving into details.
-    Task StampEntryCancelledByCustomerAsync(Guid entryId);
+    // cancel_entry takes no "who", so the customer stamps their own leaving into details. The
+    // details already on the entry come along because the write replaces the whole column.
+    Task StampEntryCancelledByCustomerAsync(Guid entryId, QueueEntryDetails? existing);
 
     // Operator-board writes. AssignEntryAsync takes a nullable operator id on purpose: null returns
     // the entry to the shared pool, which is a real destination, not an absence of one.

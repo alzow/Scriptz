@@ -640,12 +640,16 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             // column, so this is the closest thing that is actually true — how many people are in a
             // chair right now. Restoring the wall number needs the per-day sequence.
             var waiting = QueueSummary.Sum(r => r.WaitingCount);
-            var wait = QueueSummary.Count > 0 ? QueueSummary.Min(r => r.NewJoinWaitMinutes) : 0;
+
+            // Off-shift operators come back in the summary too, with nobody waiting and a wait of
+            // zero — the most attractive number on this card and the least true. Only the ones
+            // actually on shift can set the headline.
+            var wait = QueueSummary.FastestWaitMinutes();
 
             PrimaryStatValue = _servingCount.ToString();
             SecondaryStatValue = waiting.ToString();
             TertiaryStatLabel = "Est. wait";
-            TertiaryStatValue = $"~{wait:0} min";
+            TertiaryStatValue = wait is { } minutes ? $"~{minutes:0} min" : "—";
 
             var onShift = TeamMembers.Count(m => m.IsOnShift);
             LiveFootnote = $"{onShift} of {TeamMembers.Count} {_labels.PluralNoun} on shift";

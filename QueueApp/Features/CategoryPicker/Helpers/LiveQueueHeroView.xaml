@@ -62,7 +62,7 @@
 
                 <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="6">
                     <Label Style="{StaticResource lbl18_Bold_TextDark}"
-                           IsVisible="{Binding ActiveEntry.IsBeingServed, Source={x:Reference Root}}">
+                           IsVisible="{Binding ActiveEntry.ShowServedByName, Source={x:Reference Root}}">
                         <Label.FormattedText>
                             <FormattedString>
                                 <Span Text="Being served by "/>
@@ -70,14 +70,23 @@
                             </FormattedString>
                         </Label.FormattedText>
                     </Label>
+                    <!-- The board can start serving an entry it never assigned, and a name-shaped
+                         hole after "by" is worse than not naming anyone. -->
+                    <Label Text="Being served"
+                           Style="{StaticResource lbl18_Bold_TextDark}"
+                           IsVisible="{Binding ActiveEntry.ShowServedAnonymously, Source={x:Reference Root}}"/>
                     <VerticalStackLayout Spacing="1"
                            IsVisible="{Binding ActiveEntry.HasProgress, Source={x:Reference Root}}">
                         <Label Text="LATEST UPDATE" Style="{StaticResource SectionTitle_Accent}"/>
                         <Label Text="{Binding ActiveEntry.ProgressStatus, Source={x:Reference Root}}"
                                Style="{StaticResource lbl13_Regular_Accent}"/>
                     </VerticalStackLayout>
+                    <!-- join_queue assigns at join time, so the common line names a real person.
+                         The nameless variant below is only reachable when the shop had nobody on
+                         shift to assign; it used to read "for Any available" on one screen and
+                         "for " on this one, because the two RPCs disagreed about the fallback. -->
                     <Label Style="{StaticResource lbl18_Bold_TextDark}"
-                           IsVisible="{Binding ActiveEntry.IsBeingServed, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}">
+                           IsVisible="{Binding ActiveEntry.HasOperator, Source={x:Reference Root}}">
                         <Label.FormattedText>
                             <FormattedString>
                                 <Span Text="You're #"/>
@@ -86,9 +95,26 @@
                                 <Span Text="{Binding ActiveEntry.OperatorName, Source={x:Reference Root}}"/>
                             </FormattedString>
                         </Label.FormattedText>
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding ActiveEntry.IsBeingServed, Source={x:Reference Root}}"
+                                         Value="True">
+                                <Setter Property="IsVisible" Value="False"/>
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                    <Label Style="{StaticResource lbl18_Bold_TextDark}"
+                           IsVisible="{Binding ActiveEntry.ShowUnassignedNotice, Source={x:Reference Root}}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="You're #"/>
+                                <Span Text="{Binding ActiveEntry.Position, Source={x:Reference Root}}"/>
+                                <Span Text=" in the queue"/>
+                            </FormattedString>
+                        </Label.FormattedText>
                     </Label>
                     <Label Style="{StaticResource lbl13_Regular_TextLight}"
-                           IsVisible="{Binding ActiveEntry.IsBeingServed, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}">
+                           IsVisible="{Binding ActiveEntry.ShowWaitEstimate, Source={x:Reference Root}}">
                         <Label.FormattedText>
                             <FormattedString>
                                 <Span Text="~"/>
@@ -97,6 +123,11 @@
                             </FormattedString>
                         </Label.FormattedText>
                     </Label>
+                    <!-- Whoever comes free first takes this one, so there is no minute count to
+                         quote: the wait is the length of a job nobody has started yet. -->
+                    <Label Text="Waiting for someone to come free"
+                           Style="{StaticResource lbl13_Regular_TextLight}"
+                           IsVisible="{Binding ActiveEntry.ShowUnassignedNotice, Source={x:Reference Root}}"/>
                 </VerticalStackLayout>
             </Grid>
 

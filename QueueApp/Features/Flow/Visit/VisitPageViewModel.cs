@@ -437,19 +437,23 @@ public partial class VisitPageViewModel : BaseViewModel
                 HeroRelative = record.StartedAt is { } started
                     ? $"started {DescribeSpan(DateTimeOffset.UtcNow - started)} ago"
                     : string.Empty;
-                HeroDetail = $"with {record.OperatorName}";
+                HeroDetail = WithWhom(record);
                 return;
             }
 
             var placeText = record.Position > 0 ? $"you're {OrdinalOf(record.Position)}" : string.Empty;
 
-            var wait = record.WaitMinutes is { } minutes ? (int)Math.Round(minutes) : (int?)null;
+            // No wait figure, which for an unassigned entry is the honest answer rather than a gap:
+            // it belongs to no operator's line, so there is nothing to add up.
+            var wait = record.HasOperator && record.WaitMinutes is { } minutes
+                ? (int)Math.Round(minutes)
+                : (int?)null;
             if (wait is null)
             {
                 HeroCaption = "YOU'RE IN THE QUEUE";
                 HeroTime = record.Position > 0 ? OrdinalOf(record.Position) : "--";
                 HeroRelative = record.Position > 0 ? "in line" : string.Empty;
-                HeroDetail = $"with {record.OperatorName}";
+                HeroDetail = WithWhom(record);
                 return;
             }
 
@@ -499,8 +503,8 @@ public partial class VisitPageViewModel : BaseViewModel
 
             var travel = _distanceKm is { } km ? GeoDistance.TravelMinutes(km) : (int?)null;
             HeroDetail = travel is { } minutes
-                ? $"{minutes} min to get there · with {record.OperatorName}"
-                : $"with {record.OperatorName}";
+                ? $"{minutes} min to get there · {WithWhom(record)}"
+                : WithWhom(record);
         }
         catch (Exception ex)
         {
@@ -518,7 +522,12 @@ public partial class VisitPageViewModel : BaseViewModel
                 return;
 
             Facts.Add(new VisitFactRow { Label = "Service", Value = record.ServiceName, IsMono = false });
-            Facts.Add(new VisitFactRow { Label = "With", Value = record.OperatorName, IsMono = false });
+            Facts.Add(new VisitFactRow
+            {
+                Label = "With",
+                Value = record.HasOperator ? record.OperatorName : "Whoever's free first",
+                IsMono = false,
+            });
 
             if (record.IsLive && record.IsQueue)
             {
@@ -588,10 +597,14 @@ public partial class VisitPageViewModel : BaseViewModel
             if (record.JoinedAt is not null)
                 steps.Add(Step(record.JoinedAt, "You joined the queue", VisitStepState.Done));
 
+            // Nobody to name while the entry is still unassigned, and "Next available starts" reads
+            // like a person's name on a timeline of things that happened.
             if (record.StartedAt is not null)
-                steps.Add(Step(record.StartedAt, $"{record.OperatorName} started", VisitStepState.Done));
+                steps.Add(Step(record.StartedAt,
+                    record.HasOperator ? $"{record.OperatorName} started" : "Started",
+                    VisitStepState.Done));
             else if (record.IsLive)
-                steps.Add(Pending($"{record.OperatorName} starts"));
+                steps.Add(Pending(record.HasOperator ? $"{record.OperatorName} starts" : "Your turn"));
 
             if (record.FinishedAt is not null)
                 steps.Add(Step(record.FinishedAt, "Finished", VisitStepState.Done));
@@ -803,6 +816,13 @@ public partial class VisitPageViewModel : BaseViewModel
         }
     }
 
+    // A queue entry only lacks an operator when the shop had nobody on shift to assign, and a
+    // booking only until the shop picks who is taking it. Neither is a person, so neither gets
+    // phrased as one.
+    public static string WithWhom(VisitRecord record) => record.HasOperator
+        ? $"with {record.OperatorName}"
+        : record.IsQueue ? "with whoever's free first" : "with whoever's free at that time";
+
     public async Task<string> DescribeLeavingCostAsync(VisitRecord record)
     {
         try
@@ -811,7 +831,13 @@ public partial class VisitPageViewModel : BaseViewModel
                 return string.Empty;
 
             var summary = await _queueService.GetQueueSummaryAsync(record.BusinessId);
-            var row = summary.FirstOrDefault(r => r.OperatorName == record.OperatorName) ?? summary.FirstOrDefault();
+
+            // Was matched on display name, which collapses the moment a shop has two Siphos. The
+            // entry carries the id; rejoining an unassigned entry lands wherever join_queue puts
+            // it, so the fastest operator is the right quote for that case.
+            var row = record.OperatorId is { } operatorId
+                ? summary.FirstOrDefault(r => r.OperatorId == operatorId)
+                : summary.FastestOperator();
 
             var place = $"You'd lose {OrdinalOf(record.Position)} place.";
             return row is null
@@ -977,7 +1003,7 @@ public partial class VisitPageViewModel : BaseViewModel
                 return;
 
             await _queueService.CancelEntryAsync(record.Id);
-            await _queueService.StampEntryCancelledByCustomerAsync(record.Id);
+            await _queueService.StampEntryCancelledByCustomerAsync(record.Id, record.Details);
 
             await RefreshAsync();
             RefreshView();
