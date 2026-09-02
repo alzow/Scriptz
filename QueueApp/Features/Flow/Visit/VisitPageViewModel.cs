@@ -6,7 +6,6 @@ using MPowerKit;
 using MPowerKit.Navigation;
 using QueueApp.Constants;
 using QueueApp.Features.Flow.Visit.Models;
-using QueueApp.Features.Flow.Visit.Sheets;
 using QueueApp.Framework.Base;
 using QueueApp.Framework.Navigation;
 using QueueApp.Services.Api.Booking;
@@ -43,16 +42,31 @@ public partial class VisitPageViewModel : BaseViewModel
     public string BusinessName => Record?.BusinessName ?? Business?.Name ?? string.Empty;
     public string StatusText => Record?.StatusText ?? string.Empty;
 
+    // The tones the shared business header knows: accent while it is live, a plain outline once it
+    // is done with, red when it went wrong.
     public string StatusTone => Record switch
     {
-        null => "Settled",
+        null => "Muted",
         { WasNoShow: true } or { WasCancelled: true } => "Bad",
-        { IsLive: true } => "Live",
-        _ => "Settled",
+        { IsLive: true } => "Good",
+        _ => "Muted",
     };
     public bool HasPhone => Business?.HasPhone == true;
 
+    // The header's one-liner ("12 Main Rd · 181 m"); the location card wants the two halves apart.
     public string AddressLine { get; set; } = string.Empty;
+    public string LocationAddress => Business?.Address ?? Business?.Suburb ?? string.Empty;
+    public string DistanceText { get; set; } = string.Empty;
+    public bool HasDistance => DistanceText.Length > 0;
+    public bool HasLocation => LocationAddress.Length > 0 || HasDistance;
+
+    // What the page can do about this visit, each on the page itself rather than behind a sheet.
+    public bool CanShare => Record?.IsLive == true;
+    public bool CanAddToCalendar => Record is { IsLive: true, IsBooking: true, SlotStart: not null };
+    public bool CanLeaveQueue => Record is { IsLive: true, IsQueue: true };
+    public bool CanCancelBooking => Record is { IsLive: true, IsBooking: true };
+    public bool HasDestructiveAction => CanLeaveQueue || CanCancelBooking;
+    public string DestructiveActionText => CanLeaveQueue ? "Leave the queue" : "Cancel booking";
     public bool ShowJustJoined => JustJoined && IsLive;
     public string JustJoinedText { get; set; } = string.Empty;
 
@@ -62,7 +76,7 @@ public partial class VisitPageViewModel : BaseViewModel
     public string HeroRelative { get; set; } = string.Empty;
     public string HeroDetail { get; set; } = string.Empty;
 
-    public string FactsTitle => IsLive ? "YOUR PLACE" : "WHAT HAPPENED";
+    public string FactsTitle => IsLive ? "Your place" : "What happened";
     public ObservableCollection<VisitFactRow> Facts { get; } = new();
     public bool HasFacts => Facts.Count > 0;
 
@@ -351,6 +365,15 @@ public partial class VisitPageViewModel : BaseViewModel
             OnPropertyChanged(nameof(ShopNoteText));
             OnPropertyChanged(nameof(ShowReasonBlock));
             OnPropertyChanged(nameof(ShowPaymentLine));
+            OnPropertyChanged(nameof(LocationAddress));
+            OnPropertyChanged(nameof(HasDistance));
+            OnPropertyChanged(nameof(HasLocation));
+            OnPropertyChanged(nameof(CanShare));
+            OnPropertyChanged(nameof(CanAddToCalendar));
+            OnPropertyChanged(nameof(CanLeaveQueue));
+            OnPropertyChanged(nameof(CanCancelBooking));
+            OnPropertyChanged(nameof(HasDestructiveAction));
+            OnPropertyChanged(nameof(DestructiveActionText));
         }
         catch (Exception ex)
         {
@@ -364,6 +387,8 @@ public partial class VisitPageViewModel : BaseViewModel
         {
             var address = Business?.Address ?? Business?.Suburb ?? string.Empty;
             var distance = _distanceKm is { } km ? GeoDistance.Describe(km) : string.Empty;
+
+            DistanceText = distance.Length > 0 ? $"{distance} away" : string.Empty;
 
             AddressLine = (address.Length, distance.Length) switch
             {
@@ -464,8 +489,10 @@ public partial class VisitPageViewModel : BaseViewModel
             var local = LocalTime.ToLocal(slot);
             var untilSlot = slot - DateTimeOffset.UtcNow;
 
-            HeroCaption = local.Date == LocalTime.Now.Date ? "YOUR SLOT TODAY" : local.ToString("ddd d MMM").ToUpperInvariant();
-            HeroTime = local.ToString("HH:mm");
+            HeroCaption = local.Date == LocalTime.Now.Date
+                ? "YOUR SLOT TODAY"
+                : LocalTime.Day(slot).ToUpperInvariant();
+            HeroTime = LocalTime.Time(slot);
             HeroRelative = untilSlot > TimeSpan.Zero
                 ? $"in {DescribeSpan(untilSlot)}"
                 : "starting now";
@@ -499,7 +526,7 @@ public partial class VisitPageViewModel : BaseViewModel
                     Facts.Add(new VisitFactRow { Label = "Position", Value = OrdinalOf(record.Position) });
 
                 if (record.JoinedAt is not null)
-                    Facts.Add(new VisitFactRow { Label = "Joined", Value = FormatTime(record.JoinedAt) });
+                    Facts.Add(new VisitFactRow { Label = "Joined", Value = FormatMoment(record.JoinedAt) });
             }
             else if (record.IsLive && record.IsBooking)
             {
@@ -776,61 +803,6 @@ public partial class VisitPageViewModel : BaseViewModel
         }
     }
 
-    [RelayCommand]
-    public async Task OpenOptionsAsync()
-    {
-        try
-        {
-            if (Record is not { } record)
-                return;
-
-            var sheet = new VisitOptionsSheet(_popupService, record, HasPhone, await DescribeLeavingCostAsync(record));
-            await _popupService.ShowSheetAsync(sheet);
-
-            var result = await sheet.Completion;
-            await HandleOptionAsync(result.Option);
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
-        }
-    }
-
-    public async Task HandleOptionAsync(VisitOption option)
-    {
-        try
-        {
-            switch (option)
-            {
-                case VisitOption.Call:
-                    await CallShopAsync();
-                    break;
-                case VisitOption.Directions:
-                    await OpenDirectionsAsync();
-                    break;
-                case VisitOption.Share:
-                    await ShareVisitAsync();
-                    break;
-                case VisitOption.AddToCalendar:
-                    await AddToCalendarAsync();
-                    break;
-                case VisitOption.GoAgain:
-                    await GoAgainAsync();
-                    break;
-                case VisitOption.LeaveQueue:
-                    await LeaveQueueAsync();
-                    break;
-                case VisitOption.CancelBooking:
-                    await CancelBookingAsync();
-                    break;
-            }
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
-        }
-    }
-
     public async Task<string> DescribeLeavingCostAsync(VisitRecord record)
     {
         try
@@ -872,6 +844,7 @@ public partial class VisitPageViewModel : BaseViewModel
         }
     }
 
+    [RelayCommand]
     public async Task OpenDirectionsAsync()
     {
         try
@@ -893,6 +866,7 @@ public partial class VisitPageViewModel : BaseViewModel
         }
     }
 
+    [RelayCommand]
     public async Task ShareVisitAsync()
     {
         try
@@ -912,6 +886,7 @@ public partial class VisitPageViewModel : BaseViewModel
         }
     }
 
+    [RelayCommand]
     public async Task AddToCalendarAsync()
     {
         try
@@ -965,6 +940,25 @@ public partial class VisitPageViewModel : BaseViewModel
         }
     }
 
+    // One button, whichever ending applies — the footer shouldn't have to know which kind of visit
+    // it is looking at.
+    [RelayCommand]
+    public async Task DestructiveActionAsync()
+    {
+        try
+        {
+            if (CanLeaveQueue)
+                await LeaveQueueAsync();
+            else if (CanCancelBooking)
+                await CancelBookingAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    [RelayCommand]
     public async Task LeaveQueueAsync()
     {
         if (Record is not { IsLive: true, IsQueue: true } record)
@@ -994,6 +988,7 @@ public partial class VisitPageViewModel : BaseViewModel
         }
     }
 
+    [RelayCommand]
     public async Task CancelBookingAsync()
     {
         if (Record is not { IsLive: true, IsBooking: true } record)
@@ -1063,7 +1058,7 @@ public partial class VisitPageViewModel : BaseViewModel
                 : $"I'm in the queue at {record.BusinessName}.";
 
         return record.SlotStart is { } slot
-            ? $"I'm booked at {record.BusinessName} on {LocalTime.ToLocal(slot):ddd d MMM 'at' HH:mm}."
+            ? $"I'm booked at {record.BusinessName} on {LocalTime.Day(slot)} at {LocalTime.Time(slot)}."
             : $"I'm booked at {record.BusinessName}.";
     }
 
@@ -1089,30 +1084,30 @@ public partial class VisitPageViewModel : BaseViewModel
 
     public static VisitTimelineStep Step(DateTimeOffset? at, string text, VisitStepState state) => new()
     {
-        TimeText = FormatTime(at),
+        MomentText = FormatMoment(at),
         Text = text,
         State = state,
     };
 
     public static VisitTimelineStep Pending(string text) => new()
     {
-        TimeText = "--:--",
+        MomentText = "Not yet",
         Text = text,
         State = VisitStepState.Pending,
     };
 
+    public static string FormatMoment(DateTimeOffset? instant) =>
+        instant is { } value ? LocalTime.Moment(value) : "Not recorded";
+
     public static string FormatTime(DateTimeOffset? instant) =>
-        instant is { } value ? LocalTime.ToLocal(value).ToString("HH:mm") : "--:--";
+        instant is { } value ? LocalTime.Time(value) : "--:--";
 
     public static string FormatSlot(VisitRecord record)
     {
         if (record.SlotStart is not { } start)
             return string.Empty;
 
-        var local = LocalTime.ToLocal(start);
-        return record.SlotEnd is { } end
-            ? $"{local:ddd d MMM HH:mm}–{LocalTime.ToLocal(end):HH:mm}"
-            : local.ToString("ddd d MMM HH:mm");
+        return LocalTime.Range(start, record.SlotEnd);
     }
 
     public static string DescribeSpan(TimeSpan span)

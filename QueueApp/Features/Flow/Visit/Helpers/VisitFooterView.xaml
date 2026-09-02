@@ -4,6 +4,12 @@
              x:Name="Root"
              x:Class="QueueApp.Features.Flow.Visit.Helpers.VisitFooterView">
 
+    <!--
+    Everything this visit can be done about, on the page. These were behind an "Options" button that
+    opened a sheet listing them — a second screen to find out there were two things to choose from.
+    Each button hides itself when it doesn't apply, so a settled visit is one line and a live one is
+    three.
+    -->
     <VerticalStackLayout Spacing="10">
         <Label Text="Queue doesn't handle payment — that was settled at the shop."
                Style="{StaticResource lbl12_Regular_TextMuted}"
@@ -16,10 +22,23 @@
                 Command="{Binding PrimaryActionCommand, Source={x:Reference Root}}"
                 IsVisible="{Binding PrimaryActionText, Source={x:Reference Root}, Converter={StaticResource IsNotNullOrEmptyConverter}}"/>
 
-        <Button Text="Options"
+        <Button Text="Share"
                 Style="{StaticResource btn15_Regular_SheetRow}"
-                HeightRequest="56"
-                Command="{Binding OptionsCommand, Source={x:Reference Root}}"/>
+                HeightRequest="50"
+                Command="{Binding ShareCommand, Source={x:Reference Root}}"
+                IsVisible="{Binding CanShare, Source={x:Reference Root}}"/>
+
+        <Button Text="Add to calendar"
+                Style="{StaticResource btn15_Regular_SheetRow}"
+                HeightRequest="50"
+                Command="{Binding AddToCalendarCommand, Source={x:Reference Root}}"
+                IsVisible="{Binding CanAddToCalendar, Source={x:Reference Root}}"/>
+
+        <Button Text="{Binding DestructiveActionText, Source={x:Reference Root}}"
+                Style="{StaticResource btn15_Regular_SheetBad}"
+                HeightRequest="50"
+                Command="{Binding DestructiveActionCommand, Source={x:Reference Root}}"
+                IsVisible="{Binding HasDestructiveAction, Source={x:Reference Root}}"/>
     </VerticalStackLayout>
 
 </ContentView>

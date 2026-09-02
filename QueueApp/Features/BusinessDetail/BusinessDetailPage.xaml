@@ -4,6 +4,8 @@
              xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
              xmlns:vm="clr-namespace:QueueApp.Features.BusinessDetail"
              xmlns:bdHelpers="clr-namespace:QueueApp.Features.BusinessDetail.Helpers"
+             xmlns:header="clr-namespace:QueueApp.Shared.Templates.BusinessHeader"
+             xmlns:location="clr-namespace:QueueApp.Shared.Templates.LocationCard"
              x:Class="QueueApp.Features.BusinessDetail.BusinessDetailPage"
              x:DataType="vm:BusinessDetailPageViewModel"
              Title="{Binding BusinessName}"
@@ -11,12 +13,12 @@
 
     <Grid RowDefinitions="Auto,*">
 
-        <bdHelpers:LandingHeaderView Grid.Row="0"
+        <header:BusinessHeaderView Grid.Row="0"
                 BusinessName="{Binding BusinessName}"
-                IsOpen="{Binding IsOpen}"
-                OpenPillText="{Binding OpenPillText}"
+                PillText="{Binding OpenPillText}"
+                PillTone="{Binding OpenPillTone}"
                 AddressLine="{Binding AddressLine}"
-                ModeLine="{Binding ModeLine}"
+                MetaLine="{Binding ModeLine}"
                 GoBackCommand="{Binding GoBackCommand}"/>
 
         <ScrollView Grid.Row="1">
@@ -65,7 +67,7 @@
                         TeamCountText="{Binding TeamCountText}"
                         TeamMembers="{Binding TeamMembers}"/>
 
-                <bdHelpers:GettingThereSectionView
+                <location:LocationCardView Margin="20,22,20,0"
                         AddressLine="{Binding AddressLine}"
                         DistanceText="{Binding DistanceText}"
                         HasDistance="{Binding HasDistance}"

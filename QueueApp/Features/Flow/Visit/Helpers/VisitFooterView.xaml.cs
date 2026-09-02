@@ -10,8 +10,26 @@ public partial class VisitFooterView : ContentView
     public static readonly BindableProperty PrimaryActionCommandProperty = BindableProperty.Create(
         nameof(PrimaryActionCommand), typeof(ICommand), typeof(VisitFooterView));
 
-    public static readonly BindableProperty OptionsCommandProperty = BindableProperty.Create(
-        nameof(OptionsCommand), typeof(ICommand), typeof(VisitFooterView));
+    public static readonly BindableProperty CanShareProperty = BindableProperty.Create(
+        nameof(CanShare), typeof(bool), typeof(VisitFooterView), false);
+
+    public static readonly BindableProperty ShareCommandProperty = BindableProperty.Create(
+        nameof(ShareCommand), typeof(ICommand), typeof(VisitFooterView));
+
+    public static readonly BindableProperty CanAddToCalendarProperty = BindableProperty.Create(
+        nameof(CanAddToCalendar), typeof(bool), typeof(VisitFooterView), false);
+
+    public static readonly BindableProperty AddToCalendarCommandProperty = BindableProperty.Create(
+        nameof(AddToCalendarCommand), typeof(ICommand), typeof(VisitFooterView));
+
+    public static readonly BindableProperty HasDestructiveActionProperty = BindableProperty.Create(
+        nameof(HasDestructiveAction), typeof(bool), typeof(VisitFooterView), false);
+
+    public static readonly BindableProperty DestructiveActionTextProperty = BindableProperty.Create(
+        nameof(DestructiveActionText), typeof(string), typeof(VisitFooterView), string.Empty);
+
+    public static readonly BindableProperty DestructiveActionCommandProperty = BindableProperty.Create(
+        nameof(DestructiveActionCommand), typeof(ICommand), typeof(VisitFooterView));
 
     public static readonly BindableProperty ShowPaymentLineProperty = BindableProperty.Create(
         nameof(ShowPaymentLine), typeof(bool), typeof(VisitFooterView), false);
@@ -28,10 +46,46 @@ public partial class VisitFooterView : ContentView
         set => SetValue(PrimaryActionCommandProperty, value);
     }
 
-    public ICommand? OptionsCommand
+    public bool CanShare
     {
-        get => (ICommand?)GetValue(OptionsCommandProperty);
-        set => SetValue(OptionsCommandProperty, value);
+        get => (bool)GetValue(CanShareProperty);
+        set => SetValue(CanShareProperty, value);
+    }
+
+    public ICommand? ShareCommand
+    {
+        get => (ICommand?)GetValue(ShareCommandProperty);
+        set => SetValue(ShareCommandProperty, value);
+    }
+
+    public bool CanAddToCalendar
+    {
+        get => (bool)GetValue(CanAddToCalendarProperty);
+        set => SetValue(CanAddToCalendarProperty, value);
+    }
+
+    public ICommand? AddToCalendarCommand
+    {
+        get => (ICommand?)GetValue(AddToCalendarCommandProperty);
+        set => SetValue(AddToCalendarCommandProperty, value);
+    }
+
+    public bool HasDestructiveAction
+    {
+        get => (bool)GetValue(HasDestructiveActionProperty);
+        set => SetValue(HasDestructiveActionProperty, value);
+    }
+
+    public string DestructiveActionText
+    {
+        get => (string)GetValue(DestructiveActionTextProperty);
+        set => SetValue(DestructiveActionTextProperty, value);
+    }
+
+    public ICommand? DestructiveActionCommand
+    {
+        get => (ICommand?)GetValue(DestructiveActionCommandProperty);
+        set => SetValue(DestructiveActionCommandProperty, value);
     }
 
     public bool ShowPaymentLine

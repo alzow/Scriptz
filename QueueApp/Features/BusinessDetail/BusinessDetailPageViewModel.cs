@@ -60,6 +60,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     public string AddressLine => Business?.Address ?? Business?.Suburb ?? string.Empty;
     public bool IsOpen { get; set; }
     public string OpenPillText => IsOpen ? "OPEN" : "CLOSED";
+    public string OpenPillTone => IsOpen ? "Good" : "Muted";
 
     // "WALK-IN QUEUE · MON–SAT 8:00–18:00". The hours half only appears when operator_availability
     // actually has windows for this business.

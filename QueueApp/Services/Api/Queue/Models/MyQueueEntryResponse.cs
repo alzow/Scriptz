@@ -49,8 +49,12 @@ public class MyQueueEntryResponse
     // cancelled_at column. Absent on a row cancelled by the shop or by an older build.
     [JsonIgnore] public DateTimeOffset? CancelledAtUtc => Details?.CancelledAt;
 
-    private static DateTimeOffset AsUtc(DateTime value) =>
-        new(DateTime.SpecifyKind(value, DateTimeKind.Utc));
+    // The columns are timestamptz, so the JSON carries an offset — and System.Text.Json spends it
+    // on the way in, handing back a Local DateTime on the device's clock. Stamping that Utc shifted
+    // every queue time by the phone's offset; only a naive value is ours to label.
+    private static DateTimeOffset AsUtc(DateTime value) => value.Kind == DateTimeKind.Unspecified
+        ? new DateTimeOffset(DateTime.SpecifyKind(value, DateTimeKind.Utc))
+        : new DateTimeOffset(value).ToUniversalTime();
 }
 
 // queue_entries.details is jsonb and unused by the queue engine, so the two facts a cancellation
