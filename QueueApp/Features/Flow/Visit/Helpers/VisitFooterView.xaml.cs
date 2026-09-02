@@ -10,12 +10,6 @@ public partial class VisitFooterView : ContentView
     public static readonly BindableProperty PrimaryActionCommandProperty = BindableProperty.Create(
         nameof(PrimaryActionCommand), typeof(ICommand), typeof(VisitFooterView));
 
-    public static readonly BindableProperty CanShareProperty = BindableProperty.Create(
-        nameof(CanShare), typeof(bool), typeof(VisitFooterView), false);
-
-    public static readonly BindableProperty ShareCommandProperty = BindableProperty.Create(
-        nameof(ShareCommand), typeof(ICommand), typeof(VisitFooterView));
-
     public static readonly BindableProperty CanAddToCalendarProperty = BindableProperty.Create(
         nameof(CanAddToCalendar), typeof(bool), typeof(VisitFooterView), false);
 
@@ -44,18 +38,6 @@ public partial class VisitFooterView : ContentView
     {
         get => (ICommand?)GetValue(PrimaryActionCommandProperty);
         set => SetValue(PrimaryActionCommandProperty, value);
-    }
-
-    public bool CanShare
-    {
-        get => (bool)GetValue(CanShareProperty);
-        set => SetValue(CanShareProperty, value);
-    }
-
-    public ICommand? ShareCommand
-    {
-        get => (ICommand?)GetValue(ShareCommandProperty);
-        set => SetValue(ShareCommandProperty, value);
     }
 
     public bool CanAddToCalendar

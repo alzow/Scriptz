@@ -22,12 +22,6 @@
                 Command="{Binding PrimaryActionCommand, Source={x:Reference Root}}"
                 IsVisible="{Binding PrimaryActionText, Source={x:Reference Root}, Converter={StaticResource IsNotNullOrEmptyConverter}}"/>
 
-        <Button Text="Share"
-                Style="{StaticResource btn15_Regular_SheetRow}"
-                HeightRequest="50"
-                Command="{Binding ShareCommand, Source={x:Reference Root}}"
-                IsVisible="{Binding CanShare, Source={x:Reference Root}}"/>
-
         <Button Text="Add to calendar"
                 Style="{StaticResource btn15_Regular_SheetRow}"
                 HeightRequest="50"

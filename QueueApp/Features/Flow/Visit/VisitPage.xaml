@@ -84,8 +84,6 @@
                                  IsVisible="{Binding HasRecord}"
                                  PrimaryActionText="{Binding PrimaryActionText}"
                                  PrimaryActionCommand="{Binding PrimaryActionCommand}"
-                                 CanShare="{Binding CanShare}"
-                                 ShareCommand="{Binding ShareVisitCommand}"
                                  CanAddToCalendar="{Binding CanAddToCalendar}"
                                  AddToCalendarCommand="{Binding AddToCalendarCommand}"
                                  HasDestructiveAction="{Binding HasDestructiveAction}"

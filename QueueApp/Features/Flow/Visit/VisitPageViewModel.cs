@@ -893,26 +893,6 @@ public partial class VisitPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    public async Task ShareVisitAsync()
-    {
-        try
-        {
-            if (Record is not { } record)
-                return;
-
-            await Share.Default.RequestAsync(new ShareTextRequest
-            {
-                Title = record.BusinessName,
-                Text = BuildShareText(record),
-            });
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
-        }
-    }
-
-    [RelayCommand]
     public async Task AddToCalendarAsync()
     {
         try
