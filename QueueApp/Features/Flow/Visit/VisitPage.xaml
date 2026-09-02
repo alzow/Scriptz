@@ -26,7 +26,7 @@
 
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Spacing="16"
-                    Padding="20,4,20,20">
+                    Padding="20,16,20,20">
 
                 <Border Style="{StaticResource brd13_Success}"
                         IsVisible="{Binding ShowJustJoined}">
