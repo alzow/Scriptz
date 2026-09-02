@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:QueueApp.Features.BookingAgenda"
              xmlns:models="clr-namespace:QueueApp.Features.BookingAgenda.Models"
              xmlns:helpers="clr-namespace:QueueApp.Features.BookingAgenda.Helpers"
+             xmlns:skeleton="clr-namespace:QueueApp.Shared.Templates.Skeleton"
              x:Name="Root"
              Title="Manage"
              IconImageSource="icon_manage_business"
@@ -24,7 +25,11 @@
             <helpers:DayStripView Days="{Binding DateOptions}"
                                   SelectDayCommand="{Binding SelectDateCommand}"/>
 
-            <helpers:AgendaStatsBarView BookedCountText="{Binding BookedCountText}"
+            <skeleton:SkeletonList Kind="StatsBar" Count="1"
+                                   IsVisible="{Binding IsFirstLoading}"/>
+
+            <helpers:AgendaStatsBarView IsVisible="{Binding IsFirstLoading, Converter={StaticResource InvertedBoolConverter}}"
+                                        BookedCountText="{Binding BookedCountText}"
                                         FreeText="{Binding FreeText}"
                                         RevenueText="{Binding RevenueText}"
                                         RevenueLabel="{Binding RevenueLabel}"
@@ -69,12 +74,12 @@
         </CollectionView>
 
         <!-- Switching day or bay keeps the header and stats in place and only replaces the list, so
-             the spinner sits over the list rather than the page. -->
-        <ActivityIndicator Grid.Row="1" ZIndex="1"
-                           IsRunning="{Binding IsSwitchingDay}"
-                           IsVisible="{Binding IsSwitchingDay}"
-                           Style="{StaticResource ai_Accent}"
-                           HorizontalOptions="Center" VerticalOptions="Center"/>
+             the bars sit over the list rather than the page — the same rows the cold open draws. -->
+        <skeleton:SkeletonList Grid.Row="1" ZIndex="1"
+                               Kind="TimeRow"
+                               Count="{x:Static vm:BookingAgendaPageViewModel.SkeletonRowCount}"
+                               VerticalOptions="Start"
+                               IsVisible="{Binding ShowRowSkeleton}"/>
 
         <Label Grid.Row="1" ZIndex="1" Margin="40,0"
                IsVisible="{Binding ShowEmptyState}"
@@ -92,20 +97,28 @@
                                   BlockTimeCommand="{Binding BlockTimeCommand}"
                                   ZIndex="2"/>
 
-        <!-- Cold open: there is no header, no stats and no rows behind this yet, so it covers the
-             whole page rather than letting empty chrome flash first. -->
-        <Grid Grid.Row="0" Grid.RowSpan="3" ZIndex="3"
-              IsVisible="{Binding IsInitialLoading}"
-              Style="{StaticResource grid_Page}">
-            <VerticalStackLayout Spacing="14" HorizontalOptions="Center" VerticalOptions="Center">
-                <ActivityIndicator IsRunning="{Binding IsInitialLoading}"
-                                   Style="{StaticResource ai_Accent}"
-                                   HorizontalOptions="Center"/>
-                <Label Text="LOADING THE DIARY"
-                       Style="{StaticResource lbl11_Mono_TextFaint}"
+        <!--
+            Cold open. The day strip is built from dates before anything is read, so it stays real;
+            only the stats bar and the rows are being fetched, and only they are drawn as bars.
+        -->
+        <Border Grid.Row="1" ZIndex="4"
+                Style="{StaticResource brd13_Ghost}" Margin="18" Padding="18,22"
+                VerticalOptions="Center"
+                IsVisible="{Binding HasLoadFailed}">
+            <VerticalStackLayout Spacing="10">
+                <Label Text="{Binding LoadFailureText}"
+                       Style="{StaticResource lbl12_Regular_TextMuted}"
+                       HorizontalTextAlignment="Center"
                        HorizontalOptions="Center"/>
+                <Label Text="Try again"
+                       Style="{StaticResource lbl13_Bold_Action}"
+                       HorizontalOptions="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding RetryLoadCommand}"/>
+                    </Label.GestureRecognizers>
+                </Label>
             </VerticalStackLayout>
-        </Grid>
+        </Border>
 
     </Grid>
 

@@ -8,15 +8,18 @@
     <VerticalStackLayout Spacing="0" BindableLayout.ItemsSource="{Binding Items, Source={x:Reference Root}}">
         <BindableLayout.ItemTemplate>
             <DataTemplate x:DataType="businessModels:BrowseBusinessSummaryResponse">
-                <Border Style="{StaticResource brd16_White}" Padding="14" Margin="0,5">
+                <!-- Padding, margin, height floor and column spacing come from the Card styles,
+                     which SkeletonCardView reads too. -->
+                <Border Style="{StaticResource brd16_BrowseCard}">
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer
                             Command="{Binding OpenCommand, Source={x:Reference Root}}"
                             CommandParameter="{Binding .}"/>
                     </Border.GestureRecognizers>
-                    <Grid ColumnDefinitions="52,*" ColumnSpacing="13">
+                    <Grid ColumnDefinitions="Auto,*" Style="{StaticResource grid_BrowseCard}">
                         <Border Grid.Column="0"
-                                WidthRequest="52" HeightRequest="52"
+                                WidthRequest="{StaticResource dim_CardIcon}"
+                                HeightRequest="{StaticResource dim_CardIcon}"
                                 StrokeThickness="1"
                                 Padding="0"
                                 VerticalOptions="Start">
@@ -36,7 +39,7 @@
                                    HorizontalOptions="Center" VerticalOptions="Center"/>
                         </Border>
 
-                        <VerticalStackLayout Grid.Column="1" Spacing="3">
+                        <VerticalStackLayout Grid.Column="1" Style="{StaticResource vsl_RowText}" VerticalOptions="Start">
                             <Label Text="{Binding Name}"
                                    Style="{StaticResource lbl15_Bold_TextDark}"
                                    LineBreakMode="TailTruncation"/>

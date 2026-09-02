@@ -20,6 +20,8 @@ namespace QueueApp.Features.OperatorQueue;
 
 public partial class OperatorQueuePageViewModel : BaseViewModel
 {
+    public const int SkeletonRowCount = 3;
+
     public ObservableCollection<BoardSection> Sections { get; } = new();
     public ObservableCollection<QueueRowItem> PoolRows { get; } = new();
 
@@ -99,10 +101,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
             // The beat StartTicking skipped because Appearing ran before this did.
             _ = _businessService.HeartbeatAsync(_businessId);
 
-            var business = await _businessService.GetBusinessAsync(_businessId);
-            BusinessName = business?.Name ?? "Queue";
-
-            await LoadQueueAsync();
+            await RunFirstLoadAsync(FetchBoardAsync);
 
             // Appearing fires before Loaded on Android, so the first pass through
             // OnAppearingAsync had no business id to filter on and skipped the subscription.
@@ -112,6 +111,19 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         {
             await HandleExceptionAsync(ex);
         }
+    }
+
+    public override Task ReloadAsync() => RunFirstLoadAsync(FetchBoardAsync);
+
+    // The cold open only. Every other path into the board is a realtime event or a tab return,
+    // where the sections are already on screen — putting bars over a live board would hide the one
+    // thing the operator is watching, so those keep going through LoadQueueAsync.
+    public async Task FetchBoardAsync()
+    {
+        var business = await _businessService.GetBusinessAsync(_businessId);
+        BusinessName = business?.Name ?? "Queue";
+
+        await FetchQueueAsync();
     }
 
     public async Task SubscribeRealtimeAsync()
@@ -175,6 +187,18 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
 
     public async Task LoadQueueAsync()
     {
+        try
+        {
+            await FetchQueueAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    public async Task FetchQueueAsync()
+    {
         await _loadLock.WaitAsync();
         try
         {
@@ -203,10 +227,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                 AvgText = avg is null ? BoardConstants.EmDash : $"{avg.Value:0}m";
                 Rebuild();
             });
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
         }
         finally
         {

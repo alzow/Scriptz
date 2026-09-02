@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:skeleton="clr-namespace:QueueApp.Shared.Templates.Skeleton"
+             x:Class="QueueApp.Shared.Templates.Skeleton.Archetypes.SkeletonCardView">
+
+    <Border Style="{StaticResource brd16_BrowseCard}">
+        <Grid ColumnDefinitions="Auto,*" Style="{StaticResource grid_BrowseCard}">
+
+            <skeleton:SkeletonBar Grid.Column="0" Style="{StaticResource skl_Block_CardIcon}"/>
+
+            <VerticalStackLayout Grid.Column="1" Style="{StaticResource vsl_RowText}">
+                <Grid ColumnDefinitions="62*,38*">
+                    <skeleton:SkeletonBar Grid.Column="0" Style="{StaticResource skl_Line_Title}"/>
+                </Grid>
+                <Grid ColumnDefinitions="40*,60*">
+                    <skeleton:SkeletonBar Grid.Column="0" Style="{StaticResource skl_Line_Meta}"/>
+                </Grid>
+                <skeleton:SkeletonBar Style="{StaticResource skl_Block_Track}"/>
+                <Grid ColumnDefinitions="52*,48*">
+                    <skeleton:SkeletonBar Grid.Column="0" Style="{StaticResource skl_Line_Caption}"/>
+                </Grid>
+            </VerticalStackLayout>
+
+        </Grid>
+    </Border>
+
+</ContentView>

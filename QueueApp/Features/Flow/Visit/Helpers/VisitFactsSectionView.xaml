@@ -9,12 +9,13 @@
         <Label Text="{Binding SectionTitle, Source={x:Reference Root}}"
                Style="{StaticResource lbl15_Bold_TextDark}"/>
 
-        <Border Style="{StaticResource brd13_Raised}" Padding="14,4">
+        <!-- Well padding and row padding come from the FactRow styles, shared with the skeleton. -->
+        <Border Style="{StaticResource brd13_FactsWell}">
             <VerticalStackLayout Spacing="0"
                                  BindableLayout.ItemsSource="{Binding Facts, Source={x:Reference Root}}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="models:VisitFactRow">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="0,10">
+                        <Grid ColumnDefinitions="Auto,*" Style="{StaticResource grid_FactRow}">
                             <Label Grid.Column="0"
                                    Text="{Binding Label}"
                                    Style="{StaticResource lbl13_Regular_TextLight}"

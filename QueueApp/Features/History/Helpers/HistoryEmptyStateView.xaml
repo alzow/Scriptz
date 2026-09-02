@@ -4,11 +4,16 @@
              xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
              x:Name="Root"
              x:Class="QueueApp.Features.History.Helpers.HistoryEmptyStateView">
+    <!--
+        Serves the empty list and the failed load both. They are the same shape — an icon, a line
+        that says what happened, a line that says what to do, and one action — so a failed first
+        load reuses this rather than getting a second dead-end screen of its own.
+    -->
     <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="10" Padding="40,0" MaximumWidthRequest="300">
         <Border WidthRequest="84" HeightRequest="84"
                 Style="{StaticResource brd26_GhostCircle}"
                 HorizontalOptions="Center">
-            <tpl:ThemedIcon Icon="ic_ticket" WidthRequest="40" HeightRequest="40" HorizontalOptions="Center" VerticalOptions="Center"/>
+            <tpl:ThemedIcon Icon="{Binding Icon, Source={x:Reference Root}}" WidthRequest="40" HeightRequest="40" HorizontalOptions="Center" VerticalOptions="Center"/>
         </Border>
         <Label Text="{Binding EmptyTitle, Source={x:Reference Root}}" Style="{StaticResource lbl20_Bold_TextDark}" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
         <Label Text="{Binding EmptyBody, Source={x:Reference Root}}" Style="{StaticResource lbl13_Regular_TextLight}" HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
@@ -19,7 +24,7 @@
             <Border.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding BrowseCommand, Source={x:Reference Root}}"/>
             </Border.GestureRecognizers>
-            <Label Text="Browse nearby" Style="{StaticResource lbl13_Bold_Action}"/>
+            <Label Text="{Binding ActionText, Source={x:Reference Root}}" Style="{StaticResource lbl13_Bold_Action}"/>
         </Border>
     </VerticalStackLayout>
 </ContentView>

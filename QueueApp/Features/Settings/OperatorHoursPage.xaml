@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.Settings"
+             xmlns:skeleton="clr-namespace:QueueApp.Shared.Templates.Skeleton"
              xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
              xmlns:models="clr-namespace:QueueApp.Services.Api.Operator.Models"
              x:Name="Root"
@@ -15,10 +16,12 @@
                                        BackCommand="{Binding GoBackCommand}"/>
 
         <Grid Grid.Row="1">
-            <CollectionView ItemsSource="{Binding Operators}" Margin="12,6">
+            <CollectionView ItemsSource="{Binding Operators}"
+                            IsVisible="{Binding IsFirstLoading, Converter={StaticResource InvertedBoolConverter}}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:OperatorResponse">
-                        <Border Style="{StaticResource brd16_White}" Padding="16" Margin="0,6">
+                        <!-- ListRow geometry, shared with SkeletonListRowPlainView. -->
+                        <Border Style="{StaticResource brd16_ListRow}">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer
                                     Command="{Binding BindingContext.SelectOperatorCommand, Source={x:Reference Root}}"
@@ -30,8 +33,28 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
-                                HorizontalOptions="Center" VerticalOptions="Center"/>
+            <Border Style="{StaticResource brd13_Ghost}" Padding="18,20" Margin="20,0"
+                    VerticalOptions="Center"
+                    IsVisible="{Binding HasLoadFailed}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="{Binding LoadFailureText}"
+                           Style="{StaticResource lbl12_Regular_TextMuted}"
+                           HorizontalTextAlignment="Center"
+                           HorizontalOptions="Center"/>
+                    <Label Text="Try again"
+                           Style="{StaticResource lbl13_Bold_Action}"
+                           HorizontalOptions="Center">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding RetryLoadCommand}"/>
+                        </Label.GestureRecognizers>
+                    </Label>
+                </VerticalStackLayout>
+            </Border>
+
+            <skeleton:SkeletonList Kind="ListRowPlain"
+                                   Count="{x:Static vm:OperatorHoursPageViewModel.SkeletonRowCount}"
+                                   VerticalOptions="Start"
+                                   IsVisible="{Binding IsFirstLoading}"/>
         </Grid>
     </Grid>
 </ContentPage>

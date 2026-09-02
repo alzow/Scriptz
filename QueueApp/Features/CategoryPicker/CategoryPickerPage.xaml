@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:QueueApp.Features.CategoryPicker"
              xmlns:helpers="clr-namespace:QueueApp.Features.CategoryPicker.Helpers"
              xmlns:entry="clr-namespace:QueueApp.Shared.Templates.QueueEntry"
+             xmlns:skeleton="clr-namespace:QueueApp.Shared.Templates.Skeleton"
              x:Name="Root"
              x:Class="QueueApp.Features.CategoryPicker.CategoryPickerPage"
              x:DataType="vm:CategoryPickerPageViewModel"
@@ -79,16 +80,37 @@
                     </Grid>
                     <helpers:BrowseBusinessListView
                         Items="{Binding Businesses}"
+                        IsVisible="{Binding ShowBusinessSkeleton, Converter={StaticResource InvertedBoolConverter}}"
                         OpenCommand="{Binding OpenBusinessCommand}"/>
+
+                    <!-- The carousel above is a static catalog, not a read, so it is never
+                         skeletonised: the categories are known before the page opens. -->
+                    <skeleton:SkeletonList Kind="Card"
+                                           Count="{x:Static vm:CategoryPickerPageViewModel.SkeletonCardCount}"
+                                           IsVisible="{Binding ShowBusinessSkeleton}"/>
+
                     <Label Text="No businesses match yet."
                            Style="{StaticResource lbl13_Regular_TextLight}"
                            IsVisible="{Binding IsBusinessesEmpty}"
                            HorizontalOptions="Center"
                            Margin="0,20,0,20"/>
-                    <ActivityIndicator IsRunning="{Binding IsLoading}"
-                                       IsVisible="{Binding IsLoading}"
-                                       Style="{StaticResource ai_Accent}"
-                                       Margin="0,16,0,0"/>
+
+                    <Border Style="{StaticResource brd13_Ghost}" Padding="18,20" Margin="0,16,0,0"
+                            IsVisible="{Binding HasLoadFailed}">
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="{Binding LoadFailureText}"
+                                   Style="{StaticResource lbl12_Regular_TextMuted}"
+                                   HorizontalTextAlignment="Center"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="Try again"
+                                   Style="{StaticResource lbl13_Bold_Action}"
+                                   HorizontalOptions="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding RetryLoadCommand}"/>
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </VerticalStackLayout>
+                    </Border>
 
                     <!-- Frequent -->
                     <Grid ColumnDefinitions="*,Auto"

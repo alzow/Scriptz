@@ -28,35 +28,38 @@ public partial class OperatorHoursPageViewModel : BaseViewModel
         Title = "Hours";
     }
 
+    public const int SkeletonRowCount = 4;
+
     public List<OperatorResponse> Operators { get; set; } = new();
-    public bool IsLoading { get; set; } = true;
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
         try
         {
             await base.OnLoadedAsync(parameters);
-
-            var businessId = await _businessService.GetOwnedBusinessIdAsync();
-            var operators = await _operatorService.GetOperatorsAsync(businessId);
-
-            if (operators.Count == 1)
-            {
-                await NavigationService.NavigateAsync(NavigationPaths.WeeklyHoursPage,
-                    new NavigationParameters { [NavigationKeys.OperatorId] = operators[0].Id, [NavigationKeys.OperatorName] = operators[0].DisplayName });
-                return;
-            }
-
-            Operators = operators;
+            await RunFirstLoadAsync(FetchAsync);
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
         }
-        finally
+    }
+
+    public override Task ReloadAsync() => RunFirstLoadAsync(FetchAsync);
+
+    public async Task FetchAsync()
+    {
+        var businessId = await _businessService.GetOwnedBusinessIdAsync();
+        var operators = await _operatorService.GetOperatorsAsync(businessId);
+
+        if (operators.Count == 1)
         {
-            IsLoading = false;
+            await NavigationService.NavigateAsync(NavigationPaths.WeeklyHoursPage,
+                new NavigationParameters { [NavigationKeys.OperatorId] = operators[0].Id, [NavigationKeys.OperatorName] = operators[0].DisplayName });
+            return;
         }
+
+        Operators = operators;
     }
 
     [RelayCommand]

@@ -28,10 +28,16 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     private static readonly TimeSpan MinimumResolvingDisplay = TimeSpan.FromMilliseconds(400);
     private static readonly TimeSpan ResolvingTimeout = TimeSpan.FromSeconds(4);
     private const int UpcomingBookingsShown = 3;
+    public const int SkeletonCardCount = 4;
 
     public IReadOnlyList<ServiceCategory> Categories { get; } = CategoryCatalog.All.Where(c => c.Available).ToList();
-    public bool IsLoading { get; set; }
-    public bool IsRefreshing { get; set; }
+
+    // Picking a category replaces the businesses list and leaves the bar, the search field and the
+    // carousel exactly where they are, so it draws the same card skeletons the cold open does.
+    // Pull to refresh does not: the rows are already there and RefreshView has its own indicator.
+    public bool IsSwitchingCategory { get; set; }
+    public bool ShowBusinessSkeleton => IsFirstLoading || IsSwitchingCategory;
+
     public string SearchText { get; set; } = string.Empty;
     public ServiceCategory? SelectedCategory { get; set; }
     public MyActiveQueueEntryResponse? ActiveEntry { get; set; }
@@ -45,7 +51,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     public bool HasActiveEntry => ActiveEntry is not null;
     public bool HasUpcomingBookings => UpcomingBookings.Count > 0;
     public bool HasFrequentBusinesses => FrequentBusinesses.Count > 0;
-    public bool IsBusinessesEmpty => Businesses.Count == 0 && !IsLoading;
+    public bool IsBusinessesEmpty => Businesses.Count == 0 && !ShowBusinessSkeleton && !HasLoadFailed;
 
     private List<BrowseBusinessSummaryResponse> _allBusinesses = new();
     private Guid _customerId;
@@ -94,11 +100,20 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         {
             if (e.PropertyName == nameof(SearchText))
                 ApplyBusinessFilter();
+
+            if (e.PropertyName == nameof(IsSwitchingCategory))
+                OnLoadStateChanged();
         }
         catch (Exception ex)
         {
             _ = HandleExceptionAsync(ex);
         }
+    }
+
+    public override void OnLoadStateChanged()
+    {
+        OnPropertyChanged(nameof(ShowBusinessSkeleton));
+        OnPropertyChanged(nameof(IsBusinessesEmpty));
     }
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
@@ -122,7 +137,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
                 cacheIsFresh = DateTimeOffset.UtcNow - cached.ResolvedAt < CacheFreshWindow;
             }
 
-            await LoadAsync();
+            await RunFirstLoadAsync(LoadAsync);
 
             // Not awaited: a live fix is a permission prompt on a cold install and up to twelve
             // seconds of GPS after that, and the dashboard is already on screen from the cached
@@ -198,7 +213,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
                     result.Outcome == LocationOutcome.Coarse ? LocationBarState.Coarse : LocationBarState.Resolved,
                     location.Label);
                 if (moved)
-                    await LoadAsync();
+                    await RefreshQuietlyAsync();
                 break;
             case LocationOutcome.Denied:
                 ApplyLocationState(LocationBarState.Denied, "Set your location");
@@ -403,10 +418,8 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     // goes out in one wave. Serially it was the sum of five round trips before the first business
     // row appeared. The business list is awaited first so a failure in one of the smaller reads
     // cannot keep the page's main content off screen.
-    [RelayCommand]
     public async Task LoadAsync()
     {
-        IsLoading = true;
         try
         {
             var isSignedIn = _customerId != Guid.Empty;
@@ -439,14 +452,8 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
                 OnPropertyChanged(nameof(HasFrequentBusinesses));
             }
         }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
-        }
         finally
         {
-            IsLoading = false;
-            IsRefreshing = false;
             OnPropertyChanged(nameof(IsBusinessesEmpty));
 
             // Not awaited: joining the channel is a websocket handshake, and it was the first thing
@@ -525,7 +532,27 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         {
             await HandleExceptionAsync(ex);
         }
+        finally
+        {
+            IsRefreshing = false;
+        }
     }
+
+    // A location fix landing in the background is an update, not a load. It repaints rows that are
+    // already on screen and must never put grey bars over them.
+    public async Task RefreshQuietlyAsync()
+    {
+        try
+        {
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    public override Task ReloadAsync() => RunFirstLoadAsync(LoadAsync);
 
     [RelayCommand]
     public async Task SelectCategoryAsync(ServiceCategory category)
@@ -536,11 +563,16 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
                 return;
 
             SelectedCategory = category == SelectedCategory ? null : category;
+            IsSwitchingCategory = true;
             await LoadAsync();
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
+        }
+        finally
+        {
+            IsSwitchingCategory = false;
         }
     }
 

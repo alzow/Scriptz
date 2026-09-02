@@ -5,23 +5,24 @@
              VerticalOptions="Start"
              x:Class="QueueApp.Features.BookingAgenda.Helpers.AgendaStatsBarView">
 
-    <Border Style="{StaticResource brd14_White}" Margin="18,13,18,0" Padding="4,10">
+    <!-- StatsBar geometry, shared with SkeletonStatsBarView. -->
+    <Border Style="{StaticResource brd14_StatsBar}">
         <Grid ColumnDefinitions="*,Auto,*,Auto,*,Auto,*">
-            <VerticalStackLayout Grid.Column="0" Spacing="4" HorizontalOptions="Center">
+            <VerticalStackLayout Grid.Column="0" Style="{StaticResource vsl_StatCell}">
                 <Label Text="{Binding BookedCountText, Source={x:Reference Root}}"
                        Style="{StaticResource lbl16_Mono_TextPrimary}" HorizontalOptions="Center"/>
                 <Label Text="Booked" Style="{StaticResource lbl11_Regular_TextLight}" HorizontalOptions="Center"/>
             </VerticalStackLayout>
             <BoxView Grid.Column="1" WidthRequest="1" HeightRequest="22"
                      Style="{StaticResource bx_Divider}" VerticalOptions="Center"/>
-            <VerticalStackLayout Grid.Column="2" Spacing="4" HorizontalOptions="Center">
+            <VerticalStackLayout Grid.Column="2" Style="{StaticResource vsl_StatCell}">
                 <Label Text="{Binding FreeText, Source={x:Reference Root}}"
                        Style="{StaticResource lbl16_Mono_TextPrimary}" HorizontalOptions="Center"/>
                 <Label Text="Free" Style="{StaticResource lbl11_Regular_TextLight}" HorizontalOptions="Center"/>
             </VerticalStackLayout>
             <BoxView Grid.Column="3" WidthRequest="1" HeightRequest="22"
                      Style="{StaticResource bx_Divider}" VerticalOptions="Center"/>
-            <VerticalStackLayout Grid.Column="4" Spacing="4" HorizontalOptions="Center">
+            <VerticalStackLayout Grid.Column="4" Style="{StaticResource vsl_StatCell}">
                 <Label Text="{Binding RevenueText, Source={x:Reference Root}}"
                        Style="{StaticResource lbl16_Mono_TextPrimary}" HorizontalOptions="Center"/>
                 <Label Text="{Binding RevenueLabel, Source={x:Reference Root}}"
@@ -29,7 +30,7 @@
             </VerticalStackLayout>
             <BoxView Grid.Column="5" WidthRequest="1" HeightRequest="22"
                      Style="{StaticResource bx_Divider}" VerticalOptions="Center"/>
-            <VerticalStackLayout Grid.Column="6" Spacing="4" HorizontalOptions="Center">
+            <VerticalStackLayout Grid.Column="6" Style="{StaticResource vsl_StatCell}">
                 <Label Text="{Binding ResourceCountText, Source={x:Reference Root}}"
                        Style="{StaticResource lbl16_Mono_TextMuted}" HorizontalOptions="Center"/>
                 <Label Text="{Binding ResourceCountLabel, Source={x:Reference Root}}"

@@ -6,29 +6,26 @@
              x:Name="Root"
              x:DataType="models:HistoryRow"
              x:Class="QueueApp.Features.History.Helpers.HistoryRowView">
-    <Border Style="{StaticResource brd16_White}"
-            HeightRequest="72"
-            Margin="16,0,16,8"
-            Padding="12,0">
+    <!--
+        Height, margin, padding, column spacing and the leading tile all come from the ListRow
+        styles rather than from literals here, because SkeletonListRowView reads the same keys.
+        Change a number there and both this row and its skeleton move together; there is nowhere
+        left for the two to drift apart.
+    -->
+    <Border Style="{StaticResource brd16_ListRow}">
         <Border.GestureRecognizers>
             <TapGestureRecognizer Command="{Binding OpenCommand, Source={x:Reference Root}}"
                                    CommandParameter="{Binding .}"/>
         </Border.GestureRecognizers>
-        <Grid ColumnDefinitions="44,*,Auto" ColumnSpacing="12">
+        <Grid ColumnDefinitions="Auto,*,Auto" Style="{StaticResource grid_ListRow}">
 
-            <Border Grid.Column="0"
-                    WidthRequest="44" HeightRequest="44"
-                    Style="{StaticResource brd_Raised_Lined}"
-                    VerticalOptions="Center">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="13"/>
-                </Border.StrokeShape>
+            <Border Grid.Column="0" Style="{StaticResource brd13_RowIcon}">
                 <Image Source="{Binding CategoryIcon}"
                        WidthRequest="26" HeightRequest="26"
                        HorizontalOptions="Center" VerticalOptions="Center"/>
             </Border>
 
-            <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+            <VerticalStackLayout Grid.Column="1" Style="{StaticResource vsl_RowText}">
                 <Label Text="{Binding BusinessName}"
                        Style="{StaticResource lbl14_Bold_HistoryRow}"
                        LineBreakMode="TailTruncation"/>
@@ -37,7 +34,7 @@
                        LineBreakMode="TailTruncation"/>
             </VerticalStackLayout>
 
-            <VerticalStackLayout Grid.Column="2" Spacing="5" HorizontalOptions="End" VerticalOptions="Center">
+            <VerticalStackLayout Grid.Column="2" Style="{StaticResource vsl_RowTrailing}">
                 <Border Padding="8,4"
                         BackgroundColor="{Binding StatusFill}"
                         Stroke="{Binding StatusStroke}"

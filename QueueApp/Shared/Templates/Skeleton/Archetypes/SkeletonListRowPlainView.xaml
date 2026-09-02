@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:skeleton="clr-namespace:QueueApp.Shared.Templates.Skeleton"
+             x:Class="QueueApp.Shared.Templates.Skeleton.Archetypes.SkeletonListRowPlainView">
+
+    <!--
+        The same ListRow container as SkeletonListRowView — same height, margin, padding and column
+        spacing, from the same style keys — with no leading tile and a button-shaped trailing block,
+        because that is the shape the settings rows actually have.
+    -->
+    <Border Style="{StaticResource brd16_ListRow}">
+        <Grid ColumnDefinitions="*,Auto" Style="{StaticResource grid_ListRow}">
+
+            <VerticalStackLayout Grid.Column="0" Style="{StaticResource vsl_RowText}">
+                <Grid ColumnDefinitions="54*,46*">
+                    <skeleton:SkeletonBar Grid.Column="0" Style="{StaticResource skl_Line_Title}"/>
+                </Grid>
+                <Grid ColumnDefinitions="38*,62*">
+                    <skeleton:SkeletonBar Grid.Column="0" Style="{StaticResource skl_Line_Meta}"/>
+                </Grid>
+            </VerticalStackLayout>
+
+            <skeleton:SkeletonBar Grid.Column="1" Style="{StaticResource skl_Block_RowAction}"/>
+
+        </Grid>
+    </Border>
+
+</ContentView>

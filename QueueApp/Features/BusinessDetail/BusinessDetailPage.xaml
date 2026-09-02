@@ -6,6 +6,7 @@
              xmlns:bdHelpers="clr-namespace:QueueApp.Features.BusinessDetail.Helpers"
              xmlns:header="clr-namespace:QueueApp.Shared.Templates.BusinessHeader"
              xmlns:location="clr-namespace:QueueApp.Shared.Templates.LocationCard"
+             xmlns:skeleton="clr-namespace:QueueApp.Shared.Templates.Skeleton"
              x:Class="QueueApp.Features.BusinessDetail.BusinessDetailPage"
              x:DataType="vm:BusinessDetailPageViewModel"
              Title="{Binding BusinessName}"
@@ -21,7 +22,8 @@
                 MetaLine="{Binding ModeLine}"
                 GoBackCommand="{Binding GoBackCommand}"/>
 
-        <ScrollView Grid.Row="1">
+        <ScrollView Grid.Row="1"
+                    IsVisible="{Binding IsFirstLoading, Converter={StaticResource InvertedBoolConverter}}">
             <VerticalStackLayout Spacing="0" Padding="0,0,0,24">
 
                 <bdHelpers:LiveCardView
@@ -76,10 +78,33 @@
             </VerticalStackLayout>
         </ScrollView>
 
-        <ActivityIndicator Grid.Row="0" Grid.RowSpan="2"
-                           IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
-                           Style="{StaticResource ai_Accent}"
-                           HorizontalOptions="Center" VerticalOptions="Center"/>
+        <!-- Header stays real; the live card and the service rows below it are the read. -->
+        <VerticalStackLayout Grid.Row="1" Spacing="0"
+                             IsVisible="{Binding IsFirstLoading}">
+            <skeleton:SkeletonList Kind="StatsBar" Count="1"/>
+            <skeleton:SkeletonList Kind="ListRow"
+                                   Count="{x:Static vm:BusinessDetailPageViewModel.SkeletonRowCount}"
+                                   Margin="0,12,0,0"/>
+        </VerticalStackLayout>
+
+        <Border Grid.Row="1"
+                Style="{StaticResource brd13_Ghost}" Margin="18" Padding="18,22"
+                VerticalOptions="Center"
+                IsVisible="{Binding HasLoadFailed}">
+            <VerticalStackLayout Spacing="10">
+                <Label Text="{Binding LoadFailureText}"
+                       Style="{StaticResource lbl12_Regular_TextMuted}"
+                       HorizontalTextAlignment="Center"
+                       HorizontalOptions="Center"/>
+                <Label Text="Try again"
+                       Style="{StaticResource lbl13_Bold_Action}"
+                       HorizontalOptions="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding RetryLoadCommand}"/>
+                    </Label.GestureRecognizers>
+                </Label>
+            </VerticalStackLayout>
+        </Border>
 
     </Grid>
 

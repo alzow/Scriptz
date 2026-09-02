@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:skeleton="clr-namespace:QueueApp.Shared.Templates.Skeleton"
+             x:Class="QueueApp.Shared.Templates.Skeleton.Archetypes.SkeletonSectionRowView">
+
+    <Border Style="{StaticResource brd16_SectionRow}">
+        <Grid ColumnDefinitions="*,Auto" Style="{StaticResource grid_SectionRow}">
+
+            <VerticalStackLayout Grid.Column="0" Style="{StaticResource vsl_RowText}">
+                <Grid ColumnDefinitions="46*,54*">
+                    <skeleton:SkeletonBar Grid.Column="0" Style="{StaticResource skl_Line_Title}"/>
+                </Grid>
+                <Grid ColumnDefinitions="68*,32*">
+                    <skeleton:SkeletonBar Grid.Column="0" Style="{StaticResource skl_Line_Meta}"/>
+                </Grid>
+            </VerticalStackLayout>
+
+            <skeleton:SkeletonBar Grid.Column="1" Style="{StaticResource skl_Line_Chevron}"/>
+
+        </Grid>
+    </Border>
+
+</ContentView>

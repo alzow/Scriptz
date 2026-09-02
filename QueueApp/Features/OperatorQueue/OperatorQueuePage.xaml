@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:QueueApp.Features.OperatorQueue"
              xmlns:models="clr-namespace:QueueApp.Features.OperatorQueue.Models"
              xmlns:helpers="clr-namespace:QueueApp.Features.OperatorQueue.Helpers"
+             xmlns:skeleton="clr-namespace:QueueApp.Shared.Templates.Skeleton"
              x:Name="Root"
              Title="Manage"
              IconImageSource="icon_manage_business"
@@ -20,7 +21,11 @@
                                     IsLive="{Binding IsLive}"
                                     OpenSettingsCommand="{Binding OpenSettingsCommand}"/>
 
-            <helpers:ShopStatsBarView WaitingCountText="{Binding WaitingCountText}"
+            <skeleton:SkeletonList Kind="StatsBar" Count="1"
+                                   IsVisible="{Binding IsFirstLoading}"/>
+
+            <helpers:ShopStatsBarView IsVisible="{Binding IsFirstLoading, Converter={StaticResource InvertedBoolConverter}}"
+                                      WaitingCountText="{Binding WaitingCountText}"
                                       ServingCountText="{Binding ServingCountText}"
                                       DoneTodayText="{Binding DoneTodayText}"
                                       AvgText="{Binding AvgText}"/>
@@ -39,6 +44,37 @@
                                     OpenRowActionsCommand="{Binding OpenRowActionsCommand}"/>
 
         </VerticalStackLayout>
+
+        <!--
+            The board is the heaviest skeleton in the app, so it is also the most careful: bars go up
+            on the cold open and nowhere else. A realtime nudge or a return to the tab repaints
+            sections that are already on screen, and covering a live queue with grey would hide the
+            one thing the operator is watching.
+        -->
+        <skeleton:SkeletonList Grid.Row="1" ZIndex="1"
+                               Kind="BoardRow"
+                               Count="{x:Static vm:OperatorQueuePageViewModel.SkeletonRowCount}"
+                               VerticalOptions="Start"
+                               IsVisible="{Binding IsFirstLoading}"/>
+
+        <Border Grid.Row="1" ZIndex="2"
+                Style="{StaticResource brd13_Ghost}" Margin="18" Padding="18,22"
+                VerticalOptions="Center"
+                IsVisible="{Binding HasLoadFailed}">
+            <VerticalStackLayout Spacing="10">
+                <Label Text="{Binding LoadFailureText}"
+                       Style="{StaticResource lbl12_Regular_TextMuted}"
+                       HorizontalTextAlignment="Center"
+                       HorizontalOptions="Center"/>
+                <Label Text="Try again"
+                       Style="{StaticResource lbl13_Bold_Action}"
+                       HorizontalOptions="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding RetryLoadCommand}"/>
+                    </Label.GestureRecognizers>
+                </Label>
+            </VerticalStackLayout>
+        </Border>
 
         <CollectionView Grid.Row="1" ItemsSource="{Binding Sections}"
                         VerticalOptions="Start">

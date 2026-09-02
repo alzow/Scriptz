@@ -29,8 +29,9 @@ namespace QueueApp.Features.Flow;
 
 public abstract partial class FlowPageViewModelBase : BaseViewModel
 {
+    public const int SkeletonRowCount = 4;
+
     public BusinessResponse? Business { get; set; }
-    public bool IsLoading { get; set; } = true;
     public bool IsQueueMode => Business?.Mode == FlowStepEngine.QueueMode;
     public bool IsBookingMode => Business?.Mode == FlowStepEngine.BookingMode;
 
@@ -109,6 +110,8 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
     private readonly Dictionary<(Guid OperatorId, Guid ServiceId), Dictionary<DateTime, int>> _dayCountCache = new();
     private readonly Dictionary<DateTime, List<SlotResponse>> _slotCache = new();
     private Guid _businessId;
+    // Held so a retry can re-run the cold open with the parameters the flow opened with.
+    private INavigationParameters? _pendingParameters;
 
     // What the submit just created. The visit page loads from an id rather than a handed-over
     // model, so the flow has to keep the one it was given back.
@@ -170,84 +173,90 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
         {
             await base.OnLoadedAsync(parameters);
 
-            _businessId = parameters is not null && parameters.TryGetValue(NavigationKeys.BusinessId, out var idObj)
-                ? (Guid)idObj
-                : throw new InvalidOperationException("A flow page requires a 'businessId' parameter.");
-
-            if (parameters is not null)
-            {
-                if (parameters.TryGetValue(NavigationKeys.IsOperatorFlow, out var operatorFlagObj))
-                    IsOperatorFlow = operatorFlagObj is true;
-
-                if (parameters.TryGetValue(NavigationKeys.PreferredDate, out var dateObj) && dateObj is DateTime date)
-                    _preferredDate = date.Date;
-
-                if (parameters.TryGetValue(NavigationKeys.PreferredStart, out var startObj)
-                    && startObj is DateTimeOffset start)
-                    _preferredStart = start;
-            }
-
-            IsLoading = true;
-
-            var snapshot = parameters is not null
-                && parameters.TryGetValue(NavigationKeys.BusinessSnapshot, out var snapshotObj)
-                    ? snapshotObj as BusinessSnapshot
-                    : null;
-
-            BusinessResponse business;
-            IReadOnlyList<ServiceResponse> services;
-
-            if (snapshot is not null)
-            {
-                // Handed over by the business landing, which fetched all of this a tap ago. Four
-                // round trips the flow would otherwise spend re-reading what the page behind it
-                // already had on screen.
-                business = snapshot.Business;
-                _allOperators = snapshot.Operators.ToList();
-                services = snapshot.Services;
-                _hours = snapshot.Hours;
-            }
-            else
-            {
-                // Opened from somewhere with nothing to hand over — the agenda's add-booking, say.
-                // One wave for the three that need only the business id, then the hours.
-                var businessTask = _businessService.GetBusinessAsync(_businessId);
-                var operatorsTask = _operatorService.GetOperatorsAsync(_businessId);
-                var servicesTask = _serviceOfferingsService.GetActiveServicesAsync(_businessId);
-
-                await Task.WhenAll(businessTask, operatorsTask, servicesTask);
-
-                business = await businessTask
-                    ?? throw new InvalidOperationException("That business is no longer available.");
-                _allOperators = await operatorsTask;
-                services = await servicesTask;
-
-                _hours = await LoadHoursAsync(_allOperators);
-            }
-
-            Business = business;
-            Title = business.Name;
-            _labels = CategoryLabels.Resolve(business.Category);
-            _selectableOperators = FlowStepEngine.SelectableOperators(_allOperators, IsOperatorFlow);
-
-            ServiceRows.Clear();
-            foreach (var service in services.OrderBy(s => s.SortOrder))
-                ServiceRows.Add(ServiceChoiceItem.From(service));
-            OnPropertyChanged(nameof(HasServices));
-
-            if (IsQueueMode)
-                await LoadQueueSummaryAsync();
-
-            StartFlow();
+            _pendingParameters = parameters;
+            await RunFirstLoadAsync(FetchAsync);
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
         }
-        finally
+    }
+
+    public override Task ReloadAsync() => RunFirstLoadAsync(FetchAsync);
+
+    // Throws by design: RunFirstLoadAsync owns the failure, so a flow that cannot read the business
+    // says so instead of holding an empty first step.
+    public async Task FetchAsync()
+    {
+        var parameters = _pendingParameters;
+
+        _businessId = parameters is not null && parameters.TryGetValue(NavigationKeys.BusinessId, out var idObj)
+            ? (Guid)idObj
+            : throw new InvalidOperationException("A flow page requires a 'businessId' parameter.");
+
+        if (parameters is not null)
         {
-            IsLoading = false;
+            if (parameters.TryGetValue(NavigationKeys.IsOperatorFlow, out var operatorFlagObj))
+                IsOperatorFlow = operatorFlagObj is true;
+
+            if (parameters.TryGetValue(NavigationKeys.PreferredDate, out var dateObj) && dateObj is DateTime date)
+                _preferredDate = date.Date;
+
+            if (parameters.TryGetValue(NavigationKeys.PreferredStart, out var startObj)
+                && startObj is DateTimeOffset start)
+                _preferredStart = start;
         }
+
+        var snapshot = parameters is not null
+            && parameters.TryGetValue(NavigationKeys.BusinessSnapshot, out var snapshotObj)
+                ? snapshotObj as BusinessSnapshot
+                : null;
+
+        BusinessResponse business;
+        IReadOnlyList<ServiceResponse> services;
+
+        if (snapshot is not null)
+        {
+            // Handed over by the business landing, which fetched all of this a tap ago. Four
+            // round trips the flow would otherwise spend re-reading what the page behind it
+            // already had on screen.
+            business = snapshot.Business;
+            _allOperators = snapshot.Operators.ToList();
+            services = snapshot.Services;
+            _hours = snapshot.Hours;
+        }
+        else
+        {
+            // Opened from somewhere with nothing to hand over — the agenda's add-booking, say.
+            // One wave for the three that need only the business id, then the hours.
+            var businessTask = _businessService.GetBusinessAsync(_businessId);
+            var operatorsTask = _operatorService.GetOperatorsAsync(_businessId);
+            var servicesTask = _serviceOfferingsService.GetActiveServicesAsync(_businessId);
+
+            await Task.WhenAll(businessTask, operatorsTask, servicesTask);
+
+            business = await businessTask
+                ?? throw new InvalidOperationException("That business is no longer available.");
+            _allOperators = await operatorsTask;
+            services = await servicesTask;
+
+            _hours = await LoadHoursAsync(_allOperators);
+        }
+
+        Business = business;
+        Title = business.Name;
+        _labels = CategoryLabels.Resolve(business.Category);
+        _selectableOperators = FlowStepEngine.SelectableOperators(_allOperators, IsOperatorFlow);
+
+        ServiceRows.Clear();
+        foreach (var service in services.OrderBy(s => s.SortOrder))
+            ServiceRows.Add(ServiceChoiceItem.From(service));
+        OnPropertyChanged(nameof(HasServices));
+
+        if (IsQueueMode)
+            await LoadQueueSummaryAsync();
+
+        StartFlow();
     }
 
     public async Task LoadQueueSummaryAsync()

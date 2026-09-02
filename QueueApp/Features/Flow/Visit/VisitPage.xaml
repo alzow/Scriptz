@@ -5,6 +5,7 @@
              xmlns:helpers="clr-namespace:QueueApp.Features.Flow.Visit.Helpers"
              xmlns:header="clr-namespace:QueueApp.Shared.Templates.BusinessHeader"
              xmlns:location="clr-namespace:QueueApp.Shared.Templates.LocationCard"
+             xmlns:skeleton="clr-namespace:QueueApp.Shared.Templates.Skeleton"
              x:Name="Root"
              x:Class="QueueApp.Features.Flow.Visit.VisitPage"
              x:DataType="vm:VisitPageViewModel"
@@ -72,12 +73,40 @@
             </VerticalStackLayout>
         </ScrollView>
 
-        <ActivityIndicator Grid.Row="1"
-                           IsRunning="{Binding IsLoading}"
-                           IsVisible="{Binding IsLoading}"
-                           Style="{StaticResource ai_Accent}"
-                           HorizontalOptions="Center"
-                VerticalOptions="Center"/>
+        <!--
+            The header above keeps its real back and call buttons; only the countdown and the facts
+            below it are being read, so only they are drawn as bars. Both sit inside the containers
+            the real content will occupy rather than loose on the page.
+        -->
+        <VerticalStackLayout Grid.Row="1" Spacing="16" Padding="20,16,20,20"
+                             IsVisible="{Binding IsFirstLoading}">
+            <skeleton:SkeletonList Kind="Hero" Count="1"/>
+            <Border Style="{StaticResource brd13_FactsWell}">
+                <skeleton:SkeletonList Kind="FactRow"
+                                       Count="{x:Static vm:VisitPageViewModel.SkeletonFactCount}"/>
+            </Border>
+        </VerticalStackLayout>
+
+        <Border Grid.Row="1"
+                Style="{StaticResource brd13_Ghost}"
+                Padding="18,26"
+                Margin="20,0,20,20"
+                VerticalOptions="Center"
+                IsVisible="{Binding HasLoadFailed}">
+            <VerticalStackLayout Spacing="10">
+                <Label Text="{Binding LoadFailureText}"
+                       Style="{StaticResource lbl12_Regular_TextMuted}"
+                       HorizontalTextAlignment="Center"
+                       HorizontalOptions="Center"/>
+                <Label Text="Try again"
+                       Style="{StaticResource lbl13_Bold_Action}"
+                       HorizontalOptions="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding RetryLoadCommand}"/>
+                    </Label.GestureRecognizers>
+                </Label>
+            </VerticalStackLayout>
+        </Border>
 
         <helpers:VisitFooterView Grid.Row="2"
                                  Margin="20,0,20,20"

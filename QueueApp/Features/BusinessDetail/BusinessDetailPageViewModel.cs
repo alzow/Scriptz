@@ -45,7 +45,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     private string _nextFreeSlotText = "—";
     private string _slotsLeftTodayText = "—";
     public BusinessResponse? Business { get; set; }
-    public bool IsLoading { get; set; } = true;
+    public const int SkeletonRowCount = 4;
     public bool IsQueueMode => Business?.Mode == FlowStepEngine.QueueMode;
     public bool IsBookingMode => Business?.Mode == FlowStepEngine.BookingMode;
 
@@ -183,45 +183,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             _openedFromTabs = parameters is not null && parameters.TryGetValue(NavigationKeys.OpenedFromTabs, out var fromTabsObj)
                 && fromTabsObj is true;
 
-            IsLoading = true;
-
-            // Two waves rather than a chain of eight. Nothing in the first needs anything but the
-            // business id, and nothing in the second needs anything from its own wave, so the load
-            // costs two round trips end to end instead of the sum of all of them.
-            var businessTask = _businessService.GetBusinessAsync(_businessId);
-            var operatorsTask = _operatorService.GetOperatorsAsync(_businessId);
-            var servicesTask = _serviceOfferingsService.GetActiveServicesAsync(_businessId);
-
-            await Task.WhenAll(businessTask, operatorsTask, servicesTask);
-
-            Business = await businessTask;
-            if (Business is null)
-                throw new InvalidOperationException("That business is no longer available.");
-
-            Title = Business.Name;
-            _labels = CategoryLabels.Resolve(Business.Category);
-
-            _allOperators = await operatorsTask;
-            _selectableOperators = FlowStepEngine.SelectableOperators(_allOperators);
-
-            _services = await servicesTask;
-            ServiceRows.Clear();
-            foreach (var service in _services.OrderBy(s => s.SortOrder))
-                ServiceRows.Add(ServiceChoiceItem.From(service));
-            OnPropertyChanged(nameof(HasServices));
-            OnPropertyChanged(nameof(ServicesCountText));
-            OnPropertyChanged(nameof(ServicesListHeight));
-
-            var hoursTask = LoadHoursAsync(_allOperators);
-            var distanceTask = LoadDistanceAsync();
-            var liveTask = RefreshLiveStateAsync();
-
-            _hours = await hoursTask;
-            await distanceTask;
-            await liveTask;
-
-            BuildTeam();
-            RefreshLandingCard();
+            await RunFirstLoadAsync(FetchAsync);
         }
         catch (Exception ex)
         {
@@ -229,13 +191,56 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         }
         finally
         {
-            IsLoading = false;
-
             // Deliberately not awaited: opening the websocket and joining the channel is a
             // handshake the first paint does not depend on, and awaiting it here put it on the
             // critical path — connect, retry delay and all.
             _ = SubscribeRealtimeAsync();
         }
+    }
+
+    public override Task ReloadAsync() => RunFirstLoadAsync(FetchAsync);
+
+    // Throws by design so RunFirstLoadAsync can turn the skeleton into a failure. A business that
+    // is gone raises here too, which is the one case this page most needs to be able to say.
+    public async Task FetchAsync()
+    {
+        // Two waves rather than a chain of eight. Nothing in the first needs anything but the
+        // business id, and nothing in the second needs anything from its own wave, so the load
+        // costs two round trips end to end instead of the sum of all of them.
+        var businessTask = _businessService.GetBusinessAsync(_businessId);
+        var operatorsTask = _operatorService.GetOperatorsAsync(_businessId);
+        var servicesTask = _serviceOfferingsService.GetActiveServicesAsync(_businessId);
+
+        await Task.WhenAll(businessTask, operatorsTask, servicesTask);
+
+        Business = await businessTask;
+        if (Business is null)
+            throw new InvalidOperationException("That business is no longer available.");
+
+        Title = Business.Name;
+        _labels = CategoryLabels.Resolve(Business.Category);
+
+        _allOperators = await operatorsTask;
+        _selectableOperators = FlowStepEngine.SelectableOperators(_allOperators);
+
+        _services = await servicesTask;
+        ServiceRows.Clear();
+        foreach (var service in _services.OrderBy(s => s.SortOrder))
+            ServiceRows.Add(ServiceChoiceItem.From(service));
+        OnPropertyChanged(nameof(HasServices));
+        OnPropertyChanged(nameof(ServicesCountText));
+        OnPropertyChanged(nameof(ServicesListHeight));
+
+        var hoursTask = LoadHoursAsync(_allOperators);
+        var distanceTask = LoadDistanceAsync();
+        var liveTask = RefreshLiveStateAsync();
+
+        _hours = await hoursTask;
+        await distanceTask;
+        await liveTask;
+
+        BuildTeam();
+        RefreshLandingCard();
     }
 
     // The two live reads for whichever mode the business is in. They touch different state, so they

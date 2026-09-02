@@ -33,7 +33,6 @@ public partial class BusinessLocationPageViewModel : BaseViewModel
         Title = "Location";
     }
 
-    public bool IsLoading { get; set; }
     public bool IsCapturing { get; set; }
     public bool HasLocation { get; set; }
     public string CoordinatesText { get; set; } = string.Empty;
@@ -43,20 +42,21 @@ public partial class BusinessLocationPageViewModel : BaseViewModel
         try
         {
             await base.OnLoadedAsync(parameters);
-            IsLoading = true;
-
-            _businessId = await _businessService.GetOwnedBusinessIdAsync();
-            var business = await _businessService.GetBusinessAsync(_businessId);
-            ApplyBusiness(business?.Latitude, business?.Longitude);
+            await RunFirstLoadAsync(FetchAsync);
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
         }
-        finally
-        {
-            IsLoading = false;
-        }
+    }
+
+    public override Task ReloadAsync() => RunFirstLoadAsync(FetchAsync);
+
+    public async Task FetchAsync()
+    {
+        _businessId = await _businessService.GetOwnedBusinessIdAsync();
+        var business = await _businessService.GetBusinessAsync(_businessId);
+        ApplyBusiness(business?.Latitude, business?.Longitude);
     }
 
     private void ApplyBusiness(double? latitude, double? longitude)

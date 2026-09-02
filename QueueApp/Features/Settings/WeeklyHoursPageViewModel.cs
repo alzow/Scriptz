@@ -35,9 +35,10 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
         _operatorService = operatorService;
     }
 
+    public const int SkeletonRowCount = 5;
+
     public ObservableCollection<DayGroup> Days { get; } = new();
     public string OperatorName { get; set; } = "";
-    public bool IsLoading { get; set; }
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
@@ -51,7 +52,7 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
 
             OperatorName = parameters!.TryGetValue(NavigationKeys.OperatorName, out var nameObj) ? (string)nameObj : "";
 
-            await LoadAsync();
+            await RunFirstLoadAsync(FetchAsync);
         }
         catch (Exception ex)
         {
@@ -66,30 +67,32 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
             await LoadAsync();
     }
 
-    [RelayCommand]
-    private async Task LoadAsync()
+    public override Task ReloadAsync() => RunFirstLoadAsync(FetchAsync);
+
+    public async Task FetchAsync()
     {
-        IsLoading = true;
+        var windows = await _operatorService.GetAvailabilityAsync(_operatorId);
+
+        Days.Clear();
+        for (var dow = 0; dow <= 6; dow++)
+        {
+            var group = new DayGroup { DayOfWeek = dow, Label = DayLabels[dow] };
+            foreach (var w in windows.Where(w => w.DayOfWeek == dow))
+                group.Windows.Add(w);
+            Days.Add(group);
+        }
+    }
+
+    [RelayCommand]
+    public async Task LoadAsync()
+    {
         try
         {
-            var windows = await _operatorService.GetAvailabilityAsync(_operatorId);
-
-            Days.Clear();
-            for (var dow = 0; dow <= 6; dow++)
-            {
-                var group = new DayGroup { DayOfWeek = dow, Label = DayLabels[dow] };
-                foreach (var w in windows.Where(w => w.DayOfWeek == dow))
-                    group.Windows.Add(w);
-                Days.Add(group);
-            }
+            await FetchAsync();
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
-        }
-        finally
-        {
-            IsLoading = false;
         }
     }
 

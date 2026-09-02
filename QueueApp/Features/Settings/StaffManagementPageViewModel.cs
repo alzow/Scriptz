@@ -30,10 +30,13 @@ public partial class StaffManagementPageViewModel : BaseViewModel
         Title = "Staff";
     }
 
+    public const int SkeletonRowCount = 5;
+
     public ObservableCollection<OperatorResponse> Operators { get; } = new();
-    public bool IsLoading { get; set; }
     public bool IsAddingOperator { get; set; }
-    public bool IsEmpty => Operators.Count == 0 && !IsLoading;
+    public bool IsEmpty => Operators.Count == 0 && !IsFirstLoading && !HasLoadFailed;
+
+    public override void OnLoadStateChanged() => OnPropertyChanged(nameof(IsEmpty));
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
@@ -41,7 +44,7 @@ public partial class StaffManagementPageViewModel : BaseViewModel
         {
             await base.OnLoadedAsync(parameters);
             _businessId = await _businessService.GetOwnedBusinessIdAsync();
-            await LoadAsync();
+            await RunFirstLoadAsync(FetchAsync);
         }
         catch (Exception ex)
         {
@@ -56,24 +59,29 @@ public partial class StaffManagementPageViewModel : BaseViewModel
             await LoadAsync();
     }
 
-    [RelayCommand]
-    private async Task LoadAsync()
+    public override Task ReloadAsync() => RunFirstLoadAsync(FetchAsync);
+
+    // Throws so RunFirstLoadAsync can turn the skeleton into a failure instead of leaving it up.
+    public async Task FetchAsync()
     {
-        IsLoading = true;
+        var operators = await _operatorService.GetAllOperatorsForManagementAsync(_businessId);
+        Operators.Clear();
+        foreach (var o in operators)
+            Operators.Add(o);
+
+        OnPropertyChanged(nameof(IsEmpty));
+    }
+
+    [RelayCommand]
+    public async Task LoadAsync()
+    {
         try
         {
-            var operators = await _operatorService.GetAllOperatorsForManagementAsync(_businessId);
-            Operators.Clear();
-            foreach (var o in operators)
-                Operators.Add(o);
+            await FetchAsync();
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
-        }
-        finally
-        {
-            IsLoading = false;
         }
     }
 

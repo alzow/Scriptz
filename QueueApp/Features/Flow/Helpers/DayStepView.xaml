@@ -2,6 +2,7 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:QueueApp.Shared.Domain.Models"
+             xmlns:skeleton="clr-namespace:QueueApp.Shared.Templates.Skeleton"
              x:Name="Root"
              x:Class="QueueApp.Features.Flow.Helpers.DayStepView">
 
@@ -14,7 +15,8 @@
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:DayChoiceItem">
-                        <Border WidthRequest="64" Padding="4,11"
+                        <!-- DayTile geometry: the width is shared with SkeletonDayTileView. -->
+                        <Border WidthRequest="{StaticResource dim_DayTile}" Padding="4,11"
                                 Style="{StaticResource brd14_DayTile_Selectable}">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer
@@ -35,8 +37,8 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-            <ActivityIndicator IsRunning="{Binding IsLoadingDays, Source={x:Reference Root}}" IsVisible="{Binding IsLoadingDays, Source={x:Reference Root}}"
-                               Style="{StaticResource ai_Accent}" Margin="0,12,0,0"/>
+            <skeleton:SkeletonList Kind="DayTile" Count="5"
+                                   IsVisible="{Binding IsLoadingDays, Source={x:Reference Root}}"/>
 
             <Border Margin="20,16,20,0" Padding="14,6"
                     Style="{StaticResource brd15_Card}">

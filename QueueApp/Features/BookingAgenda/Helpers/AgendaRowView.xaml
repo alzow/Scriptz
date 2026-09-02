@@ -17,15 +17,14 @@
                      Style="{StaticResource bx_NowLine}" VerticalOptions="Center"/>
         </Grid>
 
-        <Border Grid.Row="1" Style="{StaticResource brd14_Row}"
-                Margin="18,0,18,8" Padding="12,11"
-                MinimumHeightRequest="70"
+        <!-- TimeRow geometry, shared with SkeletonTimeRowView. -->
+        <Border Grid.Row="1" Style="{StaticResource brd14_TimeRow}"
                 BackgroundColor="{Binding RowBackgroundColor}"
                 Stroke="{Binding RowStrokeColor}"
                 StrokeDashArray="{Binding RowStrokeDash}"
                 InputTransparent="{Binding IsNotTappable}">
 
-            <Grid ColumnDefinitions="46,3,*,Auto" ColumnSpacing="11">
+            <Grid ColumnDefinitions="46,3,*,Auto" Style="{StaticResource grid_TimeRow}">
                 <VerticalStackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
                     <Label Text="{Binding TimeText}" Style="{StaticResource lbl13_Mono_TextPrimary}"
                            TextColor="{Binding TimeColor}"/>

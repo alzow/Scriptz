@@ -83,6 +83,19 @@
     <Color x:Key="LightDangerBorder">#F5A8B7</Color>
 
     <!--
+        Skeleton bars. Their own pair rather than a reuse of Raised: in light theme Raised is
+        #FFFFFF, which is lighter than the #F5F7FB card a bar sits on, so the bar would vanish.
+        These read at 1.26 against Surface on light and 1.24 on dark — deliberately symmetric, so
+        a loading screen carries the same weight in both themes. Against Bg it drops to 1.11,
+        which is why a bar only ever renders inside the container the real content will occupy.
+        Highlight is only used by the sweep variant, which the app does not currently ship.
+    -->
+    <Color x:Key="DarkSkeletonBase">#2A3242</Color>
+    <Color x:Key="LightSkeletonBase">#D6DEE9</Color>
+    <Color x:Key="DarkSkeletonHighlight">#3A4557</Color>
+    <Color x:Key="LightSkeletonHighlight">#EDF1F7</Color>
+
+    <!--
         Scrim behind a bottom sheet. The one place alpha is correct: it is an overlay dimming live
         content underneath, not a tint standing in for one.
     -->

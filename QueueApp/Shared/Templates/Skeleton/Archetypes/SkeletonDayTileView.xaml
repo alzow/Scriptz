@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:skeleton="clr-namespace:QueueApp.Shared.Templates.Skeleton"
+             x:Class="QueueApp.Shared.Templates.Skeleton.Archetypes.SkeletonDayTileView">
+
+    <Border Style="{StaticResource brd14_DayTile_Skeleton}">
+        <VerticalStackLayout Style="{StaticResource vsl_DayTile}">
+            <Grid ColumnDefinitions="22*,56*,22*">
+                <skeleton:SkeletonBar Grid.Column="1" Style="{StaticResource skl_Line_Caption}"/>
+            </Grid>
+            <Grid ColumnDefinitions="30*,40*,30*">
+                <skeleton:SkeletonBar Grid.Column="1" Style="{StaticResource skl_Line_Title}"/>
+            </Grid>
+            <Grid ColumnDefinitions="14*,72*,14*">
+                <skeleton:SkeletonBar Grid.Column="1" Style="{StaticResource skl_Line_Caption}"/>
+            </Grid>
+        </VerticalStackLayout>
+    </Border>
+
+</ContentView>

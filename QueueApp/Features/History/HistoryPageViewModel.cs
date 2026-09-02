@@ -20,9 +20,14 @@ namespace QueueApp.Features.History;
 
 public partial class HistoryPageViewModel : BaseViewModel
 {
+    public const int SkeletonRowCount = 6;
+    public const string LoadFailureTitle = "Couldn't load your history.";
+    public const string RetryActionText = "Try again";
+
     public ObservableCollection<HistoryGroup> Groups { get; } = new();
-    public bool IsLoading { get; set; }
-    public bool IsEmpty => Groups.Count == 0 && !IsLoading;
+
+    public bool ShowList => !IsFirstLoading && !HasLoadFailed && Groups.Count > 0;
+    public bool IsEmpty => !IsFirstLoading && !HasLoadFailed && Groups.Count == 0;
 
     public HistoryFilter SelectedFilter { get; set; } = HistoryFilter.All;
     public bool IsAllSelected => SelectedFilter == HistoryFilter.All;
@@ -68,6 +73,25 @@ public partial class HistoryPageViewModel : BaseViewModel
         _authService = authService;
     }
 
+    public override void OnLoadStateChanged() => RaiseListState();
+
+    public override async Task OnLoadedAsync(INavigationParameters? parameters)
+    {
+        try
+        {
+            await base.OnLoadedAsync(parameters);
+            _isLoaded = true;
+            await RunFirstLoadAsync(LoadAsync);
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    // Coming back to a tab that already has rows on it is a refresh, not a load. Flashing grey bars
+    // over content the customer is already reading would lose their place to say nothing they did
+    // not already know.
     public override async Task OnAppearingAsync()
     {
         try
@@ -85,30 +109,17 @@ public partial class HistoryPageViewModel : BaseViewModel
         }
     }
 
-    public override async Task OnLoadedAsync(INavigationParameters? parameters)
-    {
-        try
-        {
-            await base.OnLoadedAsync(parameters);
-            _isLoaded = true;
-            await RefreshAsync();
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
-        }
-    }
+    public override Task ReloadAsync() => RunFirstLoadAsync(LoadAsync);
 
-    public async Task RefreshAsync()
+    // Throws on purpose: RunFirstLoadAsync owns the failure, and swallowing here would leave the
+    // skeleton spinning forever on a screen with no way out.
+    public async Task LoadAsync()
     {
         if (!await _refreshLock.WaitAsync(0))
             return;
 
         try
         {
-            IsLoading = true;
-            OnPropertyChanged(nameof(IsEmpty));
-
             var userId = await _authService.GetUserIdAsync();
             if (string.IsNullOrEmpty(userId))
                 throw new InvalidOperationException("No signed-in user id — should never happen post-splash-gate.");
@@ -121,15 +132,21 @@ public partial class HistoryPageViewModel : BaseViewModel
 
             ApplyFilter();
         }
+        finally
+        {
+            _refreshLock.Release();
+        }
+    }
+
+    public async Task RefreshAsync()
+    {
+        try
+        {
+            await LoadAsync();
+        }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
-        }
-        finally
-        {
-            IsLoading = false;
-            OnPropertyChanged(nameof(IsEmpty));
-            _refreshLock.Release();
         }
     }
 
@@ -158,12 +175,18 @@ public partial class HistoryPageViewModel : BaseViewModel
             foreach (var group in BucketByDate(past))
                 Groups.Add(group);
 
-            OnPropertyChanged(nameof(IsEmpty));
+            RaiseListState();
         }
         catch (Exception ex)
         {
             _ = HandleExceptionAsync(ex);
         }
+    }
+
+    public void RaiseListState()
+    {
+        OnPropertyChanged(nameof(ShowList));
+        OnPropertyChanged(nameof(IsEmpty));
     }
 
     public static IEnumerable<HistoryGroup> BucketByDate(List<HistoryRow> rows)

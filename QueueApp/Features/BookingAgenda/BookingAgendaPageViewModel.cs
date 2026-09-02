@@ -32,13 +32,16 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
 
     public string BusinessName { get; set; } = "Bookings";
 
-    // Two loaders, because they mean different things. IsInitialLoading covers the cold open, when
-    // there is no header, no stats and no rows to look at. IsLoading covers a day or bay switch,
-    // where the chrome stays put and only the list underneath is being replaced.
-    public bool IsInitialLoading { get; set; } = true;
+    public const int SkeletonRowCount = 5;
+
+    // Two loaders, because they mean different things. IsFirstLoading (on the base) covers the cold
+    // open, when there is no stats bar and no rows to look at. IsLoading covers a day or bay switch,
+    // where the chrome stays put and only the list underneath is being replaced. Both draw bars, but
+    // the cold open draws them for the stats bar as well.
     public bool IsLoading { get; set; }
-    public bool IsSwitchingDay => IsLoading && !IsInitialLoading;
-    public bool ShowEmptyState => !IsLoading && !IsInitialLoading && Rows.Count == 0;
+    public bool IsSwitchingDay => IsLoading && !IsFirstLoading;
+    public bool ShowRowSkeleton => IsLoading || IsFirstLoading;
+    public bool ShowEmptyState => !IsLoading && !IsFirstLoading && !HasLoadFailed && Rows.Count == 0;
     public bool IsOpenNow { get; set; }
     public string OpenLabel => IsOpenNow ? "OPEN" : "CLOSED";
 
@@ -78,6 +81,8 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     private Task<List<AvailabilityBlockResponse>>? _windowBlocksTask;
 
     private Guid _businessId;
+    // Held so a retry can re-run the cold open with the same navigation parameters it opened with.
+    private INavigationParameters? _pendingParameters;
     private Guid? _filterOperatorId;
     private BusinessResponse? _business;
     private CategoryLabelSet _labels = CategoryLabels.Resolve(null);
@@ -125,41 +130,9 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         {
             await base.OnLoadedAsync(parameters);
 
-            IsInitialLoading = true;
             BuildDayStrip();
-
-            _businessId = parameters is not null && parameters.TryGetValue(NavigationKeys.BusinessId, out var idObj)
-                ? (Guid)idObj
-                : await _businessService.GetOwnedBusinessIdAsync();
-
-            var businessTask = _businessService.GetBusinessAsync(_businessId);
-            var operatorsTask = _operatorService.GetOperatorsAsync(_businessId);
-            var servicesTask = _serviceOfferingsService.GetActiveServicesAsync(_businessId);
-
-            await Task.WhenAll(businessTask, operatorsTask, servicesTask);
-
-            _business = await businessTask;
-            BusinessName = _business?.Name ?? "Bookings";
-            _labels = CategoryLabels.Resolve(_business?.Category);
-            ResourceCountLabel = _labels.SectionTitle;
-
-            _operators = await operatorsTask;
-            _services = await servicesTask;
-            _operatorNames = _operators.ToDictionary(o => o.Id, o => o.DisplayName);
-            ResourceCountText = _operators.Count.ToString();
-
-            BuildBayFilters();
-
-            // The day is what the operator is looking at, so it is not made to wait behind the
-            // trading hours or the requests banner.
-            await Task.WhenAll(LoadHoursAsync(), LoadRequestsAsync(), LoadDayAsync());
-
-            // IsClosedDay reads the hours, which may have landed after the rows did.
-            RefreshDayStates();
-
-            // Appearing fires before Loaded on Android, so the first pass through
-            // OnAppearingAsync had no business id to filter on and skipped the subscription.
-            await SubscribeRealtimeAsync();
+            _pendingParameters = parameters;
+            await RunFirstLoadAsync(FetchAsync);
         }
         catch (Exception ex)
         {
@@ -167,9 +140,52 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         }
         finally
         {
-            IsInitialLoading = false;
             RaiseLoadingStateChanged();
         }
+    }
+
+    public override Task ReloadAsync() => RunFirstLoadAsync(FetchAsync);
+
+    public override void OnLoadStateChanged() => RaiseLoadingStateChanged();
+
+    // Throws by design: RunFirstLoadAsync owns the cold open's failure so the diary can say it
+    // could not load rather than holding grey bars indefinitely.
+    public async Task FetchAsync()
+    {
+        var parameters = _pendingParameters;
+
+        _businessId = parameters is not null && parameters.TryGetValue(NavigationKeys.BusinessId, out var idObj)
+            ? (Guid)idObj
+            : await _businessService.GetOwnedBusinessIdAsync();
+
+        var businessTask = _businessService.GetBusinessAsync(_businessId);
+        var operatorsTask = _operatorService.GetOperatorsAsync(_businessId);
+        var servicesTask = _serviceOfferingsService.GetActiveServicesAsync(_businessId);
+
+        await Task.WhenAll(businessTask, operatorsTask, servicesTask);
+
+        _business = await businessTask;
+        BusinessName = _business?.Name ?? "Bookings";
+        _labels = CategoryLabels.Resolve(_business?.Category);
+        ResourceCountLabel = _labels.SectionTitle;
+
+        _operators = await operatorsTask;
+        _services = await servicesTask;
+        _operatorNames = _operators.ToDictionary(o => o.Id, o => o.DisplayName);
+        ResourceCountText = _operators.Count.ToString();
+
+        BuildBayFilters();
+
+        // The day is what the operator is looking at, so it is not made to wait behind the
+        // trading hours or the requests banner.
+        await Task.WhenAll(LoadHoursAsync(), LoadRequestsAsync(), LoadDayAsync());
+
+        // IsClosedDay reads the hours, which may have landed after the rows did.
+        RefreshDayStates();
+
+        // Appearing fires before Loaded on Android, so the first pass through
+        // OnAppearingAsync had no business id to filter on and skipped the subscription.
+        await SubscribeRealtimeAsync();
     }
 
     public override async Task OnAppearingAsync()
@@ -442,6 +458,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         try
         {
             OnPropertyChanged(nameof(IsSwitchingDay));
+            OnPropertyChanged(nameof(ShowRowSkeleton));
             OnPropertyChanged(nameof(ShowEmptyState));
             OnPropertyChanged(nameof(HasRows));
         }

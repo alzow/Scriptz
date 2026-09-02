@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!--
+        Two kinds of style live here and the difference matters.
+
+        The skl_* styles size the grey bars. Nothing else uses them.
+
+        Everything below them is row geometry shared by a real layout and its skeleton archetype:
+        heights, margins, paddings, radii, spacings. Both sides reference the same key, so a change
+        to a row height cannot land on one and miss the other. That shared reference is the whole
+        reason this pass exists — a skeleton whose container is 60px against a real row of 66px has
+        failed at the only job it had.
+
+        A skl_Line's drawn bar is shorter than the text line box it stands in; the difference is
+        carried as vertical Margin so the slot the bar occupies equals the slot the real label will
+        occupy. Bar height is cosmetic, slot height is geometry.
+    -->
+
+    <!--
+        Shared scalars. A leading tile is a Border in the real row and a BoxView in the skeleton, so
+        the two cannot share a style — they share the number instead. This is the only dimension the
+        row's Auto column depends on, so it is the only one that can shift a layout if it drifts.
+    -->
+    <x:Double x:Key="dim_RowIcon">44</x:Double>
+    <x:Double x:Key="dim_CardIcon">52</x:Double>
+
+    <Style x:Key="skl_Bar" TargetType="BoxView">
+        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource LightSkeletonBase}, Dark={StaticResource DarkSkeletonBase}}"/>
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="HorizontalOptions" Value="Fill"/>
+        <Setter Property="VerticalOptions" Value="Center"/>
+    </Style>
+
+    <!--
+        Bars that sit inside a Raised well rather than on a Surface card — the visit facts block is
+        the one that matters. On dark, SkeletonBase against Raised is 1.09 and effectively invisible,
+        so dark lifts to the highlight tone (1.45) while light keeps the base (1.36, better on white
+        than it is on the card). Same key either way, so an archetype never has to know which.
+    -->
+    <Style x:Key="skl_Bar_OnRaised" TargetType="BoxView" BasedOn="{StaticResource skl_Bar}">
+        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource LightSkeletonBase}, Dark={StaticResource DarkSkeletonHighlight}}"/>
+    </Style>
+
+    <Style x:Key="skl_Line_Fact_OnRaised" TargetType="BoxView" BasedOn="{StaticResource skl_Bar_OnRaised}">
+        <Setter Property="HeightRequest" Value="12"/>
+        <Setter Property="Margin" Value="0,2"/>
+    </Style>
+
+    <!-- Slot 18: a 15px Roboto line box. Row titles. -->
+    <Style x:Key="skl_Line_Title" TargetType="BoxView" BasedOn="{StaticResource skl_Bar}">
+        <Setter Property="HeightRequest" Value="14"/>
+        <Setter Property="Margin" Value="0,2"/>
+    </Style>
+
+    <!-- Slot 15: a 12.5px line box. Meta and sub lines. -->
+    <Style x:Key="skl_Line_Meta" TargetType="BoxView" BasedOn="{StaticResource skl_Bar}">
+        <Setter Property="HeightRequest" Value="11"/>
+        <Setter Property="Margin" Value="0,2"/>
+    </Style>
+
+    <!-- Slot 13: an 11px line box. Timestamps, tile labels, stat captions. -->
+    <Style x:Key="skl_Line_Caption" TargetType="BoxView" BasedOn="{StaticResource skl_Bar}">
+        <Setter Property="HeightRequest" Value="10"/>
+        <Setter Property="Margin" Value="0,1.5"/>
+    </Style>
+
+    <!-- Slot 16: a 13px line box. Fact labels and values. -->
+    <Style x:Key="skl_Line_Fact" TargetType="BoxView" BasedOn="{StaticResource skl_Bar}">
+        <Setter Property="HeightRequest" Value="12"/>
+        <Setter Property="Margin" Value="0,2"/>
+    </Style>
+
+    <!-- Slot 19: a 16px mono line box. Stat values. -->
+    <Style x:Key="skl_Line_Stat" TargetType="BoxView" BasedOn="{StaticResource skl_Bar}">
+        <Setter Property="HeightRequest" Value="15"/>
+        <Setter Property="Margin" Value="0,2"/>
+    </Style>
+
+    <!-- Slot 42: the 34px countdown line box on the visit hero. -->
+    <Style x:Key="skl_Line_Hero" TargetType="BoxView" BasedOn="{StaticResource skl_Bar}">
+        <Setter Property="HeightRequest" Value="38"/>
+        <Setter Property="Margin" Value="0,2"/>
+    </Style>
+
+    <!-- Trailing control on a plain ListRow: the toggle or remove button the settings rows carry. -->
+    <Style x:Key="skl_Block_RowAction" TargetType="BoxView" BasedOn="{StaticResource skl_Bar}">
+        <Setter Property="HeightRequest" Value="44"/>
+        <Setter Property="WidthRequest" Value="74"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="HorizontalOptions" Value="End"/>
+    </Style>
+
+    <!-- Trailing timestamp on a ListRow. Fixed width because the real one is a fixed format. -->
+    <Style x:Key="skl_Line_Timestamp" TargetType="BoxView" BasedOn="{StaticResource skl_Line_Caption}">
+        <Setter Property="WidthRequest" Value="38"/>
+        <Setter Property="HorizontalOptions" Value="End"/>
+    </Style>
+
+    <!-- Stands in for the 14px chevron on a SectionRow. -->
+    <Style x:Key="skl_Line_Chevron" TargetType="BoxView" BasedOn="{StaticResource skl_Bar}">
+        <Setter Property="HeightRequest" Value="14"/>
+        <Setter Property="WidthRequest" Value="9"/>
+        <Setter Property="CornerRadius" Value="3"/>
+        <Setter Property="HorizontalOptions" Value="End"/>
+    </Style>
+
+    <Style x:Key="skl_Pill" TargetType="BoxView" BasedOn="{StaticResource skl_Bar}">
+        <Setter Property="HeightRequest" Value="22"/>
+        <Setter Property="WidthRequest" Value="56"/>
+        <Setter Property="CornerRadius" Value="7"/>
+        <Setter Property="HorizontalOptions" Value="End"/>
+    </Style>
+
+    <Style x:Key="skl_Circle_34" TargetType="BoxView" BasedOn="{StaticResource skl_Bar}">
+        <Setter Property="HeightRequest" Value="34"/>
+        <Setter Property="WidthRequest" Value="34"/>
+        <Setter Property="CornerRadius" Value="17"/>
+        <Setter Property="HorizontalOptions" Value="Start"/>
+    </Style>
+
+    <Style x:Key="skl_Circle_52" TargetType="BoxView" BasedOn="{StaticResource skl_Bar}">
+        <Setter Property="HeightRequest" Value="52"/>
+        <Setter Property="WidthRequest" Value="52"/>
+        <Setter Property="CornerRadius" Value="26"/>
+        <Setter Property="HorizontalOptions" Value="Center"/>
+    </Style>
+
+    <!-- Sized and rounded to the leading tile of a real ListRow. -->
+    <Style x:Key="skl_Block_RowIcon" TargetType="BoxView" BasedOn="{StaticResource skl_Bar}">
+        <Setter Property="HeightRequest" Value="{StaticResource dim_RowIcon}"/>
+        <Setter Property="WidthRequest" Value="{StaticResource dim_RowIcon}"/>
+        <Setter Property="CornerRadius" Value="13"/>
+        <Setter Property="HorizontalOptions" Value="Start"/>
+    </Style>
+
+    <!-- Sized and rounded to the leading tile of a real browse card. -->
+    <Style x:Key="skl_Block_CardIcon" TargetType="BoxView" BasedOn="{StaticResource skl_Bar}">
+        <Setter Property="HeightRequest" Value="{StaticResource dim_CardIcon}"/>
+        <Setter Property="WidthRequest" Value="{StaticResource dim_CardIcon}"/>
+        <Setter Property="CornerRadius" Value="14"/>
+        <Setter Property="HorizontalOptions" Value="Start"/>
+        <Setter Property="VerticalOptions" Value="Start"/>
+    </Style>
+
+    <!-- The wait track on a browse card. Three pixels, and it still moves the card if it is missing. -->
+    <Style x:Key="skl_Block_Track" TargetType="BoxView" BasedOn="{StaticResource skl_Bar}">
+        <Setter Property="HeightRequest" Value="3"/>
+        <Setter Property="CornerRadius" Value="2"/>
+        <Setter Property="Margin" Value="0,2,0,0"/>
+    </Style>
+
+    <!--
+        ListRow. History, staff, services, blocked dates and the board's waiting rows all resolve
+        to this shape. The leading column is Auto so the icon style is the only place 44 appears.
+    -->
+    <Style x:Key="brd16_ListRow" TargetType="Border" BasedOn="{StaticResource brd16_White}">
+        <Setter Property="HeightRequest" Value="72"/>
+        <Setter Property="Margin" Value="16,0,16,8"/>
+        <Setter Property="Padding" Value="12,0"/>
+    </Style>
+
+    <Style x:Key="grid_ListRow" TargetType="Grid">
+        <Setter Property="ColumnSpacing" Value="12"/>
+    </Style>
+
+    <Style x:Key="brd13_RowIcon" TargetType="Border" BasedOn="{StaticResource brd_Raised_Lined}">
+        <Setter Property="WidthRequest" Value="{StaticResource dim_RowIcon}"/>
+        <Setter Property="HeightRequest" Value="{StaticResource dim_RowIcon}"/>
+        <Setter Property="VerticalOptions" Value="Center"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="13"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="vsl_RowText" TargetType="VerticalStackLayout">
+        <Setter Property="Spacing" Value="3"/>
+        <Setter Property="VerticalOptions" Value="Center"/>
+    </Style>
+
+    <Style x:Key="vsl_RowTrailing" TargetType="VerticalStackLayout">
+        <Setter Property="Spacing" Value="5"/>
+        <Setter Property="HorizontalOptions" Value="End"/>
+        <Setter Property="VerticalOptions" Value="Center"/>
+    </Style>
+
+    <!--
+        BoardRow. The operator board's collapsed section rows. An 18px gutter like the rest of the
+        board, and the section container's own margin, so the skeleton stacks on the same rhythm.
+    -->
+    <Style x:Key="brd16_BoardSection" TargetType="Border" BasedOn="{StaticResource brd16_White}">
+        <Setter Property="Margin" Value="18,12,18,0"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="VerticalOptions" Value="Start"/>
+    </Style>
+
+    <Style x:Key="grid_BoardRow" TargetType="Grid">
+        <Setter Property="ColumnSpacing" Value="11"/>
+        <Setter Property="Padding" Value="12,11"/>
+        <Setter Property="MinimumHeightRequest" Value="62"/>
+    </Style>
+
+    <x:Double x:Key="dim_Avatar">40</x:Double>
+
+    <Style x:Key="skl_Circle_Avatar" TargetType="BoxView" BasedOn="{StaticResource skl_Bar}">
+        <Setter Property="HeightRequest" Value="{StaticResource dim_Avatar}"/>
+        <Setter Property="WidthRequest" Value="{StaticResource dim_Avatar}"/>
+        <Setter Property="CornerRadius" Value="20"/>
+        <Setter Property="HorizontalOptions" Value="Start"/>
+    </Style>
+
+    <!--
+        TimeRow. The agenda's booking rows. An 18px gutter rather than the ListRow's 16 because the
+        whole agenda page — stats bar, banner, footer — is built on 18.
+    -->
+    <Style x:Key="brd14_TimeRow" TargetType="Border" BasedOn="{StaticResource brd14_Row}">
+        <Setter Property="Margin" Value="18,0,18,8"/>
+        <Setter Property="Padding" Value="12,11"/>
+        <Setter Property="MinimumHeightRequest" Value="70"/>
+    </Style>
+
+    <Style x:Key="grid_TimeRow" TargetType="Grid">
+        <Setter Property="ColumnSpacing" Value="11"/>
+    </Style>
+
+    <Style x:Key="skl_Line_Time" TargetType="BoxView" BasedOn="{StaticResource skl_Bar}">
+        <Setter Property="HeightRequest" Value="12"/>
+        <Setter Property="WidthRequest" Value="38"/>
+        <Setter Property="Margin" Value="0,2"/>
+        <Setter Property="HorizontalOptions" Value="Start"/>
+    </Style>
+
+    <Style x:Key="skl_Block_TimeRail" TargetType="BoxView" BasedOn="{StaticResource skl_Bar}">
+        <Setter Property="WidthRequest" Value="3"/>
+        <Setter Property="CornerRadius" Value="2"/>
+        <Setter Property="VerticalOptions" Value="Fill"/>
+        <Setter Property="Margin" Value="0,2"/>
+    </Style>
+
+    <!--
+        Card. The browse business card. No fixed height because the wait track is only there when
+        the business reports a wait, so the floor is shared instead and the bar heights match the
+        real line boxes above them.
+    -->
+    <Style x:Key="brd16_BrowseCard" TargetType="Border" BasedOn="{StaticResource brd16_White}">
+        <Setter Property="Padding" Value="14"/>
+        <Setter Property="Margin" Value="0,5"/>
+        <Setter Property="MinimumHeightRequest" Value="86"/>
+    </Style>
+
+    <Style x:Key="grid_BrowseCard" TargetType="Grid">
+        <Setter Property="ColumnSpacing" Value="13"/>
+    </Style>
+
+    <!-- FactRow. The visit facts well. -->
+    <Style x:Key="brd13_FactsWell" TargetType="Border" BasedOn="{StaticResource brd13_Raised}">
+        <Setter Property="Padding" Value="14,4"/>
+    </Style>
+
+    <Style x:Key="grid_FactRow" TargetType="Grid">
+        <Setter Property="ColumnSpacing" Value="12"/>
+        <Setter Property="Padding" Value="0,10"/>
+    </Style>
+
+    <!-- FactRow, stats-bar form. The board and the agenda share this bar exactly. -->
+    <Style x:Key="brd14_StatsBar" TargetType="Border" BasedOn="{StaticResource brd14_White}">
+        <Setter Property="Margin" Value="18,13,18,0"/>
+        <Setter Property="Padding" Value="4,10"/>
+    </Style>
+
+    <Style x:Key="vsl_StatCell" TargetType="VerticalStackLayout">
+        <Setter Property="Spacing" Value="4"/>
+        <Setter Property="HorizontalOptions" Value="Center"/>
+    </Style>
+
+    <!-- Hero. The visit countdown block. -->
+    <Style x:Key="brd18_HeroCard" TargetType="Border" BasedOn="{StaticResource brd18_VisitHero}">
+        <Setter Property="Padding" Value="18,20"/>
+    </Style>
+
+    <Style x:Key="vsl_HeroStack" TargetType="VerticalStackLayout">
+        <Setter Property="Spacing" Value="4"/>
+        <Setter Property="HorizontalOptions" Value="Center"/>
+    </Style>
+
+    <!-- SectionRow. The settings and profile hub rows. -->
+    <Style x:Key="brd16_SectionRow" TargetType="Border" BasedOn="{StaticResource brd16_White}">
+        <Setter Property="Padding" Value="16,13"/>
+        <Setter Property="MinimumHeightRequest" Value="68"/>
+    </Style>
+
+    <Style x:Key="grid_SectionRow" TargetType="Grid">
+        <Setter Property="ColumnSpacing" Value="12"/>
+    </Style>
+
+    <!-- SectionRows carry no margin of their own; the hub page spaces them, so the list must too. -->
+    <Style x:Key="vsl_SectionRowStack" TargetType="VerticalStackLayout">
+        <Setter Property="Spacing" Value="10"/>
+    </Style>
+
+    <!-- DayTile. The booking flow's day strip. Fixed strip height and fixed tile width, so the
+         skeleton can promise the exact geometry the real strip will take. -->
+    <x:Double x:Key="dim_DayTile">64</x:Double>
+
+    <Style x:Key="hsl_DayStrip" TargetType="HorizontalStackLayout">
+        <Setter Property="Spacing" Value="9"/>
+        <Setter Property="HeightRequest" Value="86"/>
+        <Setter Property="Margin" Value="20,0"/>
+    </Style>
+
+    <Style x:Key="brd14_DayTile_Skeleton" TargetType="Border" BasedOn="{StaticResource brd14_White}">
+        <Setter Property="WidthRequest" Value="{StaticResource dim_DayTile}"/>
+        <Setter Property="Padding" Value="4,11"/>
+    </Style>
+
+    <Style x:Key="vsl_DayTile" TargetType="VerticalStackLayout">
+        <Setter Property="Spacing" Value="5"/>
+        <Setter Property="VerticalOptions" Value="Center"/>
+    </Style>
+
+    <!-- Tile. The browse category carousel. -->
+    <Style x:Key="vsl_Tile" TargetType="VerticalStackLayout">
+        <Setter Property="Spacing" Value="8"/>
+        <Setter Property="WidthRequest" Value="64"/>
+    </Style>
+
+    <Style x:Key="cv_TileStrip" TargetType="CollectionView">
+        <Setter Property="HeightRequest" Value="80"/>
+    </Style>
+
+    <Style x:Key="hsl_TileStrip" TargetType="HorizontalStackLayout">
+        <Setter Property="Spacing" Value="14"/>
+        <Setter Property="HeightRequest" Value="80"/>
+        <Setter Property="Padding" Value="16,0"/>
+    </Style>
+
+</ResourceDictionary>

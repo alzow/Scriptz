@@ -26,10 +26,13 @@ public partial class BlockedDatesPageViewModel : BaseViewModel
         Title = "Blocked Dates";
     }
 
+    public const int SkeletonRowCount = 5;
+
     public ObservableCollection<AvailabilityBlockResponse> Blocks { get; } = new();
     public string OperatorName { get; set; } = "";
-    public bool IsLoading { get; set; }
-    public bool IsEmpty => Blocks.Count == 0 && !IsLoading;
+    public bool IsEmpty => Blocks.Count == 0 && !IsFirstLoading && !HasLoadFailed;
+
+    public override void OnLoadStateChanged() => OnPropertyChanged(nameof(IsEmpty));
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
@@ -43,7 +46,7 @@ public partial class BlockedDatesPageViewModel : BaseViewModel
 
             OperatorName = parameters!.TryGetValue(NavigationKeys.OperatorName, out var nameObj) ? (string)nameObj : "";
 
-            await LoadAsync();
+            await RunFirstLoadAsync(FetchAsync);
         }
         catch (Exception ex)
         {
@@ -58,24 +61,29 @@ public partial class BlockedDatesPageViewModel : BaseViewModel
             await LoadAsync();
     }
 
-    [RelayCommand]
-    private async Task LoadAsync()
+    public override Task ReloadAsync() => RunFirstLoadAsync(FetchAsync);
+
+    // Throws so RunFirstLoadAsync can turn the skeleton into a failure instead of leaving it up.
+    public async Task FetchAsync()
     {
-        IsLoading = true;
+        var blocks = await _operatorService.GetAvailabilityBlocksAsync(_operatorId);
+        Blocks.Clear();
+        foreach (var b in blocks)
+            Blocks.Add(b);
+
+        OnPropertyChanged(nameof(IsEmpty));
+    }
+
+    [RelayCommand]
+    public async Task LoadAsync()
+    {
         try
         {
-            var blocks = await _operatorService.GetAvailabilityBlocksAsync(_operatorId);
-            Blocks.Clear();
-            foreach (var b in blocks)
-                Blocks.Add(b);
+            await FetchAsync();
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
-        }
-        finally
-        {
-            IsLoading = false;
         }
     }
 

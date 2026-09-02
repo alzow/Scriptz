@@ -5,12 +5,14 @@
              xmlns:vm="clr-namespace:QueueApp.Features.History"
              xmlns:models="clr-namespace:QueueApp.Features.History.Models"
              xmlns:helpers="clr-namespace:QueueApp.Features.History.Helpers"
+             xmlns:skeleton="clr-namespace:QueueApp.Shared.Templates.Skeleton"
              x:DataType="vm:HistoryPageViewModel"
              IconImageSource="icon_history"
              Title="History"
              Style="{StaticResource NavigationPageStyle}">
     <Grid RowDefinitions="Auto,Auto,*" Style="{StaticResource grid_Page}">
 
+        <!-- Title and filter bar are known strings and stay real while the list loads. -->
         <Label Grid.Row="0" Text="History"
                Margin="16,16,16,0"
                Style="{StaticResource lbl26_Bold_PageTitle}"/>
@@ -25,7 +27,7 @@
 
             <CollectionView ItemsSource="{Binding Groups}"
                              IsGrouped="True"
-                             IsVisible="{Binding IsEmpty, Converter={StaticResource InvertedBoolConverter}}"
+                             IsVisible="{Binding ShowList}"
                              ItemSizingStrategy="MeasureFirstItem"
                              ItemsUpdatingScrollMode="KeepScrollOffset">
 
@@ -47,8 +49,22 @@
                                             EmptyBody="{Binding EmptyBody}"
                                             BrowseCommand="{Binding BrowseCommand}"/>
 
-            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
-                                HorizontalOptions="Center" VerticalOptions="Center"/>
+            <!--
+                The skeleton's way out. The group headers are not drawn while loading because their
+                text is bucketed from the rows themselves — they are data here, not chrome, and the
+                page cannot know them yet.
+            -->
+            <helpers:HistoryEmptyStateView IsVisible="{Binding HasLoadFailed}"
+                                            Icon="ic_alert"
+                                            EmptyTitle="{x:Static vm:HistoryPageViewModel.LoadFailureTitle}"
+                                            EmptyBody="{Binding LoadFailureText}"
+                                            ActionText="{x:Static vm:HistoryPageViewModel.RetryActionText}"
+                                            BrowseCommand="{Binding RetryLoadCommand}"/>
+
+            <skeleton:SkeletonList Kind="ListRow"
+                                   Count="{x:Static vm:HistoryPageViewModel.SkeletonRowCount}"
+                                   VerticalOptions="Start"
+                                   IsVisible="{Binding IsFirstLoading}"/>
         </Grid>
     </Grid>
 </ContentPage>

@@ -4,8 +4,9 @@
              x:Name="Root"
              x:Class="QueueApp.Features.Flow.Visit.Helpers.VisitHeroView">
 
-    <Border Style="{StaticResource brd18_VisitHero}" Padding="18,20">
-        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+    <!-- Padding and stack spacing come from the Hero styles, which SkeletonHeroView reads too. -->
+    <Border Style="{StaticResource brd18_HeroCard}">
+        <VerticalStackLayout Style="{StaticResource vsl_HeroStack}">
             <Label Text="{Binding Caption, Source={x:Reference Root}}"
                    Style="{StaticResource lbl11_Mono_Green}"
                    HorizontalTextAlignment="Center"

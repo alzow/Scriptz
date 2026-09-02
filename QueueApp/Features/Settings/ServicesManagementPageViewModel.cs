@@ -30,10 +30,13 @@ public partial class ServicesManagementPageViewModel : BaseViewModel
         Title = "Services";
     }
 
+    public const int SkeletonRowCount = 5;
+
     public ObservableCollection<ServiceResponse> Services { get; } = new();
-    public bool IsLoading { get; set; }
     public bool IsAddingService { get; set; }
-    public bool IsEmpty => Services.Count == 0 && !IsLoading;
+    public bool IsEmpty => Services.Count == 0 && !IsFirstLoading && !HasLoadFailed;
+
+    public override void OnLoadStateChanged() => OnPropertyChanged(nameof(IsEmpty));
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
@@ -41,7 +44,7 @@ public partial class ServicesManagementPageViewModel : BaseViewModel
         {
             await base.OnLoadedAsync(parameters);
             _businessId = await _businessService.GetOwnedBusinessIdAsync();
-            await LoadAsync();
+            await RunFirstLoadAsync(FetchAsync);
         }
         catch (Exception ex)
         {
@@ -56,24 +59,29 @@ public partial class ServicesManagementPageViewModel : BaseViewModel
             await LoadAsync();
     }
 
-    [RelayCommand]
-    private async Task LoadAsync()
+    public override Task ReloadAsync() => RunFirstLoadAsync(FetchAsync);
+
+    // Throws so RunFirstLoadAsync can turn the skeleton into a failure instead of leaving it up.
+    public async Task FetchAsync()
     {
-        IsLoading = true;
+        var services = await _serviceOfferingsService.GetServicesAsync(_businessId);
+        Services.Clear();
+        foreach (var s in services)
+            Services.Add(s);
+
+        OnPropertyChanged(nameof(IsEmpty));
+    }
+
+    [RelayCommand]
+    public async Task LoadAsync()
+    {
         try
         {
-            var services = await _serviceOfferingsService.GetServicesAsync(_businessId);
-            Services.Clear();
-            foreach (var s in services)
-                Services.Add(s);
+            await FetchAsync();
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
-        }
-        finally
-        {
-            IsLoading = false;
         }
     }
 

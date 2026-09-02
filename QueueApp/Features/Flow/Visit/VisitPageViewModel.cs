@@ -27,15 +27,15 @@ public partial class VisitPageViewModel : BaseViewModel
     public const string QueueTable = "queue_entries";
     public const string BookingsTable = "bookings";
     public const int NoticeWindowHours = 2;
+    public const int SkeletonFactCount = 4;
     private const int TickSeconds = 30;
 
-    public bool IsLoading { get; set; } = true;
     public bool JustJoined { get; set; }
     public VisitRecord? Record { get; set; }
     public BusinessResponse? Business { get; set; }
 
     public bool HasRecord => Record is not null;
-    public bool ShowMissing => Record is null && !IsLoading;
+    public bool ShowMissing => Record is null && !IsFirstLoading && !HasLoadFailed;
     public bool IsLive => Record?.IsLive == true;
     public bool IsSettled => Record is not null && !Record.IsLive;
 
@@ -138,14 +138,8 @@ public partial class VisitPageViewModel : BaseViewModel
             ReadParameters(parameters);
 
             _isVisible = true;
-            IsLoading = true;
 
-            var locationTask = _locationService.GetCachedLocationAsync();
-            await RefreshAsync();
-            await ApplyDistanceAsync(locationTask);
-
-            RefreshView();
-            StartTimer();
+            await RunFirstLoadAsync(LoadAsync);
         }
         catch (Exception ex)
         {
@@ -153,9 +147,22 @@ public partial class VisitPageViewModel : BaseViewModel
         }
         finally
         {
-            IsLoading = false;
             OnPropertyChanged(nameof(ShowMissing));
         }
+    }
+
+    public override Task ReloadAsync() => RunFirstLoadAsync(LoadAsync);
+
+    // Throws by design so RunFirstLoadAsync owns the failure: a visit page that cannot reach the
+    // entry has to be able to say so rather than sitting on grey bars.
+    public async Task LoadAsync()
+    {
+        var locationTask = _locationService.GetCachedLocationAsync();
+        await FetchAsync();
+        await ApplyDistanceAsync(locationTask);
+
+        RefreshView();
+        StartTimer();
     }
 
     public override async Task OnAppearingAsync()
@@ -218,32 +225,40 @@ public partial class VisitPageViewModel : BaseViewModel
         }
     }
 
+    // Every caller but the first load is a realtime nudge or a timer tick on a page that already
+    // has its record, so a failure there is noise and stays swallowed. The first load goes through
+    // FetchAsync instead, where a failure has somewhere to go.
     public async Task RefreshAsync()
     {
         try
         {
-            Task<BusinessResponse?>? businessTask = null;
-
-            Record = _kind == VisitKind.Queue
-                ? await LoadEntryAsync(id => businessTask = _businessService.GetBusinessAsync(id))
-                : await LoadBookingAsync();
-
-            if (Record is null)
-                return;
-
-            businessTask ??= _businessService.GetBusinessAsync(Record.BusinessId);
-            Business ??= await businessTask;
-            Title = Record.BusinessName;
-
-            if (!Record.IsLive)
-                await UnsubscribeRealtimeAsync();
-            else
-                await SubscribeRealtimeAsync();
+            await FetchAsync();
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
         }
+    }
+
+    public async Task FetchAsync()
+    {
+        Task<BusinessResponse?>? businessTask = null;
+
+        Record = _kind == VisitKind.Queue
+            ? await LoadEntryAsync(id => businessTask = _businessService.GetBusinessAsync(id))
+            : await LoadBookingAsync();
+
+        if (Record is null)
+            return;
+
+        businessTask ??= _businessService.GetBusinessAsync(Record.BusinessId);
+        Business ??= await businessTask;
+        Title = Record.BusinessName;
+
+        if (!Record.IsLive)
+            await UnsubscribeRealtimeAsync();
+        else
+            await SubscribeRealtimeAsync();
     }
 
     public async Task<VisitRecord?> LoadEntryAsync(Action<Guid>? onBusinessIdKnown = null)

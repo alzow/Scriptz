@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.Settings"
+             xmlns:skeleton="clr-namespace:QueueApp.Shared.Templates.Skeleton"
              xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
              xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
              xmlns:models="clr-namespace:QueueApp.Services.Api.Operator.Models"
@@ -58,8 +59,28 @@
                 </VerticalStackLayout>
             </ScrollView>
 
-            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
-                                HorizontalOptions="Center" VerticalOptions="Center"/>
+            <Border Style="{StaticResource brd13_Ghost}" Padding="18,20" Margin="20,0"
+                    VerticalOptions="Center"
+                    IsVisible="{Binding HasLoadFailed}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="{Binding LoadFailureText}"
+                           Style="{StaticResource lbl12_Regular_TextMuted}"
+                           HorizontalTextAlignment="Center"
+                           HorizontalOptions="Center"/>
+                    <Label Text="Try again"
+                           Style="{StaticResource lbl13_Bold_Action}"
+                           HorizontalOptions="Center">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding RetryLoadCommand}"/>
+                        </Label.GestureRecognizers>
+                    </Label>
+                </VerticalStackLayout>
+            </Border>
+
+            <skeleton:SkeletonList Kind="ListRowPlain"
+                                   Count="{x:Static vm:WeeklyHoursPageViewModel.SkeletonRowCount}"
+                                   VerticalOptions="Start"
+                                   IsVisible="{Binding IsFirstLoading}"/>
         </Grid>
     </Grid>
 </ContentPage>

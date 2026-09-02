@@ -3,6 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.Flow.BookingFlow"
              xmlns:flow="clr-namespace:QueueApp.Features.Flow.Helpers"
+             xmlns:skeleton="clr-namespace:QueueApp.Shared.Templates.Skeleton"
+             xmlns:flowvm="clr-namespace:QueueApp.Features.Flow"
              xmlns:topbar="clr-namespace:QueueApp.Shared.Templates.TopBar"
              x:Name="Root"
              x:Class="QueueApp.Features.Flow.BookingFlow.BookingFlowPage"
@@ -82,6 +84,13 @@
                         NoteLabelText="{Binding NoteLabelText}"
                         BookingNote="{Binding BookingNote}"/>
 
+                <!-- The rail above and the footer below are chrome; the first step's choices
+                     are the read, so only they are drawn as bars. -->
+                <skeleton:SkeletonList Kind="ListRow"
+                                       Count="{x:Static flowvm:FlowPageViewModelBase.SkeletonRowCount}"
+                                       VerticalOptions="Start"
+                                       IsVisible="{Binding IsFirstLoading}"/>
+
             </Grid>
         </Grid>
 
@@ -94,9 +103,24 @@
                 IsFooterCtaEnabled="{Binding IsFooterCtaEnabled}"
                 NextCommand="{Binding NextCommand}"/>
 
-        <ActivityIndicator Grid.Row="1" IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
-                           Style="{StaticResource ai_Accent}"
-                           HorizontalOptions="Center" VerticalOptions="Center"/>
+        <Border Grid.Row="1"
+                Style="{StaticResource brd13_Ghost}" Margin="20" Padding="18,22"
+                VerticalOptions="Center"
+                IsVisible="{Binding HasLoadFailed}">
+            <VerticalStackLayout Spacing="10">
+                <Label Text="{Binding LoadFailureText}"
+                       Style="{StaticResource lbl12_Regular_TextMuted}"
+                       HorizontalTextAlignment="Center"
+                       HorizontalOptions="Center"/>
+                <Label Text="Try again"
+                       Style="{StaticResource lbl13_Bold_Action}"
+                       HorizontalOptions="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding RetryLoadCommand}"/>
+                    </Label.GestureRecognizers>
+                </Label>
+            </VerticalStackLayout>
+        </Border>
 
     </Grid>
 

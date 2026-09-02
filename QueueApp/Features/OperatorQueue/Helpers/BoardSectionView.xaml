@@ -9,9 +9,8 @@
              x:DataType="models:BoardSection"
              x:Class="QueueApp.Features.OperatorQueue.Helpers.BoardSectionView">
 
-    <Border Style="{StaticResource brd16_White}"
-            Margin="18,12,18,0" Padding="0"
-            VerticalOptions="Start">
+    <!-- BoardRow geometry, shared with SkeletonBoardRowView. -->
+    <Border Style="{StaticResource brd16_BoardSection}">
         <Grid VerticalOptions="Start">
 
             <VerticalStackLayout Spacing="0" Padding="12" IsVisible="{Binding IsExpanded}">
@@ -151,8 +150,7 @@
 
             </VerticalStackLayout>
 
-            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="11"
-                  Padding="12,11" MinimumHeightRequest="62"
+            <Grid ColumnDefinitions="Auto,*,Auto" Style="{StaticResource grid_BoardRow}"
                   IsVisible="{Binding IsCollapsed}">
                 <helpers:AvatarView Grid.Column="0"
                                     Initials="{Binding Initials}"
@@ -175,8 +173,7 @@
                 </Border>
             </Grid>
 
-            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="11"
-                  Padding="12,11" MinimumHeightRequest="62"
+            <Grid ColumnDefinitions="Auto,*,Auto" Style="{StaticResource grid_BoardRow}"
                   IsVisible="{Binding IsOffShift}">
                 <helpers:AvatarView Grid.Column="0"
                                     Initials="{Binding Initials}"/>
