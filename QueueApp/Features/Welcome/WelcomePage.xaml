@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:QueueApp.Features.Welcome"
+             xmlns:helpers="clr-namespace:QueueApp.Features.Welcome.Helpers"
+             xmlns:models="clr-namespace:QueueApp.Features.Welcome.Models"
+             x:Class="QueueApp.Features.Welcome.WelcomePage"
+             x:DataType="vm:WelcomePageViewModel"
+             NavigationPage.HasNavigationBar="False"
+             Style="{StaticResource NavigationPageStyle}">
+
+    <Grid RowDefinitions="Auto,*,Auto" Style="{StaticResource grid_Page}">
+
+        <helpers:WelcomeBrandBarView Grid.Row="0"
+                                     BrandText="{Binding BrandText}"
+                                     EyebrowText="{Binding EyebrowText}"/>
+
+        <CarouselView Grid.Row="1"
+                      ItemsSource="{Binding Panels}"
+                      Position="{Binding Position, Mode=TwoWay}"
+                      Loop="False"
+                      IsBounceEnabled="False"
+                      PeekAreaInsets="0">
+            <CarouselView.ItemTemplate>
+                <DataTemplate x:DataType="models:WelcomePanel">
+                    <helpers:WelcomePanelView NumberText="{Binding NumberText}"
+                                              HeadlineText="{Binding HeadlineText}"
+                                              BodyText="{Binding BodyText}"
+                                              IllustrationSource="{Binding IllustrationSource}"/>
+                </DataTemplate>
+            </CarouselView.ItemTemplate>
+        </CarouselView>
+
+        <VerticalStackLayout Grid.Row="2" Spacing="0">
+
+            <helpers:WelcomeDotsView Panels="{Binding Panels}"
+                                     Margin="24,14,24,0"/>
+
+            <helpers:WelcomeCtaBlockView PrimaryText="{Binding PrimaryCtaText}"
+                                         PrimaryCommand="{Binding CreateAccountCommand}"
+                                         SecondaryText="{Binding SecondaryCtaText}"
+                                         SecondaryCommand="{Binding SignInCommand}"
+                                         FootnoteText="{Binding FootnoteText}"/>
+
+        </VerticalStackLayout>
+
+    </Grid>
+
+</ContentPage>

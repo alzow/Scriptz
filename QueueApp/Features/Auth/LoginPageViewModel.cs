@@ -19,9 +19,15 @@ public partial class LoginPageViewModel : BaseViewModel
     private const string RateLimitedMessage = "Too many attempts. Wait a minute and try again.";
     private const string OfflineMessage = "No connection. Check your internet and try again.";
     private const string GenericFailureMessage = "Couldn't sign you in. Please try again.";
+
+    private const string Heading = "Welcome back";
+    private const string Lead = "Pick up where you left off.";
     #endregion
 
     #region Properties
+    public string HeadingText => Heading;
+    public string LeadText => Lead;
+
     public ISharedStateManager FormStateManager { get; } = new FormValidators.SharedStateManager();
 
     public IValidator EmailValidator { get; } = new FormValidators.EmailValidator("Enter a valid email address.");

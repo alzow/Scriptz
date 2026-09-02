@@ -3,40 +3,51 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.Auth"
              xmlns:helpers="clr-namespace:QueueApp.Features.Auth.Helpers"
+             xmlns:topbar="clr-namespace:QueueApp.Shared.Templates.TopBar"
              x:Class="QueueApp.Features.Auth.RegisterPage"
              x:DataType="vm:RegisterPageViewModel"
+             NavigationPage.HasNavigationBar="False"
              Style="{StaticResource NavigationPageStyle}">
 
-    <ScrollView>
-        <VerticalStackLayout Spacing="0">
+    <Grid RowDefinitions="Auto,*" Style="{StaticResource grid_Page}">
 
-            <helpers:AuthBrandHeaderView HeadingText="Create account"
-                                         SubheadingText="Join Queue today"/>
+        <topbar:TopBarView Grid.Row="0"
+                           GoBackCommand="{Binding GoBackCommand}"/>
 
-            <helpers:RegisterFormView
-                DisplayName="{Binding DisplayName}"
-                EmailAddress="{Binding Email}"
-                PhoneNumber="{Binding Phone}"
-                Password="{Binding Password}"
-                ConfirmPassword="{Binding ConfirmPassword}"
-                NameValidator="{Binding NameValidator}"
-                EmailValidator="{Binding EmailValidator}"
-                PhoneValidator="{Binding PhoneValidator}"
-                PasswordValidator="{Binding PasswordValidator}"
-                FormStateManager="{Binding FormStateManager}"
-                ShowPasswordMismatch="{Binding ShowPasswordMismatch}"
-                ErrorMessage="{Binding ErrorMessage}"
-                IsRegistering="{Binding IsRegistering}"
-                CanSubmit="{Binding CanSubmit}"
-                RegisterCommand="{Binding RegisterCommand}"/>
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="0">
 
-            <helpers:AuthFooterLinkView
-                Margin="24,0,24,24"
-                PromptText="Already have an account?"
-                ActionText="Sign In"
-                ActionCommand="{Binding NavigateToLoginCommand}"/>
+                <helpers:AuthPageHeaderView TitleText="{Binding HeadingText}"
+                                            LeadText="{Binding LeadText}"/>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                <helpers:RegisterFormView
+                    DisplayName="{Binding DisplayName}"
+                    EmailAddress="{Binding Email}"
+                    PhoneNumber="{Binding Phone}"
+                    Password="{Binding Password}"
+                    ConfirmPassword="{Binding ConfirmPassword}"
+                    NameValidator="{Binding NameValidator}"
+                    EmailValidator="{Binding EmailValidator}"
+                    PhoneValidator="{Binding PhoneValidator}"
+                    PasswordValidator="{Binding PasswordValidator}"
+                    FormStateManager="{Binding FormStateManager}"
+                    ShowPasswordMismatch="{Binding ShowPasswordMismatch}"
+                    PasswordRuleText="{Binding PasswordRuleText}"
+                    TermsText="{Binding TermsText}"
+                    ErrorMessage="{Binding ErrorMessage}"
+                    IsRegistering="{Binding IsRegistering}"
+                    CanSubmit="{Binding CanSubmit}"
+                    RegisterCommand="{Binding RegisterCommand}"/>
+
+                <helpers:AuthFooterLinkView
+                    Margin="24,0,24,28"
+                    PromptText="Already have an account?"
+                    ActionText="Sign in"
+                    ActionCommand="{Binding NavigateToLoginCommand}"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
 
 </ContentPage>

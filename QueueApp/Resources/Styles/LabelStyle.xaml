@@ -617,4 +617,54 @@
         </Style.Triggers>
     </Style>
 
+    <!--
+        ================================================================================
+        WelcomePage and the auth screens it lands on. The welcome headline is the one place text
+        runs past the 26pt page title: it is the whole pitch, two lines, and it is what someone
+        reads before they read anything else.
+        ================================================================================
+    -->
+
+    <Style x:Key="lbl30_Bold_WelcomeHeadline" TargetType="Label">
+        <Setter Property="FontSize" Value="30"/>
+        <Setter Property="FontFamily" Value="RobotoBold"/>
+        <Setter Property="CharacterSpacing" Value="-0.5"/>
+        <Setter Property="LineHeight" Value="1.12"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextInk}, Dark={StaticResource DarkTextInk}}"/>
+    </Style>
+
+    <Style x:Key="lbl15_Regular_WelcomeBody" TargetType="Label">
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="LineHeight" Value="1.45"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
+    </Style>
+
+    <!-- 01 / 02 / 03 / 04. Tells someone how long this is before they commit to swiping. -->
+    <Style x:Key="lbl13_Mono_PanelNumber" TargetType="Label" BasedOn="{StaticResource lbl13_Mono_Green}">
+        <Setter Property="CharacterSpacing" Value="2.2"/>
+    </Style>
+
+    <!-- The wordmark on the welcome header. -->
+    <Style x:Key="lbl20_Bold_Wordmark" TargetType="Label" BasedOn="{StaticResource lbl20_Bold_TextDark}">
+        <Setter Property="CharacterSpacing" Value="-0.4"/>
+    </Style>
+
+    <!--
+        "Free to use. Pay the shop the way you always have." TextDim on purpose: it answers a
+        question rather than making a claim, and it must not compete with the CTA above it.
+    -->
+    <Style x:Key="lbl12_Regular_CtaFootnote" TargetType="Label" BasedOn="{StaticResource lbl12_Regular_TextFaint}">
+        <Setter Property="HorizontalTextAlignment" Value="Center"/>
+    </Style>
+
+    <!-- Auth pages: the one line under the header saying why an account exists at all. -->
+    <Style x:Key="lbl14_Regular_AuthLead" TargetType="Label">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="LineHeight" Value="1.4"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
+    </Style>
+
+    <!-- Forgot-password and the create/sign-in swap. A link, so it takes the purple text token. -->
+    <Style x:Key="lbl13_Bold_AuthLink" TargetType="Label" BasedOn="{StaticResource lbl13_Bold_Orange}"/>
+
 </ResourceDictionary>

@@ -12,7 +12,7 @@
             <Label Text="{Binding PromptText, Source={x:Reference Root}}"
                    Style="{StaticResource lbl13_Regular_TextMid}"/>
             <Label Text="{Binding ActionText, Source={x:Reference Root}}"
-                   Style="{StaticResource lbl13_Bold_Orange}">
+                   Style="{StaticResource lbl13_Bold_AuthLink}">
                 <Label.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding ActionCommand, Source={x:Reference Root}}"/>
                 </Label.GestureRecognizers>

@@ -5,32 +5,35 @@
              xmlns:helpers="clr-namespace:QueueApp.Features.Auth.Helpers"
              x:Class="QueueApp.Features.Auth.LoginPage"
              x:DataType="vm:LoginPageViewModel"
+             NavigationPage.HasNavigationBar="False"
              Style="{StaticResource NavigationPageStyle}">
 
-    <ScrollView>
-        <VerticalStackLayout Spacing="0">
+    <Grid Style="{StaticResource grid_Page}">
+        <ScrollView>
+            <VerticalStackLayout Spacing="0" Padding="0,36,0,0">
 
-            <helpers:AuthBrandHeaderView HeadingText="Welcome back"
-                                         SubheadingText="Sign in to Queue"/>
+                <helpers:AuthPageHeaderView TitleText="{Binding HeadingText}"
+                                            LeadText="{Binding LeadText}"/>
 
-            <helpers:LoginFormView
-                EmailAddress="{Binding Email}"
-                Password="{Binding Password}"
-                EmailValidator="{Binding EmailValidator}"
-                PasswordValidator="{Binding PasswordValidator}"
-                FormStateManager="{Binding FormStateManager}"
-                ErrorMessage="{Binding ErrorMessage}"
-                IsSigningIn="{Binding IsSigningIn}"
-                CanSubmit="{Binding CanSubmit}"
-                SignInCommand="{Binding LoginCommand}"/>
+                <helpers:LoginFormView
+                    EmailAddress="{Binding Email}"
+                    Password="{Binding Password}"
+                    EmailValidator="{Binding EmailValidator}"
+                    PasswordValidator="{Binding PasswordValidator}"
+                    FormStateManager="{Binding FormStateManager}"
+                    ErrorMessage="{Binding ErrorMessage}"
+                    IsSigningIn="{Binding IsSigningIn}"
+                    CanSubmit="{Binding CanSubmit}"
+                    SignInCommand="{Binding LoginCommand}"/>
 
-            <helpers:AuthFooterLinkView
-                Margin="24,0,24,24"
-                PromptText="New to Queue?"
-                ActionText="Create account"
-                ActionCommand="{Binding NavigateToRegisterCommand}"/>
+                <helpers:AuthFooterLinkView
+                    Margin="24,0,24,28"
+                    PromptText="New here?"
+                    ActionText="Create an account"
+                    ActionCommand="{Binding NavigateToRegisterCommand}"/>
 
-        </VerticalStackLayout>
-    </ScrollView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 
 </ContentPage>

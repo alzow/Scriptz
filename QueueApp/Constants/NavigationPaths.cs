@@ -5,7 +5,12 @@ public static class NavigationPaths
     // ── App start ──────────────────────────────────────────────────────────────
     public const string AppStart             = "NavigationPage/QueueSplashPage";
 
+    // ── Onboarding ─────────────────────────────────────────────────────────────
+    public const string Welcome              = "/NavigationPage/WelcomePage";
+
     // ── Auth ───────────────────────────────────────────────────────────────────
+    // Register is pushed onto whatever opened it — the welcome carousel or sign-in. Login is
+    // always absolute: it is the root a signed-out customer belongs on, so it is never stacked.
     public const string RegisterPage         = "RegisterPage";
     public const string Login                = "/NavigationPage/LoginPage";
 

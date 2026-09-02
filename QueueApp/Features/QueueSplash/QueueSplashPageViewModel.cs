@@ -3,26 +3,48 @@ using QueueApp.Framework.Base;
 using QueueApp.Framework.Navigation;
 using QueueApp.Services.Api.Business;
 using QueueApp.Services.Auth;
+using QueueApp.Services.Onboarding;
 using QueueApp.Services.Storage;
 
 namespace QueueApp.Features.QueueSplash;
 
 public class QueueSplashPageViewModel : BaseViewModel
 {
+    #region Properties
+    public bool BypassWelcome { get; set; }
+    #endregion
+
+    #region Services
     private readonly INavigationService _navigationService;
     private readonly IAuthService _authService;
     private readonly IBusinessService _businessService;
+    private readonly IFirstRunService _firstRunService;
+    #endregion
 
+    #region Constructor
     public QueueSplashPageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
         IAuthService authService,
-        IBusinessService businessService)
+        IBusinessService businessService,
+        IFirstRunService firstRunService)
         : base(navigationService, secureStorageService)
     {
         _navigationService = navigationService;
         _authService = authService;
         _businessService = businessService;
+        _firstRunService = firstRunService;
+    }
+    #endregion
+
+    #region Lifecycle
+    public override void Initialize(INavigationParameters parameters)
+    {
+        base.Initialize(parameters);
+
+        BypassWelcome = parameters is not null
+            && parameters.TryGetValue(NavigationKeys.BypassWelcome, out var bypass)
+            && bypass is true;
     }
 
     public override async Task OnAppearingAsync()
@@ -30,6 +52,7 @@ public class QueueSplashPageViewModel : BaseViewModel
         await base.OnAppearingAsync();
         await SplashOrchestration();
     }
+    #endregion
 
     public async Task SplashOrchestration()
     {
@@ -39,9 +62,13 @@ public class QueueSplashPageViewModel : BaseViewModel
 
             if (!isValid)
             {
-                await _navigationService.NavigateAsync($"/{NavigationPaths.Login}");
+                await _navigationService.NavigateAsync(SignedOutDestination());
                 return;
             }
+
+            // Someone with a live session is past the pitch whether or not this install ever showed
+            // it — a reinstall that restores a session must not open on the welcome screen.
+            _firstRunService.MarkWelcomeSeen();
 
             var (ownsBusiness, mode) = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
             var uri = MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: ownsBusiness, manageMode: mode);
@@ -54,4 +81,10 @@ public class QueueSplashPageViewModel : BaseViewModel
         }
     }
 
+    // The welcome screen is for someone who has never been in the app. Everyone else — a customer
+    // who signed out, a returning install, anyone arriving through a link — gets sign-in.
+    public string SignedOutDestination() =>
+        BypassWelcome || _firstRunService.HasSeenWelcome
+            ? $"/{NavigationPaths.Login}"
+            : $"/{NavigationPaths.Welcome}";
 }

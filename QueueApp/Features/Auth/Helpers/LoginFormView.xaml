@@ -2,48 +2,36 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
-             xmlns:entry="clr-namespace:QueueApp.Shared.Templates.QueueEntry"
              xmlns:helpers="clr-namespace:QueueApp.Features.Auth.Helpers"
              x:Name="Root"
              x:Class="QueueApp.Features.Auth.Helpers.LoginFormView">
 
-    <VerticalStackLayout Padding="24,32,24,24" Spacing="16">
+    <VerticalStackLayout Padding="24,24,24,8" Spacing="18">
 
         <helpers:AuthInlineErrorView Message="{Binding ErrorMessage, Source={x:Reference Root}}"/>
 
-        <entry:QueueEntry
-            Placeholder="Email"
-            Text="{Binding EmailAddress, Source={x:Reference Root}}"
-            InputType="Email"
-            Validator="{Binding EmailValidator, Source={x:Reference Root}}"
-            SharedStateManager="{Binding FormStateManager, Source={x:Reference Root}}"
-            ValidateOnTextChanged="True"
-            ReturnType="Next"/>
+        <helpers:AuthFieldView LabelText="EMAIL"
+                               Placeholder="you@example.co.za"
+                               Text="{Binding EmailAddress, Source={x:Reference Root}}"
+                               InputType="Email"
+                               ReturnType="Next"
+                               Validator="{Binding EmailValidator, Source={x:Reference Root}}"
+                               SharedStateManager="{Binding FormStateManager, Source={x:Reference Root}}"/>
 
-        <entry:QueueEntry
-            Placeholder="Password"
-            Text="{Binding Password, Source={x:Reference Root}}"
-            IsPassword="True"
-            Validator="{Binding PasswordValidator, Source={x:Reference Root}}"
-            SharedStateManager="{Binding FormStateManager, Source={x:Reference Root}}"
-            ValidateOnTextChanged="True"/>
+        <helpers:AuthFieldView LabelText="PASSWORD"
+                               IsPassword="True"
+                               Text="{Binding Password, Source={x:Reference Root}}"
+                               Validator="{Binding PasswordValidator, Source={x:Reference Root}}"
+                               SharedStateManager="{Binding FormStateManager, Source={x:Reference Root}}"/>
 
         <controls:AlzowLoadingButton
-            Text="Sign In →"
+            Text="Sign in"
             LoadingText="Signing in…"
             Command="{Binding SignInCommand, Source={x:Reference Root}}"
             IsLoading="{Binding IsSigningIn, Source={x:Reference Root}}"
             IsEnabled="{Binding CanSubmit, Source={x:Reference Root}}"
-            HeightRequest="54"
-            Margin="0,8,0,0"
-            ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
-
-        <HorizontalStackLayout HorizontalOptions="Center" Spacing="4">
-            <Label Text="Forgot password?"
-                   Style="{StaticResource lbl13_Regular_TextLight}"/>
-            <Label Text="Reset it"
-                   Style="{StaticResource lbl13_Bold_Orange}"/>
-        </HorizontalStackLayout>
+            Margin="0,6,0,0"
+            ButtonStyle="{StaticResource btn16_Bold_AuthSubmit}"/>
 
     </VerticalStackLayout>
 

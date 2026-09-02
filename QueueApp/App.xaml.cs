@@ -1,6 +1,7 @@
 using QueueApp.Constants;
 using QueueApp.Features.Auth;
 using QueueApp.Features.QueueSplash;
+using QueueApp.Features.Welcome;
 using QueueApp.Framework.Theming;
 using QueueApp.Services.Auth;
 
@@ -42,8 +43,9 @@ public partial class App : Application
 
                 // Nothing on screen yet, or the splash is still deciding where to go — it sends a
                 // dead session to the login page itself, so navigating from here too would race it.
-                // Already on login: nothing to do.
-                if (currentPage is null or LoginPage or QueueSplashPage)
+                // Already on login, or on the welcome screen where there was never a session to
+                // lose: nothing to do.
+                if (currentPage is null or LoginPage or QueueSplashPage or WelcomePage)
                     return;
 
                 // Resolved here rather than injected: navigation is only usable once the app's first

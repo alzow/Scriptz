@@ -15,6 +15,8 @@ using QueueApp.Services.Popup;
 using QueueApp.Services.Realtime;
 using QueueApp.Services.Location;
 using QueueApp.Services.Notifications;
+using QueueApp.Services.Onboarding;
+using QueueApp.Services.Accessibility;
 using CommunityToolkit.Mvvm.Messaging;
 #if USE_STUBS
 using QueueApp.Services.Stubs;
@@ -77,6 +79,12 @@ internal static class NavigationStartup
         // live in Preferences.Default.
         services.AddSingleton<INotificationPermissionService, NotificationPermissionService>();
         services.AddSingleton<INotificationPreferencesService, NotificationPreferencesService>();
+
+        // Both read the device rather than Supabase — the welcome flag lives in Preferences.Default
+        // and the motion preference is an OS accessibility setting — so they stay real in
+        // USE_STUBS builds for the same reason location and notifications do.
+        services.AddSingleton<IFirstRunService, FirstRunService>();
+        services.AddSingleton<IMotionPreferenceService, MotionPreferenceService>();
     }
 
     private static void RegisterApiServices(IServiceCollection services)

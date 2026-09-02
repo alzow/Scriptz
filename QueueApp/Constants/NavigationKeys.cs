@@ -24,6 +24,12 @@ public static class NavigationKeys
     public const string PreferredDate   = "preferredDate";
     public const string PreferredStart  = "preferredStart";
 
+    // Set by an entry point that is not a cold first run — a deep link or a notification open.
+    // The splash sends a signed-out customer to sign-in rather than the welcome carousel when it
+    // is present, because someone who tapped a link to a specific shop did not ask for the pitch.
+    // TODO: set this from the deep-link/notification entry point once one exists.
+    public const string BypassWelcome   = "bypassWelcome";
+
     // A BusinessSnapshot handed from the business landing to the flow it opens, so the flow can skip
     // re-fetching what the page behind it already has. Optional: absent when the flow is opened from
     // anywhere else, and the flow fetches for itself then.
