@@ -43,17 +43,22 @@ the two enums don't share a terminal label.
   operator board keeps awaiting-collection entries in view. No booking-side equivalent was needed —
   the agenda's own queries are unfiltered by status already.
 
-**Found and patched — `my_active_queue_entry()`.** This RPC backs the browse dashboard's live
-queue hero (`IQueueApi.GetMyActiveEntryAsync`, `CategoryPickerPageViewModel.ActiveEntry`). Its
-`mine` CTE filtered `status in ('waiting', 'serving')`, so an entry that transitioned to
-`awaiting_collection` stopped coming back at all and the hero disappeared from the browse
-dashboard entirely. (`StubQueueService.GetMyActiveEntryAsync` had the identical bug client-side and
-has been fixed too, but that stub is opt-in via the `USE_STUBS` build flag and isn't what live
-testing runs against.) Patched body — same `CREATE OR REPLACE FUNCTION` header, only the SQL below
-changes:
+**Found, confirmed, still not applied as of the last check — `my_active_queue_entry()`.** This RPC
+backs the browse dashboard's live queue hero (`IQueueApi.GetMyActiveEntryAsync`,
+`CategoryPickerPageViewModel.ActiveEntry`). Its `mine` CTE filters `status in ('waiting',
+'serving')`, so an entry that transitions to `awaiting_collection` stops coming back at all and the
+hero disappears from the browse dashboard entirely. Confirmed directly against the live definition
+(`pg_get_functiondef`) — full header included below so this is a drop-in replacement, not a partial
+patch:
 
 ```sql
-with mine as (
+CREATE OR REPLACE FUNCTION public.my_active_queue_entry()
+ RETURNS TABLE(entry_id uuid, business_id uuid, business_name text, business_latitude double precision, business_longitude double precision, operator_id uuid, operator_name text, queue_position integer, status text, joined_at timestamp with time zone, wait_minutes numeric, progress_status text)
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+  with mine as (
     select qe.*
     from queue_entries qe
     where qe.customer_id = auth.uid()
@@ -99,6 +104,7 @@ with mine as (
   from mine m
   join businesses b on b.id = m.business_id
   left join operators o on o.id = m.operator_id;
+$function$;
 ```
 
 Three changes from the original: (1) `mine`'s status filter includes `awaiting_collection`; (2) its
@@ -109,7 +115,9 @@ never reads this value once it's in that state (`ShowWaitEstimate`/`ShowUnassign
 gated off), so this is cosmetic, just avoiding a nonsense number over a meaningless one.
 `queue_entry_wait_minutes(m.id)` wasn't inspected — worth a quick check that it doesn't assume
 `status='waiting'` internally, though nothing in the front end depends on its output for an
-awaiting-collection row either.
+awaiting-collection row either. RLS was checked and ruled out as a contributing factor — `queue:
+public read` has no status condition (`qual = true`), so this function's own filter is the only
+blocker.
 
 `my_queue_status(business_id)` is described elsewhere in this codebase as making the same kind of
 split and may have the identical gap; lower stakes if so — `VisitPageViewModel.LoadEntryAsync` only
