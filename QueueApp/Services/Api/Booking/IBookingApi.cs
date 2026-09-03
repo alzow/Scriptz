@@ -66,7 +66,7 @@ public interface IBookingApi
     [Post("/bookings")]
     Task<List<AgendaBookingResponse>> CreateBookingRowAsync([Body] CreateOperatorBookingRequest request);
 
-    [Get("/bookings?select=id,starts_at,ends_at,status,created_at,business:businesses(id,name,category,allow_operator_choice),operator:operators(display_name),service:services(name,price_cents),progress_status,note,details&status=in.(pending,confirmed)&order=starts_at.asc")]
+    [Get("/bookings?select=id,starts_at,ends_at,status,created_at,awaiting_collection_at,collected_at,business:businesses(id,name,category,allow_operator_choice),operator:operators(display_name),service:services(name,price_cents),progress_status,note,details&status=in.(pending,confirmed,awaiting_collection)&order=starts_at.asc")]
     Task<List<UpcomingBookingResponse>> GetMyUpcomingBookingsAsync([AliasAs("customer_id")] string customerId);
 
     [Get("/bookings?select=id,starts_at,ends_at,status,created_at,business:businesses(id,name,category,allow_operator_choice),operator:operators(display_name),service:services(name,price_cents),note,details&order=starts_at.desc")]

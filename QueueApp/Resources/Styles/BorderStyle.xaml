@@ -689,6 +689,9 @@
             <DataTrigger TargetType="Border" Binding="{Binding Status}" Value="pending">
                 <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightPurpleTint}, Dark={StaticResource DarkPurpleTint}}"/>
             </DataTrigger>
+            <DataTrigger TargetType="Border" Binding="{Binding Status}" Value="awaiting_collection">
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightPurpleTint}, Dark={StaticResource DarkPurpleTint}}"/>
+            </DataTrigger>
         </Style.Triggers>
     </Style>
 

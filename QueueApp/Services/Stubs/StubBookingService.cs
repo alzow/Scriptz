@@ -349,7 +349,7 @@ public class StubBookingService : IBookingService
     public Task<List<UpcomingBookingResponse>> GetMyUpcomingBookingsAsync(Guid customerId)
     {
         var upcoming = _bookings
-            .Where(b => b.CustomerId == customerId && b.Status is "pending" or "confirmed")
+            .Where(b => b.CustomerId == customerId && b.Status is "pending" or "confirmed" or BookingStatuses.AwaitingCollection)
             .OrderBy(b => b.StartsAt)
             .Select(b => new UpcomingBookingResponse
             {
