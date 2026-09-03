@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using QueueApp.Services.Api.Intake.Models;
 
 namespace QueueApp.Services.Api.Booking.Models;
 
@@ -30,4 +31,12 @@ public class CreateOperatorBookingRequest
     [JsonPropertyName("note")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Note { get; set; }
+
+    // A direct insert, so this is the column itself rather than an RPC parameter. Left out of the
+    // body unless the service asked something.
+    // TODO: stub — bookings.intake_responses jsonb; see
+    // Documentation/service-intake-fields-backend-requirements.md.
+    [JsonPropertyName("intake_responses")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, IntakeAnswer>? IntakeResponses { get; set; }
 }

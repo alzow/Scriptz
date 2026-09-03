@@ -5,6 +5,7 @@ using QueueApp.Constants;
 using QueueApp.Services.Api;
 using QueueApp.Services.Api.Booking;
 using QueueApp.Services.Api.Business;
+using QueueApp.Services.Api.Intake;
 using QueueApp.Services.Api.Operator;
 using QueueApp.Services.Api.Profile;
 using QueueApp.Services.Api.Queue;
@@ -85,6 +86,11 @@ internal static class NavigationStartup
         // USE_STUBS builds for the same reason location and notifications do.
         services.AddSingleton<IFirstRunService, FirstRunService>();
         services.AddSingleton<IMotionPreferenceService, MotionPreferenceService>();
+
+        // The picker half of this is the device's file picker, not Supabase, so it stays real in
+        // USE_STUBS builds for the same reason location does. The upload half is stubbed in the
+        // implementation itself, and stays stubbed in every build until the bucket exists.
+        services.AddSingleton<IIntakeFileService, IntakeFileService>();
     }
 
     private static void RegisterApiServices(IServiceCollection services)
@@ -103,6 +109,7 @@ internal static class NavigationStartup
         services.AddSingleton<IProfileService, StubProfileService>();
         services.AddSingleton<IServiceOfferingsService, StubServiceOfferingsService>();
         services.AddSingleton<IBookingService, StubBookingService>();
+        services.AddSingleton<IIntakeFieldsService, StubIntakeFieldsService>();
 #else
         services.AddSingleton<IQueueService, QueueService>();
         services.AddSingleton<IBusinessService, BusinessService>();
@@ -111,6 +118,7 @@ internal static class NavigationStartup
         services.AddSingleton<IProfileService, ProfileService>();
         services.AddSingleton<IServiceOfferingsService, ServiceOfferingsService>();
         services.AddSingleton<IBookingService, BookingService>();
+        services.AddSingleton<IIntakeFieldsService, IntakeFieldsService>();
 #endif
     }
 }

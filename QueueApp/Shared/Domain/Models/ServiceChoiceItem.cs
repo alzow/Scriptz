@@ -9,7 +9,13 @@ public sealed class ServiceChoiceItem : ObservableObject
     public string Name { get; init; } = string.Empty;
     public string DurationText { get; init; } = string.Empty;
     public string PriceText { get; init; } = string.Empty;
-    public bool IsSelected { get; set; }
+
+    private bool _isSelected;
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set => SetProperty(ref _isSelected, value);
+    }
 
     public static ServiceChoiceItem From(ServiceResponse service) => new()
     {

@@ -12,6 +12,8 @@ using QueueApp.Services.Api.Booking;
 using QueueApp.Services.Api.Booking.Models;
 using QueueApp.Services.Api.Business;
 using QueueApp.Services.Api.Business.Models;
+using QueueApp.Services.Api.Intake.Models;
+using QueueApp.Services.Api.Intake;
 using QueueApp.Services.Api.Queue;
 using QueueApp.Services.Api.Queue.Models;
 using QueueApp.Services.Location;
@@ -83,6 +85,12 @@ public partial class VisitPageViewModel : BaseViewModel
     public ObservableCollection<VisitTimelineStep> Steps { get; } = new();
     public bool HasTimeline => Steps.Count > 0;
 
+    // What the customer answered before this visit existed. Only rendered when the entry actually
+    // carries answers — every visit taken before this feature, and every service that asks nothing,
+    // has none and shows no section at all.
+    public ObservableCollection<IntakeAnswer> IntakeAnswers { get; } = new();
+    public bool HasIntakeAnswers => IntakeAnswers.Count > 0;
+
     public bool HasCustomerNote => Record?.HasCustomerNote == true;
     public string CustomerNoteText => Record?.CustomerNote ?? string.Empty;
     public bool HasShopNote => Record?.HasShopNote == true;
@@ -109,6 +117,7 @@ public partial class VisitPageViewModel : BaseViewModel
     private readonly ILocationService _locationService;
     private readonly IQueueRealtimeService _realtimeService;
     private readonly IQueuePopupService _popupService;
+    private readonly IIntakeFileService _intakeFileService;
 
     public VisitPageViewModel(
         INavigationService navigationService,
@@ -118,7 +127,8 @@ public partial class VisitPageViewModel : BaseViewModel
         IBusinessService businessService,
         ILocationService locationService,
         IQueueRealtimeService realtimeService,
-        IQueuePopupService popupService)
+        IQueuePopupService popupService,
+        IIntakeFileService intakeFileService)
         : base(navigationService, secureStorageService)
     {
         _queueService = queueService;
@@ -127,6 +137,7 @@ public partial class VisitPageViewModel : BaseViewModel
         _locationService = locationService;
         _realtimeService = realtimeService;
         _popupService = popupService;
+        _intakeFileService = intakeFileService;
     }
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
@@ -328,6 +339,7 @@ public partial class VisitPageViewModel : BaseViewModel
             BuildAddressLine();
             BuildHero();
             BuildFacts();
+            BuildIntake();
             BuildTimeline();
             BuildReasonBlock();
             BuildPrimaryAction();
@@ -518,6 +530,46 @@ public partial class VisitPageViewModel : BaseViewModel
         catch (Exception ex)
         {
             _ = HandleExceptionAsync(ex);
+        }
+    }
+
+    public void BuildIntake()
+    {
+        try
+        {
+            IntakeAnswers.Clear();
+
+            if (Record is not { } record)
+                return;
+
+            foreach (var answer in record.IntakeAnswers)
+                IntakeAnswers.Add(answer);
+
+            OnPropertyChanged(nameof(HasIntakeAnswers));
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
+    }
+
+    [RelayCommand]
+    public async Task OpenIntakeFileAsync(IntakeAnswer? answer)
+    {
+        try
+        {
+            var file = answer?.File;
+            if (file is null)
+                return;
+
+            var downloadedPath = await _intakeFileService.DownloadAsync(file);
+            await Launcher.Default.OpenAsync(new OpenFileRequest(
+                file.Name,
+                new ReadOnlyFile(downloadedPath, "application/octet-stream")));
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
         }
     }
 

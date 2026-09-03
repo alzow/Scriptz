@@ -50,6 +50,11 @@
                                                SectionTitle="{Binding FactsTitle}"
                                                Facts="{Binding Facts}"/>
 
+                <helpers:VisitIntakeSectionView IsVisible="{Binding HasIntakeAnswers}"
+                                                SectionTitle="What you were asked"
+                                                Answers="{Binding IntakeAnswers}"
+                                                OpenFileCommand="{Binding OpenIntakeFileCommand}"/>
+
                 <helpers:VisitTimelineView IsVisible="{Binding HasTimeline}"
                                            Steps="{Binding Steps}"/>
 

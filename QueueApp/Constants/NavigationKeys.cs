@@ -6,6 +6,7 @@ public static class NavigationKeys
     public const string OperatorId      = "operatorId";
     public const string OperatorName    = "operatorName";
     public const string ServiceId       = "serviceId";
+    public const string IntakeFieldId   = "intakeFieldId";
     public const string Category        = "category";
     public const string DayOfWeek       = "dayOfWeek";
     public const string OpenedFromTabs  = "openedFromTabs";

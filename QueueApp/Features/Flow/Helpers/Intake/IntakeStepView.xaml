@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:intake="clr-namespace:QueueApp.Features.Flow.Helpers.Intake"
+             xmlns:models="clr-namespace:QueueApp.Shared.Domain.Models"
+             x:Name="Root"
+             x:Class="QueueApp.Features.Flow.Helpers.Intake.IntakeStepView">
+
+    <!--
+        One step, every question the service asks, in the order the shop put them in. Not a wizard:
+        a second beat inside the join flow is a beat, and five of them would be a different product.
+
+        Each field type is its own ContentView, and this decides which of them a row shows. A sixth
+        type is one more view and one more line here.
+    -->
+    <ScrollView IsVisible="{Binding ShowIntakeStep, Source={x:Reference Root}}">
+        <VerticalStackLayout Spacing="20" Padding="20,0,20,20"
+                             BindableLayout.ItemsSource="{Binding IntakeFields, Source={x:Reference Root}}">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate x:DataType="models:IntakeFieldItem">
+                    <VerticalStackLayout Spacing="9">
+
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="{Binding Label}"
+                                   Style="{StaticResource lbl14_Bold_TextDark}"/>
+                            <Label Grid.Column="1" Text="{Binding RequirementText}"
+                                   VerticalOptions="Center"
+                                   Style="{StaticResource lbl11_Mono_TextMuted}"/>
+                        </Grid>
+
+                        <intake:IntakeShortTextFieldView
+                                IsVisible="{Binding IsShortText}"
+                                Text="{Binding TextAnswer}"/>
+
+                        <intake:IntakeLongTextFieldView
+                                IsVisible="{Binding IsLongText}"
+                                Text="{Binding TextAnswer}"/>
+
+                        <intake:IntakeSingleSelectFieldView
+                                IsVisible="{Binding IsSingleSelect}"
+                                Options="{Binding Options}"
+                                SelectOptionCommand="{Binding SelectOptionCommand, Source={x:Reference Root}}"/>
+
+                        <intake:IntakeMultiSelectFieldView
+                                IsVisible="{Binding IsMultiSelect}"
+                                Options="{Binding Options}"
+                                ToggleOptionCommand="{Binding SelectOptionCommand, Source={x:Reference Root}}"/>
+
+                        <intake:IntakeFileFieldView
+                                IsVisible="{Binding IsFile}"
+                                HasFile="{Binding HasFile}"
+                                FileName="{Binding FileName}"
+                                FileSizeText="{Binding FileSizeText}"
+                                PickText="{Binding FilePickText}"
+                                IsPicking="{Binding IsPickingFile}"
+                                CommandParameter="{Binding .}"
+                                PickCommand="{Binding PickFileCommand, Source={x:Reference Root}}"
+                                ClearCommand="{Binding ClearFileCommand, Source={x:Reference Root}}"/>
+
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentView>

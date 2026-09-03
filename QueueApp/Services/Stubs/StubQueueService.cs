@@ -1,3 +1,4 @@
+using QueueApp.Services.Api.Intake.Models;
 using QueueApp.Services.Api.Queue;
 using QueueApp.Services.Api.Queue.Models;
 
@@ -118,7 +119,8 @@ public class StubQueueService : IQueueService
 
     // Mirrors join_queue: a null operator means "pick for me", not "leave it in the pool", so a
     // stubbed run and a real one put the customer in the same chair.
-    public Task<QueueEntryResponse> JoinQueueAsync(Guid businessId, Guid? operatorId, Guid customerId, string? customerName, Guid serviceId)
+    public Task<QueueEntryResponse> JoinQueueAsync(Guid businessId, Guid? operatorId, Guid customerId, string? customerName, Guid serviceId,
+        Dictionary<string, IntakeAnswer>? intakeResponses = null)
     {
         var resolved = operatorId ?? PickFastestOperator(businessId);
 

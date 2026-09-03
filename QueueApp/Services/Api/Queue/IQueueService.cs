@@ -1,3 +1,4 @@
+using QueueApp.Services.Api.Intake.Models;
 using QueueApp.Services.Api.Queue.Models;
 
 namespace QueueApp.Services.Api.Queue;
@@ -16,7 +17,10 @@ public interface IQueueService
 
     Task NoShowAsync(Guid entryId);
     Task<List<QueueSummaryRow>> GetQueueSummaryAsync(Guid businessId);
-    Task<QueueEntryResponse> JoinQueueAsync(Guid businessId, Guid? operatorId, Guid customerId, string? customerName, Guid serviceId);
+    // intakeResponses is null for every service that asks nothing, which leaves the request body
+    // exactly as it was — see JoinQueueRequest.
+    Task<QueueEntryResponse> JoinQueueAsync(Guid businessId, Guid? operatorId, Guid customerId, string? customerName, Guid serviceId,
+        Dictionary<string, IntakeAnswer>? intakeResponses = null);
     Task<QueueEntryResponse> CancelEntryAsync(Guid entryId);
     Task<MyQueueStatusResponse?> GetMyQueueStatusAsync(Guid businessId);
     Task<MyActiveQueueEntryResponse?> GetMyActiveEntryAsync();

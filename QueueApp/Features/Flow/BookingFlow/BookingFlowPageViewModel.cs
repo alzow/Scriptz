@@ -4,6 +4,7 @@ using MPowerKit.Navigation;
 using QueueApp.Constants;
 using QueueApp.Services.Api.Booking;
 using QueueApp.Services.Api.Business;
+using QueueApp.Services.Api.Intake;
 using QueueApp.Services.Api.Operator;
 using QueueApp.Services.Api.Profile;
 using QueueApp.Services.Api.Queue;
@@ -29,10 +30,12 @@ public partial class BookingFlowPageViewModel : FlowPageViewModelBase
         IAuthService authService,
         IQueuePopupService popupService,
         IProfileService profileService,
+        IIntakeFieldsService intakeFieldsService,
+        IIntakeFileService intakeFileService,
         IMessenger messenger)
         : base(navigationService, secureStorageService, businessService, queueService,
             operatorService, serviceOfferingsService, bookingService, authService,
-            popupService, profileService, messenger)
+            popupService, profileService, intakeFieldsService, intakeFileService, messenger)
     {
     }
 
