@@ -17,8 +17,6 @@ public class MyQueueEntryResponse
     [JsonPropertyName("serving_at")] public DateTime? ServingAt { get; set; }
     [JsonPropertyName("done_at")] public DateTime? DoneAt { get; set; }
 
-    // TODO: stub pending Documentation/awaiting-collection-backend-requirements.md — column names
-    // are that spec's call.
     [JsonPropertyName("awaiting_collection_at")] public DateTime? AwaitingCollectionAt { get; set; }
     [JsonPropertyName("collected_at")] public DateTime? CollectedAt { get; set; }
 

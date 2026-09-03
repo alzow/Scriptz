@@ -12,8 +12,8 @@ public interface IBookingService
     Task<BookingResponse> ConfirmBookingAsync(Guid bookingId);
     Task<BookingResponse> CompleteBookingAsync(Guid bookingId);
 
-    // TODO: stub pending Documentation/awaiting-collection-backend-requirements.md — no dedicated
-    // RPC exists yet.
+    // TODO: PATCH-based by design (see Documentation/awaiting-collection-backend-requirements.md
+    // §4) — no state-machine enforcement. Revisit with a dedicated RPC if that becomes a problem.
     Task<AgendaBookingResponse?> MarkBookingAwaitingCollectionAsync(Guid bookingId);
     Task<AgendaBookingResponse?> MarkBookingCollectedAsync(Guid bookingId);
     Task<BookingResponse> SetBookingProgressAsync(Guid bookingId, string? status);

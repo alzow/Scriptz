@@ -150,9 +150,6 @@ public sealed class VisitRecord
         if (entry.IsCancelled)
             return VisitLifecycle.Cancelled;
 
-        // TODO: checked ahead of IsFinished — Documentation/awaiting-collection-backend-
-        // requirements.md hasn't settled whether done_at is stamped on entering awaiting
-        // collection or only on final collection, so status is the one fact this can rely on.
         if (entry.IsAwaitingCollection)
             return VisitLifecycle.AwaitingCollection;
 

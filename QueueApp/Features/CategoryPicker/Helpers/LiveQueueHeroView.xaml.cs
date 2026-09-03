@@ -102,6 +102,7 @@ public partial class LiveQueueHeroView : ContentView
             if (ActiveEntry is null || minutes is null || ActiveEntry.IsBeingServed)
             {
                 CountdownLabel.Text = ActiveEntry?.IsBeingServed == true ? "NOW" : "--:--";
+                CountdownLabel.TextColor = ThemePalette.TextInk;
                 return;
             }
 

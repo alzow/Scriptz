@@ -15,8 +15,6 @@ public static class BookingStatuses
     public const string Cancelled = "cancelled";
     public const string NoShow = "no_show";
 
-    // TODO: stub pending Documentation/awaiting-collection-backend-requirements.md — swap this
-    // constant for the real enum label once that spec lands.
     public const string AwaitingCollection = "awaiting_collection";
 
     // What the day's revenue figure counts. A cancelled or no-show booking earned nothing, so

@@ -116,9 +116,6 @@ public partial class AgendaBookingResponse : ObservableObject
     // name, so the query keeps working until the column exists.
     [JsonPropertyName("started_at")] public DateTimeOffset? StartedAt { get; set; }
 
-    // TODO: stub pending Documentation/awaiting-collection-backend-requirements.md. Selected via
-    // `*` above, same as started_at, so the agenda keeps working today and picks the column up
-    // once it exists.
     [JsonPropertyName("awaiting_collection_at")] public DateTimeOffset? AwaitingCollectionAt { get; set; }
 
     [JsonIgnore] public bool IsConfirming { get; set; }

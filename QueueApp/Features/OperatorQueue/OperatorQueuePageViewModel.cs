@@ -467,7 +467,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
             WaitingCountText = waiting.ToString();
             ServingCountText = serving.ToString();
 
-            IsQuiet = waiting == 0 && serving == 0;
+            IsQuiet = waiting == 0 && serving == 0 && !HasAwaitingCollection;
             QuietText = $"Everyone's clear. {DoneTodayText} served today.";
         }
         catch (Exception ex)
@@ -616,7 +616,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
             }
             else
             {
-                ApplyLocally(card.EntryId, e => e.Status = "completed");
+                ApplyLocally(card.EntryId, e => e.Status = QueueEntryStatuses.Done);
                 await _queueService.CompleteAsync(card.EntryId);
             }
         }
@@ -639,7 +639,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         row.IsBusy = true;
         try
         {
-            ApplyLocally(row.EntryId, e => e.Status = "completed");
+            ApplyLocally(row.EntryId, e => e.Status = QueueEntryStatuses.Done);
             await _queueService.MarkCollectedAsync(row.EntryId);
         }
         catch (Exception ex)

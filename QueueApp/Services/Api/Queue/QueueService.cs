@@ -39,13 +39,14 @@ public class QueueService : BaseService, IQueueService
                 ["awaiting_collection_at"] = DateTime.UtcNow,
             }));
 
-    public Task MarkCollectedAsync(Guid entryId) =>
-        ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
-            new Dictionary<string, object?>
-            {
-                ["status"] = "completed",
-                ["collected_at"] = DateTime.UtcNow,
-            }));
+    // Goes through complete_entry rather than PATCHing status="done" directly, so this stays
+    // correct even if the RPC's own transition logic ever does more than a column write.
+    public async Task MarkCollectedAsync(Guid entryId)
+    {
+        await ExecuteApiCallAsync(_api.CompleteEntryAsync(new EntryIdRequest { EntryId = entryId }));
+        await ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
+            new Dictionary<string, object?> { ["collected_at"] = DateTime.UtcNow }));
+    }
 
     public Task NoShowAsync(Guid entryId) =>
         ExecuteApiCallAsync(_api.MarkNoShowAsync(new EntryIdRequest { EntryId = entryId }));

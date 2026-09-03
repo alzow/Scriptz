@@ -12,8 +12,6 @@ public class ServiceResponse
     [JsonPropertyName("is_active")] public bool IsActive { get; set; }
     [JsonPropertyName("sort_order")] public int SortOrder { get; set; }
 
-    // TODO: stub pending Documentation/awaiting-collection-backend-requirements.md — swap the
-    // column name for the real one once that spec lands.
     [JsonPropertyName("requires_collection")] public bool RequiresCollection { get; set; }
 
     [JsonIgnore] public bool IsToggling { get; set; }

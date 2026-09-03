@@ -53,7 +53,7 @@ public class StubQueueService : IQueueService
         var entry = _entries.FirstOrDefault(e => e.Id == entryId);
         if (entry != null)
         {
-            entry.Status = "completed";
+            entry.Status = QueueEntryStatuses.Done;
             entry.DoneAt = DateTime.UtcNow;
         }
         return Task.CompletedTask;
@@ -75,8 +75,10 @@ public class StubQueueService : IQueueService
         var entry = _entries.FirstOrDefault(e => e.Id == entryId);
         if (entry != null)
         {
-            entry.Status = "completed";
-            entry.CollectedAt = DateTime.UtcNow;
+            var now = DateTime.UtcNow;
+            entry.Status = QueueEntryStatuses.Done;
+            entry.DoneAt = now;
+            entry.CollectedAt = now;
         }
         return Task.CompletedTask;
     }

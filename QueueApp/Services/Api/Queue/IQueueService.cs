@@ -9,8 +9,8 @@ public interface IQueueService
     Task StartServingAsync(Guid entryId);
     Task CompleteAsync(Guid entryId);
 
-    // TODO: stub pending Documentation/awaiting-collection-backend-requirements.md — no dedicated
-    // RPC exists yet.
+    // TODO: PATCH-based by design (see Documentation/awaiting-collection-backend-requirements.md
+    // §4) — no state-machine enforcement. Revisit with a dedicated RPC if that becomes a problem.
     Task MarkAwaitingCollectionAsync(Guid entryId);
     Task MarkCollectedAsync(Guid entryId);
 
