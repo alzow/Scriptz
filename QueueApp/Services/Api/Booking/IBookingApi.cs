@@ -72,8 +72,10 @@ public interface IBookingApi
     [Get("/bookings?select=id,starts_at,ends_at,status,created_at,business:businesses(id,name,category,allow_operator_choice),operator:operators(display_name),service:services(name,price_cents),note,details&order=starts_at.desc")]
     Task<List<UpcomingBookingResponse>> GetMyBookingHistoryAsync([AliasAs("customer_id")] string customerId);
 
-    // One booking, in the same projection the history list uses — VisitPage loads from an id
-    // because the row that was tapped may be stale.
-    [Get("/bookings?select=id,starts_at,ends_at,status,created_at,awaiting_collection_at,collected_at,business:businesses(id,name,category,allow_operator_choice),operator:operators(display_name),service:services(name,price_cents),note,details")]
+    // `*` rather than a column list on purpose, same reasoning as GetAgendaBookingsAsync above:
+    // started_at isn't confirmed to exist on every schema this runs against, and naming a column
+    // PostgREST can't find fails the whole query with a 400. VisitPage loads from an id because
+    // the row that was tapped may be stale.
+    [Get("/bookings?select=*,business:businesses(id,name,category,allow_operator_choice),operator:operators(display_name),service:services(name,price_cents)")]
     Task<List<UpcomingBookingResponse>> GetBookingAsync([AliasAs("id")] string idEq);
 }

@@ -105,7 +105,11 @@ public class StubBookingService : IBookingService
     public Task<AgendaBookingResponse?> MarkBookingAwaitingCollectionAsync(Guid bookingId)
     {
         var booking = _agenda.FirstOrDefault(b => b.Id == bookingId);
-        if (booking is not null) booking.Status = BookingStatuses.AwaitingCollection;
+        if (booking is not null)
+        {
+            booking.Status = BookingStatuses.AwaitingCollection;
+            booking.AwaitingCollectionAt = DateTimeOffset.UtcNow;
+        }
         else SetStatus(bookingId, BookingStatuses.AwaitingCollection);
 
         return Task.FromResult<AgendaBookingResponse?>(booking);

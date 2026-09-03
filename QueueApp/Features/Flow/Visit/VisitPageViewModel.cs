@@ -640,9 +640,8 @@ public partial class VisitPageViewModel : BaseViewModel
         return steps;
     }
 
-    // TODO: bookings carry no marked-at for a no-show either, and no actual start timestamp, so a
-    // finished booking shows its scheduled slot and nothing more — unless it went through Awaiting
-    // Collection, which does carry both.
+    // TODO: bookings carry no marked-at for a no-show, so a no-showed booking's timeline still
+    // shows only what happened up to the slot — the reason block carries the rest.
     public List<VisitTimelineStep> BuildBookingTimeline(VisitRecord record)
     {
         var steps = new List<VisitTimelineStep>();
@@ -655,6 +654,14 @@ public partial class VisitPageViewModel : BaseViewModel
             if (record.SlotStart is { } slot)
                 steps.Add(Step(record.SlotStart, "Your slot",
                     slot <= DateTimeOffset.UtcNow ? VisitStepState.Done : VisitStepState.Pending));
+
+            // No pending variant: nothing in this app's operator flow marks a booking "started"
+            // today (bookings.started_at exists on some schemas but nothing writes it yet), so a
+            // step that can never resolve would be worse than one that only appears once it's true.
+            if (record.StartedAt is not null)
+                steps.Add(Step(record.StartedAt,
+                    record.HasOperator ? $"{record.OperatorName} started" : "Started",
+                    VisitStepState.Done));
 
             if (record.AwaitingCollectionAt is not null)
             {

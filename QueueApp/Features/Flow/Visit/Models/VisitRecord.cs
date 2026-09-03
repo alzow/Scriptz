@@ -140,6 +140,7 @@ public sealed class VisitRecord
             CancelledByCustomer = booking.CancelledBy == CancelledByValues.Customer,
             CancelledByShop = booking.CancelledBy == CancelledByValues.Business || booking.HasCancellationReason,
             RequestedAt = booking.CreatedAt == default ? null : booking.CreatedAt,
+            StartedAt = booking.StartedAt,
             AwaitingCollectionAt = booking.AwaitingCollectionAt,
             CollectedAt = booking.CollectedAt,
             CancelledAt = booking.CancelledAt,

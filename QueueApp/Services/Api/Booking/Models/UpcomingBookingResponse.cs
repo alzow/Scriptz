@@ -21,6 +21,7 @@ public class UpcomingBookingResponse
     [JsonPropertyName("ends_at")] public DateTimeOffset EndsAt { get; set; }
     [JsonPropertyName("status")] public string Status { get; set; } = "";
     [JsonPropertyName("created_at")] public DateTimeOffset CreatedAt { get; set; }
+    [JsonPropertyName("started_at")] public DateTimeOffset? StartedAt { get; set; }
     [JsonPropertyName("awaiting_collection_at")] public DateTimeOffset? AwaitingCollectionAt { get; set; }
     [JsonPropertyName("collected_at")] public DateTimeOffset? CollectedAt { get; set; }
     [JsonPropertyName("business")] public UpcomingBookingBusinessRef? Business { get; set; }
