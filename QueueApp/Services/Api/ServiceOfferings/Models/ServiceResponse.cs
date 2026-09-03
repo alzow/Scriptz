@@ -12,6 +12,8 @@ public class ServiceResponse
     [JsonPropertyName("is_active")] public bool IsActive { get; set; }
     [JsonPropertyName("sort_order")] public int SortOrder { get; set; }
 
+    [JsonPropertyName("requires_collection")] public bool RequiresCollection { get; set; }
+
     [JsonIgnore] public bool IsToggling { get; set; }
 
     [JsonIgnore]

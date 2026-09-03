@@ -15,6 +15,8 @@ public static class BookingStatuses
     public const string Cancelled = "cancelled";
     public const string NoShow = "no_show";
 
+    public const string AwaitingCollection = "awaiting_collection";
+
     // What the day's revenue figure counts. A cancelled or no-show booking earned nothing, so
     // including it would make the number worse than useless (spec §3).
     public static bool CountsTowardsRevenue(string status) =>

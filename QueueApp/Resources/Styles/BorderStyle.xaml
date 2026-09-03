@@ -555,6 +555,10 @@
         <Setter Property="StrokeThickness" Value="6"/>
     </Style>
 
+    <Style x:Key="brd_Hero_AccentRing_Purple" TargetType="Border" BasedOn="{StaticResource brd_Hero_AccentRing}">
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightPurpleText}, Dark={StaticResource DarkPurpleText}}"/>
+    </Style>
+
     <!--
         ================================================================================
         Sundries.
@@ -683,6 +687,9 @@
     <Style x:Key="brd20_StatusPill_Selectable" TargetType="Border" BasedOn="{StaticResource brd20_StatusPill}">
         <Style.Triggers>
             <DataTrigger TargetType="Border" Binding="{Binding Status}" Value="pending">
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightPurpleTint}, Dark={StaticResource DarkPurpleTint}}"/>
+            </DataTrigger>
+            <DataTrigger TargetType="Border" Binding="{Binding Status}" Value="awaiting_collection">
                 <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightPurpleTint}, Dark={StaticResource DarkPurpleTint}}"/>
             </DataTrigger>
         </Style.Triggers>

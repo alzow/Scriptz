@@ -46,7 +46,9 @@
                                                OpenCommand="{Binding OpenActiveEntryCommand}"
                                                DirectionsCommand="{Binding OpenDirectionsCommand}"
                                                LeaveCommand="{Binding LeaveQueueCommand}"
-                                               IsLeaving="{Binding IsLeavingQueue}"/>
+                                               IsLeaving="{Binding IsLeavingQueue}"
+                                               MarkCollectedCommand="{Binding MarkCollectedCommand}"
+                                               IsMarkingCollected="{Binding IsMarkingCollected}"/>
 
                     <!-- Upcoming bookings -->
                     <Grid ColumnDefinitions="*,Auto"

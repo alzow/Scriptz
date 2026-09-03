@@ -8,6 +8,12 @@ public interface IQueueService
     Task AddWalkInAsync(Guid businessId, Guid? operatorId, string? name, Guid serviceId);
     Task StartServingAsync(Guid entryId);
     Task CompleteAsync(Guid entryId);
+
+    // TODO: PATCH-based by design (see Documentation/awaiting-collection-backend-requirements.md
+    // §4) — no state-machine enforcement. Revisit with a dedicated RPC if that becomes a problem.
+    Task MarkAwaitingCollectionAsync(Guid entryId);
+    Task MarkCollectedAsync(Guid entryId);
+
     Task NoShowAsync(Guid entryId);
     Task<List<QueueSummaryRow>> GetQueueSummaryAsync(Guid businessId);
     Task<QueueEntryResponse> JoinQueueAsync(Guid businessId, Guid? operatorId, Guid customerId, string? customerName, Guid serviceId);

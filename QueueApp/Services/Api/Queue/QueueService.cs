@@ -31,6 +31,29 @@ public class QueueService : BaseService, IQueueService
     public Task CompleteAsync(Guid entryId) =>
         ExecuteApiCallAsync(_api.CompleteEntryAsync(new EntryIdRequest { EntryId = entryId }));
 
+    public Task MarkAwaitingCollectionAsync(Guid entryId) =>
+        ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
+            new Dictionary<string, object?>
+            {
+                ["status"] = QueueEntryStatuses.AwaitingCollection,
+                ["awaiting_collection_at"] = DateTime.UtcNow,
+            }));
+
+    // PATCHes status directly rather than going through complete_entry: that RPC's own state
+    // machine requires status='serving' and rejects anything else with "entry is not completable",
+    // but by the time this runs the entry is already in awaiting_collection, not serving.
+    public Task MarkCollectedAsync(Guid entryId)
+    {
+        var now = DateTime.UtcNow;
+        return ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
+            new Dictionary<string, object?>
+            {
+                ["status"] = QueueEntryStatuses.Done,
+                ["done_at"] = now,
+                ["collected_at"] = now,
+            }));
+    }
+
     public Task NoShowAsync(Guid entryId) =>
         ExecuteApiCallAsync(_api.MarkNoShowAsync(new EntryIdRequest { EntryId = entryId }));
 

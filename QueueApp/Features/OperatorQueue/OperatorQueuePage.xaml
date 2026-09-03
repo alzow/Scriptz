@@ -38,6 +38,11 @@
                                     AssignCommand="{Binding AssignCommand}"
                                     OpenRowActionsCommand="{Binding OpenRowActionsCommand}"/>
 
+            <helpers:AwaitingCollectionSectionView IsVisible="{Binding HasAwaitingCollection}"
+                                                    HasAwaitingCollection="{Binding HasAwaitingCollection}"
+                                                    AwaitingCollectionRows="{Binding AwaitingCollectionRows}"
+                                                    MarkCollectedCommand="{Binding MarkCollectedCommand}"/>
+
         </VerticalStackLayout>
 
         <CollectionView Grid.Row="1" ItemsSource="{Binding Sections}"

@@ -17,6 +17,7 @@ public sealed class QueueRowItem : ObservableObject
     public bool ShowPosition { get; init; }
     public bool ShowServe { get; init; }
     public bool ShowAssign { get; init; }
+    public bool ShowMarkCollected { get; init; }
 
     public string SubText { get; set; } = string.Empty;
 
@@ -45,5 +46,11 @@ public sealed class QueueRowItem : ObservableObject
     {
         var wait = $"waiting {waitedMinutes}m";
         return string.IsNullOrWhiteSpace(serviceName) ? wait : $"{serviceName} · {wait}";
+    }
+
+    public static string BuildReadySubText(string serviceName, int readyMinutes)
+    {
+        var ready = readyMinutes <= 0 ? "ready now" : $"ready {readyMinutes}m ago";
+        return string.IsNullOrWhiteSpace(serviceName) ? ready : $"{serviceName} · {ready}";
     }
 }

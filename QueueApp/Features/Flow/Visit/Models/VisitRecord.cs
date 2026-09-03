@@ -14,6 +14,7 @@ public enum VisitKind
 public enum VisitLifecycle
 {
     Live,
+    AwaitingCollection,
     Settled,
     Cancelled,
     NoShow,
@@ -53,6 +54,8 @@ public sealed class VisitRecord
     public DateTimeOffset? JoinedAt { get; init; }
     public DateTimeOffset? StartedAt { get; init; }
     public DateTimeOffset? FinishedAt { get; init; }
+    public DateTimeOffset? AwaitingCollectionAt { get; init; }
+    public DateTimeOffset? CollectedAt { get; init; }
     public DateTimeOffset? CancelledAt { get; init; }
     public DateTimeOffset? SlotStart { get; init; }
     public DateTimeOffset? SlotEnd { get; init; }
@@ -62,7 +65,9 @@ public sealed class VisitRecord
 
     public bool IsQueue => Kind == VisitKind.Queue;
     public bool IsBooking => Kind == VisitKind.Booking;
-    public bool IsLive => Lifecycle == VisitLifecycle.Live;
+
+    public bool IsLive => Lifecycle is VisitLifecycle.Live or VisitLifecycle.AwaitingCollection;
+    public bool IsAwaitingCollection => Lifecycle == VisitLifecycle.AwaitingCollection;
     public bool IsSettled => Lifecycle == VisitLifecycle.Settled;
     public bool WasCancelled => Lifecycle == VisitLifecycle.Cancelled;
     public bool WasNoShow => Lifecycle == VisitLifecycle.NoShow;
@@ -107,6 +112,8 @@ public sealed class VisitRecord
             JoinedAt = entry.JoinedAtUtc,
             StartedAt = entry.ServingAtUtc,
             FinishedAt = entry.DoneAtUtc,
+            AwaitingCollectionAt = entry.AwaitingCollectionAtUtc,
+            CollectedAt = entry.CollectedAtUtc,
             CancelledAt = entry.CancelledAtUtc,
         };
     }
@@ -133,6 +140,9 @@ public sealed class VisitRecord
             CancelledByCustomer = booking.CancelledBy == CancelledByValues.Customer,
             CancelledByShop = booking.CancelledBy == CancelledByValues.Business || booking.HasCancellationReason,
             RequestedAt = booking.CreatedAt == default ? null : booking.CreatedAt,
+            StartedAt = booking.StartedAt,
+            AwaitingCollectionAt = booking.AwaitingCollectionAt,
+            CollectedAt = booking.CollectedAt,
             CancelledAt = booking.CancelledAt,
             SlotStart = booking.StartsAt,
             SlotEnd = booking.EndsAt,
@@ -146,6 +156,9 @@ public sealed class VisitRecord
 
         if (entry.IsCancelled)
             return VisitLifecycle.Cancelled;
+
+        if (entry.IsAwaitingCollection)
+            return VisitLifecycle.AwaitingCollection;
 
         if (entry.IsFinished)
             return VisitLifecycle.Settled;
@@ -161,6 +174,9 @@ public sealed class VisitRecord
         if (booking.Status == BookingStatuses.Cancelled)
             return VisitLifecycle.Cancelled;
 
+        if (booking.IsAwaitingCollection)
+            return VisitLifecycle.AwaitingCollection;
+
         if (booking.Status is BookingStatuses.Pending or BookingStatuses.Confirmed or BookingStatuses.InProgress)
             return booking.EndsAt > DateTimeOffset.UtcNow ? VisitLifecycle.Live : VisitLifecycle.Settled;
 
@@ -173,6 +189,7 @@ public sealed class VisitRecord
         VisitLifecycle.Cancelled => entry.Details?.CancelledBy == CancelledByValues.Customer
             ? "YOU LEFT"
             : "CANCELLED",
+        VisitLifecycle.AwaitingCollection => "READY FOR COLLECTION",
         VisitLifecycle.Live => entry.IsBeingServed ? "IN THE CHAIR" : "IN THE QUEUE",
         _ => "SERVED",
     };
@@ -181,6 +198,7 @@ public sealed class VisitRecord
     {
         VisitLifecycle.NoShow => "NO-SHOW",
         VisitLifecycle.Cancelled => booking.WasCancelledByCustomer ? "YOU CANCELLED" : "CANCELLED",
+        VisitLifecycle.AwaitingCollection => "READY FOR COLLECTION",
         VisitLifecycle.Live => booking.Status == BookingStatuses.Pending ? "PENDING" : "CONFIRMED",
         _ => booking.Status == BookingStatuses.Completed ? "COMPLETED" : "SLOT PASSED",
     };

@@ -22,6 +22,8 @@ public sealed class AgendaRow : ObservableObject
     public bool IsGap => Kind == AgendaRowKind.Gap;
     public bool IsNotTappable => Kind == AgendaRowKind.Blocked;
 
+    public bool ShowMarkCollected { get; init; }
+
     public string TimeText { get; init; } = string.Empty;
     public string DurationText { get; init; } = string.Empty;
     public bool ShowDuration => DurationText.Length > 0;

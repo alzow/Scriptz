@@ -11,7 +11,7 @@ public class StubQueueService : IQueueService
 
     public Task<List<QueueEntryResponse>> GetActiveEntriesAsync(Guid businessId)
         => Task.FromResult(_entries
-            .Where(e => e.BusinessId == businessId && (e.Status == "waiting" || e.Status == "serving"))
+            .Where(e => e.BusinessId == businessId && e.Status is "waiting" or "serving" or QueueEntryStatuses.AwaitingCollection)
             .OrderBy(e => e.JoinedAt)
             .ToList());
 
@@ -53,8 +53,32 @@ public class StubQueueService : IQueueService
         var entry = _entries.FirstOrDefault(e => e.Id == entryId);
         if (entry != null)
         {
-            entry.Status = "completed";
+            entry.Status = QueueEntryStatuses.Done;
             entry.DoneAt = DateTime.UtcNow;
+        }
+        return Task.CompletedTask;
+    }
+
+    public Task MarkAwaitingCollectionAsync(Guid entryId)
+    {
+        var entry = _entries.FirstOrDefault(e => e.Id == entryId);
+        if (entry != null)
+        {
+            entry.Status = QueueEntryStatuses.AwaitingCollection;
+            entry.AwaitingCollectionAt = DateTime.UtcNow;
+        }
+        return Task.CompletedTask;
+    }
+
+    public Task MarkCollectedAsync(Guid entryId)
+    {
+        var entry = _entries.FirstOrDefault(e => e.Id == entryId);
+        if (entry != null)
+        {
+            var now = DateTime.UtcNow;
+            entry.Status = QueueEntryStatuses.Done;
+            entry.DoneAt = now;
+            entry.CollectedAt = now;
         }
         return Task.CompletedTask;
     }
@@ -180,7 +204,7 @@ public class StubQueueService : IQueueService
     public Task<MyActiveQueueEntryResponse?> GetMyActiveEntryAsync()
     {
         var mine = _entries
-            .Where(e => e.Status is "waiting" or "serving")
+            .Where(e => e.Status is "waiting" or "serving" or QueueEntryStatuses.AwaitingCollection)
             .OrderBy(e => e.JoinedAt)
             .LastOrDefault();
 
@@ -188,7 +212,7 @@ public class StubQueueService : IQueueService
             return Task.FromResult<MyActiveQueueEntryResponse?>(null);
 
         var position = PositionOf(mine, _entries
-            .Where(e => e.BusinessId == mine.BusinessId && e.Status is "waiting" or "serving")
+            .Where(e => e.BusinessId == mine.BusinessId && e.Status is "waiting" or "serving" or QueueEntryStatuses.AwaitingCollection)
             .OrderBy(e => e.JoinedAt)
             .ToList());
 

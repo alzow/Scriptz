@@ -69,7 +69,21 @@ public static class AgendaBuilder
         DoubleCollection? dash = null;
         var tag = string.Empty;
 
-        if (booking.IsInProgress)
+        var bayText = booking.Operator?.DisplayName.ToUpperInvariant() ?? string.Empty;
+        var showMarkCollected = false;
+
+        if (booking.IsAwaitingCollection)
+        {
+            bar = AgendaPalette.Purple;
+            background = AgendaPalette.PurpleTint;
+            stroke = AgendaPalette.PurpleBorder;
+            tag = "READY";
+            tagInk = AgendaPalette.Purple;
+            tagFill = AgendaPalette.PurpleTint;
+            showMarkCollected = true;
+            bayText = string.Empty;
+        }
+        else if (booking.IsInProgress)
         {
             background = AgendaPalette.GreenTint;
             stroke = AgendaPalette.GreenBorder;
@@ -114,7 +128,8 @@ public static class AgendaBuilder
             DurationText = booking.DurationText,
             Title = booking.CustomerName,
             Subtitle = string.Join(" · ", subtitleParts),
-            BayText = booking.Operator?.DisplayName.ToUpperInvariant() ?? string.Empty,
+            BayText = bayText,
+            ShowMarkCollected = showMarkCollected,
             TagText = tag,
             TagTextColor = tagInk,
             TagBackgroundColor = tagFill,

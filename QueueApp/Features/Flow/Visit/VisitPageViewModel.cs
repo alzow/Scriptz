@@ -63,8 +63,8 @@ public partial class VisitPageViewModel : BaseViewModel
     // What the page can do about this visit, each on the page itself rather than behind a sheet.
     public bool CanShare => Record?.IsLive == true;
     public bool CanAddToCalendar => Record is { IsLive: true, IsBooking: true, SlotStart: not null };
-    public bool CanLeaveQueue => Record is { IsLive: true, IsQueue: true };
-    public bool CanCancelBooking => Record is { IsLive: true, IsBooking: true };
+    public bool CanLeaveQueue => Record is { IsLive: true, IsQueue: true, IsAwaitingCollection: false };
+    public bool CanCancelBooking => Record is { IsLive: true, IsBooking: true, IsAwaitingCollection: false };
     public bool HasDestructiveAction => CanLeaveQueue || CanCancelBooking;
     public string DestructiveActionText => CanLeaveQueue ? "Leave the queue" : "Cancel booking";
     public bool ShowJustJoined => JustJoined && IsLive;
@@ -415,6 +415,15 @@ public partial class VisitPageViewModel : BaseViewModel
                 ? "You're in. We'll keep this page up to date."
                 : "Request sent. You'll hear back from the shop.";
 
+            if (record.IsAwaitingCollection)
+            {
+                HeroCaption = "READY FOR COLLECTION";
+                HeroTime = record.FinishedAt is { } finished ? FormatTime(finished) : "--:--";
+                HeroRelative = "come by whenever you're ready";
+                HeroDetail = WithWhom(record);
+                return;
+            }
+
             if (record.IsQueue)
                 BuildQueueHero(record);
             else
@@ -606,10 +615,19 @@ public partial class VisitPageViewModel : BaseViewModel
             else if (record.IsLive)
                 steps.Add(Pending(record.HasOperator ? $"{record.OperatorName} starts" : "Your turn"));
 
-            if (record.FinishedAt is not null)
+            if (record.AwaitingCollectionAt is not null)
+            {
+                steps.Add(Step(record.AwaitingCollectionAt, "Finished — ready for collection", VisitStepState.Done));
+                AddCollectedStep(steps, record);
+            }
+            else if (record.FinishedAt is not null)
+            {
                 steps.Add(Step(record.FinishedAt, "Finished", VisitStepState.Done));
+            }
             else if (record.IsLive)
+            {
                 steps.Add(Pending("Finished"));
+            }
 
             if (record.WasCancelled && record.CancelledAt is not null)
                 steps.Add(Step(record.CancelledAt, record.CancelledByCustomer ? "You left the queue" : "The shop cancelled this", VisitStepState.Failed));
@@ -622,8 +640,8 @@ public partial class VisitPageViewModel : BaseViewModel
         return steps;
     }
 
-    // TODO: bookings carry no marked-at for a no-show either, and no actual start or completion
-    // timestamp, so a finished booking shows its scheduled slot and nothing more.
+    // TODO: bookings carry no marked-at for a no-show, so a no-showed booking's timeline still
+    // shows only what happened up to the slot — the reason block carries the rest.
     public List<VisitTimelineStep> BuildBookingTimeline(VisitRecord record)
     {
         var steps = new List<VisitTimelineStep>();
@@ -637,6 +655,20 @@ public partial class VisitPageViewModel : BaseViewModel
                 steps.Add(Step(record.SlotStart, "Your slot",
                     slot <= DateTimeOffset.UtcNow ? VisitStepState.Done : VisitStepState.Pending));
 
+            // No pending variant: nothing in this app's operator flow marks a booking "started"
+            // today (bookings.started_at exists on some schemas but nothing writes it yet), so a
+            // step that can never resolve would be worse than one that only appears once it's true.
+            if (record.StartedAt is not null)
+                steps.Add(Step(record.StartedAt,
+                    record.HasOperator ? $"{record.OperatorName} started" : "Started",
+                    VisitStepState.Done));
+
+            if (record.AwaitingCollectionAt is not null)
+            {
+                steps.Add(Step(record.AwaitingCollectionAt, "Finished — ready for collection", VisitStepState.Done));
+                AddCollectedStep(steps, record);
+            }
+
             if (record.CancelledAt is not null)
                 steps.Add(Step(record.CancelledAt, record.CancelledByCustomer ? "You cancelled" : "The shop cancelled this", VisitStepState.Failed));
         }
@@ -646,6 +678,21 @@ public partial class VisitPageViewModel : BaseViewModel
         }
 
         return steps;
+    }
+
+    public void AddCollectedStep(List<VisitTimelineStep> steps, VisitRecord record)
+    {
+        try
+        {
+            if (record.CollectedAt is not null)
+                steps.Add(Step(record.CollectedAt, "Collected", VisitStepState.Done));
+            else if (record.IsLive)
+                steps.Add(Pending("Collected"));
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
     }
 
     public void BuildReasonBlock()
@@ -695,6 +742,7 @@ public partial class VisitPageViewModel : BaseViewModel
             PrimaryActionText = Record switch
             {
                 null => string.Empty,
+                { IsAwaitingCollection: true } => "Mark as collected",
                 { IsLive: true } => string.Empty,
                 { WasNoShow: true } missed => HasPhone ? $"Call {missed.BusinessName}" : string.Empty,
                 { IsBooking: true } => "Book another time",
@@ -932,6 +980,12 @@ public partial class VisitPageViewModel : BaseViewModel
     {
         try
         {
+            if (Record is { IsAwaitingCollection: true })
+            {
+                await MarkAsCollectedAsync();
+                return;
+            }
+
             if (Record is { WasNoShow: true })
             {
                 await CallShopAsync();
@@ -939,6 +993,27 @@ public partial class VisitPageViewModel : BaseViewModel
             }
 
             await GoAgainAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    public async Task MarkAsCollectedAsync()
+    {
+        if (Record is not { IsAwaitingCollection: true } record)
+            return;
+
+        try
+        {
+            if (record.IsQueue)
+                await _queueService.MarkCollectedAsync(record.Id);
+            else
+                await _bookingService.MarkBookingCollectedAsync(record.Id);
+
+            await RefreshAsync();
+            RefreshView();
         }
         catch (Exception ex)
         {

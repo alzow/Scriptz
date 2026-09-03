@@ -15,13 +15,27 @@
             <!-- Kicker row -->
             <Grid ColumnDefinitions="*,Auto" Padding="16,13,16,0">
                 <HorizontalStackLayout Grid.Column="0" Spacing="7">
-                    <Ellipse Style="{StaticResource ell_AccentDot}" WidthRequest="6" HeightRequest="6" VerticalOptions="Center"/>
+                    <Ellipse Style="{StaticResource ell_AccentDot}" WidthRequest="6" HeightRequest="6" VerticalOptions="Center">
+                        <Ellipse.Triggers>
+                            <DataTrigger TargetType="Ellipse"
+                                         Binding="{Binding ActiveEntry.IsAwaitingCollection, Source={x:Reference Root}}"
+                                         Value="True">
+                                <Setter Property="Style" Value="{StaticResource ell_PurpleDot}"/>
+                            </DataTrigger>
+                        </Ellipse.Triggers>
+                    </Ellipse>
                     <Label Text="YOU'RE IN THE QUEUE" Style="{StaticResource SectionTitle_Accent}">
                         <Label.Triggers>
                             <DataTrigger TargetType="Label"
                                          Binding="{Binding ActiveEntry.IsBeingServed, Source={x:Reference Root}}"
                                          Value="True">
                                 <Setter Property="Text" Value="BEING SERVED"/>
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding ActiveEntry.IsAwaitingCollection, Source={x:Reference Root}}"
+                                         Value="True">
+                                <Setter Property="Text" Value="READY FOR COLLECTION"/>
+                                <Setter Property="Style" Value="{StaticResource SectionTitle_Purple}"/>
                             </DataTrigger>
                         </Label.Triggers>
                     </Label>
@@ -39,6 +53,13 @@
                         Style="{StaticResource brd_Hero_AccentRing}"
                         StrokeShape="Ellipse"
                         Padding="0">
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border"
+                                     Binding="{Binding ActiveEntry.IsAwaitingCollection, Source={x:Reference Root}}"
+                                     Value="True">
+                            <Setter Property="Style" Value="{StaticResource brd_Hero_AccentRing_Purple}"/>
+                        </DataTrigger>
+                    </Border.Triggers>
                     <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="2">
                         <Label x:Name="CountdownLabel"
                                HorizontalOptions="Center"
@@ -47,6 +68,11 @@
                             <Label.Triggers>
                                 <DataTrigger TargetType="Label"
                                              Binding="{Binding ActiveEntry.IsBeingServed, Source={x:Reference Root}}"
+                                             Value="True">
+                                    <Setter Property="IsVisible" Value="False"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Label"
+                                             Binding="{Binding ActiveEntry.IsAwaitingCollection, Source={x:Reference Root}}"
                                              Value="True">
                                     <Setter Property="IsVisible" Value="False"/>
                                 </DataTrigger>
@@ -75,6 +101,9 @@
                     <Label Text="Being served"
                            Style="{StaticResource lbl18_Bold_TextDark}"
                            IsVisible="{Binding ActiveEntry.ShowServedAnonymously, Source={x:Reference Root}}"/>
+                    <Label Text="Ready whenever you are"
+                           Style="{StaticResource lbl18_Bold_TextDark}"
+                           IsVisible="{Binding ActiveEntry.IsAwaitingCollection, Source={x:Reference Root}}"/>
                     <VerticalStackLayout Spacing="1"
                            IsVisible="{Binding ActiveEntry.HasProgress, Source={x:Reference Root}}">
                         <Label Text="LATEST UPDATE" Style="{StaticResource SectionTitle_Accent}"/>
@@ -98,6 +127,11 @@
                         <Label.Triggers>
                             <DataTrigger TargetType="Label"
                                          Binding="{Binding ActiveEntry.IsBeingServed, Source={x:Reference Root}}"
+                                         Value="True">
+                                <Setter Property="IsVisible" Value="False"/>
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label"
+                                         Binding="{Binding ActiveEntry.IsAwaitingCollection, Source={x:Reference Root}}"
                                          Value="True">
                                 <Setter Property="IsVisible" Value="False"/>
                             </DataTrigger>
@@ -152,7 +186,14 @@
                         ButtonStyle="{StaticResource TertiaryButtonStyle}"
                         Command="{Binding LeaveCommand, Source={x:Reference Root}}"
                         IsLoading="{Binding IsLeaving, Source={x:Reference Root}}"
-                        IsVisible="{Binding ActiveEntry.IsBeingServed, Source={x:Reference Root}, Converter={StaticResource InvertedBoolConverter}}"/>
+                        IsVisible="{Binding ActiveEntry.ShowLeaveButton, Source={x:Reference Root}}"/>
+                <controls:AlzowLoadingButton Grid.Column="1"
+                        Text="Mark as collected"
+                        LoadingText="Marking…"
+                        ButtonStyle="{StaticResource PrimaryButtonStyle}"
+                        Command="{Binding MarkCollectedCommand, Source={x:Reference Root}}"
+                        IsLoading="{Binding IsMarkingCollected, Source={x:Reference Root}}"
+                        IsVisible="{Binding ActiveEntry.ShowMarkCollectedButton, Source={x:Reference Root}}"/>
             </Grid>
         </VerticalStackLayout>
     </Border>

@@ -79,6 +79,7 @@ public sealed class HistoryRow
             "completed" or "done" => ("COMPLETED", HistoryStatusPalette.RaisedFill, HistoryStatusPalette.MutedInk, false, false),
             "expired" => ("EXPIRED", Colors.Transparent, HistoryStatusPalette.DimInk, true, true),
             "no_show" => ("NO-SHOW", HistoryStatusPalette.BadFill, HistoryStatusPalette.BadInk, false, false),
+            "awaiting_collection" => ("READY FOR COLLECTION", HistoryStatusPalette.InfoFill, HistoryStatusPalette.InfoInk, false, false),
             _ => (booking.Status.ToUpperInvariant(), HistoryStatusPalette.RaisedFill, HistoryStatusPalette.MutedInk, false, false),
         };
 
@@ -109,6 +110,9 @@ public sealed class HistoryRow
         if (entry.IsCancelled)
             return (entry.Details?.CancelledBy == CancelledByValues.Customer ? "YOU LEFT" : "CANCELLED",
                 Colors.Transparent, HistoryStatusPalette.DimInk, true, false);
+
+        if (entry.IsAwaitingCollection)
+            return ("READY FOR COLLECTION", HistoryStatusPalette.InfoFill, HistoryStatusPalette.InfoInk, false, false);
 
         if (entry.IsFinished)
             return ("SERVED", HistoryStatusPalette.RaisedFill, HistoryStatusPalette.MutedInk, false, false);

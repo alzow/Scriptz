@@ -146,7 +146,7 @@ public partial class HistoryPageViewModel : BaseViewModel
 
             var now = DateTimeOffset.UtcNow;
             var upcoming = rows
-                .Where(r => (r.StatusText is "CONFIRMED" or "PENDING" or "IN THE QUEUE" or "IN THE CHAIR")
+                .Where(r => (r.StatusText is "CONFIRMED" or "PENDING" or "IN THE QUEUE" or "IN THE CHAIR" or "READY FOR COLLECTION")
                             && (r.Kind == HistoryRowKind.Visit || r.OccurredAt >= now))
                 .OrderBy(r => r.OccurredAt)
                 .ToList();

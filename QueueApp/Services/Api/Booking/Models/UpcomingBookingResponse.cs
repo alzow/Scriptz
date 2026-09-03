@@ -21,6 +21,9 @@ public class UpcomingBookingResponse
     [JsonPropertyName("ends_at")] public DateTimeOffset EndsAt { get; set; }
     [JsonPropertyName("status")] public string Status { get; set; } = "";
     [JsonPropertyName("created_at")] public DateTimeOffset CreatedAt { get; set; }
+    [JsonPropertyName("started_at")] public DateTimeOffset? StartedAt { get; set; }
+    [JsonPropertyName("awaiting_collection_at")] public DateTimeOffset? AwaitingCollectionAt { get; set; }
+    [JsonPropertyName("collected_at")] public DateTimeOffset? CollectedAt { get; set; }
     [JsonPropertyName("business")] public UpcomingBookingBusinessRef? Business { get; set; }
     [JsonPropertyName("operator")] public VisitOperatorRef? Operator { get; set; }
     [JsonPropertyName("service")] public VisitServiceRef? Service { get; set; }
@@ -71,6 +74,12 @@ public class UpcomingBookingResponse
     [JsonIgnore]
     public string EffectiveStatus => Status == "confirmed" && EndsAt < DateTimeOffset.UtcNow ? "expired" : Status;
 
+    [JsonIgnore] public bool IsAwaitingCollection => Status == BookingStatuses.AwaitingCollection;
     [JsonIgnore] public bool IsCancellable => Status is "pending" or "confirmed";
-    [JsonIgnore] public string StatusLabel => Status == "pending" ? "Pending" : "Confirmed";
+    [JsonIgnore] public string StatusLabel => Status switch
+    {
+        "pending" => "Pending",
+        _ when IsAwaitingCollection => "Ready for collection",
+        _ => "Confirmed",
+    };
 }

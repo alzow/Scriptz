@@ -47,6 +47,20 @@ public class BookingService : BaseService, IBookingService
     public Task<BookingResponse> CompleteBookingAsync(Guid bookingId) =>
         ExecuteApiCallAsync(_api.CompleteBookingAsync(new CancelBookingRequest { BookingId = bookingId }));
 
+    public Task<AgendaBookingResponse?> MarkBookingAwaitingCollectionAsync(Guid bookingId) =>
+        PatchAsync(bookingId, new UpdateBookingRequest
+        {
+            Status = BookingStatuses.AwaitingCollection,
+            AwaitingCollectionAt = DateTimeOffset.UtcNow,
+        });
+
+    public Task<AgendaBookingResponse?> MarkBookingCollectedAsync(Guid bookingId) =>
+        PatchAsync(bookingId, new UpdateBookingRequest
+        {
+            Status = BookingStatuses.Completed,
+            CollectedAt = DateTimeOffset.UtcNow,
+        });
+
     public Task<List<MyBookingSummaryResponse>> GetMyBookingsAsync(Guid businessId, Guid customerId) =>
         ExecuteApiCallAsync(_api.GetMyBookingsAsync($"eq.{businessId}", $"eq.{customerId}"));
 

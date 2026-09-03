@@ -81,6 +81,13 @@
                                                    IsOn="{Binding QueueChanged}"
                                                    IsAvailable="{Binding IsAllowed}"/>
 
+                <Label Text="WHEN IT'S READY" Style="{StaticResource SectionTitle}" Margin="2,18,0,2"/>
+
+                <helpers:NotificationToggleRowView Title="Ready for collection"
+                                                   Detail="Applies to both queue and booking mode"
+                                                   IsOn="{Binding AwaitingCollectionReady}"
+                                                   IsAvailable="{Binding IsAllowed}"/>
+
                 <Label Text="NUDGE ME THIS LONG BEFORE I SHOULD LEAVE"
                        Style="{StaticResource SectionTitle}" Margin="2,18,0,2"/>
 

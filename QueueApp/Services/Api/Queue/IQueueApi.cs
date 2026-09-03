@@ -39,7 +39,7 @@ public interface IQueueApi
     [Get("/queue_entries")]
     Task<List<QueueEntryResponse>> GetActiveEntriesAsync(
         [AliasAs("business_id")] string businessIdEq,
-        [AliasAs("status")] string statusEq = "in.(waiting,serving)",
+        [AliasAs("status")] string statusEq = "in.(waiting,serving,awaiting_collection)",
         [AliasAs("order")] string order = "joined_at.asc");
 
     [Post("/rpc/business_queue_summary")]

@@ -22,6 +22,14 @@ public class UpdateBookingRequest
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public DateTimeOffset? EndsAt { get; set; }
 
+    [JsonPropertyName("awaiting_collection_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public DateTimeOffset? AwaitingCollectionAt { get; set; }
+
+    [JsonPropertyName("collected_at")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public DateTimeOffset? CollectedAt { get; set; }
+
     [JsonPropertyName("details")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public BookingDetails? Details { get; set; }

@@ -521,10 +521,14 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
     </Style>
 
-    <!-- Upcoming booking status pill: confirmed is green, a pending request is purple. -->
+    <!-- Upcoming booking status pill: confirmed is green, a pending request or an
+         awaiting-collection booking is purple. -->
     <Style x:Key="lbl11_Bold_BookingPill" TargetType="Label" BasedOn="{StaticResource lbl11_Bold_Green}">
         <Style.Triggers>
             <DataTrigger TargetType="Label" Binding="{Binding Status}" Value="pending">
+                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightPurpleText}, Dark={StaticResource DarkPurpleText}}"/>
+            </DataTrigger>
+            <DataTrigger TargetType="Label" Binding="{Binding Status}" Value="awaiting_collection">
                 <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightPurpleText}, Dark={StaticResource DarkPurpleText}}"/>
             </DataTrigger>
         </Style.Triggers>
