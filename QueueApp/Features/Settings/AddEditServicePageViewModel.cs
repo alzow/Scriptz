@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
+using MPowerKit;
 using MPowerKit.Navigation.Interfaces;
 using QueueApp.Constants;
 using QueueApp.Framework.Base;
