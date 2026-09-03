@@ -77,7 +77,7 @@ public static class AgendaBuilder
             bar = AgendaPalette.Purple;
             background = AgendaPalette.PurpleTint;
             stroke = AgendaPalette.PurpleBorder;
-            tag = "READY FOR COLLECTION";
+            tag = "READY";
             tagInk = AgendaPalette.Purple;
             tagFill = AgendaPalette.PurpleTint;
             showMarkCollected = true;
