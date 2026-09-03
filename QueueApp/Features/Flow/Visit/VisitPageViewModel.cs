@@ -615,10 +615,19 @@ public partial class VisitPageViewModel : BaseViewModel
             else if (record.IsLive)
                 steps.Add(Pending(record.HasOperator ? $"{record.OperatorName} starts" : "Your turn"));
 
-            if (record.FinishedAt is not null)
+            if (record.AwaitingCollectionAt is not null)
+            {
+                steps.Add(Step(record.AwaitingCollectionAt, "Finished — ready for collection", VisitStepState.Done));
+                AddCollectedStep(steps, record);
+            }
+            else if (record.FinishedAt is not null)
+            {
                 steps.Add(Step(record.FinishedAt, "Finished", VisitStepState.Done));
+            }
             else if (record.IsLive)
+            {
                 steps.Add(Pending("Finished"));
+            }
 
             if (record.WasCancelled && record.CancelledAt is not null)
                 steps.Add(Step(record.CancelledAt, record.CancelledByCustomer ? "You left the queue" : "The shop cancelled this", VisitStepState.Failed));
@@ -631,8 +640,9 @@ public partial class VisitPageViewModel : BaseViewModel
         return steps;
     }
 
-    // TODO: bookings carry no marked-at for a no-show either, and no actual start or completion
-    // timestamp, so a finished booking shows its scheduled slot and nothing more.
+    // TODO: bookings carry no marked-at for a no-show either, and no actual start timestamp, so a
+    // finished booking shows its scheduled slot and nothing more — unless it went through Awaiting
+    // Collection, which does carry both.
     public List<VisitTimelineStep> BuildBookingTimeline(VisitRecord record)
     {
         var steps = new List<VisitTimelineStep>();
@@ -646,6 +656,12 @@ public partial class VisitPageViewModel : BaseViewModel
                 steps.Add(Step(record.SlotStart, "Your slot",
                     slot <= DateTimeOffset.UtcNow ? VisitStepState.Done : VisitStepState.Pending));
 
+            if (record.AwaitingCollectionAt is not null)
+            {
+                steps.Add(Step(record.AwaitingCollectionAt, "Finished — ready for collection", VisitStepState.Done));
+                AddCollectedStep(steps, record);
+            }
+
             if (record.CancelledAt is not null)
                 steps.Add(Step(record.CancelledAt, record.CancelledByCustomer ? "You cancelled" : "The shop cancelled this", VisitStepState.Failed));
         }
@@ -655,6 +671,21 @@ public partial class VisitPageViewModel : BaseViewModel
         }
 
         return steps;
+    }
+
+    public void AddCollectedStep(List<VisitTimelineStep> steps, VisitRecord record)
+    {
+        try
+        {
+            if (record.CollectedAt is not null)
+                steps.Add(Step(record.CollectedAt, "Collected", VisitStepState.Done));
+            else if (record.IsLive)
+                steps.Add(Pending("Collected"));
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
     }
 
     public void BuildReasonBlock()

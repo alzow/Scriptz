@@ -54,6 +54,7 @@ public class MyQueueEntryResponse
     [JsonIgnore] public DateTimeOffset JoinedAtUtc => AsUtc(JoinedAt);
     [JsonIgnore] public DateTimeOffset? ServingAtUtc => ServingAt is { } value ? AsUtc(value) : null;
     [JsonIgnore] public DateTimeOffset? DoneAtUtc => DoneAt is { } value ? AsUtc(value) : null;
+    [JsonIgnore] public DateTimeOffset? AwaitingCollectionAtUtc => AwaitingCollectionAt is { } value ? AsUtc(value) : null;
     [JsonIgnore] public DateTimeOffset? CollectedAtUtc => CollectedAt is { } value ? AsUtc(value) : null;
 
     // The customer's own leave-the-queue stamp, written into details because queue_entries has no

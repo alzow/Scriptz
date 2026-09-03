@@ -54,6 +54,8 @@ public sealed class VisitRecord
     public DateTimeOffset? JoinedAt { get; init; }
     public DateTimeOffset? StartedAt { get; init; }
     public DateTimeOffset? FinishedAt { get; init; }
+    public DateTimeOffset? AwaitingCollectionAt { get; init; }
+    public DateTimeOffset? CollectedAt { get; init; }
     public DateTimeOffset? CancelledAt { get; init; }
     public DateTimeOffset? SlotStart { get; init; }
     public DateTimeOffset? SlotEnd { get; init; }
@@ -110,6 +112,8 @@ public sealed class VisitRecord
             JoinedAt = entry.JoinedAtUtc,
             StartedAt = entry.ServingAtUtc,
             FinishedAt = entry.DoneAtUtc,
+            AwaitingCollectionAt = entry.AwaitingCollectionAtUtc,
+            CollectedAt = entry.CollectedAtUtc,
             CancelledAt = entry.CancelledAtUtc,
         };
     }
@@ -136,6 +140,8 @@ public sealed class VisitRecord
             CancelledByCustomer = booking.CancelledBy == CancelledByValues.Customer,
             CancelledByShop = booking.CancelledBy == CancelledByValues.Business || booking.HasCancellationReason,
             RequestedAt = booking.CreatedAt == default ? null : booking.CreatedAt,
+            AwaitingCollectionAt = booking.AwaitingCollectionAt,
+            CollectedAt = booking.CollectedAt,
             CancelledAt = booking.CancelledAt,
             SlotStart = booking.StartsAt,
             SlotEnd = booking.EndsAt,
