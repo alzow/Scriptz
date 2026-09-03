@@ -11,6 +11,11 @@ public interface IBookingService
     Task<BookingResponse> CancelBookingAsync(Guid bookingId);
     Task<BookingResponse> ConfirmBookingAsync(Guid bookingId);
     Task<BookingResponse> CompleteBookingAsync(Guid bookingId);
+
+    // TODO: stub pending Documentation/awaiting-collection-backend-requirements.md — no dedicated
+    // RPC exists yet.
+    Task<AgendaBookingResponse?> MarkBookingAwaitingCollectionAsync(Guid bookingId);
+    Task<AgendaBookingResponse?> MarkBookingCollectedAsync(Guid bookingId);
     Task<BookingResponse> SetBookingProgressAsync(Guid bookingId, string? status);
     Task<List<MyBookingSummaryResponse>> GetMyBookingsAsync(Guid businessId, Guid customerId);
     Task<List<AgendaBookingResponse>> GetAgendaBookingsAsync(Guid businessId, DateTime date);

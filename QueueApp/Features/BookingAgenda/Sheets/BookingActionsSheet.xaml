@@ -143,6 +143,12 @@
                         IsVisible="{Binding CanComplete, Source={x:Reference Root}}"
                         Clicked="OnCompleteClicked"/>
 
+                <Button Text="Mark collected"
+                        Margin="0,12,0,0"
+                        Style="{StaticResource btn15_Bold_SheetGo}"
+                        IsVisible="{Binding CanMarkCollected, Source={x:Reference Root}}"
+                        Clicked="OnMarkCollectedClicked"/>
+
                 <Button Text="Move to another time"
                         Margin="0,9,0,0"
                         Style="{StaticResource btn15_Regular_SheetRow}"

@@ -62,7 +62,8 @@
                 <DataTemplate x:DataType="models:AgendaRow">
                     <helpers:AgendaRowView
                         RowTappedCommand="{Binding BindingContext.RowTappedCommand, Source={x:Reference Root}}"
-                        FillGapCommand="{Binding BindingContext.FillGapCommand, Source={x:Reference Root}}"/>
+                        FillGapCommand="{Binding BindingContext.FillGapCommand, Source={x:Reference Root}}"
+                        MarkCollectedCommand="{Binding BindingContext.MarkCollectedCommand, Source={x:Reference Root}}"/>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
 

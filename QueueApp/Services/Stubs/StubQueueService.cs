@@ -11,7 +11,7 @@ public class StubQueueService : IQueueService
 
     public Task<List<QueueEntryResponse>> GetActiveEntriesAsync(Guid businessId)
         => Task.FromResult(_entries
-            .Where(e => e.BusinessId == businessId && (e.Status == "waiting" || e.Status == "serving"))
+            .Where(e => e.BusinessId == businessId && e.Status is "waiting" or "serving" or QueueEntryStatuses.AwaitingCollection)
             .OrderBy(e => e.JoinedAt)
             .ToList());
 
@@ -55,6 +55,28 @@ public class StubQueueService : IQueueService
         {
             entry.Status = "completed";
             entry.DoneAt = DateTime.UtcNow;
+        }
+        return Task.CompletedTask;
+    }
+
+    public Task MarkAwaitingCollectionAsync(Guid entryId)
+    {
+        var entry = _entries.FirstOrDefault(e => e.Id == entryId);
+        if (entry != null)
+        {
+            entry.Status = QueueEntryStatuses.AwaitingCollection;
+            entry.AwaitingCollectionAt = DateTime.UtcNow;
+        }
+        return Task.CompletedTask;
+    }
+
+    public Task MarkCollectedAsync(Guid entryId)
+    {
+        var entry = _entries.FirstOrDefault(e => e.Id == entryId);
+        if (entry != null)
+        {
+            entry.Status = "completed";
+            entry.CollectedAt = DateTime.UtcNow;
         }
         return Task.CompletedTask;
     }

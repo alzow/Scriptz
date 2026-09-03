@@ -102,6 +102,24 @@ public class StubBookingService : IBookingService
     public Task<BookingResponse> CompleteBookingAsync(Guid bookingId) =>
         Task.FromResult(SetStatus(bookingId, BookingStatuses.Completed));
 
+    public Task<AgendaBookingResponse?> MarkBookingAwaitingCollectionAsync(Guid bookingId)
+    {
+        var booking = _agenda.FirstOrDefault(b => b.Id == bookingId);
+        if (booking is not null) booking.Status = BookingStatuses.AwaitingCollection;
+        else SetStatus(bookingId, BookingStatuses.AwaitingCollection);
+
+        return Task.FromResult<AgendaBookingResponse?>(booking);
+    }
+
+    public Task<AgendaBookingResponse?> MarkBookingCollectedAsync(Guid bookingId)
+    {
+        var booking = _agenda.FirstOrDefault(b => b.Id == bookingId);
+        if (booking is not null) booking.Status = BookingStatuses.Completed;
+        else SetStatus(bookingId, BookingStatuses.Completed);
+
+        return Task.FromResult<AgendaBookingResponse?>(booking);
+    }
+
     public Task<List<MyBookingSummaryResponse>> GetMyBookingsAsync(Guid businessId, Guid customerId)
     {
         var summaries = _bookings

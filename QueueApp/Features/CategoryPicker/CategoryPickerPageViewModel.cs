@@ -36,6 +36,7 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     public ServiceCategory? SelectedCategory { get; set; }
     public MyActiveQueueEntryResponse? ActiveEntry { get; set; }
     public bool IsLeavingQueue { get; set; }
+    public bool IsMarkingCollected { get; set; }
     public LocationBarState LocationState { get; set; } = LocationBarState.Resolving;
     public string LocationBarText { get; set; } = "Finding your location…";
     public ObservableCollection<BrowseBusinessSummaryResponse> Businesses { get; } = new();
@@ -681,6 +682,27 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
         finally
         {
             IsLeavingQueue = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task MarkCollectedAsync()
+    {
+        if (ActiveEntry is null) return;
+
+        IsMarkingCollected = true;
+        try
+        {
+            await _queueService.MarkCollectedAsync(ActiveEntry.EntryId);
+            await RefreshActiveEntryAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+        finally
+        {
+            IsMarkingCollected = false;
         }
     }
 }

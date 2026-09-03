@@ -438,6 +438,10 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightAccentText}, Dark={StaticResource DarkAccentText}}"/>
     </Style>
 
+    <Style TargetType="Label" x:Key="SectionTitle_Purple" BasedOn="{StaticResource SectionTitle}">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightPurpleText}, Dark={StaticResource DarkPurpleText}}"/>
+    </Style>
+
     <Style TargetType="Page" ApplyToDerivedTypes="True">
         <Setter Property="Padding" Value="0"/>
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightBg}, Dark={StaticResource DarkBg}}"/>

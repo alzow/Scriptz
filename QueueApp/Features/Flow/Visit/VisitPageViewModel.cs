@@ -63,8 +63,8 @@ public partial class VisitPageViewModel : BaseViewModel
     // What the page can do about this visit, each on the page itself rather than behind a sheet.
     public bool CanShare => Record?.IsLive == true;
     public bool CanAddToCalendar => Record is { IsLive: true, IsBooking: true, SlotStart: not null };
-    public bool CanLeaveQueue => Record is { IsLive: true, IsQueue: true };
-    public bool CanCancelBooking => Record is { IsLive: true, IsBooking: true };
+    public bool CanLeaveQueue => Record is { IsLive: true, IsQueue: true, IsAwaitingCollection: false };
+    public bool CanCancelBooking => Record is { IsLive: true, IsBooking: true, IsAwaitingCollection: false };
     public bool HasDestructiveAction => CanLeaveQueue || CanCancelBooking;
     public string DestructiveActionText => CanLeaveQueue ? "Leave the queue" : "Cancel booking";
     public bool ShowJustJoined => JustJoined && IsLive;
@@ -415,6 +415,15 @@ public partial class VisitPageViewModel : BaseViewModel
                 ? "You're in. We'll keep this page up to date."
                 : "Request sent. You'll hear back from the shop.";
 
+            if (record.IsAwaitingCollection)
+            {
+                HeroCaption = "READY FOR COLLECTION";
+                HeroTime = record.FinishedAt is { } finished ? FormatTime(finished) : "--:--";
+                HeroRelative = "come by whenever you're ready";
+                HeroDetail = WithWhom(record);
+                return;
+            }
+
             if (record.IsQueue)
                 BuildQueueHero(record);
             else
@@ -695,6 +704,7 @@ public partial class VisitPageViewModel : BaseViewModel
             PrimaryActionText = Record switch
             {
                 null => string.Empty,
+                { IsAwaitingCollection: true } => "Mark as collected",
                 { IsLive: true } => string.Empty,
                 { WasNoShow: true } missed => HasPhone ? $"Call {missed.BusinessName}" : string.Empty,
                 { IsBooking: true } => "Book another time",
@@ -932,6 +942,12 @@ public partial class VisitPageViewModel : BaseViewModel
     {
         try
         {
+            if (Record is { IsAwaitingCollection: true })
+            {
+                await MarkAsCollectedAsync();
+                return;
+            }
+
             if (Record is { WasNoShow: true })
             {
                 await CallShopAsync();
@@ -939,6 +955,27 @@ public partial class VisitPageViewModel : BaseViewModel
             }
 
             await GoAgainAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    public async Task MarkAsCollectedAsync()
+    {
+        if (Record is not { IsAwaitingCollection: true } record)
+            return;
+
+        try
+        {
+            if (record.IsQueue)
+                await _queueService.MarkCollectedAsync(record.Id);
+            else
+                await _bookingService.MarkBookingCollectedAsync(record.Id);
+
+            await RefreshAsync();
+            RefreshView();
         }
         catch (Exception ex)
         {

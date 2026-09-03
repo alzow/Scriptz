@@ -19,6 +19,11 @@ public partial class QueueEntryResponse : ObservableObject
     [JsonPropertyName("serving_at")] public DateTime? ServingAt { get; set; }
     [JsonPropertyName("done_at")] public DateTime? DoneAt { get; set; }
 
+    // TODO: stub pending Documentation/awaiting-collection-backend-requirements.md — column names
+    // are that spec's call.
+    [JsonPropertyName("awaiting_collection_at")] public DateTime? AwaitingCollectionAt { get; set; }
+    [JsonPropertyName("collected_at")] public DateTime? CollectedAt { get; set; }
+
     [JsonPropertyName("progress_status")] public string? ProgressStatus { get; set; }
 
     // Carries join_queue's assignment stamp onto the board, so a card can say whether the shop's
@@ -27,6 +32,7 @@ public partial class QueueEntryResponse : ObservableObject
 
     [JsonIgnore] public bool HasProgress => !string.IsNullOrWhiteSpace(ProgressStatus);
     [JsonIgnore] public bool WasAutoAssigned => Details?.WasAutoAssigned == true;
+    [JsonIgnore] public bool IsAwaitingCollection => Status == QueueEntryStatuses.AwaitingCollection;
 
     [JsonIgnore] [ObservableProperty] private bool _isServing;
     [JsonIgnore] [ObservableProperty] private bool _isCompleting;

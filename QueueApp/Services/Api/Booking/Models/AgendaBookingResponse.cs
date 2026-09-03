@@ -116,6 +116,11 @@ public partial class AgendaBookingResponse : ObservableObject
     // name, so the query keeps working until the column exists.
     [JsonPropertyName("started_at")] public DateTimeOffset? StartedAt { get; set; }
 
+    // TODO: stub pending Documentation/awaiting-collection-backend-requirements.md. Selected via
+    // `*` above, same as started_at, so the agenda keeps working today and picks the column up
+    // once it exists.
+    [JsonPropertyName("awaiting_collection_at")] public DateTimeOffset? AwaitingCollectionAt { get; set; }
+
     [JsonIgnore] public bool IsConfirming { get; set; }
     [JsonIgnore] public bool IsCompleting { get; set; }
     [JsonIgnore] public bool IsCancelling { get; set; }
@@ -165,6 +170,7 @@ public partial class AgendaBookingResponse : ObservableObject
     [JsonIgnore] public bool IsCompleted => Status == BookingStatuses.Completed;
     [JsonIgnore] public bool IsCancelled => Status == BookingStatuses.Cancelled;
     [JsonIgnore] public bool IsNoShow => Status == BookingStatuses.NoShow;
+    [JsonIgnore] public bool IsAwaitingCollection => Status == BookingStatuses.AwaitingCollection;
 
     // Two ways in, because only one of them can exist on the current schema and neither is
     // guaranteed: the enum value if the migration added it, or a started_at stamp on an otherwise
@@ -179,10 +185,11 @@ public partial class AgendaBookingResponse : ObservableObject
     [JsonIgnore] public bool HasWindowPassed => DateTimeOffset.UtcNow >= EndsAt;
 
     [JsonIgnore] public bool CanConfirm => IsPending;
-    [JsonIgnore] public bool CanComplete => !IsFinished && (IsWithinWindow || HasWindowPassed);
-    [JsonIgnore] public bool CanMarkNoShow => !IsFinished && IsWithinWindow;
-    [JsonIgnore] public bool CanUpdateCustomer => !IsFinished && IsWithinWindow;
-    [JsonIgnore] public bool CanCancel => !IsFinished;
+    [JsonIgnore] public bool CanComplete => !IsFinished && !IsAwaitingCollection && (IsWithinWindow || HasWindowPassed);
+    [JsonIgnore] public bool CanMarkNoShow => !IsFinished && !IsAwaitingCollection && IsWithinWindow;
+    [JsonIgnore] public bool CanUpdateCustomer => !IsFinished && !IsAwaitingCollection && IsWithinWindow;
+    [JsonIgnore] public bool CanCancel => !IsFinished && !IsAwaitingCollection;
+    [JsonIgnore] public bool CanMarkCollected => IsAwaitingCollection;
 
     [JsonIgnore] public DateTimeOffset ElapsedFrom => (StartedAt ?? StartsAt).ToOffset(LocalOffset);
 
@@ -195,6 +202,7 @@ public partial class AgendaBookingResponse : ObservableObject
         BookingStatuses.Cancelled => "Cancelled",
         BookingStatuses.Completed => "Completed",
         BookingStatuses.NoShow => "No show",
+        BookingStatuses.AwaitingCollection => "Ready for collection",
         _ => Status
     };
 

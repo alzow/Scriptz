@@ -21,6 +21,7 @@ public class MyActiveQueueEntryResponse
     [JsonPropertyName("progress_status")] public string? ProgressStatus { get; set; }
 
     [JsonIgnore] public bool IsBeingServed => Status == "serving";
+    [JsonIgnore] public bool IsAwaitingCollection => Status == QueueEntryStatuses.AwaitingCollection;
     [JsonIgnore] public bool HasProgress => !string.IsNullOrWhiteSpace(ProgressStatus);
 
     // join_queue picks an operator now, so an entry with none is the one case it could not: a shop
@@ -31,8 +32,11 @@ public class MyActiveQueueEntryResponse
     [JsonIgnore] public bool HasOperator => OperatorId is not null;
     [JsonIgnore] public bool IsUnassigned => OperatorId is null;
     [JsonIgnore] public bool HasWaitEstimate => HasOperator && WaitMinutes.HasValue;
-    [JsonIgnore] public bool ShowWaitEstimate => HasWaitEstimate && !IsBeingServed;
-    [JsonIgnore] public bool ShowUnassignedNotice => IsUnassigned && !IsBeingServed;
+    [JsonIgnore] public bool ShowWaitEstimate => HasWaitEstimate && !IsBeingServed && !IsAwaitingCollection;
+    [JsonIgnore] public bool ShowUnassignedNotice => IsUnassigned && !IsBeingServed && !IsAwaitingCollection;
     [JsonIgnore] public bool ShowServedByName => IsBeingServed && HasOperator;
     [JsonIgnore] public bool ShowServedAnonymously => IsBeingServed && IsUnassigned;
+
+    [JsonIgnore] public bool ShowLeaveButton => !IsBeingServed && !IsAwaitingCollection;
+    [JsonIgnore] public bool ShowMarkCollectedButton => IsAwaitingCollection;
 }

@@ -66,6 +66,13 @@
                         Style="{StaticResource btn14_Bold_GreenOutline}"
                         Command="{Binding FillGapCommand, Source={x:Reference Root}}"
                         CommandParameter="{Binding .}"/>
+
+                <Button Grid.Column="3" Text="Collected" HeightRequest="42"
+                        VerticalOptions="Center"
+                        IsVisible="{Binding ShowMarkCollected}"
+                        Style="{StaticResource btn14_Bold_PurpleOutline}"
+                        Command="{Binding MarkCollectedCommand, Source={x:Reference Root}}"
+                        CommandParameter="{Binding .}"/>
             </Grid>
 
             <Border.GestureRecognizers>

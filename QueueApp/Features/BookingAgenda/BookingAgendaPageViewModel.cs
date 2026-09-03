@@ -788,6 +788,36 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    public async Task MarkCollectedAsync(AgendaRow? row)
+    {
+        try
+        {
+            if (row?.Booking is not { } booking)
+                return;
+
+            await _bookingService.MarkBookingCollectedAsync(booking.Id);
+            await RefreshAsync();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    public bool RequiresCollection(Guid? serviceId)
+    {
+        try
+        {
+            return _services.FirstOrDefault(s => s.Id == serviceId)?.RequiresCollection ?? false;
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+            return false;
+        }
+    }
+
+    [RelayCommand]
     public async Task AddBookingAsync()
     {
         try
@@ -876,7 +906,15 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
                     break;
 
                 case BookingAction.Complete:
-                    await _bookingService.CompleteBookingAsync(booking.Id);
+                    if (RequiresCollection(booking.ServiceId))
+                        await _bookingService.MarkBookingAwaitingCollectionAsync(booking.Id);
+                    else
+                        await _bookingService.CompleteBookingAsync(booking.Id);
+                    await RefreshAsync();
+                    break;
+
+                case BookingAction.MarkCollected:
+                    await _bookingService.MarkBookingCollectedAsync(booking.Id);
                     await RefreshAsync();
                     break;
 

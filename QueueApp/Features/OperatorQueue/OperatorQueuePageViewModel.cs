@@ -22,6 +22,8 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
 {
     public ObservableCollection<BoardSection> Sections { get; } = new();
     public ObservableCollection<QueueRowItem> PoolRows { get; } = new();
+    public ObservableCollection<QueueRowItem> AwaitingCollectionRows { get; } = new();
+    public bool HasAwaitingCollection => AwaitingCollectionRows.Count > 0;
 
     public string BusinessName { get; set; } = "Queue";
     public bool IsLoading { get; set; }
@@ -268,6 +270,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
             }
 
             RebuildPool();
+            RebuildAwaitingCollection();
             RefreshStats();
             RefreshTickText();
         }
@@ -409,6 +412,44 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
 
             OnPropertyChanged(nameof(HasPool));
             OnPropertyChanged(nameof(PoolChevron));
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
+    }
+
+    public void RebuildAwaitingCollection()
+    {
+        try
+        {
+            AwaitingCollectionRows.Clear();
+
+            var awaitingCollection = _entries
+                .Where(e => e.IsAwaitingCollection)
+                .OrderBy(e => e.AwaitingCollectionAt ?? e.DoneAt ?? e.JoinedAt)
+                .ToList();
+
+            foreach (var entry in awaitingCollection)
+            {
+                var readyMinutes = MinutesSince(entry.AwaitingCollectionAt ?? entry.DoneAt ?? entry.JoinedAt);
+
+                AwaitingCollectionRows.Add(new QueueRowItem
+                {
+                    EntryId = entry.Id,
+                    OperatorId = entry.OperatorId,
+                    ServiceId = entry.ServiceId,
+                    CustomerName = DisplayNameOf(entry),
+                    Initials = InitialsOf(DisplayNameOf(entry)),
+                    ServiceName = ServiceNameOf(entry.ServiceId),
+                    JoinedAt = entry.JoinedAt,
+                    ShowPosition = false,
+                    ShowMarkCollected = true,
+                    SubText = QueueRowItem.BuildReadySubText(ServiceNameOf(entry.ServiceId), readyMinutes),
+                });
+            }
+
+            OnPropertyChanged(nameof(HasAwaitingCollection));
         }
         catch (Exception ex)
         {
@@ -568,8 +609,16 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         card.IsBusy = true;
         try
         {
-            ApplyLocally(card.EntryId, e => e.Status = "completed");
-            await _queueService.CompleteAsync(card.EntryId);
+            if (RequiresCollection(card.ServiceId))
+            {
+                ApplyLocally(card.EntryId, e => e.Status = QueueEntryStatuses.AwaitingCollection);
+                await _queueService.MarkAwaitingCollectionAsync(card.EntryId);
+            }
+            else
+            {
+                ApplyLocally(card.EntryId, e => e.Status = "completed");
+                await _queueService.CompleteAsync(card.EntryId);
+            }
         }
         catch (Exception ex)
         {
@@ -578,6 +627,41 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         finally
         {
             card.IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task MarkCollectedAsync(QueueRowItem? row)
+    {
+        if (row is null || row.IsBusy)
+            return;
+
+        row.IsBusy = true;
+        try
+        {
+            ApplyLocally(row.EntryId, e => e.Status = "completed");
+            await _queueService.MarkCollectedAsync(row.EntryId);
+        }
+        catch (Exception ex)
+        {
+            await ReloadAfterFailureAsync(ex);
+        }
+        finally
+        {
+            row.IsBusy = false;
+        }
+    }
+
+    public bool RequiresCollection(Guid? serviceId)
+    {
+        try
+        {
+            return _services.FirstOrDefault(s => s.Id == serviceId)?.RequiresCollection ?? false;
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+            return false;
         }
     }
 
@@ -957,7 +1041,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                 return;
 
             mutate(entry);
-            _entries = _entries.Where(e => e.Status is "waiting" or "serving").ToList();
+            _entries = _entries.Where(e => e.Status is "waiting" or "serving" or QueueEntryStatuses.AwaitingCollection).ToList();
             Rebuild();
         }
         catch (Exception ex)

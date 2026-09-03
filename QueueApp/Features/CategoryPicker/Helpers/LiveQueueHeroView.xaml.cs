@@ -17,6 +17,10 @@ public partial class LiveQueueHeroView : ContentView
         nameof(LeaveCommand), typeof(ICommand), typeof(LiveQueueHeroView), default(ICommand));
     public static readonly BindableProperty IsLeavingProperty = BindableProperty.Create(
         nameof(IsLeaving), typeof(bool), typeof(LiveQueueHeroView), default(bool));
+    public static readonly BindableProperty MarkCollectedCommandProperty = BindableProperty.Create(
+        nameof(MarkCollectedCommand), typeof(ICommand), typeof(LiveQueueHeroView), default(ICommand));
+    public static readonly BindableProperty IsMarkingCollectedProperty = BindableProperty.Create(
+        nameof(IsMarkingCollected), typeof(bool), typeof(LiveQueueHeroView), default(bool));
 
     public MyActiveQueueEntryResponse ActiveEntry
     {
@@ -48,6 +52,18 @@ public partial class LiveQueueHeroView : ContentView
         set => SetValue(IsLeavingProperty, value);
     }
 
+    public ICommand MarkCollectedCommand
+    {
+        get => (ICommand)GetValue(MarkCollectedCommandProperty);
+        set => SetValue(MarkCollectedCommandProperty, value);
+    }
+
+    public bool IsMarkingCollected
+    {
+        get => (bool)GetValue(IsMarkingCollectedProperty);
+        set => SetValue(IsMarkingCollectedProperty, value);
+    }
+
     private IDispatcherTimer? _timer;
     private int _remainingSeconds;
 
@@ -74,6 +90,13 @@ public partial class LiveQueueHeroView : ContentView
         try
         {
             StopCountdown();
+
+            if (ActiveEntry?.IsAwaitingCollection == true)
+            {
+                CountdownLabel.Text = "READY";
+                CountdownLabel.TextColor = ThemePalette.PurpleText;
+                return;
+            }
 
             var minutes = ActiveEntry?.WaitMinutes;
             if (ActiveEntry is null || minutes is null || ActiveEntry.IsBeingServed)

@@ -16,6 +16,12 @@ public class MyQueueEntryResponse
     [JsonPropertyName("joined_at")] public DateTime JoinedAt { get; set; }
     [JsonPropertyName("serving_at")] public DateTime? ServingAt { get; set; }
     [JsonPropertyName("done_at")] public DateTime? DoneAt { get; set; }
+
+    // TODO: stub pending Documentation/awaiting-collection-backend-requirements.md — column names
+    // are that spec's call.
+    [JsonPropertyName("awaiting_collection_at")] public DateTime? AwaitingCollectionAt { get; set; }
+    [JsonPropertyName("collected_at")] public DateTime? CollectedAt { get; set; }
+
     [JsonPropertyName("note")] public string? Note { get; set; }
     [JsonPropertyName("progress_status")] public string? ProgressStatus { get; set; }
     [JsonPropertyName("details")] public QueueEntryDetails? Details { get; set; }
@@ -37,7 +43,9 @@ public class MyQueueEntryResponse
 
     [JsonIgnore] public bool IsWaiting => Status == QueueEntryStatuses.Waiting;
     [JsonIgnore] public bool IsBeingServed => Status == QueueEntryStatuses.Serving;
-    [JsonIgnore] public bool IsLive => IsWaiting || IsBeingServed;
+    [JsonIgnore] public bool IsAwaitingCollection => Status == QueueEntryStatuses.AwaitingCollection;
+
+    [JsonIgnore] public bool IsLive => IsWaiting || IsBeingServed || IsAwaitingCollection;
     [JsonIgnore] public bool IsNoShow => QueueEntryStatuses.IsNoShow(Status);
     [JsonIgnore] public bool IsCancelled => QueueEntryStatuses.IsCancelled(Status);
 
@@ -48,6 +56,7 @@ public class MyQueueEntryResponse
     [JsonIgnore] public DateTimeOffset JoinedAtUtc => AsUtc(JoinedAt);
     [JsonIgnore] public DateTimeOffset? ServingAtUtc => ServingAt is { } value ? AsUtc(value) : null;
     [JsonIgnore] public DateTimeOffset? DoneAtUtc => DoneAt is { } value ? AsUtc(value) : null;
+    [JsonIgnore] public DateTimeOffset? CollectedAtUtc => CollectedAt is { } value ? AsUtc(value) : null;
 
     // The customer's own leave-the-queue stamp, written into details because queue_entries has no
     // cancelled_at column. Absent on a row cancelled by the shop or by an older build.

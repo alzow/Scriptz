@@ -71,6 +71,12 @@ public class UpcomingBookingResponse
     [JsonIgnore]
     public string EffectiveStatus => Status == "confirmed" && EndsAt < DateTimeOffset.UtcNow ? "expired" : Status;
 
+    [JsonIgnore] public bool IsAwaitingCollection => Status == BookingStatuses.AwaitingCollection;
     [JsonIgnore] public bool IsCancellable => Status is "pending" or "confirmed";
-    [JsonIgnore] public string StatusLabel => Status == "pending" ? "Pending" : "Confirmed";
+    [JsonIgnore] public string StatusLabel => Status switch
+    {
+        "pending" => "Pending",
+        _ when IsAwaitingCollection => "Ready for collection",
+        _ => "Confirmed",
+    };
 }

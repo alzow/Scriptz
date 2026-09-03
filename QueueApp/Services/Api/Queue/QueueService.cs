@@ -31,6 +31,22 @@ public class QueueService : BaseService, IQueueService
     public Task CompleteAsync(Guid entryId) =>
         ExecuteApiCallAsync(_api.CompleteEntryAsync(new EntryIdRequest { EntryId = entryId }));
 
+    public Task MarkAwaitingCollectionAsync(Guid entryId) =>
+        ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
+            new Dictionary<string, object?>
+            {
+                ["status"] = QueueEntryStatuses.AwaitingCollection,
+                ["awaiting_collection_at"] = DateTime.UtcNow,
+            }));
+
+    public Task MarkCollectedAsync(Guid entryId) =>
+        ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
+            new Dictionary<string, object?>
+            {
+                ["status"] = "completed",
+                ["collected_at"] = DateTime.UtcNow,
+            }));
+
     public Task NoShowAsync(Guid entryId) =>
         ExecuteApiCallAsync(_api.MarkNoShowAsync(new EntryIdRequest { EntryId = entryId }));
 

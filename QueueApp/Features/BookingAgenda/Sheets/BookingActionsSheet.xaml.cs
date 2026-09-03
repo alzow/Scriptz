@@ -25,6 +25,7 @@ public partial class BookingActionsSheet : BottomSheetPage
     public bool HasPhone { get; }
     public bool CanConfirm { get; }
     public bool CanComplete { get; }
+    public bool CanMarkCollected { get; }
     public bool CanMarkNoShow { get; }
     public bool CanUpdateCustomer { get; }
     public bool CanCancel { get; }
@@ -64,6 +65,7 @@ public partial class BookingActionsSheet : BottomSheetPage
 
         CanConfirm = booking?.CanConfirm ?? false;
         CanComplete = (booking?.CanComplete ?? false) && !isPending;
+        CanMarkCollected = booking?.CanMarkCollected ?? false;
         CanMarkNoShow = (booking?.CanMarkNoShow ?? false) && !isPending;
         CanUpdateCustomer = (booking?.CanUpdateCustomer ?? false) && !isPending;
         CanCancel = (booking?.CanCancel ?? false) && !isPending;
@@ -118,6 +120,9 @@ public partial class BookingActionsSheet : BottomSheetPage
 
     private void OnCompleteClicked(object? sender, EventArgs e) =>
         Close(new BookingActionResult(BookingAction.Complete));
+
+    private void OnMarkCollectedClicked(object? sender, EventArgs e) =>
+        Close(new BookingActionResult(BookingAction.MarkCollected));
 
     private void OnMoveTimeClicked(object? sender, EventArgs e) =>
         Close(new BookingActionResult(BookingAction.MoveToAnotherTime));

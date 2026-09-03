@@ -26,6 +26,7 @@ public partial class ProfileNotificationsPageViewModel : BaseViewModel
     public bool QueueChanged { get; set; } = true;
     public bool BookingConfirmed { get; set; } = true;
     public bool BookingReminders { get; set; } = true;
+    public bool AwaitingCollectionReady { get; set; } = true;
     public int LeaveAtMinutes { get; set; } = 10;
 
     private readonly INotificationPermissionService _permissionService;
@@ -77,6 +78,7 @@ public partial class ProfileNotificationsPageViewModel : BaseViewModel
         QueueChanged = preferences.QueueChanged;
         BookingConfirmed = preferences.BookingConfirmed;
         BookingReminders = preferences.BookingReminders;
+        AwaitingCollectionReady = preferences.AwaitingCollectionReady;
         LeaveAtMinutes = preferences.LeaveAtMinutes;
     }
 
@@ -88,6 +90,7 @@ public partial class ProfileNotificationsPageViewModel : BaseViewModel
             QueueChanged = QueueChanged,
             BookingConfirmed = BookingConfirmed,
             BookingReminders = BookingReminders,
+            AwaitingCollectionReady = AwaitingCollectionReady,
             LeaveAtMinutes = LeaveAtMinutes,
         });
 

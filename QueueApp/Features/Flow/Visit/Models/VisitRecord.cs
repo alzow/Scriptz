@@ -14,6 +14,7 @@ public enum VisitKind
 public enum VisitLifecycle
 {
     Live,
+    AwaitingCollection,
     Settled,
     Cancelled,
     NoShow,
@@ -62,7 +63,9 @@ public sealed class VisitRecord
 
     public bool IsQueue => Kind == VisitKind.Queue;
     public bool IsBooking => Kind == VisitKind.Booking;
-    public bool IsLive => Lifecycle == VisitLifecycle.Live;
+
+    public bool IsLive => Lifecycle is VisitLifecycle.Live or VisitLifecycle.AwaitingCollection;
+    public bool IsAwaitingCollection => Lifecycle == VisitLifecycle.AwaitingCollection;
     public bool IsSettled => Lifecycle == VisitLifecycle.Settled;
     public bool WasCancelled => Lifecycle == VisitLifecycle.Cancelled;
     public bool WasNoShow => Lifecycle == VisitLifecycle.NoShow;
@@ -147,6 +150,12 @@ public sealed class VisitRecord
         if (entry.IsCancelled)
             return VisitLifecycle.Cancelled;
 
+        // TODO: checked ahead of IsFinished — Documentation/awaiting-collection-backend-
+        // requirements.md hasn't settled whether done_at is stamped on entering awaiting
+        // collection or only on final collection, so status is the one fact this can rely on.
+        if (entry.IsAwaitingCollection)
+            return VisitLifecycle.AwaitingCollection;
+
         if (entry.IsFinished)
             return VisitLifecycle.Settled;
 
@@ -161,6 +170,9 @@ public sealed class VisitRecord
         if (booking.Status == BookingStatuses.Cancelled)
             return VisitLifecycle.Cancelled;
 
+        if (booking.IsAwaitingCollection)
+            return VisitLifecycle.AwaitingCollection;
+
         if (booking.Status is BookingStatuses.Pending or BookingStatuses.Confirmed or BookingStatuses.InProgress)
             return booking.EndsAt > DateTimeOffset.UtcNow ? VisitLifecycle.Live : VisitLifecycle.Settled;
 
@@ -173,6 +185,7 @@ public sealed class VisitRecord
         VisitLifecycle.Cancelled => entry.Details?.CancelledBy == CancelledByValues.Customer
             ? "YOU LEFT"
             : "CANCELLED",
+        VisitLifecycle.AwaitingCollection => "READY FOR COLLECTION",
         VisitLifecycle.Live => entry.IsBeingServed ? "IN THE CHAIR" : "IN THE QUEUE",
         _ => "SERVED",
     };
@@ -181,6 +194,7 @@ public sealed class VisitRecord
     {
         VisitLifecycle.NoShow => "NO-SHOW",
         VisitLifecycle.Cancelled => booking.WasCancelledByCustomer ? "YOU CANCELLED" : "CANCELLED",
+        VisitLifecycle.AwaitingCollection => "READY FOR COLLECTION",
         VisitLifecycle.Live => booking.Status == BookingStatuses.Pending ? "PENDING" : "CONFIRMED",
         _ => booking.Status == BookingStatuses.Completed ? "COMPLETED" : "SLOT PASSED",
     };

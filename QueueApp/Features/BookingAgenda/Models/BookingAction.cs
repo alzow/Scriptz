@@ -6,6 +6,7 @@ public enum BookingAction
     Confirm,
     Decline,
     Complete,
+    MarkCollected,
     MoveToAnotherTime,
     MoveToResource,
     MarkNoShow,

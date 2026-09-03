@@ -8,6 +8,10 @@ public static class QueueEntryStatuses
     public const string Waiting = "waiting";
     public const string Serving = "serving";
 
+    // TODO: stub pending Documentation/awaiting-collection-backend-requirements.md — swap this
+    // constant for the real enum label once that spec lands.
+    public const string AwaitingCollection = "awaiting_collection";
+
     public static bool IsCancelled(string? status) =>
         status is not null && status.Contains("cancel", StringComparison.OrdinalIgnoreCase);
 

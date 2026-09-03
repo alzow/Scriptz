@@ -8,6 +8,12 @@ public interface IQueueService
     Task AddWalkInAsync(Guid businessId, Guid? operatorId, string? name, Guid serviceId);
     Task StartServingAsync(Guid entryId);
     Task CompleteAsync(Guid entryId);
+
+    // TODO: stub pending Documentation/awaiting-collection-backend-requirements.md — no dedicated
+    // RPC exists yet.
+    Task MarkAwaitingCollectionAsync(Guid entryId);
+    Task MarkCollectedAsync(Guid entryId);
+
     Task NoShowAsync(Guid entryId);
     Task<List<QueueSummaryRow>> GetQueueSummaryAsync(Guid businessId);
     Task<QueueEntryResponse> JoinQueueAsync(Guid businessId, Guid? operatorId, Guid customerId, string? customerName, Guid serviceId);
