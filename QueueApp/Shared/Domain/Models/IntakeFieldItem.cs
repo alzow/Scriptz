@@ -7,7 +7,13 @@ namespace QueueApp.Shared.Domain.Models;
 public sealed class IntakeOptionItem : ObservableObject
 {
     public required string Text { get; init; }
-    public bool IsSelected { get; set; }
+
+    private bool _isSelected;
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set => SetProperty(ref _isSelected, value);
+    }
 }
 
 // One question on the intake step, with whatever the customer has put against it so far. Lives in

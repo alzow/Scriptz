@@ -15,5 +15,11 @@ public sealed class OperatorChoiceItem : ObservableObject
     public string SubLabel { get; init; } = string.Empty;
     public bool IsAnyAvailable { get; init; }
     public bool ShowFastestTag { get; init; }
-    public bool IsSelected { get; set; }
+
+    private bool _isSelected;
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set => SetProperty(ref _isSelected, value);
+    }
 }

@@ -216,6 +216,8 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
                     ? snapshotObj as BusinessSnapshot
                     : null;
 
+            var intakeFieldsTask = _intakeFieldsService.GetFieldsByServiceAsync(_businessId);
+
             BusinessResponse business;
             IReadOnlyList<ServiceResponse> services;
 
@@ -257,16 +259,9 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
                 ServiceRows.Add(ServiceChoiceItem.From(service));
             OnPropertyChanged(nameof(HasServices));
 
-            // One read for the whole business, ahead of the first step: picking a service has to be
-            // able to answer "does this one ask anything?" on the spot, without an await standing
-            // between the tap and the step list. Empty for every business that defines no fields —
-            // which is all of them today — and empty too if the table isn't there yet.
-            // TODO: stub — service_intake_fields, per
-            // Documentation/service-intake-fields-backend-requirements.md.
-            _intakeFieldsByService = await _intakeFieldsService.GetFieldsByServiceAsync(_businessId);
-
-            if (IsQueueMode)
-                await LoadQueueSummaryAsync();
+            var queueSummaryTask = IsQueueMode ? LoadQueueSummaryAsync() : Task.CompletedTask;
+            _intakeFieldsByService = await intakeFieldsTask;
+            await queueSummaryTask;
 
             StartFlow();
         }

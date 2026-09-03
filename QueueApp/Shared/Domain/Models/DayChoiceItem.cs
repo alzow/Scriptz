@@ -12,7 +12,13 @@ public sealed class DayChoiceItem : ObservableObject
     // the operator ("7 free · Bay 2") rather than implying the whole shop has seven slots open.
     public string FreeText { get; set; } = "…";
     public bool IsFull { get; set; }
-    public bool IsSelected { get; set; }
+
+    private bool _isSelected;
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set => SetProperty(ref _isSelected, value);
+    }
 
     public bool IsSelectable => !IsFull;
 }
