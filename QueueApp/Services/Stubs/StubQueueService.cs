@@ -204,7 +204,7 @@ public class StubQueueService : IQueueService
     public Task<MyActiveQueueEntryResponse?> GetMyActiveEntryAsync()
     {
         var mine = _entries
-            .Where(e => e.Status is "waiting" or "serving")
+            .Where(e => e.Status is "waiting" or "serving" or QueueEntryStatuses.AwaitingCollection)
             .OrderBy(e => e.JoinedAt)
             .LastOrDefault();
 
@@ -212,7 +212,7 @@ public class StubQueueService : IQueueService
             return Task.FromResult<MyActiveQueueEntryResponse?>(null);
 
         var position = PositionOf(mine, _entries
-            .Where(e => e.BusinessId == mine.BusinessId && e.Status is "waiting" or "serving")
+            .Where(e => e.BusinessId == mine.BusinessId && e.Status is "waiting" or "serving" or QueueEntryStatuses.AwaitingCollection)
             .OrderBy(e => e.JoinedAt)
             .ToList());
 

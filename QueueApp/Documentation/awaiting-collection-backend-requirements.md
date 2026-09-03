@@ -43,6 +43,22 @@ the two enums don't share a terminal label.
   operator board keeps awaiting-collection entries in view. No booking-side equivalent was needed —
   the agenda's own queries are unfiltered by status already.
 
+**Known gap, needs a backend fix — `my_active_queue_entry()`.** This RPC backs the browse
+dashboard's live queue hero (`IQueueApi.GetMyActiveEntryAsync`, `CategoryPickerPageViewModel.
+ActiveEntry`). Its SQL isn't in this repo, but its behavior confirms it filters server-side to some
+status set — an entry that transitions to `awaiting_collection` stops coming back at all, and the
+hero disappears from the browse dashboard entirely (reported after the migration in this file was
+applied; reproduced against the real backend, not the stub — `StubQueueService.GetMyActiveEntryAsync`
+had the equivalent bug client-side and has been fixed to include `awaiting_collection`, but that
+stub is opt-in via the `USE_STUBS` build flag and isn't what live testing runs against). Whatever
+this function's `WHERE status = ...` / `status IN (...)` clause currently reads, it needs
+`awaiting_collection` added alongside `waiting` and `serving` — same fix as `GetActiveEntriesAsync`
+above, just server-side. `my_queue_status(business_id)` is described as making the same kind of
+split and may have the identical gap; lower stakes if so — `VisitPageViewModel.LoadEntryAsync` only
+loses the Position/WaitMinutes it supplies, doesn't lose the row. Neither function's definition was
+available in this pass to write an exact patch — needs whoever has the live definition (or
+Supabase migration history) to apply it.
+
 ## 3. Timestamps
 
 - `queue_entries.awaiting_collection_at` (nullable timestamptz) — stamped when an entry enters
