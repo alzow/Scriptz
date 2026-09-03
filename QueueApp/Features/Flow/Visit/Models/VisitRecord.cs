@@ -1,5 +1,6 @@
 using QueueApp.Framework.Extensions;
 using QueueApp.Services.Api.Booking.Models;
+using QueueApp.Services.Api.Intake.Models;
 using QueueApp.Services.Api.Queue.Models;
 using QueueApp.Shared.Domain;
 
@@ -43,6 +44,11 @@ public sealed class VisitRecord
     public QueueEntryDetails? Details { get; init; }
     public required string PriceText { get; init; }
 
+    // What the customer answered before the entry existed, in the order the questions were asked.
+    // Each answer carries its own label and type, so this renders without ever reading the field
+    // definitions — a question renamed or deleted since does not rewrite what was already answered.
+    public IReadOnlyList<IntakeAnswer> IntakeAnswers { get; init; } = Array.Empty<IntakeAnswer>();
+
     public string? ShopUpdate { get; init; }
     public string? CustomerNote { get; init; }
     public string? ShopNote { get; init; }
@@ -72,6 +78,7 @@ public sealed class VisitRecord
     public bool WasCancelled => Lifecycle == VisitLifecycle.Cancelled;
     public bool WasNoShow => Lifecycle == VisitLifecycle.NoShow;
     public bool HasPrice => !string.IsNullOrWhiteSpace(PriceText);
+    public bool HasIntakeAnswers => IntakeAnswers.Count > 0;
     public bool HasCustomerNote => !string.IsNullOrWhiteSpace(CustomerNote);
     public bool HasShopNote => !string.IsNullOrWhiteSpace(ShopNote) || !string.IsNullOrWhiteSpace(ShopUpdate);
     public bool HasCancellationReason => !string.IsNullOrWhiteSpace(CancellationReason);
@@ -104,6 +111,7 @@ public sealed class VisitRecord
             HasOperator = entry.HasOperator,
             OperatorId = entry.OperatorId,
             Details = entry.Details,
+            IntakeAnswers = OrderAnswers(entry.IntakeResponses),
             PriceText = MoneyFormat.Format(entry.PriceCents),
             ShopUpdate = entry.ProgressStatus,
             ShopNote = entry.Note,
@@ -134,6 +142,7 @@ public sealed class VisitRecord
             OperatorName = booking.OperatorName,
             HasOperator = booking.Operator is not null,
             PriceText = booking.PriceText,
+            IntakeAnswers = OrderAnswers(booking.IntakeResponses),
             ShopUpdate = booking.ProgressStatus,
             CustomerNote = booking.Note,
             CancellationReason = booking.CancellationReason,
@@ -148,6 +157,13 @@ public sealed class VisitRecord
             SlotEnd = booking.EndsAt,
         };
     }
+
+    // The jsonb is an object keyed by field id, so it comes back in whatever order it was stored
+    // in. sort_order is the order the shop chose, and it travelled with each answer for this.
+    public static IReadOnlyList<IntakeAnswer> OrderAnswers(Dictionary<string, IntakeAnswer>? responses) =>
+        responses is null or { Count: 0 }
+            ? Array.Empty<IntakeAnswer>()
+            : responses.Values.OrderBy(a => a.SortOrder).ToList();
 
     public static VisitLifecycle ResolveEntryLifecycle(MyQueueEntryResponse entry)
     {

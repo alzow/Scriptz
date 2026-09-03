@@ -36,10 +36,14 @@ public static class FlowStepEngine
         return isOperatorFlow || business.AllowOperatorChoice;
     }
 
+    // hasIntakeFields is the whole of this feature's reach into the step list: a service that
+    // defines questions gets one more step between picking it and confirming, and a service that
+    // defines none — which is every service that exists today — builds the list it built before.
     public static List<FlowStep> BuildSteps(
         BusinessResponse business,
         IReadOnlyList<OperatorResponse> selectable,
-        bool isOperatorFlow = false)
+        bool isOperatorFlow = false,
+        bool hasIntakeFields = false)
     {
         var steps = new List<FlowStep>();
 
@@ -47,6 +51,11 @@ public static class FlowStepEngine
             steps.Add(FlowStep.Operator);
 
         steps.Add(FlowStep.Service);
+
+        // Straight after the service in both modes, not before the confirm: the questions belong to
+        // the service that raised them, so stepping back off them lands on the choice that did.
+        if (hasIntakeFields)
+            steps.Add(FlowStep.Intake);
 
         if (business.Mode == BookingMode || isOperatorFlow)
         {
@@ -65,6 +74,7 @@ public static class FlowStepEngine
     {
         FlowStep.Operator => operatorNoun,
         FlowStep.Service => "Service",
+        FlowStep.Intake => "Details",
         FlowStep.Day => "Day",
         FlowStep.Time => "Time",
         _ => "Confirm",

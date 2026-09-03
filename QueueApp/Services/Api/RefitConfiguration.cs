@@ -2,6 +2,7 @@ using Refit;
 using QueueApp.Constants;
 using QueueApp.Services.Api.Auth;
 using QueueApp.Services.Api.Booking;
+using QueueApp.Services.Api.Intake;
 using QueueApp.Services.Api.Business;
 using QueueApp.Services.Api.Operator;
 using QueueApp.Services.Api.Profile;
@@ -25,6 +26,7 @@ public static class RefitConfiguration
         services.AddApiClient<IProfileApi>(SupabaseConfig.RestUrl);
         services.AddApiClient<IServiceOfferingsApi>(SupabaseConfig.RestUrl);
         services.AddApiClient<IBookingApi>(SupabaseConfig.RestUrl);
+        services.AddApiClient<IIntakeFieldsApi>(SupabaseConfig.RestUrl);
 
         // The one client that must not go through SupabaseAuthHeaderHandler: that handler renews the
         // token by calling this, so sending this through it would be a cycle. See ITokenRefreshApi.

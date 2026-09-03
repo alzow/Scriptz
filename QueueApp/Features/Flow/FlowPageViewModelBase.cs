@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Net;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -14,6 +15,8 @@ using QueueApp.Services.Api.Booking;
 using QueueApp.Services.Api.Booking.Models;
 using QueueApp.Services.Api.Business;
 using QueueApp.Services.Api.Business.Models;
+using QueueApp.Services.Api.Intake;
+using QueueApp.Services.Api.Intake.Models;
 using QueueApp.Services.Api.Operator;
 using QueueApp.Services.Api.Operator.Models;
 using QueueApp.Services.Api.Queue;
@@ -60,6 +63,7 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
     public bool ShowServiceStep { get; set; }
     public bool ShowDayStep { get; set; }
     public bool ShowTimeStep { get; set; }
+    public bool ShowIntakeStep { get; set; }
     public bool ShowReviewStep { get; set; }
     public string FooterLabel { get; set; } = string.Empty;
     public string FooterValue { get; set; } = string.Empty;
@@ -75,6 +79,13 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
     public ObservableCollection<OperatorChoiceItem> OperatorChoices { get; } = new();
     public OperatorChoiceItem? SelectedOperatorChoice { get; set; }
     public ServiceChoiceItem? SelectedServiceRow { get; set; }
+
+    // The selected service's questions, and the answers to them. Ordinary flow state, sitting
+    // alongside the service that raised it: the confirm step is handed nothing new, and the submit
+    // that already runs writes these with the rest of the entry.
+    public ObservableCollection<IntakeFieldItem> IntakeFields { get; } = new();
+    public bool HasIntakeFields => IntakeFields.Count > 0;
+
     public ObservableCollection<DayChoiceItem> DayChoices { get; } = new();
     public DayChoiceItem? SelectedDay { get; set; }
     public bool IsLoadingDays { get; set; }
@@ -121,6 +132,11 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
     private List<OperatorResponse> _allOperators = new();
     private List<OperatorResponse> _selectableOperators = new();
     private List<FlowStep> _steps = new();
+
+    // Every intake field the business's services define, keyed by service. Read once with the rest
+    // of the flow's data so picking a service can decide, there and then and without awaiting
+    // anything, whether there is a step to insert.
+    private Dictionary<Guid, List<IntakeFieldResponse>> _intakeFieldsByService = new();
     private CancellationTokenSource? _slotDebounce;
 
     // Where the agenda was standing when it handed over — the day it was showing, and the gap that
@@ -138,6 +154,8 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
     private readonly IQueuePopupService _popupService;
     private readonly IProfileService _profileService;
     private readonly IMessenger _messenger;
+    private readonly IIntakeFieldsService _intakeFieldsService;
+    private readonly IIntakeFileService _intakeFileService;
 
     protected FlowPageViewModelBase(
         INavigationService navigationService,
@@ -150,10 +168,14 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
         IAuthService authService,
         IQueuePopupService popupService,
         IProfileService profileService,
+        IIntakeFieldsService intakeFieldsService,
+        IIntakeFileService intakeFileService,
         IMessenger messenger)
         : base(navigationService, secureStorageService)
     {
         _messenger = messenger;
+        _intakeFieldsService = intakeFieldsService;
+        _intakeFileService = intakeFileService;
         _profileService = profileService;
         _businessService = businessService;
         _queueService = queueService;
@@ -234,6 +256,14 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
             foreach (var service in services.OrderBy(s => s.SortOrder))
                 ServiceRows.Add(ServiceChoiceItem.From(service));
             OnPropertyChanged(nameof(HasServices));
+
+            // One read for the whole business, ahead of the first step: picking a service has to be
+            // able to answer "does this one ask anything?" on the spot, without an await standing
+            // between the tap and the step list. Empty for every business that defines no fields —
+            // which is all of them today — and empty too if the table isn't there yet.
+            // TODO: stub — service_intake_fields, per
+            // Documentation/service-intake-fields-backend-requirements.md.
+            _intakeFieldsByService = await _intakeFieldsService.GetFieldsByServiceAsync(_businessId);
 
             if (IsQueueMode)
                 await LoadQueueSummaryAsync();
@@ -444,7 +474,9 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
             BookingNote = string.Empty;
             CustomerName = string.Empty;
             CustomerPhone = string.Empty;
-            ShowOperatorStep = ShowServiceStep = ShowDayStep = ShowTimeStep = ShowReviewStep = false;
+            ShowOperatorStep = ShowServiceStep = ShowDayStep = ShowTimeStep = false;
+            ShowIntakeStep = ShowReviewStep = false;
+            ClearIntakeFields();
             Crumbs.Clear();
             OnPropertyChanged(nameof(HasCrumbs));
         }
@@ -509,6 +541,7 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
             ShowServiceStep = step == FlowStep.Service;
             ShowDayStep = step == FlowStep.Day;
             ShowTimeStep = step == FlowStep.Time;
+            ShowIntakeStep = step == FlowStep.Intake;
             ShowReviewStep = step == FlowStep.Review;
 
             RailStepLabel = FlowStepEngine.RailLabel(step, _labels.Noun);
@@ -557,6 +590,14 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
                         ? "This helps us match the right appointment length."
                         : "This helps us estimate how long you'll be in the queue.";
                     break;
+                case FlowStep.Intake:
+                    StepHeading = IsOperatorFlow ? "What do they need to tell you?" : "A few details first";
+                    StepSubheading = SelectedServiceRow is null
+                        ? string.Empty
+                        : IsOperatorFlow
+                            ? $"{SelectedServiceRow.Name} asks for these before it can be prepared."
+                            : $"{SelectedServiceRow.Name} needs these so they can have it ready.";
+                    break;
                 case FlowStep.Day:
                     StepHeading = "Which day?";
                     StepSubheading = "Next 14 days. Greyed days are fully booked.";
@@ -596,6 +637,7 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
                 {
                     FlowStep.Operator => SelectedOperatorChoice?.Name,
                     FlowStep.Service => SelectedServiceRow?.Name,
+                    FlowStep.Intake => HasIntakeFields ? "Details" : null,
                     FlowStep.Day => SelectedDay is null ? null : $"{SelectedDay.DayOfWeekText} {SelectedDay.DayNumberText}",
                     FlowStep.Time => SelectedSlot?.TimeText,
                     _ => null,
@@ -631,6 +673,16 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
                         : $"{SelectedServiceRow.Name} · {SelectedServiceRow.DurationText}";
                     FooterValue = SelectedServiceRow?.PriceText ?? string.Empty;
                     IsFooterCtaEnabled = SelectedServiceRow is not null;
+                    break;
+                case FlowStep.Intake:
+                    // Counts what's required and still blank — an optional question left alone is
+                    // not outstanding, so this never claims everything was answered.
+                    var outstanding = IntakeFields.Count(f => !f.IsSatisfied);
+                    FooterLabel = outstanding == 0
+                        ? "Nothing else needed"
+                        : outstanding == 1 ? "1 still needed" : $"{outstanding} still needed";
+                    FooterValue = SelectedServiceRow?.PriceText ?? string.Empty;
+                    IsFooterCtaEnabled = outstanding == 0;
                     break;
                 case FlowStep.Day:
                     FooterLabel = SelectedDay is null ? "Pick a day" : SelectedDay.Date.ToString("ddd d MMM");
@@ -726,6 +778,181 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
             _ = HandleExceptionAsync(ex);
         }
     }
+    // The one piece of existing sequencing this feature reaches into. A service that asks nothing
+    // rebuilds the list it already had, SequenceEqual says so, and not a single step moves.
+    public void RebuildSteps()
+    {
+        try
+        {
+            if (Business is null)
+                return;
+
+            var rebuilt = FlowStepEngine.BuildSteps(Business, _selectableOperators, IsOperatorFlow, HasIntakeFields);
+
+            if (rebuilt.SequenceEqual(_steps))
+                return;
+
+            _steps = rebuilt;
+
+            // Intake goes in after Service, so the step being stood on keeps its index: the
+            // customer doesn't move, the rail gains or loses a segment ahead of them.
+            ApplyStep();
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
+    }
+
+    public void BuildIntakeFields(Guid serviceId)
+    {
+        try
+        {
+            ClearIntakeFields();
+
+            if (!_intakeFieldsByService.TryGetValue(serviceId, out var fields))
+                return;
+
+            foreach (var field in fields.OrderBy(f => f.SortOrder))
+            {
+                var item = IntakeFieldItem.From(field);
+                item.PropertyChanged += OnIntakeFieldChanged;
+                IntakeFields.Add(item);
+            }
+
+            OnPropertyChanged(nameof(HasIntakeFields));
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
+    }
+
+    public void ClearIntakeFields()
+    {
+        try
+        {
+            foreach (var item in IntakeFields)
+                item.PropertyChanged -= OnIntakeFieldChanged;
+
+            IntakeFields.Clear();
+            OnPropertyChanged(nameof(HasIntakeFields));
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
+    }
+
+    // Typing into a short or long text field is the one answer nothing else routes through a
+    // command, and the footer's CTA turns on the moment the last required one is filled.
+    private void OnIntakeFieldChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (ShowIntakeStep)
+            RefreshFooter();
+    }
+
+    [RelayCommand]
+    public void SelectIntakeOption(IntakeOptionItem? option)
+    {
+        try
+        {
+            if (option is null)
+                return;
+
+            var field = IntakeFields.FirstOrDefault(f => f.Options.Contains(option));
+            if (field is null)
+                return;
+
+            // One choice replaces the last; any number of choices toggle.
+            if (field.IsSingleSelect)
+            {
+                foreach (var candidate in field.Options)
+                    candidate.IsSelected = ReferenceEquals(candidate, option);
+            }
+            else
+            {
+                option.IsSelected = !option.IsSelected;
+            }
+
+            field.NotifyAnswerChanged();
+            RefreshFooter();
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
+    }
+
+    [RelayCommand]
+    public async Task PickIntakeFileAsync(IntakeFieldItem? field)
+    {
+        if (field is null || field.IsPickingFile || SelectedServiceRow is null)
+            return;
+
+        field.IsPickingFile = true;
+        try
+        {
+            var picked = await _intakeFileService.PickAndUploadAsync(SelectedServiceRow.Service.Id, field.FieldId);
+
+            // Null is the customer closing the picker without choosing, which is not a failure and
+            // must not wipe a file they already attached.
+            if (picked is null)
+                return;
+
+            field.FileAnswer = picked;
+            field.NotifyAnswerChanged();
+            RefreshFooter();
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+        finally
+        {
+            field.IsPickingFile = false;
+        }
+    }
+
+    [RelayCommand]
+    public void ClearIntakeFile(IntakeFieldItem? field)
+    {
+        try
+        {
+            if (field is null)
+                return;
+
+            field.FileAnswer = null;
+            field.NotifyAnswerChanged();
+            RefreshFooter();
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
+    }
+
+    // Null unless the service actually asked something — so an entry for a service with no fields
+    // goes up with the body it went up with before any of this existed.
+    //
+    // Keyed by field id, valued by a snapshot of both the question and the answer: see IntakeAnswer.
+    // Every defined field is written, including optional ones left blank, so the shop can tell a
+    // question that was skipped from one that was never asked.
+    public Dictionary<string, IntakeAnswer>? BuildIntakeResponses()
+    {
+        try
+        {
+            return HasIntakeFields
+                ? IntakeFields.ToDictionary(f => f.FieldId.ToString(), f => f.ToAnswer())
+                : null;
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+            return null;
+        }
+    }
+
     [RelayCommand]
     public void SelectOperator(OperatorChoiceItem? item)
     {
@@ -759,6 +986,8 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
 
             SelectedServiceRow = item;
             InvalidateAfter(FlowStep.Service);
+            BuildIntakeFields(item.Service.Id);
+            RebuildSteps();
             RefreshFooter();
         }
         catch (Exception ex)
@@ -1192,6 +1421,7 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
                 CustomerName = CustomerName.Trim(),
                 CustomerPhone = string.IsNullOrWhiteSpace(CustomerPhone) ? null : CustomerPhone.Trim(),
                 Details = new BookingDetails { CreatedBy = "operator" },
+                IntakeResponses = BuildIntakeResponses(),
             });
 
             ResetFlowState();
@@ -1232,7 +1462,8 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
                 SelectedOperatorChoice?.OperatorId,
                 Guid.Parse(userId),
                 customerName,
-                SelectedServiceRow.Service.Id);
+                SelectedServiceRow.Service.Id,
+                BuildIntakeResponses());
 
             _submittedRecordId = entry.Id;
             _submittedIsBooking = false;
@@ -1299,6 +1530,7 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
                     CustomerId = Guid.Parse(userId),
                     StartsAt = SelectedSlot.Slot.SlotStart,
                     Note = TrimmedBookingNote(),
+                    IntakeResponses = BuildIntakeResponses(),
                 });
             }
             else
@@ -1311,6 +1543,7 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
                     CustomerId = Guid.Parse(userId),
                     StartsAt = SelectedSlot.Slot.SlotStart,
                     Note = TrimmedBookingNote(),
+                    IntakeResponses = BuildIntakeResponses(),
                 });
             }
 

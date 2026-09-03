@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
+             xmlns:models="clr-namespace:QueueApp.Shared.Domain.Models"
+             x:Name="Root"
+             x:Class="QueueApp.Features.Flow.Helpers.Intake.IntakeSingleSelectFieldView">
+
+    <!-- One answer, so the rows carry the same radio the service step uses for the same job. -->
+    <VerticalStackLayout Spacing="8"
+                         BindableLayout.ItemsSource="{Binding Options, Source={x:Reference Root}}">
+        <BindableLayout.ItemTemplate>
+            <DataTemplate x:DataType="models:IntakeOptionItem">
+                <Border Padding="12" Style="{StaticResource brd15_Row_Selectable}">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Command="{Binding SelectOptionCommand, Source={x:Reference Root}}"
+                            CommandParameter="{Binding .}"/>
+                    </Border.GestureRecognizers>
+
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <Label Grid.Column="0" Text="{Binding Text}" VerticalOptions="Center"
+                               Style="{StaticResource lbl14_Regular_TextDark}"/>
+                        <Border Grid.Column="1" WidthRequest="22" HeightRequest="22"
+                                Style="{StaticResource brd11_Radio_Selectable}"
+                                VerticalOptions="Center">
+                            <tpl:ThemedIcon Icon="ic_check" WidthRequest="12" HeightRequest="12"
+                                            HorizontalOptions="Center" VerticalOptions="Center"
+                                            IsVisible="{Binding IsSelected}"/>
+                        </Border>
+                    </Grid>
+                </Border>
+            </DataTemplate>
+        </BindableLayout.ItemTemplate>
+    </VerticalStackLayout>
+
+</ContentView>

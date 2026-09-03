@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json.Serialization;
 using QueueApp.Framework.Extensions;
+using QueueApp.Services.Api.Intake.Models;
 using QueueApp.Services.Api.Queue.Models;
 using QueueApp.Shared.Domain;
 
@@ -30,6 +31,11 @@ public class UpcomingBookingResponse
     [JsonPropertyName("progress_status")] public string? ProgressStatus { get; set; }
     [JsonPropertyName("note")] public string? Note { get; set; }
     [JsonPropertyName("details")] public BookingDetails? Details { get; set; }
+
+    // Same as the queue side's: selected via `*` on the visit page's read, absent everywhere else.
+    // TODO: stub — bookings.intake_responses jsonb; see
+    // Documentation/service-intake-fields-backend-requirements.md.
+    [JsonPropertyName("intake_responses")] public Dictionary<string, IntakeAnswer>? IntakeResponses { get; set; }
 
     [JsonIgnore] public bool IsCancelling { get; set; }
 

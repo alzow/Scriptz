@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using QueueApp.Services.Api.Intake.Models;
 using QueueApp.Shared.Domain;
 
 namespace QueueApp.Services.Api.Queue.Models;
@@ -23,6 +24,12 @@ public class MyQueueEntryResponse
     [JsonPropertyName("note")] public string? Note { get; set; }
     [JsonPropertyName("progress_status")] public string? ProgressStatus { get; set; }
     [JsonPropertyName("details")] public QueueEntryDetails? Details { get; set; }
+
+    // What the customer answered on the way in, keyed by the field's id. Selected via `*`, so it
+    // stays null and harmless until the column exists.
+    // TODO: stub — queue_entries.intake_responses jsonb; see
+    // Documentation/service-intake-fields-backend-requirements.md.
+    [JsonPropertyName("intake_responses")] public Dictionary<string, IntakeAnswer>? IntakeResponses { get; set; }
 
     [JsonPropertyName("business")] public VisitBusinessRef? Business { get; set; }
     [JsonPropertyName("operator")] public VisitOperatorRef? Operator { get; set; }

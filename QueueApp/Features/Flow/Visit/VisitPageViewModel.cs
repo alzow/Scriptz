@@ -12,6 +12,7 @@ using QueueApp.Services.Api.Booking;
 using QueueApp.Services.Api.Booking.Models;
 using QueueApp.Services.Api.Business;
 using QueueApp.Services.Api.Business.Models;
+using QueueApp.Services.Api.Intake.Models;
 using QueueApp.Services.Api.Queue;
 using QueueApp.Services.Api.Queue.Models;
 using QueueApp.Services.Location;
@@ -82,6 +83,12 @@ public partial class VisitPageViewModel : BaseViewModel
 
     public ObservableCollection<VisitTimelineStep> Steps { get; } = new();
     public bool HasTimeline => Steps.Count > 0;
+
+    // What the customer answered before this visit existed. Only rendered when the entry actually
+    // carries answers — every visit taken before this feature, and every service that asks nothing,
+    // has none and shows no section at all.
+    public ObservableCollection<IntakeAnswer> IntakeAnswers { get; } = new();
+    public bool HasIntakeAnswers => IntakeAnswers.Count > 0;
 
     public bool HasCustomerNote => Record?.HasCustomerNote == true;
     public string CustomerNoteText => Record?.CustomerNote ?? string.Empty;
@@ -328,6 +335,7 @@ public partial class VisitPageViewModel : BaseViewModel
             BuildAddressLine();
             BuildHero();
             BuildFacts();
+            BuildIntake();
             BuildTimeline();
             BuildReasonBlock();
             BuildPrimaryAction();
@@ -518,6 +526,48 @@ public partial class VisitPageViewModel : BaseViewModel
         catch (Exception ex)
         {
             _ = HandleExceptionAsync(ex);
+        }
+    }
+
+    public void BuildIntake()
+    {
+        try
+        {
+            IntakeAnswers.Clear();
+
+            if (Record is not { } record)
+                return;
+
+            foreach (var answer in record.IntakeAnswers)
+                IntakeAnswers.Add(answer);
+
+            OnPropertyChanged(nameof(HasIntakeAnswers));
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+        }
+    }
+
+    // The file itself lives in a bucket nothing has created yet, so there is nothing honest to open.
+    // Saying so beats a link that does nothing.
+    // TODO: stub — open the stored path once the storage bucket and its access policy exist; see
+    // Documentation/service-intake-fields-backend-requirements.md.
+    [RelayCommand]
+    public async Task OpenIntakeFileAsync(IntakeAnswer? answer)
+    {
+        try
+        {
+            if (answer?.File is null)
+                return;
+
+            await _popupService.ShowAlertAsync(
+                "Not available yet",
+                $"{answer.File.Name} was attached to this visit, but file storage isn't switched on yet.");
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
         }
     }
 

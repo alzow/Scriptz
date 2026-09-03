@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.Flow.QueueFlow"
              xmlns:flow="clr-namespace:QueueApp.Features.Flow.Helpers"
+             xmlns:intake="clr-namespace:QueueApp.Features.Flow.Helpers.Intake"
              xmlns:topbar="clr-namespace:QueueApp.Shared.Templates.TopBar"
              x:Name="Root"
              x:Class="QueueApp.Features.Flow.QueueFlow.QueueFlowPage"
@@ -43,6 +44,14 @@
                         ServiceRows="{Binding ServiceRows}"
                         ShowServiceStep="{Binding ShowServiceStep}"
                         SelectServiceCommand="{Binding SelectServiceCommand}"/>
+
+                <intake:IntakeStepView
+                        IsVisible="{Binding ShowIntakeStep}"
+                        ShowIntakeStep="{Binding ShowIntakeStep}"
+                        IntakeFields="{Binding IntakeFields}"
+                        SelectOptionCommand="{Binding SelectIntakeOptionCommand}"
+                        PickFileCommand="{Binding PickIntakeFileCommand}"
+                        ClearFileCommand="{Binding ClearIntakeFileCommand}"/>
 
                 <flow:ReviewStepView
                         IsVisible="{Binding ShowReviewStep}"

@@ -27,6 +27,7 @@ public static class NavigationPaths
     public const string BusinessSettingsPage  = "BusinessSettingsPage";
     public const string ServicesManagementPage = "ServicesManagementPage";
     public const string AddEditServicePage    = "AddEditServicePage";
+    public const string AddEditIntakeFieldPage = "AddEditIntakeFieldPage";
     public const string StaffManagementPage   = "StaffManagementPage";
     public const string AddEditOperatorPage   = "AddEditOperatorPage";
     public const string OperatorHoursPage     = "OperatorHoursPage";

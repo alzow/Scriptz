@@ -1,4 +1,5 @@
 using QueueApp.Framework.Base;
+using QueueApp.Services.Api.Intake.Models;
 using QueueApp.Services.Api.Queue.Models;
 
 namespace QueueApp.Services.Api.Queue;
@@ -60,7 +61,8 @@ public class QueueService : BaseService, IQueueService
     public Task<List<QueueSummaryRow>> GetQueueSummaryAsync(Guid businessId) =>
         ExecuteApiCallAsync(_api.GetQueueSummaryAsync(new BusinessIdRequest { BusinessId = businessId }));
 
-    public Task<QueueEntryResponse> JoinQueueAsync(Guid businessId, Guid? operatorId, Guid customerId, string? customerName, Guid serviceId) =>
+    public Task<QueueEntryResponse> JoinQueueAsync(Guid businessId, Guid? operatorId, Guid customerId, string? customerName, Guid serviceId,
+        Dictionary<string, IntakeAnswer>? intakeResponses = null) =>
         ExecuteApiCallAsync(_api.JoinQueueAsync(new JoinQueueRequest
         {
             BusinessId = businessId,
@@ -68,6 +70,7 @@ public class QueueService : BaseService, IQueueService
             CustomerId = customerId,
             CustomerName = customerName,
             ServiceId = serviceId,
+            IntakeResponses = intakeResponses,
         }));
 
     public Task<QueueEntryResponse> CancelEntryAsync(Guid entryId) =>
