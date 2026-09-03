@@ -2,10 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace QueueApp.Services.Api.Intake.Models;
 
-// A pointer at whatever the customer uploaded. The bucket it points into does not exist yet, so
-// nothing here is fetchable — see the backend requirements file.
-//
-// TODO: stub — storage bucket, path convention and access policy are all still to be decided.
+// A pointer at an object in the private intake-uploads Storage bucket.
 public class IntakeFileRef
 {
     [JsonPropertyName("path")] public string Path { get; set; } = string.Empty;

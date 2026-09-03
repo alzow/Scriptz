@@ -1,22 +1,16 @@
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Diagnostics;
+using QueueApp.Constants;
 using QueueApp.Services.Api.Intake.Models;
 using QueueApp.Services.Auth;
 
 namespace QueueApp.Services.Api.Intake;
 
-// Picking is a device capability and is real. Uploading is not: file-upload fields need a Supabase
-// Storage bucket that does not exist, and inventing a bucket name and an access policy here would
-// be guessing at the two decisions that matter most.
-//
-// So the pick is genuine — the customer chooses a real script or photo, and the step shows its real
-// name and size — and what comes back is a path into a bucket nothing has created yet. That is
-// enough to exercise the whole flow, and it is deliberately not enough to ship.
-//
-// TODO: stub — see the "File storage" section of
-// Documentation/service-intake-fields-backend-requirements.md.
 public class IntakeFileService : IIntakeFileService
 {
     private readonly IAuthService _authService;
+    private readonly IHttpClientFactory _httpClientFactory;
 
     private static readonly FilePickerFileType ImagesAndPdf = new(
         new Dictionary<DevicePlatform, IEnumerable<string>>
@@ -27,9 +21,10 @@ public class IntakeFileService : IIntakeFileService
             [DevicePlatform.WinUI] = new[] { ".png", ".jpg", ".jpeg", ".heic", ".pdf" },
         });
 
-    public IntakeFileService(IAuthService authService)
+    public IntakeFileService(IAuthService authService, IHttpClientFactory httpClientFactory)
     {
         _authService = authService;
+        _httpClientFactory = httpClientFactory;
     }
 
     public async Task<IntakeFileRef?> PickAndUploadAsync(Guid serviceId, Guid fieldId)
@@ -47,15 +42,78 @@ public class IntakeFileService : IIntakeFileService
         if (picked is null)
             return null;
 
+        var objectKey = $"{userId}/{serviceId}/{fieldId}/{Guid.NewGuid()}{Path.GetExtension(picked.FileName)}";
+        var objectPath = BuildObjectPath(objectKey);
+        var contentType = string.IsNullOrWhiteSpace(picked.ContentType)
+            ? "application/octet-stream"
+            : picked.ContentType;
+
+        await using var source = await picked.OpenReadAsync();
+        using var content = new StreamContent(source);
+        content.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
+        using var request = new HttpRequestMessage(
+            HttpMethod.Post,
+            $"storage/v1/object/{SupabaseConfig.IntakeUploadsBucket}/{objectPath}")
+        {
+            Content = content,
+        };
+        request.Headers.TryAddWithoutValidation("x-upsert", "false");
+
+        using var response = await _httpClientFactory
+            .CreateClient(RefitConfiguration.SupabaseStorageClientName)
+            .SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
         return new IntakeFileRef
         {
-            // The path the real upload would write to, so the shape stored in intake_responses is
-            // already the shape the backend will have to serve.
-            Path = $"{userId}/{serviceId}/{fieldId}/{Guid.NewGuid()}{System.IO.Path.GetExtension(picked.FileName)}",
+            Path = objectKey,
             Name = picked.FileName,
-            ContentType = picked.ContentType,
+            ContentType = contentType,
             SizeBytes = SizeOf(picked),
         };
+    }
+
+    public async Task<string> DownloadAsync(IntakeFileRef file)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+
+        if (string.IsNullOrWhiteSpace(file.Path))
+            throw new InvalidOperationException("The intake file has no storage path.");
+
+        var objectPath = BuildObjectPath(file.Path);
+
+        var safeFileName = Path.GetFileName(file.Name);
+        if (string.IsNullOrWhiteSpace(safeFileName))
+            safeFileName = "intake-file";
+
+        var localPath = Path.Combine(FileSystem.CacheDirectory, $"{Guid.NewGuid():N}-{safeFileName}");
+        using var response = await _httpClientFactory
+            .CreateClient(RefitConfiguration.SupabaseStorageClientName)
+            .GetAsync($"storage/v1/object/authenticated/{SupabaseConfig.IntakeUploadsBucket}/{objectPath}",
+                HttpCompletionOption.ResponseHeadersRead);
+        response.EnsureSuccessStatusCode();
+
+        await using var source = await response.Content.ReadAsStreamAsync();
+        await using var destination = File.Create(localPath);
+        await source.CopyToAsync(destination);
+
+        return localPath;
+    }
+
+    private static string BuildObjectPath(string path)
+    {
+        var segments = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        if (segments.Length == 0)
+            throw new InvalidOperationException("The intake file has an invalid storage path.");
+
+        // Stored references created before the key convention changed include the bucket name.
+        if (string.Equals(segments[0], SupabaseConfig.IntakeUploadsBucket, StringComparison.Ordinal))
+            segments = segments[1..];
+
+        if (segments.Length == 0)
+            throw new InvalidOperationException("The intake file has an invalid storage path.");
+
+        return string.Join('/', segments.Select(Uri.EscapeDataString));
     }
 
     private static long? SizeOf(FileResult picked)

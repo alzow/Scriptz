@@ -6,6 +6,7 @@ public static class SupabaseConfig
     public const string ProjectUrl = "https://lnxfwrfqxamfrbebgukg.supabase.co";
     public const string RestUrl = ProjectUrl + "/rest/v1";
     public const string AuthUrl = ProjectUrl; // GoTrue paths are /auth/v1/... off the project root
+    public const string IntakeUploadsBucket = "intake-uploads";
     public const string AnonKey = "sb_publishable_DtRAQzD-2sSOpD5NR6s_1A_wF7ITIbB"; // publishable/anon key — safe in-app; RLS protects data
 
     // SecureStorage keys for the current session. SessionRefreshService owns them — it is the only

@@ -84,7 +84,7 @@ the answer:
     "field_type": "file",
     "sort_order": 3,
     "is_required": false,
-    "file": { "path": "intake-uploads/<service>/<field>/<uuid>.pdf", "name": "script.pdf",
+    "file": { "path": "<auth.uid()>/<service>/<field>/<uuid>.pdf", "name": "script.pdf",
               "content_type": "application/pdf", "size_bytes": 51201 }
   }
 }
@@ -140,8 +140,8 @@ answers.
 
 ## 4. File storage — a genuine gap
 
-**No Supabase Storage bucket exists for this, and this pass deliberately did not invent one.**
-File-upload fields cannot ship until one does. What has to be decided:
+**The front end expects a private `intake-uploads` Supabase Storage bucket.** File-upload fields
+cannot ship until selected files are uploaded to it. What still has to be decided:
 
 - **Bucket name and privacy.** The front end writes the storage object key
   `<auth.uid()>/<service_id>/<field_id>/<uuid><ext>`. The bucket name remains a backend decision.
@@ -157,15 +157,14 @@ File-upload fields cannot ship until one does. What has to be decided:
 - **Limits.** Max size and accepted types. The picker is currently restricted to images and PDFs
   front-end-side; that restriction is not enforcement.
 
-Until the bucket exists, `IntakeFileService` picks a real file, shows its real name and size, and
-hands back a path into a bucket nothing has created. The visit page's file answer says so plainly
-rather than offering a link that does nothing
-(`VisitPageViewModel.OpenIntakeFileAsync`). Both are the only two places to change when storage
-lands.
+`IntakeFileService` uploads the picked file before returning its reference. The visit page downloads
+the object through the authenticated Supabase Storage endpoint and opens its cached local copy
+(`VisitPageViewModel.OpenIntakeFileAsync`).
 
 ## 5. What was deliberately not built
 
-- **No migration, no RLS, no bucket.** Per §8.1 of the intent file.
+- **No migration or RLS policy is included here.** The `intake-uploads` bucket and policies must be
+  created in Supabase before uploads and downloads can succeed.
 - **No new field types.** Five, as specified — date, number and the rest wait for a real use case.
 - **Nothing downstream was touched.** The confirm step, queue engine, position tracking, realtime,
   notifications, operator queue board and booking agenda are all unmodified. The only existing

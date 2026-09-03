@@ -13,6 +13,7 @@ using QueueApp.Services.Api.Booking.Models;
 using QueueApp.Services.Api.Business;
 using QueueApp.Services.Api.Business.Models;
 using QueueApp.Services.Api.Intake.Models;
+using QueueApp.Services.Api.Intake;
 using QueueApp.Services.Api.Queue;
 using QueueApp.Services.Api.Queue.Models;
 using QueueApp.Services.Location;
@@ -116,6 +117,7 @@ public partial class VisitPageViewModel : BaseViewModel
     private readonly ILocationService _locationService;
     private readonly IQueueRealtimeService _realtimeService;
     private readonly IQueuePopupService _popupService;
+    private readonly IIntakeFileService _intakeFileService;
 
     public VisitPageViewModel(
         INavigationService navigationService,
@@ -125,7 +127,8 @@ public partial class VisitPageViewModel : BaseViewModel
         IBusinessService businessService,
         ILocationService locationService,
         IQueueRealtimeService realtimeService,
-        IQueuePopupService popupService)
+        IQueuePopupService popupService,
+        IIntakeFileService intakeFileService)
         : base(navigationService, secureStorageService)
     {
         _queueService = queueService;
@@ -134,6 +137,7 @@ public partial class VisitPageViewModel : BaseViewModel
         _locationService = locationService;
         _realtimeService = realtimeService;
         _popupService = popupService;
+        _intakeFileService = intakeFileService;
     }
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
@@ -549,21 +553,19 @@ public partial class VisitPageViewModel : BaseViewModel
         }
     }
 
-    // The file itself lives in a bucket nothing has created yet, so there is nothing honest to open.
-    // Saying so beats a link that does nothing.
-    // TODO: stub — open the stored path once the storage bucket and its access policy exist; see
-    // Documentation/service-intake-fields-backend-requirements.md.
     [RelayCommand]
     public async Task OpenIntakeFileAsync(IntakeAnswer? answer)
     {
         try
         {
-            if (answer?.File is null)
+            var file = answer?.File;
+            if (file is null)
                 return;
 
-            await _popupService.ShowAlertAsync(
-                "Not available yet",
-                $"{answer.File.Name} was attached to this visit, but file storage isn't switched on yet.");
+            var downloadedPath = await _intakeFileService.DownloadAsync(file);
+            await Launcher.Default.OpenAsync(new OpenFileRequest(
+                file.Name,
+                new ReadOnlyFile(downloadedPath, "application/octet-stream")));
         }
         catch (Exception ex)
         {
