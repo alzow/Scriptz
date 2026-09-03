@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using QueueApp.Services.Api.Intake.Models;
+using QueueApp.Services.Auth;
 
 namespace QueueApp.Services.Api.Intake;
 
@@ -15,7 +16,7 @@ namespace QueueApp.Services.Api.Intake;
 // Documentation/service-intake-fields-backend-requirements.md.
 public class IntakeFileService : IIntakeFileService
 {
-    public const string PendingBucket = "intake-uploads";
+    private readonly IAuthService _authService;
 
     private static readonly FilePickerFileType ImagesAndPdf = new(
         new Dictionary<DevicePlatform, IEnumerable<string>>
@@ -26,8 +27,17 @@ public class IntakeFileService : IIntakeFileService
             [DevicePlatform.WinUI] = new[] { ".png", ".jpg", ".jpeg", ".heic", ".pdf" },
         });
 
+    public IntakeFileService(IAuthService authService)
+    {
+        _authService = authService;
+    }
+
     public async Task<IntakeFileRef?> PickAndUploadAsync(Guid serviceId, Guid fieldId)
     {
+        var userId = await _authService.GetUserIdAsync();
+        if (string.IsNullOrWhiteSpace(userId))
+            throw new InvalidOperationException("No authenticated user is available for intake file upload.");
+
         var picked = await FilePicker.Default.PickAsync(new PickOptions
         {
             PickerTitle = "Choose an image or PDF",
@@ -41,7 +51,7 @@ public class IntakeFileService : IIntakeFileService
         {
             // The path the real upload would write to, so the shape stored in intake_responses is
             // already the shape the backend will have to serve.
-            Path = $"{PendingBucket}/{serviceId}/{fieldId}/{Guid.NewGuid()}{System.IO.Path.GetExtension(picked.FileName)}",
+            Path = $"{userId}/{serviceId}/{fieldId}/{Guid.NewGuid()}{System.IO.Path.GetExtension(picked.FileName)}",
             Name = picked.FileName,
             ContentType = picked.ContentType,
             SizeBytes = SizeOf(picked),

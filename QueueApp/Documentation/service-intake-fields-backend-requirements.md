@@ -143,14 +143,13 @@ answers.
 **No Supabase Storage bucket exists for this, and this pass deliberately did not invent one.**
 File-upload fields cannot ship until one does. What has to be decided:
 
-- **Bucket name and privacy.** The front end writes a placeholder path prefixed
-  `intake-uploads/<service_id>/<field_id>/<uuid><ext>` (`IntakeFileService.PendingBucket`), which is
-  a suggestion, not a decision. Private is the only defensible default: a prescription is the
-  motivating case for this whole feature.
+- **Bucket name and privacy.** The front end writes the storage object key
+  `<auth.uid()>/<service_id>/<field_id>/<uuid><ext>`. The bucket name remains a backend decision.
+  Private is the only defensible default: a prescription is the motivating case for this whole
+  feature.
 - **Who may upload.** The customer, before the entry exists — so the upload happens ahead of any row
-  that could be used to authorise it. Either the path has to be authorised on the uploader's own
-  user id, or the upload has to move to after creation and patch the row, which costs the
-  single-write property in §2.
+  that could be used to authorise it. The first path segment is the uploader's user id, allowing
+  the storage policy to authorise the upload with `auth.uid() = (storage.foldername(name))[1]`.
 - **Who may read.** The customer who uploaded it, and the business that was asked to act on it.
   There is no obvious existing policy to copy for the second half.
 - **Retention.** These are medical-adjacent documents in the motivating case. How long they live
