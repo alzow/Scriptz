@@ -39,13 +39,19 @@ public class QueueService : BaseService, IQueueService
                 ["awaiting_collection_at"] = DateTime.UtcNow,
             }));
 
-    // Goes through complete_entry rather than PATCHing status="done" directly, so this stays
-    // correct even if the RPC's own transition logic ever does more than a column write.
-    public async Task MarkCollectedAsync(Guid entryId)
+    // PATCHes status directly rather than going through complete_entry: that RPC's own state
+    // machine requires status='serving' and rejects anything else with "entry is not completable",
+    // but by the time this runs the entry is already in awaiting_collection, not serving.
+    public Task MarkCollectedAsync(Guid entryId)
     {
-        await ExecuteApiCallAsync(_api.CompleteEntryAsync(new EntryIdRequest { EntryId = entryId }));
-        await ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
-            new Dictionary<string, object?> { ["collected_at"] = DateTime.UtcNow }));
+        var now = DateTime.UtcNow;
+        return ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
+            new Dictionary<string, object?>
+            {
+                ["status"] = QueueEntryStatuses.Done,
+                ["done_at"] = now,
+                ["collected_at"] = now,
+            }));
     }
 
     public Task NoShowAsync(Guid entryId) =>

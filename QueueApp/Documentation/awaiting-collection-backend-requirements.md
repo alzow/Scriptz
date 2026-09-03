@@ -43,21 +43,86 @@ the two enums don't share a terminal label.
   operator board keeps awaiting-collection entries in view. No booking-side equivalent was needed —
   the agenda's own queries are unfiltered by status already.
 
-**Known gap, needs a backend fix — `my_active_queue_entry()`.** This RPC backs the browse
-dashboard's live queue hero (`IQueueApi.GetMyActiveEntryAsync`, `CategoryPickerPageViewModel.
-ActiveEntry`). Its SQL isn't in this repo, but its behavior confirms it filters server-side to some
-status set — an entry that transitions to `awaiting_collection` stops coming back at all, and the
-hero disappears from the browse dashboard entirely (reported after the migration in this file was
-applied; reproduced against the real backend, not the stub — `StubQueueService.GetMyActiveEntryAsync`
-had the equivalent bug client-side and has been fixed to include `awaiting_collection`, but that
-stub is opt-in via the `USE_STUBS` build flag and isn't what live testing runs against). Whatever
-this function's `WHERE status = ...` / `status IN (...)` clause currently reads, it needs
-`awaiting_collection` added alongside `waiting` and `serving` — same fix as `GetActiveEntriesAsync`
-above, just server-side. `my_queue_status(business_id)` is described as making the same kind of
+**Found and patched — `my_active_queue_entry()`.** This RPC backs the browse dashboard's live
+queue hero (`IQueueApi.GetMyActiveEntryAsync`, `CategoryPickerPageViewModel.ActiveEntry`). Its
+`mine` CTE filtered `status in ('waiting', 'serving')`, so an entry that transitioned to
+`awaiting_collection` stopped coming back at all and the hero disappeared from the browse
+dashboard entirely. (`StubQueueService.GetMyActiveEntryAsync` had the identical bug client-side and
+has been fixed too, but that stub is opt-in via the `USE_STUBS` build flag and isn't what live
+testing runs against.) Patched body — same `CREATE OR REPLACE FUNCTION` header, only the SQL below
+changes:
+
+```sql
+with mine as (
+    select qe.*
+    from queue_entries qe
+    where qe.customer_id = auth.uid()
+      and qe.status in ('waiting', 'serving', 'awaiting_collection')
+    order by
+      case qe.status
+        when 'serving' then 0
+        when 'awaiting_collection' then 1
+        else 2
+      end,
+      qe.joined_at asc
+    limit 1
+  ),
+  ahead as (
+    -- Unchanged on purpose: an awaiting-collection entry isn't blocking anyone in line, so it
+    -- stays out of the "how many are ahead of me" count.
+    select count(*)::int as n
+    from queue_entries qe
+    cross join mine m
+    where qe.business_id = m.business_id
+      and qe.status in ('waiting', 'serving')
+      and qe.joined_at < m.joined_at
+      and (
+        m.operator_id  is null
+        or qe.operator_id is null
+        or qe.operator_id = m.operator_id
+      )
+  )
+  select
+    m.id,
+    m.business_id,
+    b.name,
+    b.latitude,
+    b.longitude,
+    m.operator_id,
+    o.display_name,
+    case when m.status in ('serving', 'awaiting_collection') then 1
+         else (select n from ahead) + 1 end,
+    m.status::text,
+    m.joined_at,
+    queue_entry_wait_minutes(m.id),
+    m.progress_status
+  from mine m
+  join businesses b on b.id = m.business_id
+  left join operators o on o.id = m.operator_id;
+```
+
+Three changes from the original: (1) `mine`'s status filter includes `awaiting_collection`; (2) its
+`order by` became a 3-way case (serving, then awaiting_collection, then waiting) instead of a
+2-way one, in case a customer somehow has more than one live-ish row at once; (3) the
+`queue_position` case returns 1 for `awaiting_collection` too, matching `serving` — the front end
+never reads this value once it's in that state (`ShowWaitEstimate`/`ShowUnassignedNotice` are both
+gated off), so this is cosmetic, just avoiding a nonsense number over a meaningless one.
+`queue_entry_wait_minutes(m.id)` wasn't inspected — worth a quick check that it doesn't assume
+`status='waiting'` internally, though nothing in the front end depends on its output for an
+awaiting-collection row either.
+
+`my_queue_status(business_id)` is described elsewhere in this codebase as making the same kind of
 split and may have the identical gap; lower stakes if so — `VisitPageViewModel.LoadEntryAsync` only
-loses the Position/WaitMinutes it supplies, doesn't lose the row. Neither function's definition was
-available in this pass to write an exact patch — needs whoever has the live definition (or
-Supabase migration history) to apply it.
+loses the Position/WaitMinutes it supplies, doesn't lose the row. Its definition wasn't available in
+this pass to check or patch.
+
+**Second bug found while fixing the first — `complete_entry` and `MarkCollectedAsync`.**
+`IQueueService.MarkCollectedAsync` briefly went through `complete_entry` (see §4) to avoid guessing
+the terminal status label. That RPC enforces `status='serving'` and rejects anything else with
+`entry is not completable` — by the time `MarkCollectedAsync` runs the entry is in
+`awaiting_collection`, not `serving`, so it always failed. Now that the terminal label is confirmed
+(`done`, not a guess), `MarkCollectedAsync` PATCHes `status`, `done_at` and `collected_at` directly
+instead — see §4 for the full history.
 
 ## 3. Timestamps
 
@@ -98,35 +163,42 @@ surfaces it as an actual problem, not before.
 | Front-end call | Implementation | Sets |
 |---|---|---|
 | `IQueueService.MarkAwaitingCollectionAsync` | `PATCH /queue_entries?id=eq.<id>` | `status`, `awaiting_collection_at` |
-| `IQueueService.MarkCollectedAsync` | `POST /rpc/complete_entry` then `PATCH /queue_entries?id=eq.<id>` | (RPC's own effect, includes `done_at`), then `collected_at` |
+| `IQueueService.MarkCollectedAsync` | `PATCH /queue_entries?id=eq.<id>` | `status=done`, `done_at`, `collected_at` |
 | `IBookingService.MarkBookingAwaitingCollectionAsync` | `PATCH /bookings?id=eq.<id>` | `status` |
 | `IBookingService.MarkBookingCollectedAsync` | `PATCH /bookings?id=eq.<id>` | `status=completed`, `collected_at` |
 
-`MarkCollectedAsync` (queue) does **not** PATCH `status` directly — a first pass did, guessing the
-terminal `queue_status` label was `"completed"`, and that guess was wrong against the live enum
-(`invalid input value for enum queue_status`). **Confirmed: the real label is `"done"`.** This is
-now `QueueEntryStatuses.Done` and is the value every local optimistic-update in the operator board
-uses (`OperatorQueuePageViewModel.DoneAsync`/`MarkCollectedAsync`, `StubQueueService`) — none of
-them PATCH it to the server directly, they only mirror it into local state; the queue engine's
-`complete_entry` RPC is what actually writes it. `MarkCollectedAsync` calls that RPC (same one the
-non-collection Done path already uses) to close the entry out, then PATCHes only `collected_at`,
-which is a plain timestamptz column and carries no enum-label risk. This means `done_at`'s value
-comes from whatever `complete_entry` stamps, not from the C# — so it is not necessarily identical
-to `collected_at` down to the millisecond, unlike the booking side. `MarkBookingCollectedAsync` was
-not affected: `completed` was already a
-proven `booking_status` label (returned by `complete_booking`'s own output) before this file
-existed, so PATCHing it directly is safe.
+`MarkCollectedAsync` (queue) went through two wrong shapes before landing here, both worth
+recording so nobody re-derives them:
+
+1. First pass PATCHed `status="completed"` directly — a guess. `QueueEntryStatuses.cs` already
+   flagged the terminal `queue_status` label as never independently confirmed (only `waiting` and
+   `serving` are labels this app itself sends). The guess was wrong: `invalid input value for enum
+   queue_status`.
+2. Second pass avoided guessing by calling `complete_entry` (the same RPC the non-collection Done
+   path uses) instead of PATCHing `status` at all. That RPC has its own state-machine check —
+   it requires `status='serving'` and rejects anything else with `entry is not completable` — and
+   by the time `MarkCollectedAsync` runs, the entry is in `awaiting_collection`, not `serving`. It
+   was never going to work for this transition.
+
+**Confirmed: the real terminal label is `"done"`** (`QueueEntryStatuses.Done`), so the shipped
+version PATCHes `status`, `done_at` and `collected_at` directly — no RPC, since none exists for
+this transition and `complete_entry` doesn't apply outside its own `serving → done` case. Every
+local optimistic-update on the queue side (`OperatorQueuePageViewModel.DoneAsync`/
+`MarkCollectedAsync`, `StubQueueService`) uses the same confirmed constant.
+`MarkBookingCollectedAsync` never had this problem: `completed` was already a proven
+`booking_status` label (returned by `complete_booking`'s own output) before this file existed, so
+PATCHing it directly was always safe.
 
 This works because both tables already grant the owner (operator) and the customer (self-manage)
 UPDATE access to their own rows — the same policy `AssignEntryAsync`, `MoveEntryToEndAsync`,
 `MarkBookingNoShowAsync` etc. already rely on. Left deferred, not fixed:
 
-- A raw PATCH lets either side set `status` to anything the enum allows, not just the two
-  legal transitions (`serving → awaiting_collection`, `awaiting_collection → completed`). There's
-  no state-machine enforcement. (`MarkCollectedAsync` queue-side is the exception — it goes through
-  `complete_entry`, which already validates the entry is in a state it can close out.)
-- `collected_at` is customer-writable today with no check that the entry was actually in
-  `awaiting_collection` first.
+- A raw PATCH lets either side set `status` to anything the enum allows, not just the legal
+  transitions (`serving → awaiting_collection → done`, or `serving → done` directly). There's no
+  state-machine enforcement — unlike `complete_entry`/`complete_booking`, which is exactly why
+  `MarkCollectedAsync` can't reuse them for this new transition.
+- `done_at` and `collected_at` are customer-writable today with no check that the entry was
+  actually in `awaiting_collection` first.
 - If this ever needs fixing: two RPCs per domain (`mark_awaiting_collection` / `mark_collected`
   for queue, equivalent for bookings), mirroring `complete_entry` / `complete_booking`, validating
   the current status before transitioning and safe for either the operator or the customer to call
