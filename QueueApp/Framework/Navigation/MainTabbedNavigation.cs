@@ -33,20 +33,21 @@ public static class MainTabbedNavigation
                   $"&{KnownNavigationParameters.CreateTab}=TabNavigationPage|{NavigationPaths.HistoryPage}" +
                   $"&{KnownNavigationParameters.CreateTab}=TabNavigationPage|{NavigationPaths.ProfilePage}";
 
+        string? managePage = null;
         if (includeManageTab)
         {
-            var managePage = manageMode == "booking"
+            managePage = manageMode == "booking"
                 ? NavigationPaths.BookingAgendaPage
                 : NavigationPaths.OperatorQueuePage;
             uri += $"&{KnownNavigationParameters.CreateTab}=TabNavigationPage|{managePage}";
         }
 
         // A Manage tab that was never created can't be selected — fall back to Browse rather than
-        // building a uri that selects nothing.
-        var tab = selectTab is null || (selectTab == NavigationPaths.BookingAgendaPage
-                                        || selectTab == NavigationPaths.OperatorQueuePage) && !includeManageTab
-            ? NavigationPaths.CategoryPickerPage
-            : selectTab;
+        // building a uri that selects nothing. With no tab requested, an owner lands on Manage
+        // rather than the customer's Browse tab.
+        var tab = selectTab == NavigationPaths.BookingAgendaPage || selectTab == NavigationPaths.OperatorQueuePage
+            ? (includeManageTab ? selectTab : NavigationPaths.CategoryPickerPage)
+            : selectTab ?? managePage ?? NavigationPaths.CategoryPickerPage;
 
         uri += $"&{KnownNavigationParameters.SelectTab}={tab}";
 
