@@ -17,8 +17,6 @@ public static class FlowConstants
     public const string AfternoonTitle = "AFTERNOON";
     public const string EveningTitle = "EVENING";
 
-    public const string CreatedByOperator = "operator";
-
     public const string AnyAvailableInitials = "★";
     public const string UnknownInitials = "?";
 

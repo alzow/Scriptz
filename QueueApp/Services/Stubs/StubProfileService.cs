@@ -13,4 +13,8 @@ public class StubProfileService : IProfileService
 
     public Task UpdateMyProfileAsync(Guid userId, string? displayName, string? phone)
         => Task.CompletedTask;
+
+    public void InvalidateCache()
+    {
+    }
 }

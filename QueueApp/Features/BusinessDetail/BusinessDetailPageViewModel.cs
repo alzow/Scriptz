@@ -395,18 +395,11 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 await HandleExceptionAsync(ex);
             }
         });
-    // operator_availability is per operator, so the business's trading hours are the union across
-    // the ones on the books — read in one request over all of them.
     public async Task<BusinessHours> LoadHoursAsync(IReadOnlyList<OperatorResponse> operators)
     {
         try
         {
-            var active = operators.Where(o => o.IsActive).ToList();
-            if (active.Count == 0)
-                return BusinessHours.Unknown;
-
-            var windows = await _operatorService.GetAvailabilityAsync(active.Select(o => o.Id).ToList());
-            return BusinessHours.FromAvailability(windows);
+            return await _operatorService.GetBusinessHoursAsync(operators);
         }
         catch (Exception ex)
         {

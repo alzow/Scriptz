@@ -275,9 +275,6 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         }
     }
 
-    // operator_availability is per operator, so trading hours are the union across the ones on the
-    // books. One request per resource, but issued together — a five-bay shop was paying five round
-    // trips in a row for a header pill.
     public async Task LoadHoursAsync()
     {
         try
@@ -285,10 +282,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
             if (_operators.Count == 0)
                 return;
 
-            var windows = await Task.WhenAll(
-                _operators.Select(o => _operatorService.GetAvailabilityAsync(o.Id)));
-
-            _hours = BusinessHours.FromAvailability(windows.SelectMany(w => w));
+            _hours = await _operatorService.GetBusinessHoursAsync(_operators);
             IsOpenNow = _hours.IsOpenAt(LocalTime.Now);
         }
         catch (Exception ex)

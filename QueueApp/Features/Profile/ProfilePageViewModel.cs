@@ -299,6 +299,7 @@ public partial class ProfilePageViewModel : BaseViewModel
                 return;
 
             await _authService.SignOutAsync();
+            _profileService.InvalidateCache();
             await NavigationService.NavigateAsync(NavigationPaths.Login);
         }
         catch (Exception ex)

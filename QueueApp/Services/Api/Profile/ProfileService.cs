@@ -1,11 +1,19 @@
 using QueueApp.Framework.Base;
+using QueueApp.Services.Api;
 using QueueApp.Services.Api.Profile.Models;
 
 namespace QueueApp.Services.Api.Profile;
 
-// Hides PostgREST filter syntax (e.g. "eq.<guid>") from callers.
 public class ProfileService : BaseService, IProfileService
 {
+    private const string FallbackDisplayName = "Customer";
+
+    // The signed-in user's own row, which nothing but this service writes. Reading it is on the
+    // path of every join, every booking and the profile tab, and it changes only when the customer
+    // edits it here — so it is held rather than re-fetched, and dropped on that edit.
+    private ProfileResponse? _cached;
+    private Guid _cachedUserId;
+
     private readonly IProfileApi _api;
 
     public ProfileService(IProfileApi api)
@@ -16,20 +24,39 @@ public class ProfileService : BaseService, IProfileService
     public async Task<string> GetMyDisplayNameAsync(Guid userId)
     {
         var profile = await GetMyProfileAsync(userId);
-        var name = profile?.DisplayName;
-        return string.IsNullOrWhiteSpace(name) ? "Customer" : name;
+
+        return string.IsNullOrWhiteSpace(profile?.DisplayName)
+            ? FallbackDisplayName
+            : profile.DisplayName;
     }
 
     public async Task<ProfileResponse?> GetMyProfileAsync(Guid userId)
     {
-        var rows = await ExecuteApiCallAsync(_api.GetProfileByIdAsync($"eq.{userId}"));
-        return rows.FirstOrDefault();
+        if (_cached is not null && _cachedUserId == userId)
+            return _cached;
+
+        var profile = await ExecuteSingleAsync(_api.GetProfileByIdAsync(PostgrestFilter.Eq(userId)));
+
+        _cached = profile;
+        _cachedUserId = userId;
+
+        return profile;
     }
 
-    public Task UpdateMyProfileAsync(Guid userId, string? displayName, string? phone) =>
-        ExecuteApiCallAsync(_api.UpdateProfileAsync($"eq.{userId}", new UpdateProfileRequest
+    public async Task UpdateMyProfileAsync(Guid userId, string? displayName, string? phone)
+    {
+        await ExecuteApiCallAsync(_api.UpdateProfileAsync(PostgrestFilter.Eq(userId), new UpdateProfileRequest
         {
             DisplayName = displayName,
             Phone = phone,
         }));
+
+        InvalidateCache();
+    }
+
+    public void InvalidateCache()
+    {
+        _cached = null;
+        _cachedUserId = Guid.Empty;
+    }
 }

@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using QueueApp.Framework.Base;
+using QueueApp.Services.Api;
 using QueueApp.Services.Api.Intake.Models;
 
 namespace QueueApp.Services.Api.Intake;
 
-// Hides PostgREST filter syntax (e.g. "eq.<guid>") from callers.
 public class IntakeFieldsService : BaseService, IIntakeFieldsService
 {
     private readonly IIntakeFieldsApi _api;
@@ -24,7 +24,7 @@ public class IntakeFieldsService : BaseService, IIntakeFieldsService
     {
         try
         {
-            var fields = await ExecuteApiCallAsync(_api.GetFieldsForBusinessAsync($"eq.{businessId}"));
+            var fields = await ExecuteApiCallAsync(_api.GetFieldsForBusinessAsync(PostgrestFilter.Eq(businessId)));
             return Group(fields);
         }
         catch (Exception ex)
@@ -35,23 +35,20 @@ public class IntakeFieldsService : BaseService, IIntakeFieldsService
     }
 
     public Task<List<IntakeFieldResponse>> GetFieldsForServiceAsync(Guid serviceId) =>
-        ExecuteApiCallAsync(_api.GetFieldsForServiceAsync($"eq.{serviceId}"));
+        ExecuteApiCallAsync(_api.GetFieldsForServiceAsync(PostgrestFilter.Eq(serviceId)));
 
-    public async Task<IntakeFieldResponse?> CreateFieldAsync(CreateIntakeFieldRequest request)
-    {
-        var created = await ExecuteApiCallAsync(_api.CreateFieldAsync(request));
-        return created.FirstOrDefault();
-    }
+    public Task<IntakeFieldResponse?> CreateFieldAsync(CreateIntakeFieldRequest request) =>
+        ExecuteSingleAsync(_api.CreateFieldAsync(request));
 
     public Task UpdateFieldAsync(Guid fieldId, UpdateIntakeFieldRequest request) =>
-        ExecuteApiCallAsync(_api.UpdateFieldAsync($"eq.{fieldId}", request));
+        ExecuteApiCallAsync(_api.UpdateFieldAsync(PostgrestFilter.Eq(fieldId), request));
 
     public Task SetFieldOrderAsync(Guid fieldId, int sortOrder) =>
-        ExecuteApiCallAsync(_api.SetFieldOrderAsync($"eq.{fieldId}",
+        ExecuteApiCallAsync(_api.SetFieldOrderAsync(PostgrestFilter.Eq(fieldId),
             new SetIntakeFieldOrderRequest { SortOrder = sortOrder }));
 
     public Task DeleteFieldAsync(Guid fieldId) =>
-        ExecuteApiCallAsync(_api.DeleteFieldAsync($"eq.{fieldId}"));
+        ExecuteApiCallAsync(_api.DeleteFieldAsync(PostgrestFilter.Eq(fieldId)));
 
     public static Dictionary<Guid, List<IntakeFieldResponse>> Group(IEnumerable<IntakeFieldResponse> fields) =>
         fields

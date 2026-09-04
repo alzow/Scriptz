@@ -1,4 +1,5 @@
 using QueueApp.Services.Api.Operator.Models;
+using QueueApp.Shared.Domain;
 
 namespace QueueApp.Services.Api.Operator;
 
@@ -16,6 +17,10 @@ public interface IOperatorService
 
     Task<List<OperatorAvailabilityResponse>> GetAvailabilityAsync(Guid operatorId);
     Task<List<OperatorAvailabilityResponse>> GetAvailabilityAsync(IReadOnlyCollection<Guid> operatorIds);
+
+    // operator_availability is per operator, so the business's trading hours are the union across
+    // the ones on the books. One batched read, not one per resource.
+    Task<BusinessHours> GetBusinessHoursAsync(IEnumerable<OperatorResponse> operators);
     Task<List<OperatorAvailabilityResponse>> CreateAvailabilityAsync(CreateAvailabilityRequest request);
     Task DeleteAvailabilityAsync(Guid id);
 

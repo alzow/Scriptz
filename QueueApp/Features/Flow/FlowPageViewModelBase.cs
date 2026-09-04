@@ -235,12 +235,7 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
     {
         try
         {
-            var active = operators.Where(o => o.IsActive).ToList();
-            if (active.Count == 0)
-                return BusinessHours.Unknown;
-
-            var windows = await _services.Operators.GetAvailabilityAsync(active.Select(o => o.Id).ToList());
-            return BusinessHours.FromAvailability(windows);
+            return await _services.Operators.GetBusinessHoursAsync(operators);
         }
         catch (Exception exception)
         {

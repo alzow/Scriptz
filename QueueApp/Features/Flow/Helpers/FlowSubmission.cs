@@ -65,7 +65,7 @@ public sealed class FlowSubmissionCoordinator
             Note = request.Note,
             CustomerName = request.CustomerName.Trim(),
             CustomerPhone = string.IsNullOrWhiteSpace(request.CustomerPhone) ? null : request.CustomerPhone.Trim(),
-            Details = new BookingDetails { CreatedBy = FlowConstants.CreatedByOperator },
+            Details = new BookingDetails { CreatedBy = BookingCreators.Operator },
             IntakeResponses = request.IntakeResponses,
         });
 

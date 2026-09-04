@@ -3,9 +3,8 @@ using Refit;
 
 namespace QueueApp.Framework.Base;
 
-// Wraps Refit calls so every service gets consistent failure logging without repeating
-// try/catch boilerplate. Rethrows so BaseViewModel.ExecuteAsync/HandleExceptionAsync can
-// still surface the error to the user.
+// Wraps Refit calls so every service gets consistent failure logging without repeating try/catch
+// boilerplate. Rethrows, so the view model's HandleExceptionAsync still owns the message shown.
 public abstract class BaseService
 {
     protected async Task<T> ExecuteApiCallAsync<T>(Task<T> apiCall)
@@ -32,6 +31,14 @@ public abstract class BaseService
             LogFailure(ex);
             throw;
         }
+    }
+
+    // A PostgREST read of one row still comes back as a list, and every service was unwrapping it
+    // the same way.
+    protected async Task<T?> ExecuteSingleAsync<T>(Task<List<T>> apiCall)
+    {
+        var rows = await ExecuteApiCallAsync(apiCall);
+        return rows.Count > 0 ? rows[0] : default;
     }
 
     private static void LogFailure(Exception exception)

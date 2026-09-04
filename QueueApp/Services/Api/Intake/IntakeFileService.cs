@@ -9,6 +9,13 @@ namespace QueueApp.Services.Api.Intake;
 
 public class IntakeFileService : IIntakeFileService
 {
+    private const string FilePickerTitle = "Choose an image or PDF";
+    private const string DefaultContentType = "application/octet-stream";
+    private const string FallbackFileName = "intake-file";
+    private const string NoUserError = "No authenticated user is available for intake file upload.";
+    private const string NoPathError = "The intake file has no storage path.";
+    private const string InvalidPathError = "The intake file has an invalid storage path.";
+
     private readonly IAuthService _authService;
     private readonly IHttpClientFactory _httpClientFactory;
 
@@ -31,11 +38,11 @@ public class IntakeFileService : IIntakeFileService
     {
         var userId = await _authService.GetUserIdAsync();
         if (string.IsNullOrWhiteSpace(userId))
-            throw new InvalidOperationException("No authenticated user is available for intake file upload.");
+            throw new InvalidOperationException(NoUserError);
 
         var picked = await FilePicker.Default.PickAsync(new PickOptions
         {
-            PickerTitle = "Choose an image or PDF",
+            PickerTitle = FilePickerTitle,
             FileTypes = ImagesAndPdf,
         });
 
@@ -45,7 +52,7 @@ public class IntakeFileService : IIntakeFileService
         var objectKey = $"{userId}/{serviceId}/{fieldId}/{Guid.NewGuid()}{Path.GetExtension(picked.FileName)}";
         var objectPath = BuildObjectPath(objectKey);
         var contentType = string.IsNullOrWhiteSpace(picked.ContentType)
-            ? "application/octet-stream"
+            ? DefaultContentType
             : picked.ContentType;
 
         await using var source = await picked.OpenReadAsync();
@@ -78,13 +85,13 @@ public class IntakeFileService : IIntakeFileService
         ArgumentNullException.ThrowIfNull(file);
 
         if (string.IsNullOrWhiteSpace(file.Path))
-            throw new InvalidOperationException("The intake file has no storage path.");
+            throw new InvalidOperationException(NoPathError);
 
         var objectPath = BuildObjectPath(file.Path);
 
         var safeFileName = Path.GetFileName(file.Name);
         if (string.IsNullOrWhiteSpace(safeFileName))
-            safeFileName = "intake-file";
+            safeFileName = FallbackFileName;
 
         var localPath = Path.Combine(FileSystem.CacheDirectory, $"{Guid.NewGuid():N}-{safeFileName}");
         using var response = await _httpClientFactory
@@ -104,14 +111,14 @@ public class IntakeFileService : IIntakeFileService
     {
         var segments = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
         if (segments.Length == 0)
-            throw new InvalidOperationException("The intake file has an invalid storage path.");
+            throw new InvalidOperationException(InvalidPathError);
 
         // Stored references created before the key convention changed include the bucket name.
         if (string.Equals(segments[0], SupabaseConfig.IntakeUploadsBucket, StringComparison.Ordinal))
             segments = segments[1..];
 
         if (segments.Length == 0)
-            throw new InvalidOperationException("The intake file has an invalid storage path.");
+            throw new InvalidOperationException(InvalidPathError);
 
         return string.Join('/', segments.Select(Uri.EscapeDataString));
     }
