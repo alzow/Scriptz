@@ -220,19 +220,6 @@ public partial class AgendaBookingResponse : ObservableObject
 
     [JsonIgnore] public DateTimeOffset ElapsedFrom => (StartedAt ?? StartsAt).ToOffset(LocalOffset);
 
-    [JsonIgnore]
-    public string StatusLabel => Status switch
-    {
-        BookingStatuses.Pending => "Pending",
-        BookingStatuses.Confirmed => "Confirmed",
-        BookingStatuses.InProgress => "In chair",
-        BookingStatuses.Cancelled => "Cancelled",
-        BookingStatuses.Completed => "Completed",
-        BookingStatuses.NoShow => "No show",
-        BookingStatuses.AwaitingCollection => "Ready for collection",
-        _ => Status
-    };
-
     public static string FormatDuration(TimeSpan span)
     {
         var minutes = (int)Math.Round(span.TotalMinutes);

@@ -11,10 +11,7 @@ public readonly record struct FlowCopyContext(
     bool IsSlotFlow,
     CategoryLabelSet Labels,
     ServiceChoiceItem? Service,
-    OperatorChoiceItem? Operator)
-{
-    public string LowerNoun => Labels.Noun.ToLowerInvariant();
-}
+    OperatorChoiceItem? Operator);
 
 public static class FlowCopy
 {
@@ -33,7 +30,7 @@ public static class FlowCopy
     public static string StepHeading(FlowStep step, in FlowCopyContext context) => step switch
     {
         FlowStep.Operator => context.IsOperatorFlow
-            ? $"Which {context.LowerNoun}?"
+            ? $"Which {context.Labels.LowerNoun}?"
             : context.Labels.StepHeading,
         FlowStep.Service => context.IsOperatorFlow
             ? "What are they in for?"
@@ -73,12 +70,12 @@ public static class FlowCopy
         {
             return isLongJob
                 ? $"A {context.Service.DurationText} job needs one unbroken block, so some days show fewer options."
-                : "Counts are the shop's free slots across everyone.";
+                : $"Counts are {context.Labels.VenuePossessive} free slots across everyone.";
         }
 
         return isLongJob
             ? $"A {context.Service.DurationText} job needs one unbroken block, so some days show fewer options than {context.Operator.Name} has slots."
-            : $"Counts are {context.Operator.Name}'s free slots, not the whole shop's.";
+            : $"Counts are {context.Operator.Name}'s free slots, not the whole {context.Labels.VenueNoun}'s.";
     }
 
     public static string OutstandingLabel(int outstanding) => outstanding switch
@@ -111,24 +108,24 @@ public static class FlowCopy
         ? $"Shortest wait · about {minutes:0} min"
         : FlowConstants.FastestAvailableEmptySubLabel;
 
-    public static string EmptyPeriodNote(BusinessHours hours, DateTime? day, int fromHour)
+    public static string EmptyPeriodNote(BusinessHours hours, DateTime? day, int fromHour, CategoryLabelSet labels)
     {
         if (day is null)
             return FlowConstants.NoSlotsNote;
 
         return hours.ClosingTimeOn(day.Value) is { } closing && closing.TotalHours <= fromHour
-            ? $"none — shop closes {BusinessHours.FormatClock(closing)}"
+            ? $"none — {labels.VenueNoun} closes {BusinessHours.FormatClock(closing)}"
             : FlowConstants.NoSlotsLongEnoughNote;
     }
 
     private static string OperatorSubheading(in FlowCopyContext context)
     {
         if (context.IsOperatorFlow)
-            return $"Availability is per {context.LowerNoun}, so this decides which times are free.";
+            return $"Availability is per {context.Labels.LowerNoun}, so this decides which times are free.";
 
         return context.IsBookingMode
-            ? $"Availability is per {context.LowerNoun}, so this decides which times you'll see."
-            : $"Pick a {context.LowerNoun}, or take whoever's free first.";
+            ? $"Availability is per {context.Labels.LowerNoun}, so this decides which times you'll see."
+            : $"Pick a {context.Labels.LowerNoun}, or take whoever's free first.";
     }
 
     private static string IntakeSubheading(in FlowCopyContext context)
@@ -147,7 +144,7 @@ public static class FlowCopy
             return "Added by you, so it's confirmed straight away. No account means no reminder — take a number if you want to call them.";
 
         return context.IsBookingMode
-            ? "The shop confirms this before it's final. You can cancel any time."
+            ? $"{context.Labels.VenueCapitalised} confirms this before it's final. You can cancel any time."
             : "You can leave the queue any time.";
     }
 }

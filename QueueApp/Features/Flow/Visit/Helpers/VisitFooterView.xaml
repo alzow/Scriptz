@@ -11,7 +11,7 @@
     three.
     -->
     <VerticalStackLayout Spacing="10">
-        <Label Text="Queue doesn't handle payment — that was settled at the shop."
+        <Label Text="{Binding PaymentLineText, Source={x:Reference Root}}"
                Style="{StaticResource lbl12_Regular_TextMuted}"
                HorizontalTextAlignment="Center"
                IsVisible="{Binding ShowPaymentLine, Source={x:Reference Root}}"/>

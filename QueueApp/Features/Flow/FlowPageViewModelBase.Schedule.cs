@@ -157,7 +157,7 @@ public abstract partial class FlowPageViewModelBase
     }
 
     public SlotPeriod SlotPeriodFor(string title, int fromHour) =>
-        SlotPeriod.Empty(title, FlowCopy.EmptyPeriodNote(_hours, SelectedDay?.Date, fromHour));
+        SlotPeriod.Empty(title, FlowCopy.EmptyPeriodNote(_hours, SelectedDay?.Date, fromHour, _labels));
 
     public SlotPeriod SlotPeriodFor(
         string title,
@@ -166,5 +166,5 @@ public abstract partial class FlowPageViewModelBase
         IReadOnlyList<SlotChoiceItem> items) =>
         new(title,
             FlowHelper.SlotsInPeriod(items, fromHour, toHour),
-            FlowCopy.EmptyPeriodNote(_hours, SelectedDay?.Date, fromHour));
+            FlowCopy.EmptyPeriodNote(_hours, SelectedDay?.Date, fromHour, _labels));
 }

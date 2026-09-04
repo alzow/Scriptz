@@ -12,7 +12,7 @@ public sealed record AgendaBuildRequest
     public required IReadOnlyList<SlotResponse> FreeSlots { get; init; }
     public required IReadOnlyDictionary<Guid, string> OperatorNames { get; init; }
     public required int ActiveOperatorCount { get; init; }
-    public required string ResourcePluralNoun { get; init; }
+    public required CategoryLabelSet Labels { get; init; }
     public required int ShortestServiceMinutes { get; init; }
     public required DateTimeOffset Now { get; init; }
 }
@@ -29,7 +29,7 @@ public static class AgendaBuilder
             .ToList();
 
         foreach (var booking in live)
-            rows.Add(BookingRow(booking, request.Now));
+            rows.Add(BookingRow(booking, request.Now, request.Labels));
 
         var blockRanges = new List<(DateTimeOffset Start, DateTimeOffset End)>();
         rows.AddRange(BlockRows(request, blockRanges));
@@ -51,7 +51,7 @@ public static class AgendaBuilder
         return byStart != 0 ? byStart : left.Kind.CompareTo(right.Kind);
     }
 
-    public static AgendaRow BookingRow(AgendaBookingResponse booking, DateTimeOffset now)
+    public static AgendaRow BookingRow(AgendaBookingResponse booking, DateTimeOffset now, CategoryLabelSet labels)
     {
         var subtitleParts = new List<string>(2);
         if (booking.ServiceName.Length > 0) subtitleParts.Add(booking.ServiceName);
@@ -87,7 +87,7 @@ public static class AgendaBuilder
         {
             background = AgendaPalette.GreenTint;
             stroke = AgendaPalette.GreenBorder;
-            tag = "IN CHAIR";
+            tag = labels.ServingStatus;
             tagInk = AgendaPalette.OnGreen;
             tagFill = AgendaPalette.Green;
         }
@@ -168,8 +168,8 @@ public static class AgendaBuilder
 
             var who = affected.Count >= request.ActiveOperatorCount && request.ActiveOperatorCount > 0
                 ? request.ActiveOperatorCount == 2
-                    ? $"Both {request.ResourcePluralNoun}"
-                    : $"All {request.ResourcePluralNoun}"
+                    ? $"Both {request.Labels.PluralNoun}"
+                    : $"All {request.Labels.PluralNoun}"
                 : string.Join(", ", affected!);
 
             var duration = AgendaBookingResponse.FormatDuration(end - start);

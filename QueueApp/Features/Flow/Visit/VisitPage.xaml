@@ -95,7 +95,8 @@
                                  HasDestructiveAction="{Binding HasDestructiveAction}"
                                  DestructiveActionText="{Binding DestructiveActionText}"
                                  DestructiveActionCommand="{Binding DestructiveActionCommand}"
-                                 ShowPaymentLine="{Binding ShowPaymentLine}"/>
+                                 ShowPaymentLine="{Binding ShowPaymentLine}"
+                                 PaymentLineText="{Binding PaymentLineText}"/>
 
         <Border Grid.Row="2"
                 Style="{StaticResource brd13_Ghost}"

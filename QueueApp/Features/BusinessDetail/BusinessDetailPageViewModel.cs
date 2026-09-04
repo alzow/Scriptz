@@ -52,7 +52,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     // A live ticket or a booking awaiting confirmation is a strip on the landing that taps
     // through to VisitPage, which owns the detail.
     public bool HasSomethingActive => IsInQueue || _activeBooking is not null;
-    public string ActiveStripText => IsInQueue ? "You're in the queue" : "Your booking is with the shop";
+    public string ActiveStripText => IsInQueue ? "You're in the queue" : $"Your booking is with {_labels.Venue}";
 
     public string BusinessName => Business?.Name ?? string.Empty;
     public string AddressLine => Business?.Address ?? Business?.Suburb ?? string.Empty;
@@ -188,6 +188,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
 
             Title = Business.Name;
             _labels = CategoryLabels.Resolve(Business.Category);
+            OnPropertyChanged(nameof(TeamSectionTitle));
+            OnPropertyChanged(nameof(ActiveStripText));
 
             _allOperators = await operatorsTask;
             _selectableOperators = FlowStepEngine.SelectableOperators(_allOperators);
@@ -616,7 +618,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 TertiaryStatValue = next?.TimeText ?? "—";
                 CtaText = next is not null ? $"Queue opens {next.TimeText}" : "Queue is closed";
                 IsCtaEnabled = true;//TODO revert later after testing. Make operator hours matter for this. Currently, the operator hours are not being used to determine if the queue is open or closed.
-                LiveFootnote = "The queue reopens when the shop does";
+                LiveFootnote = $"The queue reopens when {_labels.Venue} does";
                 return;
             }
 

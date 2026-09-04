@@ -57,6 +57,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     private int _ticks;
 
     private Guid _businessId;
+    private CategoryLabelSet _labels = CategoryLabels.Resolve(null);
     private List<OperatorResponse> _operators = new();
     private List<ServiceResponse> _services = new();
     private List<QueueEntryResponse> _entries = new();
@@ -107,6 +108,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
 
             var business = await _businessService.GetBusinessAsync(_businessId);
             BusinessName = business?.Name ?? "Queue";
+            _labels = CategoryLabels.Resolve(business?.Category);
 
             await LoadQueueAsync();
 
@@ -840,7 +842,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
             await OpenIntakeAnswersAsync(
                 card.CustomerName,
                 card.ServiceText,
-                BoardConstants.NowServingText,
+                _labels.ServingNowText,
                 card.IntakeAnswers);
         }
         catch (Exception ex)
