@@ -60,26 +60,47 @@ public partial class ProfileNotificationsPageViewModel : BaseViewModel
 
     public override async Task OnAppearingAsync()
     {
-        await base.OnAppearingAsync();
-        IsAllowed = await _permissionService.IsAllowedAsync();
+        try
+        {
+            await base.OnAppearingAsync();
+            IsAllowed = await _permissionService.IsAllowedAsync();
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     public override async Task OnDisappearingAsync()
     {
-        await base.OnDisappearingAsync();
-        SavePreferences();
+        try
+        {
+            await base.OnDisappearingAsync();
+            SavePreferences();
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     public void LoadPreferences()
     {
-        var preferences = _preferencesService.Get();
-        TimeToLeave = preferences.TimeToLeave;
-        YoureNext = preferences.YoureNext;
-        QueueChanged = preferences.QueueChanged;
-        BookingConfirmed = preferences.BookingConfirmed;
-        BookingReminders = preferences.BookingReminders;
-        AwaitingCollectionReady = preferences.AwaitingCollectionReady;
-        LeaveAtMinutes = preferences.LeaveAtMinutes;
+        try
+        {
+            var preferences = _preferencesService.Get();
+            TimeToLeave = preferences.TimeToLeave;
+            YoureNext = preferences.YoureNext;
+            QueueChanged = preferences.QueueChanged;
+            BookingConfirmed = preferences.BookingConfirmed;
+            BookingReminders = preferences.BookingReminders;
+            AwaitingCollectionReady = preferences.AwaitingCollectionReady;
+            LeaveAtMinutes = preferences.LeaveAtMinutes;
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
     }
 
     public void SavePreferences() =>

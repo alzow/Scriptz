@@ -62,8 +62,15 @@ public partial class OperatorHoursPageViewModel : BaseViewModel
     [RelayCommand]
     public async Task SelectOperatorAsync(OperatorResponse op)
     {
-        await NavigationService.NavigateAsync(NavigationPaths.WeeklyHoursPage,
-            new NavigationParameters { [NavigationKeys.OperatorId] = op.Id, [NavigationKeys.OperatorName] = op.DisplayName });
+        try
+        {
+            await NavigationService.NavigateAsync(NavigationPaths.WeeklyHoursPage,
+                new NavigationParameters { [NavigationKeys.OperatorId] = op.Id, [NavigationKeys.OperatorName] = op.DisplayName });
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     [RelayCommand]

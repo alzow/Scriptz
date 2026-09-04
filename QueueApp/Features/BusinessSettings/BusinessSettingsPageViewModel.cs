@@ -17,25 +17,53 @@ public partial class BusinessSettingsPageViewModel : BaseViewModel
     [RelayCommand]
     public async Task OpenServicesAsync()
     {
-        await NavigationService.NavigateAsync(NavigationPaths.ServicesManagementPage);
+        try
+        {
+            await NavigationService.NavigateAsync(NavigationPaths.ServicesManagementPage);
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     [RelayCommand]
     public async Task OpenStaffAsync()
     {
-        await NavigationService.NavigateAsync(NavigationPaths.StaffManagementPage);
+        try
+        {
+            await NavigationService.NavigateAsync(NavigationPaths.StaffManagementPage);
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     [RelayCommand]
     public async Task OpenHoursAsync()
     {
-        await NavigationService.NavigateAsync(NavigationPaths.OperatorHoursPage);
+        try
+        {
+            await NavigationService.NavigateAsync(NavigationPaths.OperatorHoursPage);
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     [RelayCommand]
     public async Task OpenLocationAsync()
     {
-        await NavigationService.NavigateAsync(NavigationPaths.BusinessLocationPage);
+        try
+        {
+            await NavigationService.NavigateAsync(NavigationPaths.BusinessLocationPage);
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     [RelayCommand]

@@ -90,10 +90,17 @@ public partial class ProfilePageViewModel : BaseViewModel
 
     public override async Task OnAppearingAsync()
     {
-        await base.OnAppearingAsync();
-        await RefreshPermissionAsync();
-        await LoadIdentityAsync();
-        RefreshAppearanceRow();
+        try
+        {
+            await base.OnAppearingAsync();
+            await RefreshPermissionAsync();
+            await LoadIdentityAsync();
+            RefreshAppearanceRow();
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     public async Task LoadIdentityAsync()
@@ -166,21 +173,28 @@ public partial class ProfilePageViewModel : BaseViewModel
 
     public void RefreshStatus()
     {
-        var preferences = _notificationPreferencesService.Get();
-
-        if (NotificationsAllowed)
+        try
         {
-            StatusHeadline = AllowedHeadline;
-            StatusDetail = $"Notifications on · nudge {preferences.LeaveAtMinutes} min before";
-            StatusActionText = "";
-            NotificationsRowDetail = $"{preferences.OnCount} of {NotificationPreferences.TotalCount} on";
-            return;
-        }
+            var preferences = _notificationPreferencesService.Get();
 
-        StatusHeadline = BlockedHeadline;
-        StatusDetail = BlockedDetail;
-        StatusActionText = BlockedAction;
-        NotificationsRowDetail = NotificationsOffRowDetail;
+            if (NotificationsAllowed)
+            {
+                StatusHeadline = AllowedHeadline;
+                StatusDetail = $"Notifications on · nudge {preferences.LeaveAtMinutes} min before";
+                StatusActionText = "";
+                NotificationsRowDetail = $"{preferences.OnCount} of {NotificationPreferences.TotalCount} on";
+                return;
+            }
+
+            StatusHeadline = BlockedHeadline;
+            StatusDetail = BlockedDetail;
+            StatusActionText = BlockedAction;
+            NotificationsRowDetail = NotificationsOffRowDetail;
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
     }
 
     public void RefreshAppearanceRow() =>

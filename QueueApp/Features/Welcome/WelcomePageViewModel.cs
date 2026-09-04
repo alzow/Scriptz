@@ -108,39 +108,46 @@ public partial class WelcomePageViewModel : BaseViewModel
 
     public void BuildPanels()
     {
-        Panels.Add(new WelcomePanel
+        try
         {
-            NumberText = DiscoverNumber,
-            HeadlineText = DiscoverHeadline,
-            BodyText = DiscoverBody,
-            IllustrationSource = DiscoverArt,
-        });
+            Panels.Add(new WelcomePanel
+            {
+                NumberText = DiscoverNumber,
+                HeadlineText = DiscoverHeadline,
+                BodyText = DiscoverBody,
+                IllustrationSource = DiscoverArt,
+            });
 
-        Panels.Add(new WelcomePanel
+            Panels.Add(new WelcomePanel
+            {
+                NumberText = JoinNumber,
+                HeadlineText = JoinHeadline,
+                BodyText = JoinBody,
+                IllustrationSource = JoinArt,
+            });
+
+            Panels.Add(new WelcomePanel
+            {
+                NumberText = BookNumber,
+                HeadlineText = BookHeadline,
+                BodyText = BookBody,
+                IllustrationSource = BookArt,
+            });
+
+            Panels.Add(new WelcomePanel
+            {
+                NumberText = LeaveNumber,
+                HeadlineText = LeaveHeadline,
+                BodyText = LeaveBody,
+                IllustrationSource = LeaveArt,
+            });
+
+            SyncActivePanel();
+        }
+        catch (Exception exception)
         {
-            NumberText = JoinNumber,
-            HeadlineText = JoinHeadline,
-            BodyText = JoinBody,
-            IllustrationSource = JoinArt,
-        });
-
-        Panels.Add(new WelcomePanel
-        {
-            NumberText = BookNumber,
-            HeadlineText = BookHeadline,
-            BodyText = BookBody,
-            IllustrationSource = BookArt,
-        });
-
-        Panels.Add(new WelcomePanel
-        {
-            NumberText = LeaveNumber,
-            HeadlineText = LeaveHeadline,
-            BodyText = LeaveBody,
-            IllustrationSource = LeaveArt,
-        });
-
-        SyncActivePanel();
+            _ = HandleExceptionAsync(exception);
+        }
     }
 
     public void OnPositionChanged()
@@ -166,31 +173,45 @@ public partial class WelcomePageViewModel : BaseViewModel
 
     public void StartAutoAdvance()
     {
-        if (_isAutoAdvanceRetired || _autoAdvanceTimer is not null)
-            return;
+        try
+        {
+            if (_isAutoAdvanceRetired || _autoAdvanceTimer is not null)
+                return;
 
-        if (_motionPreferenceService.PrefersReducedMotion)
-            return;
+            if (_motionPreferenceService.PrefersReducedMotion)
+                return;
 
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher is null)
-            return;
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null)
+                return;
 
-        _autoAdvanceTimer = dispatcher.CreateTimer();
-        _autoAdvanceTimer.Interval = TimeSpan.FromSeconds(AutoAdvanceSeconds);
-        _autoAdvanceTimer.IsRepeating = true;
-        _autoAdvanceTimer.Tick += OnAutoAdvanceTick;
-        _autoAdvanceTimer.Start();
+            _autoAdvanceTimer = dispatcher.CreateTimer();
+            _autoAdvanceTimer.Interval = TimeSpan.FromSeconds(AutoAdvanceSeconds);
+            _autoAdvanceTimer.IsRepeating = true;
+            _autoAdvanceTimer.Tick += OnAutoAdvanceTick;
+            _autoAdvanceTimer.Start();
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
     }
 
     public void StopAutoAdvance()
     {
-        if (_autoAdvanceTimer is null)
-            return;
+        try
+        {
+            if (_autoAdvanceTimer is null)
+                return;
 
-        _autoAdvanceTimer.Tick -= OnAutoAdvanceTick;
-        _autoAdvanceTimer.Stop();
-        _autoAdvanceTimer = null;
+            _autoAdvanceTimer.Tick -= OnAutoAdvanceTick;
+            _autoAdvanceTimer.Stop();
+            _autoAdvanceTimer = null;
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
     }
 
     public void RetireAutoAdvance()

@@ -53,9 +53,16 @@ public partial class BlockedDatesPageViewModel : BaseViewModel
 
     public override async Task OnAppearingAsync()
     {
-        await base.OnAppearingAsync();
-        if (_operatorId != Guid.Empty)
-            await LoadAsync();
+        try
+        {
+            await base.OnAppearingAsync();
+            if (_operatorId != Guid.Empty)
+                await LoadAsync();
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     [RelayCommand]
@@ -82,8 +89,15 @@ public partial class BlockedDatesPageViewModel : BaseViewModel
     [RelayCommand]
     public async Task AddBlockAsync()
     {
-        await NavigationService.NavigateAsync(NavigationPaths.AddAvailabilityBlockPage,
-            new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId });
+        try
+        {
+            await NavigationService.NavigateAsync(NavigationPaths.AddAvailabilityBlockPage,
+                new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId });
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     [RelayCommand]

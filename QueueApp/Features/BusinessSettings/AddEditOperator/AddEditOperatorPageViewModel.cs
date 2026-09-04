@@ -56,12 +56,19 @@ public partial class AddEditOperatorPageViewModel : BaseViewModel
 
     public async Task LoadExistingAsync(Guid operatorId)
     {
-        var operators = await _operatorService.GetAllOperatorsForManagementAsync(_businessId);
-        var existing = operators.FirstOrDefault(o => o.Id == operatorId);
-        if (existing is null) return;
+        try
+        {
+            var operators = await _operatorService.GetAllOperatorsForManagementAsync(_businessId);
+            var existing = operators.FirstOrDefault(o => o.Id == operatorId);
+            if (existing is null) return;
 
-        DisplayName = existing.DisplayName;
-        SortOrderText = existing.SortOrder.ToString();
+            DisplayName = existing.DisplayName;
+            SortOrderText = existing.SortOrder.ToString();
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     [RelayCommand]

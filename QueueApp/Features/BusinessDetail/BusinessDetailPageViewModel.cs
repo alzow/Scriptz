@@ -235,19 +235,26 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     // run together rather than one behind the other.
     public async Task RefreshLiveStateAsync()
     {
-        if (IsQueueMode)
+        try
         {
-            var queueTask = RefreshQueueAsync();
-            var statusTask = RefreshMyStatusAsync();
-            await queueTask;
-            await statusTask;
-            return;
-        }
+            if (IsQueueMode)
+            {
+                var queueTask = RefreshQueueAsync();
+                var statusTask = RefreshMyStatusAsync();
+                await queueTask;
+                await statusTask;
+                return;
+            }
 
-        var slotsTask = RefreshBookingSlotStatsAsync();
-        var bookingsTask = RefreshMyBookingsAsync();
-        await slotsTask;
-        await bookingsTask;
+            var slotsTask = RefreshBookingSlotStatsAsync();
+            var bookingsTask = RefreshMyBookingsAsync();
+            await slotsTask;
+            await bookingsTask;
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
     // Re-subscribes after a page pushed over this one is popped: Loaded runs once per page, so
     // without this the feed torn down on Disappearing never comes back.

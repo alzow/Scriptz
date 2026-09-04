@@ -51,9 +51,16 @@ public partial class StaffManagementPageViewModel : BaseViewModel
 
     public override async Task OnAppearingAsync()
     {
-        await base.OnAppearingAsync();
-        if (_businessId != Guid.Empty)
-            await LoadAsync();
+        try
+        {
+            await base.OnAppearingAsync();
+            if (_businessId != Guid.Empty)
+                await LoadAsync();
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     [RelayCommand]
@@ -99,8 +106,15 @@ public partial class StaffManagementPageViewModel : BaseViewModel
     [RelayCommand]
     public async Task EditOperatorAsync(OperatorResponse op)
     {
-        await NavigationService.NavigateAsync(NavigationPaths.AddEditOperatorPage,
-            new NavigationParameters { [NavigationKeys.BusinessId] = _businessId, [NavigationKeys.OperatorId] = op.Id });
+        try
+        {
+            await NavigationService.NavigateAsync(NavigationPaths.AddEditOperatorPage,
+                new NavigationParameters { [NavigationKeys.BusinessId] = _businessId, [NavigationKeys.OperatorId] = op.Id });
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     [RelayCommand]

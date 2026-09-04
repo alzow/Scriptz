@@ -33,17 +33,31 @@ public class QueueSplashPageViewModel : BaseViewModel
 
     public override void Initialize(INavigationParameters parameters)
     {
-        base.Initialize(parameters);
+        try
+        {
+            base.Initialize(parameters);
 
-        BypassWelcome = parameters is not null
-            && parameters.TryGetValue(NavigationKeys.BypassWelcome, out var bypass)
-            && bypass is true;
+            BypassWelcome = parameters is not null
+                && parameters.TryGetValue(NavigationKeys.BypassWelcome, out var bypass)
+                && bypass is true;
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
     }
 
     public override async Task OnAppearingAsync()
     {
-        await base.OnAppearingAsync();
-        await SplashOrchestration();
+        try
+        {
+            await base.OnAppearingAsync();
+            await SplashOrchestration();
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     public async Task SplashOrchestration()

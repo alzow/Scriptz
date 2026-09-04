@@ -88,19 +88,26 @@ public partial class AddEditIntakeFieldPageViewModel : BaseViewModel
 
     public void Apply(IntakeFieldResponse? field)
     {
-        if (field is null)
-            return;
+        try
+        {
+            if (field is null)
+                return;
 
-        _sortOrder = field.SortOrder;
-        Label = field.Label;
-        IsRequired = field.IsRequired;
-        SelectType(TypeOptions.FirstOrDefault(t => t.FieldType == field.FieldType));
+            _sortOrder = field.SortOrder;
+            Label = field.Label;
+            IsRequired = field.IsRequired;
+            SelectType(TypeOptions.FirstOrDefault(t => t.FieldType == field.FieldType));
 
-        Options.Clear();
-        foreach (var option in field.Options ?? new List<string>())
-            Options.Add(new IntakeOptionRow { Text = option });
+            Options.Clear();
+            foreach (var option in field.Options ?? new List<string>())
+                Options.Add(new IntakeOptionRow { Text = option });
 
-        RaiseOptionState();
+            RaiseOptionState();
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
     }
 
     [RelayCommand]

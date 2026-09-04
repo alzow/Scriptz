@@ -53,11 +53,18 @@ public partial class LoginPageViewModel : BaseViewModel
 
     public override void Initialize(INavigationParameters parameters)
     {
-        base.Initialize(parameters);
+        try
+        {
+            base.Initialize(parameters);
 
-        CanGoBack = parameters is not null
-            && parameters.TryGetValue(NavigationKeys.CanGoBack, out var canGoBack)
-            && canGoBack is true;
+            CanGoBack = parameters is not null
+                && parameters.TryGetValue(NavigationKeys.CanGoBack, out var canGoBack)
+                && canGoBack is true;
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
     }
 
     public void OnFormValidationStateChanged(bool isValid) => IsFormValid = isValid;

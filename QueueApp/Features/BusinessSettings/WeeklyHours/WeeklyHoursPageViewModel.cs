@@ -61,9 +61,16 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
 
     public override async Task OnAppearingAsync()
     {
-        await base.OnAppearingAsync();
-        if (_operatorId != Guid.Empty)
-            await LoadAsync();
+        try
+        {
+            await base.OnAppearingAsync();
+            if (_operatorId != Guid.Empty)
+                await LoadAsync();
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     [RelayCommand]
@@ -96,8 +103,15 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
     [RelayCommand]
     public async Task AddWindowAsync(int dayOfWeek)
     {
-        await NavigationService.NavigateAsync(NavigationPaths.AddAvailabilityWindowPage,
-            new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId, [NavigationKeys.DayOfWeek] = dayOfWeek });
+        try
+        {
+            await NavigationService.NavigateAsync(NavigationPaths.AddAvailabilityWindowPage,
+                new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId, [NavigationKeys.DayOfWeek] = dayOfWeek });
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     [RelayCommand]
@@ -122,8 +136,15 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
     [RelayCommand]
     public async Task GoToBlockedDatesAsync()
     {
-        await NavigationService.NavigateAsync(NavigationPaths.BlockedDatesPage,
-            new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId, [NavigationKeys.OperatorName] = OperatorName });
+        try
+        {
+            await NavigationService.NavigateAsync(NavigationPaths.BlockedDatesPage,
+                new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId, [NavigationKeys.OperatorName] = OperatorName });
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     [RelayCommand]

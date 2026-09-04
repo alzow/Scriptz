@@ -77,23 +77,37 @@ public partial class AddEditServicePageViewModel : BaseViewModel
 
     public async Task LoadExistingAsync(Guid serviceId)
     {
-        var services = await _serviceOfferingsService.GetServicesAsync(_businessId);
-        var existing = services.FirstOrDefault(s => s.Id == serviceId);
-        if (existing is null) return;
+        try
+        {
+            var services = await _serviceOfferingsService.GetServicesAsync(_businessId);
+            var existing = services.FirstOrDefault(s => s.Id == serviceId);
+            if (existing is null) return;
 
-        Name = existing.Name;
-        DurationMinutesText = existing.EstMinutes.ToString();
-        PriceRandText = existing.PriceCents.HasValue ? (existing.PriceCents.Value / 100m).ToString("0.##") : "";
+            Name = existing.Name;
+            DurationMinutesText = existing.EstMinutes.ToString();
+            PriceRandText = existing.PriceCents.HasValue ? (existing.PriceCents.Value / 100m).ToString("0.##") : "";
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     // Coming back from the question editor is the only way this list changes, so it reloads here
     // rather than being handed a result.
     public override async Task OnAppearingAsync()
     {
-        await base.OnAppearingAsync();
+        try
+        {
+            await base.OnAppearingAsync();
 
-        if (_editingServiceId is not null)
-            await LoadIntakeFieldsAsync();
+            if (_editingServiceId is not null)
+                await LoadIntakeFieldsAsync();
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     public async Task LoadIntakeFieldsAsync()

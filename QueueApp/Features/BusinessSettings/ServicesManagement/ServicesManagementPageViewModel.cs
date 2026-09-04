@@ -51,9 +51,16 @@ public partial class ServicesManagementPageViewModel : BaseViewModel
 
     public override async Task OnAppearingAsync()
     {
-        await base.OnAppearingAsync();
-        if (_businessId != Guid.Empty)
-            await LoadAsync();
+        try
+        {
+            await base.OnAppearingAsync();
+            if (_businessId != Guid.Empty)
+                await LoadAsync();
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     [RelayCommand]
@@ -99,8 +106,15 @@ public partial class ServicesManagementPageViewModel : BaseViewModel
     [RelayCommand]
     public async Task EditServiceAsync(ServiceResponse service)
     {
-        await NavigationService.NavigateAsync(NavigationPaths.AddEditServicePage,
-            new NavigationParameters { [NavigationKeys.BusinessId] = _businessId, [NavigationKeys.ServiceId] = service.Id });
+        try
+        {
+            await NavigationService.NavigateAsync(NavigationPaths.AddEditServicePage,
+                new NavigationParameters { [NavigationKeys.BusinessId] = _businessId, [NavigationKeys.ServiceId] = service.Id });
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     [RelayCommand]

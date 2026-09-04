@@ -149,28 +149,35 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
     // the businesses list) still updates quietly once it actually completes.
     public async Task ResolveLocationAsync(bool showAnimation)
     {
-        if (showAnimation)
-            ApplyLocationState(LocationBarState.Resolving, "Finding your location…");
-
-        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        var refreshTask = _locationService.RefreshLocationAsync();
-
-        if (showAnimation)
+        try
         {
-            var completedInTime = await Task.WhenAny(refreshTask, Task.Delay(ResolvingTimeout)) == refreshTask;
-            if (!completedInTime)
+            if (showAnimation)
+                ApplyLocationState(LocationBarState.Resolving, "Finding your location…");
+
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            var refreshTask = _locationService.RefreshLocationAsync();
+
+            if (showAnimation)
             {
-                ApplyLocationState(LocationBarState.Failed, "Couldn't find you — tap to set");
-                _ = ApplyLocationResultWhenReadyAsync(refreshTask);
-                return;
+                var completedInTime = await Task.WhenAny(refreshTask, Task.Delay(ResolvingTimeout)) == refreshTask;
+                if (!completedInTime)
+                {
+                    ApplyLocationState(LocationBarState.Failed, "Couldn't find you — tap to set");
+                    _ = ApplyLocationResultWhenReadyAsync(refreshTask);
+                    return;
+                }
+
+                var elapsed = stopwatch.Elapsed;
+                if (elapsed < MinimumResolvingDisplay)
+                    await Task.Delay(MinimumResolvingDisplay - elapsed);
             }
 
-            var elapsed = stopwatch.Elapsed;
-            if (elapsed < MinimumResolvingDisplay)
-                await Task.Delay(MinimumResolvingDisplay - elapsed);
+            await ApplyLocationResultWhenReadyAsync(refreshTask);
         }
-
-        await ApplyLocationResultWhenReadyAsync(refreshTask);
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     public async Task ApplyLocationResultWhenReadyAsync(Task<LocationResolution> refreshTask)
@@ -187,27 +194,34 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
 
     public async Task ApplyLocationResultAsync(LocationResolution result)
     {
-        switch (result.Outcome)
+        try
         {
-            case LocationOutcome.Resolved:
-            case LocationOutcome.Coarse:
-                var location = result.Location!;
-                var moved = location.HasMovedFrom(_customerLatitude, _customerLongitude);
-                _customerLatitude = location.Latitude;
-                _customerLongitude = location.Longitude;
-                _lastKnownLocation = location;
-                ApplyLocationState(
-                    result.Outcome == LocationOutcome.Coarse ? LocationBarState.Coarse : LocationBarState.Resolved,
-                    location.Label);
-                if (moved)
-                    await LoadAsync();
-                break;
-            case LocationOutcome.Denied:
-                ApplyLocationState(LocationBarState.Denied, "Set your location");
-                break;
-            case LocationOutcome.Failed:
-                ApplyLocationState(LocationBarState.Failed, "Couldn't find you — tap to set");
-                break;
+            switch (result.Outcome)
+            {
+                case LocationOutcome.Resolved:
+                case LocationOutcome.Coarse:
+                    var location = result.Location!;
+                    var moved = location.HasMovedFrom(_customerLatitude, _customerLongitude);
+                    _customerLatitude = location.Latitude;
+                    _customerLongitude = location.Longitude;
+                    _lastKnownLocation = location;
+                    ApplyLocationState(
+                        result.Outcome == LocationOutcome.Coarse ? LocationBarState.Coarse : LocationBarState.Resolved,
+                        location.Label);
+                    if (moved)
+                        await LoadAsync();
+                    break;
+                case LocationOutcome.Denied:
+                    ApplyLocationState(LocationBarState.Denied, "Set your location");
+                    break;
+                case LocationOutcome.Failed:
+                    ApplyLocationState(LocationBarState.Failed, "Couldn't find you — tap to set");
+                    break;
+            }
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
         }
     }
 
@@ -350,11 +364,18 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
 
     public void ApplyUpcomingBookings(List<UpcomingBookingResponse> bookings)
     {
-        UpcomingBookings.Clear();
-        foreach (var booking in bookings.Take(UpcomingBookingsShown))
-            UpcomingBookings.Add(booking);
+        try
+        {
+            UpcomingBookings.Clear();
+            foreach (var booking in bookings.Take(UpcomingBookingsShown))
+                UpcomingBookings.Add(booking);
 
-        OnPropertyChanged(nameof(HasUpcomingBookings));
+            OnPropertyChanged(nameof(HasUpcomingBookings));
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
     }
 
     public async Task RefreshUpcomingBookingsAsync()
