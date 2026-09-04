@@ -106,7 +106,9 @@ public sealed class VisitRecord
             BusinessName = entry.BusinessName,
             Lifecycle = lifecycle,
             StatusText = EntryStatusText(entry, lifecycle),
-            ServiceName = string.IsNullOrWhiteSpace(entry.ServiceName) ? "Not recorded" : entry.ServiceName,
+            ServiceName = string.IsNullOrWhiteSpace(entry.ServiceName)
+                ? VisitSnapshotDefaults.ServiceNotRecorded
+                : entry.ServiceName,
             OperatorName = entry.OperatorName,
             HasOperator = entry.HasOperator,
             OperatorId = entry.OperatorId,
@@ -138,9 +140,11 @@ public sealed class VisitRecord
             BusinessName = booking.BusinessName,
             Lifecycle = lifecycle,
             StatusText = BookingStatusText(booking, lifecycle),
-            ServiceName = string.IsNullOrWhiteSpace(booking.ServiceName) ? "Not recorded" : booking.ServiceName,
+            ServiceName = string.IsNullOrWhiteSpace(booking.ServiceName)
+                ? VisitSnapshotDefaults.ServiceNotRecorded
+                : booking.ServiceName,
             OperatorName = booking.OperatorName,
-            HasOperator = booking.Operator is not null,
+            HasOperator = booking.HasOperator,
             PriceText = booking.PriceText,
             IntakeAnswers = OrderAnswers(booking.IntakeResponses),
             ShopUpdate = booking.ProgressStatus,

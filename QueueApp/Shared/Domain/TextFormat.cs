@@ -32,4 +32,9 @@ public static class TextFormat
 
     public static string Join(string first, string second) =>
         second.Length == 0 ? first : $"{first} · {second}";
+
+    public static string? FirstNonBlank(string? first, string? second) =>
+        !string.IsNullOrWhiteSpace(first) ? first
+        : string.IsNullOrWhiteSpace(second) ? null
+        : second;
 }
