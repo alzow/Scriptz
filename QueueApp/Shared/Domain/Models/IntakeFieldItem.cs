@@ -28,6 +28,15 @@ public sealed class IntakeFieldItem : ObservableObject
     public bool IsRequired => Field.IsRequired;
     public string RequirementText => IsRequired ? "REQUIRED" : "OPTIONAL";
 
+    // True for every field with no VisibilityRule. The coordinator is what flips this for a
+    // conditional one, once it can see every field's current answer.
+    private bool _isVisible = true;
+    public bool IsVisible
+    {
+        get => _isVisible;
+        set => SetProperty(ref _isVisible, value);
+    }
+
     public bool IsShortText => Field.FieldType == IntakeFieldTypes.ShortText;
     public bool IsLongText => Field.FieldType == IntakeFieldTypes.LongText;
     public bool IsFile => Field.FieldType == IntakeFieldTypes.File;
@@ -85,6 +94,20 @@ public sealed class IntakeFieldItem : ObservableObject
         OnPropertyChanged(nameof(FileName));
         OnPropertyChanged(nameof(FileSizeText));
         OnPropertyChanged(nameof(FilePickText));
+    }
+
+    // A field the coordinator has just hidden carries no answer forward: otherwise a choice made
+    // before the trigger changed back and forth could ride along, or slip into what gets submitted
+    // for a question the customer never actually saw.
+    public void ClearAnswer()
+    {
+        TextAnswer = string.Empty;
+        FileAnswer = null;
+
+        foreach (var option in Options)
+            option.IsSelected = false;
+
+        NotifyAnswerChanged();
     }
 
     // The stored answer is a snapshot of the question as well as the answer — see IntakeAnswer for

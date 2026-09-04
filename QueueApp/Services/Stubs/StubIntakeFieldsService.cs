@@ -53,6 +53,7 @@ public class StubIntakeFieldsService : IIntakeFieldsService
             IsRequired = request.IsRequired,
             SortOrder = request.SortOrder,
             Options = request.Options,
+            VisibilityRule = request.VisibilityRule,
         };
 
         list.Add(created);
@@ -68,6 +69,7 @@ public class StubIntakeFieldsService : IIntakeFieldsService
             field.Label = request.Label;
             field.IsRequired = request.IsRequired;
             field.Options = request.Options;
+            field.VisibilityRule = request.VisibilityRule;
         }
 
         return Task.CompletedTask;

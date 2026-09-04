@@ -232,14 +232,15 @@ public partial class AddEditServicePageViewModel : BaseViewModel
     [RelayCommand]
     public async Task SaveAsync()
     {
-        if (!NameValidator.Validate(Name) || !DurationValidator.Validate(DurationMinutesText))
-        {
-            return;
-        }
-
+        // The button already forces its bound loading flag true on tap, before this ever runs —
+        // every exit, including a validation failure, has to go through the same finally or it
+        // stays stuck until the page is left and reopened.
         IsSaving = true;
         try
         {
+            if (!NameValidator.Validate(Name) || !DurationValidator.Validate(DurationMinutesText))
+                return;
+
             if (!int.TryParse(DurationMinutesText, out var duration) || duration <= 0)
                 throw new InvalidOperationException("Duration must be a whole number of minutes.");
 

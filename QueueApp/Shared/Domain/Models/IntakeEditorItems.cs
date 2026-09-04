@@ -22,3 +22,14 @@ public sealed class IntakeOptionRow : ObservableObject
 {
     public required string Text { get; set; }
 }
+
+// An earlier single/multi-select question, offered as something this one's visibility could
+// depend on. Wraps the field rather than just its id so the value chips can read its Options.
+public sealed class IntakeTriggerFieldOption : ObservableObject
+{
+    public required IntakeFieldResponse Field { get; init; }
+
+    public Guid FieldId => Field.Id;
+    public string Label => Field.Label;
+    public bool IsSelected { get; set; }
+}

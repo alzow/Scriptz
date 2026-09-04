@@ -11,4 +11,8 @@ public class UpdateIntakeFieldRequest
     [JsonPropertyName("is_required")] public bool IsRequired { get; set; }
 
     [JsonPropertyName("options")] public List<string>? Options { get; set; }
+
+    [JsonPropertyName("visibility_rule")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public IntakeVisibilityRule? VisibilityRule { get; set; }
 }

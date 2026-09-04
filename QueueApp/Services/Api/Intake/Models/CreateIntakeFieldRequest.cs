@@ -13,4 +13,8 @@ public class CreateIntakeFieldRequest
     [JsonPropertyName("options")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<string>? Options { get; set; }
+
+    [JsonPropertyName("visibility_rule")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public IntakeVisibilityRule? VisibilityRule { get; set; }
 }
