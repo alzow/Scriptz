@@ -22,6 +22,7 @@ public partial class BookingActionsSheet : BottomSheetPage
     public string BookedAgoText { get; }
     public string NoteText { get; }
     public bool HasNote { get; }
+    public bool HasIntakeAnswers { get; }
     public bool HasPhone { get; }
     public bool CanConfirm { get; }
     public bool CanComplete { get; }
@@ -56,6 +57,7 @@ public partial class BookingActionsSheet : BottomSheetPage
         BookedAgoText = DescribeBooked(booking?.CreatedAt ?? default);
         NoteText = booking?.Note ?? string.Empty;
         HasNote = booking?.HasNote ?? false;
+        HasIntakeAnswers = booking?.HasIntakeAnswers ?? false;
         ProgressStatus = booking?.ProgressStatus ?? string.Empty;
 
         // A pending booking has not been accepted yet, so the only answers it takes are confirm and
@@ -138,6 +140,9 @@ public partial class BookingActionsSheet : BottomSheetPage
 
     private void OnCancelClicked(object? sender, EventArgs e) =>
         Close(new BookingActionResult(BookingAction.Cancel));
+
+    private void OnViewAnswersClicked(object? sender, EventArgs e) =>
+        Close(new BookingActionResult(BookingAction.ViewAnswers));
 
     private void OnSaveProgressClicked(object? sender, EventArgs e) =>
         Close(new BookingActionResult(

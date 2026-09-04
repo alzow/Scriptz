@@ -14,6 +14,7 @@ public partial class EntryActionsSheet : BottomSheetPage
     public string SubText { get; }
     public bool CanServe { get; }
     public bool CanReorder { get; }
+    public bool HasIntakeAnswers { get; }
 
     // Two-way bound to the note field, so it carries the edit out of the sheet rather than the
     // note it came in with.
@@ -34,7 +35,8 @@ public partial class EntryActionsSheet : BottomSheetPage
         string subText,
         bool canServe,
         bool canReorder,
-        string? note = null)
+        string? note = null,
+        bool hasIntakeAnswers = false)
     {
         _popups = popups;
         CustomerName = customerName;
@@ -42,6 +44,7 @@ public partial class EntryActionsSheet : BottomSheetPage
         SubText = subText;
         CanServe = canServe;
         CanReorder = canReorder;
+        HasIntakeAnswers = hasIntakeAnswers;
         NoteText = note ?? string.Empty;
         NoteHeaderText = string.IsNullOrWhiteSpace(note) ? "LEAVE A NOTE" : "NOTE";
 
@@ -60,6 +63,7 @@ public partial class EntryActionsSheet : BottomSheetPage
     private void OnChangeServiceClicked(object? sender, EventArgs e) => Close(EntryAction.ChangeService);
     private void OnNoShowClicked(object? sender, EventArgs e) => Close(EntryAction.MarkNoShow);
     private void OnRemoveClicked(object? sender, EventArgs e) => Close(EntryAction.RemoveFromQueue);
+    private void OnViewAnswersClicked(object? sender, EventArgs e) => Close(EntryAction.ViewAnswers);
 
     // Null rather than "" when the field is emptied: clearing a note is a real edit, and the board
     // writes null to take the message back off the customer's screen.

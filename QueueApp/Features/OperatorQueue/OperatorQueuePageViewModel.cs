@@ -1,12 +1,14 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using QueueApp.Shared.Domain;
+using MPowerKit;
 using MPowerKit.Navigation;
 using QueueApp.Constants;
 using QueueApp.Features.OperatorQueue.Models;
 using QueueApp.Features.OperatorQueue.Sheets;
 using QueueApp.Framework.Base;
 using QueueApp.Services.Api.Business;
+using QueueApp.Services.Api.Intake.Models;
 using QueueApp.Services.Api.Operator;
 using QueueApp.Services.Api.Operator.Models;
 using QueueApp.Services.Api.Queue;
@@ -16,6 +18,7 @@ using QueueApp.Services.Api.ServiceOfferings.Models;
 using QueueApp.Services.Popup;
 using QueueApp.Services.Realtime;
 using QueueApp.Services.Storage;
+using QueueApp.Shared.Domain.Models;
 
 namespace QueueApp.Features.OperatorQueue;
 
@@ -322,6 +325,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                         MinutesSince(entry.JoinedAt)),
                     NoteText = entry.ProgressStatus ?? string.Empty,
                     HasNote = !string.IsNullOrWhiteSpace(entry.ProgressStatus),
+                    IntakeAnswers = IntakeAnswer.Ordered(entry.IntakeResponses),
                     SectionIsServing = serving is not null,
                 });
             }
@@ -356,6 +360,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                 HasEstimate = service is not null,
                 NoteText = string.IsNullOrWhiteSpace(entry.ProgressStatus) ? "Add a note" : entry.ProgressStatus!,
                 HasNote = !string.IsNullOrWhiteSpace(entry.ProgressStatus),
+                IntakeAnswers = IntakeAnswer.Ordered(entry.IntakeResponses),
             };
 
             card.RefreshElapsed();
@@ -397,6 +402,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                     SubText = QueueRowItem.BuildSubText(ServiceNameOf(entry.ServiceId), waited),
                     NoteText = entry.ProgressStatus ?? string.Empty,
                     HasNote = !string.IsNullOrWhiteSpace(entry.ProgressStatus),
+                    IntakeAnswers = IntakeAnswer.Ordered(entry.IntakeResponses),
                 });
             }
 
@@ -447,6 +453,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                     ShowPosition = false,
                     ShowMarkCollected = true,
                     SubText = QueueRowItem.BuildReadySubText(ServiceNameOf(entry.ServiceId), readyMinutes),
+                    IntakeAnswers = IntakeAnswer.Ordered(entry.IntakeResponses),
                 });
             }
 
@@ -768,7 +775,8 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                 $"{row.ServiceName} · joined {row.JoinedAtText} · waiting {row.WaitedMinutes}m",
                 canServe: row.OperatorId is not null && !sectionIsServing,
                 canReorder: true,
-                note: row.HasNote ? row.NoteText : null);
+                note: row.HasNote ? row.NoteText : null,
+                hasIntakeAnswers: row.HasIntakeAnswers);
 
             await _popupService.ShowSheetAsync(sheet);
             var result = await sheet.Completion;
@@ -802,11 +810,68 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                 case EntryAction.RemoveFromQueue:
                     await ConfirmRemoveAsync(row.EntryId, row.CustomerName);
                     break;
+
+                case EntryAction.ViewAnswers:
+                    await OpenIntakeAnswersAsync(
+                        row.CustomerName,
+                        row.ServiceName,
+                        QueueRowItem.BuildJoinedText(row.JoinedAtText),
+                        row.IntakeAnswers);
+                    break;
             }
         }
         catch (Exception ex)
         {
             await ReloadAfterFailureAsync(ex);
+        }
+    }
+
+    // Straight off the card the operator is already looking at: the entry read selects every
+    // column, and a stored answer carries its own label, type and order, so the page it opens needs
+    // nothing fetched.
+    [RelayCommand]
+    public async Task ViewServingAnswersAsync(ServingCardItem? card)
+    {
+        try
+        {
+            if (card is null)
+                return;
+
+            await OpenIntakeAnswersAsync(
+                card.CustomerName,
+                card.ServiceText,
+                BoardConstants.NowServingText,
+                card.IntakeAnswers);
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    public async Task OpenIntakeAnswersAsync(
+        string customerName,
+        string serviceName,
+        string whenText,
+        IReadOnlyList<IntakeAnswer> answers)
+    {
+        try
+        {
+            var parameters = new NavigationParameters
+            {
+                [NavigationKeys.IntakeAnswers] =
+                    new IntakeAnswerSnapshot(customerName, serviceName, whenText, answers),
+            };
+
+            // The board is a tab, so a plain push would bury the page inside the tab's own stack
+            // with the tab bar still on screen — the same reason the flow opens modally from here.
+            await NavigationService.NavigateAsync(
+                $"NavigationPage/{NavigationPaths.IntakeAnswersPage}", parameters,
+                modal: true, animated: false);
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
         }
     }
 

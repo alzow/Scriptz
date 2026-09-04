@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using QueueApp.Services.Api.Intake.Models;
 
 namespace QueueApp.Features.OperatorQueue.Models;
 
@@ -26,6 +27,12 @@ public sealed class QueueRowItem : ObservableObject
     public string NoteText { get; init; } = string.Empty;
     public bool HasNote { get; init; }
 
+    // The answers the customer gave on the way in, carried onto the row so the operator can open
+    // them without a round trip. Empty whenever the service asked nothing, and for every walk-in
+    // added at the counter — that sheet does not ask the service's questions.
+    public IReadOnlyList<IntakeAnswer> IntakeAnswers { get; init; } = Array.Empty<IntakeAnswer>();
+    public bool HasIntakeAnswers => IntakeAnswers.Count > 0;
+
     public bool SectionIsServing { get; init; }
 
     public bool IsBusy { get; set; }
@@ -47,6 +54,11 @@ public sealed class QueueRowItem : ObservableObject
         var wait = $"waiting {waitedMinutes}m";
         return string.IsNullOrWhiteSpace(serviceName) ? wait : $"{serviceName} · {wait}";
     }
+
+    // Empty rather than a dangling "joined" for the rows that carry no join time — the awaiting
+    // collection list is built without one.
+    public static string BuildJoinedText(string joinedAtText) =>
+        string.IsNullOrWhiteSpace(joinedAtText) ? string.Empty : $"joined {joinedAtText}";
 
     public static string BuildReadySubText(string serviceName, int readyMinutes)
     {

@@ -23,6 +23,9 @@ public static class NavigationPaths
     // ── Booking (operator counter-tablet) ─────────────────────────────────────
     public const string BookingAgendaPage    = "BookingAgendaPage";
 
+    // Read-only view of what a customer answered, opened from either operator board.
+    public const string IntakeAnswersPage    = "IntakeAnswersPage";
+
     // ── Business settings (Services / Staff / Hours) ──────────────────────────
     public const string BusinessSettingsPage  = "BusinessSettingsPage";
     public const string ServicesManagementPage = "ServicesManagementPage";

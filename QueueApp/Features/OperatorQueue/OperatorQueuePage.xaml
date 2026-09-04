@@ -55,6 +55,7 @@
                         DoneCommand="{Binding BindingContext.DoneCommand, Source={x:Reference Root}}"
                         ServeCommand="{Binding BindingContext.ServeCommand, Source={x:Reference Root}}"
                         OpenRowActionsCommand="{Binding BindingContext.OpenRowActionsCommand, Source={x:Reference Root}}"
+                        ViewAnswersCommand="{Binding BindingContext.ViewServingAnswersCommand, Source={x:Reference Root}}"
                         AddWalkInCommand="{Binding BindingContext.AddWalkInCommand, Source={x:Reference Root}}"
                         ToggleShiftCommand="{Binding BindingContext.ToggleShiftCommand, Source={x:Reference Root}}"/>
                 </DataTemplate>

@@ -59,6 +59,14 @@
 
             <BoxView HeightRequest="1" Style="{StaticResource bx_Divider}" Margin="0,16,0,4"/>
 
+            <!-- The questions this shop's own service asked. Shown only when the entry carries
+                 answers: most do not — a walk-in added at the counter never has any — and a row
+                 that leads nowhere is worse than no row. -->
+            <Button Text="View answers" Margin="0,9,0,0"
+                    Style="{StaticResource btn15_Regular_SheetRow}"
+                    IsVisible="{Binding HasIntakeAnswers, Source={x:Reference Root}}"
+                    Clicked="OnViewAnswersClicked"/>
+
             <Button Text="Serve now" Margin="0,9,0,0"
                     Style="{StaticResource btn15_Bold_SheetGo}"
                     IsVisible="{Binding CanServe, Source={x:Reference Root}}"

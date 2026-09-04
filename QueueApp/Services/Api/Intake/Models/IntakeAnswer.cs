@@ -61,4 +61,11 @@ public class IntakeAnswer
             : Values is { Count: > 0 }
                 ? string.Join(", ", Values)
                 : Value ?? string.Empty;
+
+    // The jsonb is an object keyed by field id, so it comes back in whatever order it was stored
+    // in. sort_order is the order the shop chose, and it travelled with each answer for this.
+    public static IReadOnlyList<IntakeAnswer> Ordered(Dictionary<string, IntakeAnswer>? responses) =>
+        responses is null or { Count: 0 }
+            ? Array.Empty<IntakeAnswer>()
+            : responses.Values.OrderBy(a => a.SortOrder).ToList();
 }

@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using QueueApp.Services.Api.Intake.Models;
 
 namespace QueueApp.Features.OperatorQueue.Models;
 
@@ -16,6 +17,12 @@ public sealed class ServingCardItem : ObservableObject
 
     public string NoteText { get; set; } = string.Empty;
     public bool HasNote { get; set; }
+
+    // The answers the customer gave on the way in, carried onto the row so the operator can open
+    // them without a round trip. Empty whenever the service asked nothing, and for every walk-in
+    // added at the counter — that sheet does not ask the service's questions.
+    public IReadOnlyList<IntakeAnswer> IntakeAnswers { get; init; } = Array.Empty<IntakeAnswer>();
+    public bool HasIntakeAnswers => IntakeAnswers.Count > 0;
 
     public string ElapsedText { get; set; } = "00:00";
 
