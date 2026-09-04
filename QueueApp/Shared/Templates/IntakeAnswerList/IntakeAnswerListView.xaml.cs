@@ -1,18 +1,18 @@
 using System.Collections;
 using System.Windows.Input;
 
-namespace QueueApp.Features.Flow.Visit.Helpers;
+namespace QueueApp.Shared.Templates.IntakeAnswerList;
 
-public partial class VisitIntakeSectionView : ContentView
+public partial class IntakeAnswerListView : ContentView
 {
     public static readonly BindableProperty SectionTitleProperty = BindableProperty.Create(
-        nameof(SectionTitle), typeof(string), typeof(VisitIntakeSectionView), string.Empty);
+        nameof(SectionTitle), typeof(string), typeof(IntakeAnswerListView), string.Empty);
 
     public static readonly BindableProperty AnswersProperty = BindableProperty.Create(
-        nameof(Answers), typeof(IEnumerable), typeof(VisitIntakeSectionView));
+        nameof(Answers), typeof(IEnumerable), typeof(IntakeAnswerListView));
 
     public static readonly BindableProperty OpenFileCommandProperty = BindableProperty.Create(
-        nameof(OpenFileCommand), typeof(ICommand), typeof(VisitIntakeSectionView));
+        nameof(OpenFileCommand), typeof(ICommand), typeof(IntakeAnswerListView));
 
     public string SectionTitle
     {
@@ -32,7 +32,7 @@ public partial class VisitIntakeSectionView : ContentView
         set => SetValue(OpenFileCommandProperty, value);
     }
 
-    public VisitIntakeSectionView()
+    public IntakeAnswerListView()
     {
         InitializeComponent();
     }

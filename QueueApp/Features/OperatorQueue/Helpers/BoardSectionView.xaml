@@ -73,6 +73,26 @@
                             </Border.GestureRecognizers>
                         </Border>
 
+                        <!-- The person in the chair is who the shop most needs the answers for, and
+                             the card is where they are already looking. Only present when the entry
+                             carries any. -->
+                        <Border Style="{StaticResource brd10_Surface_Flat}"
+                                Padding="11,9" Margin="0,9,0,0" MinimumHeightRequest="44"
+                                IsVisible="{Binding HasIntakeAnswers}">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="7">
+                                <tpl:ThemedIcon Grid.Column="0" Icon="ic_eye" WidthRequest="14" HeightRequest="14"
+                                       VerticalOptions="Center"/>
+                                <Label Grid.Column="1" Text="View answers"
+                                       Style="{StaticResource lbl12_Regular_TextLight}"
+                                       VerticalOptions="Center"/>
+                            </Grid>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding ViewAnswersCommand, Source={x:Reference Root}}"
+                                    CommandParameter="{Binding .}"/>
+                            </Border.GestureRecognizers>
+                        </Border>
+
                         <Button Text="Done" HeightRequest="56" Margin="0,12,0,0"
                                 Style="{StaticResource btn16_Bold_Green}"
                                 IsEnabled="{Binding IsEnabled}"

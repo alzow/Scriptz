@@ -10,4 +10,5 @@ public enum EntryAction
     SaveNote,
     MarkNoShow,
     RemoveFromQueue,
+    ViewAnswers,
 }

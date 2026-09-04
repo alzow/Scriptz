@@ -13,6 +13,7 @@ using QueueApp.Services.Api.Booking;
 using QueueApp.Services.Api.Booking.Models;
 using QueueApp.Services.Api.Business;
 using QueueApp.Services.Api.Business.Models;
+using QueueApp.Services.Api.Intake.Models;
 using QueueApp.Services.Api.Operator;
 using QueueApp.Services.Api.Operator.Models;
 using QueueApp.Services.Api.ServiceOfferings;
@@ -20,6 +21,7 @@ using QueueApp.Services.Api.ServiceOfferings.Models;
 using QueueApp.Services.Popup;
 using QueueApp.Services.Realtime;
 using QueueApp.Services.Storage;
+using QueueApp.Shared.Domain.Models;
 
 namespace QueueApp.Features.BookingAgenda;
 
@@ -950,7 +952,39 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
                     await _bookingService.SetBookingProgressAsync(booking.Id, result.ProgressStatus);
                     await RefreshAsync();
                     break;
+
+                case BookingAction.ViewAnswers:
+                    await OpenIntakeAnswersAsync(booking);
+                    break;
             }
+        }
+        catch (Exception ex)
+        {
+            await HandleExceptionAsync(ex);
+        }
+    }
+
+    // The agenda read selects every column and a stored answer carries its own label, type and
+    // order, so the booking already in hand holds everything the page renders — no round trip, and
+    // no read of the field definitions.
+    public async Task OpenIntakeAnswersAsync(AgendaBookingResponse booking)
+    {
+        try
+        {
+            var parameters = new NavigationParameters
+            {
+                [NavigationKeys.IntakeAnswers] = new IntakeAnswerSnapshot(
+                    booking.CustomerName,
+                    booking.ServiceName,
+                    booking.DayAndRangeDisplay,
+                    IntakeAnswer.Ordered(booking.IntakeResponses)),
+            };
+
+            // The agenda is a tab, so a plain push would bury the page inside the tab's own stack
+            // with the tab bar still on screen — the same reason the booking flow opens modally.
+            await NavigationService.NavigateAsync(
+                $"NavigationPage/{NavigationPaths.IntakeAnswersPage}", parameters,
+                modal: true, animated: false);
         }
         catch (Exception ex)
         {

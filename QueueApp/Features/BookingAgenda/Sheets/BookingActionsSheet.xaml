@@ -107,6 +107,15 @@
                     </VerticalStackLayout>
                 </Border>
 
+                <!-- The questions this shop's own service asked. Only offered when the booking
+                     actually carries answers: most do not, and a row that leads nowhere is worse
+                     than no row. -->
+                <Button Text="View answers"
+                        Margin="0,9,0,0"
+                        Style="{StaticResource btn15_Regular_SheetRow}"
+                        IsVisible="{Binding HasIntakeAnswers, Source={x:Reference Root}}"
+                        Clicked="OnViewAnswersClicked"/>
+
                 <VerticalStackLayout Spacing="0"
                                      IsVisible="{Binding CanUpdateCustomer, Source={x:Reference Root}}">
                     <Label Text="UPDATE THE CUSTOMER"
