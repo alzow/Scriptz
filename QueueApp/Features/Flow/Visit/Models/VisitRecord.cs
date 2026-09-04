@@ -1,3 +1,4 @@
+using QueueApp.Features.Flow.Visit.Helpers;
 using QueueApp.Framework.Extensions;
 using QueueApp.Services.Api.Booking.Models;
 using QueueApp.Services.Api.Intake.Models;
@@ -107,7 +108,7 @@ public sealed class VisitRecord
             Lifecycle = lifecycle,
             StatusText = EntryStatusText(entry, lifecycle),
             ServiceName = string.IsNullOrWhiteSpace(entry.ServiceName)
-                ? VisitSnapshotDefaults.ServiceNotRecorded
+                ? VisitHelper.NotRecorded
                 : entry.ServiceName,
             OperatorName = entry.OperatorName,
             HasOperator = entry.HasOperator,
@@ -141,7 +142,7 @@ public sealed class VisitRecord
             Lifecycle = lifecycle,
             StatusText = BookingStatusText(booking, lifecycle),
             ServiceName = string.IsNullOrWhiteSpace(booking.ServiceName)
-                ? VisitSnapshotDefaults.ServiceNotRecorded
+                ? VisitHelper.NotRecorded
                 : booking.ServiceName,
             OperatorName = booking.OperatorName,
             HasOperator = booking.HasOperator,
