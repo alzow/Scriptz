@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.Settings"
              xmlns:responses="clr-namespace:QueueApp.Services.Api.Operator.Models"
-             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
+             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.AlzowLoadingButton"
              xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
              x:Name="Root"
              x:Class="QueueApp.Features.Settings.StaffManagementPage"

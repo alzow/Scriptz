@@ -4,7 +4,7 @@
              xmlns:vm="clr-namespace:QueueApp.Features.Settings"
              xmlns:models="clr-namespace:QueueApp.Shared.Domain.Models"
              xmlns:entry="clr-namespace:QueueApp.Shared.Templates.QueueEntry"
-             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
+             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.AlzowLoadingButton"
              xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
              xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
              x:Name="Root"

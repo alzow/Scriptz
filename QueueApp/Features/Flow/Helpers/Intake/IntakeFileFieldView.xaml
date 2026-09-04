@@ -7,8 +7,6 @@
 
     <VerticalStackLayout Spacing="8">
 
-        <!-- What's attached, once something is. Named and sized, because "a file is attached" is
-             not enough to tell a photo of the right script from a photo of the wrong one. -->
         <Border Padding="12" Style="{StaticResource brd13_Raised_Lined}"
                 IsVisible="{Binding HasFile, Source={x:Reference Root}}">
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">

@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.Settings"
              xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
-             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.QueueLoadingButton"
+             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.AlzowLoadingButton"
              x:Class="QueueApp.Features.Settings.BusinessLocationPage"
              x:DataType="vm:BusinessLocationPageViewModel"
              Title="{Binding Title}"

@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Name="LoadingButton"
              xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
-             x:Class="QueueApp.Shared.Templates.QueueLoadingButton.AlzowLoadingButton">
+             x:Class="QueueApp.Shared.Templates.AlzowLoadingButton.AlzowLoadingButton">
     <Grid>
         <Button
             x:Name="Button"
