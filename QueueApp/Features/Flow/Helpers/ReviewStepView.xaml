@@ -9,8 +9,9 @@
     <ScrollView IsVisible="{Binding ShowReviewStep, Source={x:Reference Root}}">
         <VerticalStackLayout Spacing="0">
 
-            <!-- Shop-side only: an operator-created booking has no account behind it, so the name
-                 and number are the only way to know whose slot this is or to reach them. -->
+            <!-- Shop-side only: an operator-created row has no account behind it, so the name is
+                 the only way to know whose it is. The number goes with it wherever there is a
+                 column to keep it in — bookings have one, queue entries do not. -->
             <VerticalStackLayout Spacing="0" Margin="0,0,0,18"
                                  IsVisible="{Binding ShowCustomerCapture, Source={x:Reference Root}}">
                 <Label Text="NAME" Style="{StaticResource lbl11_Mono_TextMuted}" Margin="20,0,20,8"/>
@@ -19,12 +20,14 @@
                                   Placeholder="Who's coming in?"
                                   ShowClearTextButton="True"/>
 
-                <Label Text="PHONE — OPTIONAL" Style="{StaticResource lbl11_Mono_TextMuted}" Margin="20,14,20,8"/>
+                <Label Text="PHONE — OPTIONAL" Style="{StaticResource lbl11_Mono_TextMuted}" Margin="20,14,20,8"
+                       IsVisible="{Binding ShowCustomerPhone, Source={x:Reference Root}}"/>
                 <entry:QueueEntry Margin="20,0"
                                   Text="{Binding CustomerPhone, Source={x:Reference Root}}"
                                   Placeholder="082 000 0000"
                                   InputType="Telephone"
-                                  ShowClearTextButton="True"/>
+                                  ShowClearTextButton="True"
+                                  IsVisible="{Binding ShowCustomerPhone, Source={x:Reference Root}}"/>
             </VerticalStackLayout>
 
             <Border Margin="20,0" Padding="15,6"
@@ -55,12 +58,12 @@
                     </Grid>
                     <Grid ColumnDefinitions="*,Auto" Padding="0,11"
                           IsVisible="{Binding ShowReviewQueueLines, Source={x:Reference Root}}">
-                        <Label Grid.Column="0" Text="You'll be" Style="{StaticResource lbl13_Regular_TextMid}"/>
+                        <Label Grid.Column="0" Text="{Binding ReviewPositionLabel, Source={x:Reference Root}}" Style="{StaticResource lbl13_Regular_TextMid}"/>
                         <Label Grid.Column="1" Text="{Binding ReviewPositionText, Source={x:Reference Root}}" Style="{StaticResource lbl13_Mono_Green}"/>
                     </Grid>
                     <Grid ColumnDefinitions="*,Auto" Padding="0,11"
                           IsVisible="{Binding ShowReviewQueueLines, Source={x:Reference Root}}">
-                        <Label Grid.Column="0" Text="Your turn about" Style="{StaticResource lbl13_Regular_TextMid}"/>
+                        <Label Grid.Column="0" Text="{Binding ReviewTurnLabel, Source={x:Reference Root}}" Style="{StaticResource lbl13_Regular_TextMid}"/>
                         <Label Grid.Column="1" Text="{Binding ReviewTurnText, Source={x:Reference Root}}" Style="{StaticResource lbl13_Mono_Green}"/>
                     </Grid>
                 </VerticalStackLayout>

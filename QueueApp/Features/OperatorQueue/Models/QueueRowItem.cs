@@ -16,9 +16,6 @@ public sealed class QueueRowItem : ObservableObject
 
     public string PositionText { get; init; } = string.Empty;
     public bool ShowPosition { get; init; }
-    public bool ShowServe { get; init; }
-    public bool ShowAssign { get; init; }
-    public bool ShowMarkCollected { get; init; }
 
     public string SubText { get; set; } = string.Empty;
 
@@ -27,17 +24,17 @@ public sealed class QueueRowItem : ObservableObject
     public string NoteText { get; init; } = string.Empty;
     public bool HasNote { get; init; }
 
-    // The answers the customer gave on the way in, carried onto the row so the operator can open
-    // them without a round trip. Empty whenever the service asked nothing, and for every walk-in
-    // added at the counter — that sheet does not ask the service's questions.
+    // The answers the customer gave on the way in, carried onto the row so the sheet can open them
+    // without a round trip. Empty whenever the service asked nothing.
     public IReadOnlyList<IntakeAnswer> IntakeAnswers { get; init; } = Array.Empty<IntakeAnswer>();
     public bool HasIntakeAnswers => IntakeAnswers.Count > 0;
 
-    public bool SectionIsServing { get; init; }
+    // A row with nothing on it but a name reads as inert. The count is the badge that says there
+    // is something behind the tap, without spending a line of the row saying so.
+    public string IntakeAnswerCountText => IntakeAnswers.Count.ToString();
 
     public bool IsBusy { get; set; }
     public bool IsEnabled => !IsBusy;
-    public bool IsServeEnabled => !IsBusy && !SectionIsServing;
 
     public int WaitedMinutes =>
         (int)Math.Max(0, (DateTime.UtcNow - BoardConstants.AsUtc(JoinedAt)).TotalMinutes);

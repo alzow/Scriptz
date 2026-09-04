@@ -35,8 +35,7 @@
                                     IsPoolExpanded="{Binding IsPoolExpanded}"
                                     PoolRows="{Binding PoolRows}"
                                     TogglePoolCommand="{Binding TogglePoolCommand}"
-                                    AssignCommand="{Binding AssignCommand}"
-                                    OpenRowActionsCommand="{Binding OpenRowActionsCommand}"/>
+                                    OpenRowSheetCommand="{Binding OpenRowSheetCommand}"/>
 
             <helpers:AwaitingCollectionSectionView IsVisible="{Binding HasAwaitingCollection}"
                                                     HasAwaitingCollection="{Binding HasAwaitingCollection}"
@@ -51,12 +50,9 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:BoardSection">
                     <helpers:BoardSectionView
-                        EditNoteCommand="{Binding BindingContext.EditNoteCommand, Source={x:Reference Root}}"
-                        DoneCommand="{Binding BindingContext.DoneCommand, Source={x:Reference Root}}"
-                        ServeCommand="{Binding BindingContext.ServeCommand, Source={x:Reference Root}}"
-                        OpenRowActionsCommand="{Binding BindingContext.OpenRowActionsCommand, Source={x:Reference Root}}"
-                        ViewAnswersCommand="{Binding BindingContext.ViewServingAnswersCommand, Source={x:Reference Root}}"
-                        AddWalkInCommand="{Binding BindingContext.AddWalkInCommand, Source={x:Reference Root}}"
+                        OpenRowSheetCommand="{Binding BindingContext.OpenRowSheetCommand, Source={x:Reference Root}}"
+                        OpenServingSheetCommand="{Binding BindingContext.OpenServingSheetCommand, Source={x:Reference Root}}"
+                        AddToQueueCommand="{Binding BindingContext.AddToQueueCommand, Source={x:Reference Root}}"
                         ToggleShiftCommand="{Binding BindingContext.ToggleShiftCommand, Source={x:Reference Root}}"/>
                 </DataTemplate>
             </CollectionView.ItemTemplate>

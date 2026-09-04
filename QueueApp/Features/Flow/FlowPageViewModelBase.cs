@@ -26,15 +26,21 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
     public bool IsQueueMode => Business?.Mode == FlowStepEngine.QueueMode;
     public bool IsBookingMode => Business?.Mode == FlowStepEngine.BookingMode;
 
-    // The shop taking a booking at the counter walks the same steps against the same slot engine.
-    // What differs is who it's for: there is no account behind it, so the name and phone are typed
-    // in, and the row is inserted already confirmed instead of going through create_booking.
+    // The shop taking a booking or a walk-in at the counter walks the same steps as the customer.
+    // What differs is who it's for: there is no account behind it, so the name is typed in, and the
+    // row is written by the shop rather than requested from it.
     public bool IsOperatorFlow { get; set; }
-    public bool IsSlotFlow => IsBookingMode || IsOperatorFlow;
+    public bool IsSlotFlow => IsBookingMode;
 
     public string BusinessName => Business?.Name ?? string.Empty;
     public string FlowTitle => FlowCopy.FlowTitle(IsOperatorFlow, IsBookingMode);
     public Guid BusinessId => _businessId;
+
+    // Where an operator flow came from, and the only tab it can go back to: a shop runs one manage
+    // screen or the other, never both.
+    public string OperatorHomeTab => IsBookingMode
+        ? NavigationPaths.BookingAgendaPage
+        : NavigationPaths.OperatorQueuePage;
 
     public ObservableCollection<RailSegment> RailSegments { get; } = new();
     public ObservableCollection<CrumbChip> Crumbs { get; } = new();
@@ -87,11 +93,17 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
     public string ReviewPriceText { get; set; } = string.Empty;
     public string ReviewPositionText { get; set; } = string.Empty;
     public string ReviewTurnText { get; set; } = string.Empty;
+    public string ReviewPositionLabel => FlowCopy.ReviewPositionLabel(IsOperatorFlow);
+    public string ReviewTurnLabel => FlowCopy.ReviewTurnLabel(IsOperatorFlow);
     public string ReviewWhenText { get; set; } = string.Empty;
     public bool ShowReviewWhen => IsSlotFlow;
     public bool ShowReviewQueueLines => !IsSlotFlow;
 
     public bool ShowCustomerCapture => IsOperatorFlow;
+
+    // bookings carries a customer_phone; queue_entries does not. Asking for a number the join has
+    // nowhere to put would lose it silently, which is worse than not asking.
+    public bool ShowCustomerPhone => IsOperatorFlow && IsSlotFlow;
     public string CustomerName { get; set; } = string.Empty;
     public string CustomerPhone { get; set; } = string.Empty;
     public string NoteLabelText => FlowCopy.NoteLabel(IsOperatorFlow);
@@ -113,6 +125,10 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
     // was tapped. Both are one-shot: once the matching chip is selected they stop steering anything.
     private DateTime? _preferredDate;
     private DateTimeOffset? _preferredStart;
+
+    // The board column the walk-in was added from. Not one-shot: it settles the operator for the
+    // whole flow, which is why the Operator step never appears.
+    private Guid? _preselectedOperatorId;
 
     private readonly FlowServices _services;
     private readonly FlowScheduleLoader _schedule;
@@ -181,6 +197,9 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
         if (parameters.TryGetValue(NavigationKeys.IsOperatorFlow, out var operatorFlagObj))
             IsOperatorFlow = operatorFlagObj is true;
 
+        if (parameters.TryGetValue(NavigationKeys.OperatorId, out var operatorIdObj) && operatorIdObj is Guid operatorId)
+            _preselectedOperatorId = operatorId;
+
         if (parameters.TryGetValue(NavigationKeys.PreferredDate, out var dateObj) && dateObj is DateTime date)
             _preferredDate = date.Date;
 
@@ -224,7 +243,8 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
         Business = business;
         Title = business.Name;
         _labels = CategoryLabels.Resolve(business.Category);
-        _selectableOperators = FlowStepEngine.SelectableOperators(_allOperators, IsOperatorFlow);
+        _selectableOperators = FlowStepEngine.NarrowToPreselected(
+            FlowStepEngine.SelectableOperators(_allOperators, IsOperatorFlow), _preselectedOperatorId);
 
         ServiceRows.Clear();
         foreach (var service in services.OrderBy(s => s.SortOrder))
@@ -385,7 +405,7 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
             ResetFlowState();
 
             if (IsOperatorFlow)
-                _ = ReturnToTabsAsync(NavigationPaths.BookingAgendaPage);
+                _ = ReturnToTabsAsync(OperatorHomeTab);
             else
                 _ = NavigationService.GoBackAsync();
         }
@@ -626,6 +646,8 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
             }
 
             OnPropertyChanged(nameof(ReviewOperatorLabel));
+            OnPropertyChanged(nameof(ReviewPositionLabel));
+            OnPropertyChanged(nameof(ReviewTurnLabel));
             OnPropertyChanged(nameof(ShowReviewWhen));
             OnPropertyChanged(nameof(ShowReviewQueueLines));
         }
@@ -994,11 +1016,13 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
         {
             var request = BuildSubmissionRequest();
 
-            var result = IsOperatorFlow
-                ? await _submission.SubmitOperatorBookingAsync(request)
-                : IsBookingMode
-                    ? await _submission.SubmitBookingAsync(request)
-                    : await _submission.SubmitJoinAsync(request);
+            var result = (IsOperatorFlow, IsBookingMode) switch
+            {
+                (true, true) => await _submission.SubmitOperatorBookingAsync(request),
+                (true, false) => await _submission.SubmitOperatorJoinAsync(request),
+                (false, true) => await _submission.SubmitBookingAsync(request),
+                (false, false) => await _submission.SubmitJoinAsync(request),
+            };
 
             _submittedRecordId = result.RecordId;
             _submittedIsBooking = result.IsBooking;
@@ -1006,7 +1030,7 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
             ResetFlowState();
             await OnSubmittedAsync();
         }
-        catch (ApiException exception) when (exception.StatusCode == HttpStatusCode.Conflict)
+        catch (ApiException exception) when (IsSlotFlow && exception.StatusCode == HttpStatusCode.Conflict)
         {
             // bookings_no_overlap caught a race — someone took this exact slot between the list
             // loading and the confirm tap.

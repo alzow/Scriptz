@@ -1,5 +1,6 @@
 using MPowerKit;
 using MPowerKit.Navigation;
+using QueueApp.Constants;
 using QueueApp.Features.Flow.Helpers;
 using QueueApp.Services.Storage;
 
@@ -17,11 +18,16 @@ public partial class QueueFlowPageViewModel : FlowPageViewModelBase
     {
     }
 
+    // The shop's own add has no ticket to show — the entry it just wrote is on the board behind
+    // this flow, so the operator goes back to it.
     public override async Task OnSubmittedAsync()
     {
         try
         {
-            await GoToVisitAsync();
+            if (IsOperatorFlow)
+                await ReturnToTabsAsync(NavigationPaths.OperatorQueuePage);
+            else
+                await GoToVisitAsync();
         }
         catch (Exception exception)
         {

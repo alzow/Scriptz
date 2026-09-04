@@ -50,6 +50,15 @@ public partial class ReviewStepView : ContentView
         nameof(CustomerPhone), typeof(string), typeof(ReviewStepView), string.Empty,
         defaultBindingMode: BindingMode.TwoWay);
 
+    public static readonly BindableProperty ShowCustomerPhoneProperty = BindableProperty.Create(
+        nameof(ShowCustomerPhone), typeof(bool), typeof(ReviewStepView), false);
+
+    public static readonly BindableProperty ReviewPositionLabelProperty = BindableProperty.Create(
+        nameof(ReviewPositionLabel), typeof(string), typeof(ReviewStepView), string.Empty);
+
+    public static readonly BindableProperty ReviewTurnLabelProperty = BindableProperty.Create(
+        nameof(ReviewTurnLabel), typeof(string), typeof(ReviewStepView), string.Empty);
+
     public bool ShowReviewStep
     {
         get => (bool)GetValue(ShowReviewStepProperty);
@@ -138,6 +147,24 @@ public partial class ReviewStepView : ContentView
     {
         get => (string)GetValue(CustomerPhoneProperty);
         set => SetValue(CustomerPhoneProperty, value);
+    }
+
+    public bool ShowCustomerPhone
+    {
+        get => (bool)GetValue(ShowCustomerPhoneProperty);
+        set => SetValue(ShowCustomerPhoneProperty, value);
+    }
+
+    public string ReviewPositionLabel
+    {
+        get => (string)GetValue(ReviewPositionLabelProperty);
+        set => SetValue(ReviewPositionLabelProperty, value);
+    }
+
+    public string ReviewTurnLabel
+    {
+        get => (string)GetValue(ReviewTurnLabelProperty);
+        set => SetValue(ReviewTurnLabelProperty, value);
     }
 
     public ReviewStepView()

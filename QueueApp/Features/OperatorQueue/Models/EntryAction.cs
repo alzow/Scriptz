@@ -4,6 +4,7 @@ public enum EntryAction
 {
     Dismissed,
     ServeNow,
+    MarkDone,
     MoveToAnotherOperator,
     MoveToEndOfQueue,
     ChangeService,

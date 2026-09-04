@@ -65,6 +65,13 @@
                         ReviewWhenText="{Binding ReviewWhenText}"
                         ShowReviewWhen="{Binding ShowReviewWhen}"
                         ShowReviewQueueLines="{Binding ShowReviewQueueLines}"
+                        ReviewPositionLabel="{Binding ReviewPositionLabel}"
+                        ReviewTurnLabel="{Binding ReviewTurnLabel}"
+                        ShowCustomerCapture="{Binding ShowCustomerCapture}"
+                        ShowCustomerPhone="{Binding ShowCustomerPhone}"
+                        CustomerName="{Binding CustomerName}"
+                        CustomerPhone="{Binding CustomerPhone}"
+                        NoteLabelText="{Binding NoteLabelText}"
                         BookingNote="{Binding BookingNote}"/>
 
             </Grid>

@@ -97,9 +97,16 @@ public static class FlowStepPresenter
 
     private static FlowFooterState BuildReviewFooter(in FlowStepContext context, string cta)
     {
+        // An operator booking has nothing but the name to identify whose slot it is, so an empty
+        // field is something still missing. A queue entry without one is a walk-in, which is a
+        // complete answer rather than an omission.
+        var unnamedLabel = context.Copy.IsSlotFlow
+            ? FlowConstants.NeedsNameLabel
+            : FlowConstants.UnnamedWalkInLabel;
+
         var label = context.Copy.IsOperatorFlow
             ? string.IsNullOrWhiteSpace(context.CustomerName)
-                ? FlowConstants.NeedsNameLabel
+                ? unnamedLabel
                 : context.CustomerName.Trim()
             : context.Copy.IsBookingMode ? FlowConstants.RequestingLabel : FlowConstants.JoiningLabel;
 
