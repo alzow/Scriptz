@@ -30,7 +30,6 @@ namespace QueueApp.Features.BusinessDetail;
 
 public partial class BusinessDetailPageViewModel : BaseViewModel
 {
-    #region Properties and fields
     private readonly SemaphoreSlim _loadLock = new(1, 1);
     private Guid _businessId;
     private bool _openedFromTabs;
@@ -55,7 +54,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     public bool HasSomethingActive => IsInQueue || _activeBooking is not null;
     public string ActiveStripText => IsInQueue ? "You're in the queue" : "Your booking is with the shop";
 
-    // Landing — header
     public string BusinessName => Business?.Name ?? string.Empty;
     public string AddressLine => Business?.Address ?? Business?.Suburb ?? string.Empty;
     public bool IsOpen { get; set; }
@@ -73,7 +71,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         }
     }
 
-    // Landing — live card
     public string PrimaryStatValue { get; set; } = "—";
     public string PrimaryStatLabel { get; set; } = "Now serving";
     public string SecondaryStatValue { get; set; } = "—";
@@ -87,7 +84,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     public string CtaText { get; set; } = string.Empty;
     public bool IsCtaEnabled { get; set; }
 
-    // Landing — services, team, getting there
     public ObservableCollection<ServiceChoiceItem> ServiceRows { get; } = new();
     public bool HasServices => ServiceRows.Count > 0;
     public string ServicesCountText => ServiceRows.Count > 0 ? $"All {ServiceRows.Count}" : string.Empty;
@@ -103,10 +99,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     public string DistanceText { get; set; } = string.Empty;
     public bool HasDistance => !string.IsNullOrEmpty(DistanceText);
 
-    // Flow chrome
     public ObservableCollection<QueueSummaryRow> QueueSummary { get; } = new();
 
-    // Queue confirmation
     public MyQueueStatusResponse? MyStatus { get; set; }
     public decimal? MyWaitMinutes { get; set; }
     public bool IsInQueue => MyStatus is not null;
@@ -129,8 +123,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             WaitMinutes = MyWaitMinutes,
             ProgressStatus = MyStatus.ProgressStatus,
         };
-    #endregion
-    #region Services
     private readonly IBusinessService _businessService;
     private readonly IQueueService _queueService;
     private readonly IOperatorService _operatorService;
@@ -141,8 +133,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     private readonly IQueueRealtimeService _realtimeService;
     private readonly IQueuePopupService _popupService;
     private readonly ILocationService _locationService;
-    #endregion
-    #region Constructor
     public BusinessDetailPageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
@@ -169,8 +159,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         _popupService = popupService;
         _locationService = locationService;
     }
-    #endregion
-    #region Lifecycle
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
         try
@@ -242,19 +230,26 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     // run together rather than one behind the other.
     public async Task RefreshLiveStateAsync()
     {
-        if (IsQueueMode)
+        try
         {
-            var queueTask = RefreshQueueAsync();
-            var statusTask = RefreshMyStatusAsync();
-            await queueTask;
-            await statusTask;
-            return;
-        }
+            if (IsQueueMode)
+            {
+                var queueTask = RefreshQueueAsync();
+                var statusTask = RefreshMyStatusAsync();
+                await queueTask;
+                await statusTask;
+                return;
+            }
 
-        var slotsTask = RefreshBookingSlotStatsAsync();
-        var bookingsTask = RefreshMyBookingsAsync();
-        await slotsTask;
-        await bookingsTask;
+            var slotsTask = RefreshBookingSlotStatsAsync();
+            var bookingsTask = RefreshMyBookingsAsync();
+            await slotsTask;
+            await bookingsTask;
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
     // Re-subscribes after a page pushed over this one is popped: Loaded runs once per page, so
     // without this the feed torn down on Disappearing never comes back.
@@ -306,9 +301,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         }
     }
 
-    #endregion
-    #region Rest of functions
-
     [RelayCommand]
     public async Task StartFlowAsync()
     {
@@ -358,7 +350,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         }
     }
 
-
     // Base HandleExceptionAsync only logs — surface real failures to the customer instead, most
     // notably a pooled join/booking race ("all resources are currently busy", "that time was
     // just taken") — those are normal operational states, not faults, and deserve to be seen.
@@ -395,18 +386,11 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
                 await HandleExceptionAsync(ex);
             }
         });
-    // operator_availability is per operator, so the business's trading hours are the union across
-    // the ones on the books — read in one request over all of them.
     public async Task<BusinessHours> LoadHoursAsync(IReadOnlyList<OperatorResponse> operators)
     {
         try
         {
-            var active = operators.Where(o => o.IsActive).ToList();
-            if (active.Count == 0)
-                return BusinessHours.Unknown;
-
-            var windows = await _operatorService.GetAvailabilityAsync(active.Select(o => o.Id).ToList());
-            return BusinessHours.FromAvailability(windows);
+            return await _operatorService.GetBusinessHoursAsync(operators);
         }
         catch (Exception ex)
         {
@@ -439,7 +423,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
 
                 TeamMembers.Add(new TeamMemberItem
                 {
-                    Initials = Initials(op.DisplayName),
+                    Initials = TextFormat.Initials(op.DisplayName),
                     Name = op.DisplayName,
                     SubLabel = subLabel,
                     ShowSubLabel = !IsBookingMode,
@@ -732,23 +716,4 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             await HandleExceptionAsync(ex);
         }
     }
-    public static string Initials(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return "?";
-
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return parts.Length == 1
-            ? parts[0][..Math.Min(2, parts[0].Length)].ToUpperInvariant()
-            : $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
-    }
-    public static string Ordinal(int value) => value switch
-    {
-        11 or 12 or 13 => $"{value}th",
-        _ when value % 10 == 1 => $"{value}st",
-        _ when value % 10 == 2 => $"{value}nd",
-        _ when value % 10 == 3 => $"{value}rd",
-        _ => $"{value}th",
-    };
-    #endregion
 }

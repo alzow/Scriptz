@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.Input;
 using MPowerKit.Navigation.Interfaces;
+using QueueApp.Features.Profile.Helpers;
+using QueueApp.Shared.Domain;
 using QueueApp.Constants;
 using QueueApp.Features.Profile.Sheets;
 using QueueApp.Framework.Base;
@@ -88,10 +90,17 @@ public partial class ProfilePageViewModel : BaseViewModel
 
     public override async Task OnAppearingAsync()
     {
-        await base.OnAppearingAsync();
-        await RefreshPermissionAsync();
-        await LoadIdentityAsync();
-        RefreshAppearanceRow();
+        try
+        {
+            await base.OnAppearingAsync();
+            await RefreshPermissionAsync();
+            await LoadIdentityAsync();
+            RefreshAppearanceRow();
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     public async Task LoadIdentityAsync()
@@ -106,7 +115,7 @@ public partial class ProfilePageViewModel : BaseViewModel
 
             var profile = await _profileService.GetMyProfileAsync(userId);
             DisplayName = string.IsNullOrWhiteSpace(profile?.DisplayName) ? "Customer" : profile!.DisplayName!;
-            Initials = InitialsOf(DisplayName);
+            Initials = TextFormat.Initials(DisplayName);
 
             _phone = profile?.Phone ?? "";
             DetailsRowDetail = string.IsNullOrWhiteSpace(_phone) ? DisplayName : $"{DisplayName} · {_phone}";
@@ -140,8 +149,8 @@ public partial class ProfilePageViewModel : BaseViewModel
             OwnsBusiness = true;
             BusinessName = business.Name;
             BusinessDetail = string.IsNullOrWhiteSpace(business.Suburb)
-                ? CategoryLabel(business.Category)
-                : $"{CategoryLabel(business.Category)} · {business.Suburb}";
+                ? ProfileHelper.CategoryLabel(business.Category)
+                : $"{ProfileHelper.CategoryLabel(business.Category)} · {business.Suburb}";
         }
         catch (Exception)
         {
@@ -164,21 +173,28 @@ public partial class ProfilePageViewModel : BaseViewModel
 
     public void RefreshStatus()
     {
-        var preferences = _notificationPreferencesService.Get();
-
-        if (NotificationsAllowed)
+        try
         {
-            StatusHeadline = AllowedHeadline;
-            StatusDetail = $"Notifications on · nudge {preferences.LeaveAtMinutes} min before";
-            StatusActionText = "";
-            NotificationsRowDetail = $"{preferences.OnCount} of {NotificationPreferences.TotalCount} on";
-            return;
-        }
+            var preferences = _notificationPreferencesService.Get();
 
-        StatusHeadline = BlockedHeadline;
-        StatusDetail = BlockedDetail;
-        StatusActionText = BlockedAction;
-        NotificationsRowDetail = NotificationsOffRowDetail;
+            if (NotificationsAllowed)
+            {
+                StatusHeadline = AllowedHeadline;
+                StatusDetail = $"Notifications on · nudge {preferences.LeaveAtMinutes} min before";
+                StatusActionText = "";
+                NotificationsRowDetail = $"{preferences.OnCount} of {NotificationPreferences.TotalCount} on";
+                return;
+            }
+
+            StatusHeadline = BlockedHeadline;
+            StatusDetail = BlockedDetail;
+            StatusActionText = BlockedAction;
+            NotificationsRowDetail = NotificationsOffRowDetail;
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
     }
 
     public void RefreshAppearanceRow() =>
@@ -188,17 +204,6 @@ public partial class ProfilePageViewModel : BaseViewModel
             ThemeChoice.Dark => "Always dark",
             _ => "Follow system",
         };
-
-    public static string InitialsOf(string name)
-    {
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length == 0)
-            return "?";
-
-        return parts.Length == 1
-            ? parts[0][..1].ToUpperInvariant()
-            : $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
-    }
 
     [RelayCommand]
     public async Task OpenDetailsAsync()
@@ -309,6 +314,7 @@ public partial class ProfilePageViewModel : BaseViewModel
                 return;
 
             await _authService.SignOutAsync();
+            _profileService.InvalidateCache();
             await NavigationService.NavigateAsync(NavigationPaths.Login);
         }
         catch (Exception ex)
@@ -316,9 +322,4 @@ public partial class ProfilePageViewModel : BaseViewModel
             await HandleExceptionAsync(ex);
         }
     }
-
-    public static string CategoryLabel(string category) =>
-        string.IsNullOrWhiteSpace(category)
-            ? "Business"
-            : char.ToUpperInvariant(category[0]) + category[1..];
 }

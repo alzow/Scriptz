@@ -6,8 +6,6 @@
              x:Name="Root"
              x:Class="QueueApp.Features.Flow.Helpers.Intake.IntakeMultiSelectFieldView">
 
-    <!-- Any number of answers, so the mark is a square rather than the single-choice radio, and a
-         tap on a chosen row takes it back off. -->
     <VerticalStackLayout Spacing="8"
                          BindableLayout.ItemsSource="{Binding Options, Source={x:Reference Root}}">
         <BindableLayout.ItemTemplate>

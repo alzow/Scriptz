@@ -5,7 +5,6 @@ namespace QueueApp.Services.Api.Business;
 
 public interface IBusinessApi
 {
-    // Reads (PostgREST filter syntax, e.g. "eq.<guid>")
     [Get("/businesses")]
     Task<List<BusinessIdResponse>> GetOwnedBusinessesAsync(
         [AliasAs("owner_id")] string ownerIdEq,
@@ -23,7 +22,6 @@ public interface IBusinessApi
         [AliasAs("suburb")] string suburbEq,
         [AliasAs("select")] string select = "*");
 
-    // Presence heartbeat
     [Patch("/businesses")]
     Task HeartbeatAsync(
         [AliasAs("id")] string idEq,

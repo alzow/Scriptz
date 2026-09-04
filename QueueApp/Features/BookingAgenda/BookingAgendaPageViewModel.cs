@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using MPowerKit;
 using MPowerKit.Navigation;
 using QueueApp.Constants;
+using QueueApp.Features.BookingAgenda.Helpers;
 using QueueApp.Features.BookingAgenda.Models;
 using QueueApp.Features.BookingAgenda.Sheets;
 using QueueApp.Shared.Domain;
@@ -275,9 +276,6 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         }
     }
 
-    // operator_availability is per operator, so trading hours are the union across the ones on the
-    // books. One request per resource, but issued together — a five-bay shop was paying five round
-    // trips in a row for a header pill.
     public async Task LoadHoursAsync()
     {
         try
@@ -285,10 +283,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
             if (_operators.Count == 0)
                 return;
 
-            var windows = await Task.WhenAll(
-                _operators.Select(o => _operatorService.GetAvailabilityAsync(o.Id)));
-
-            _hours = BusinessHours.FromAvailability(windows.SelectMany(w => w));
+            _hours = await _operatorService.GetBusinessHoursAsync(_operators);
             IsOpenNow = _hours.IsOpenAt(LocalTime.Now);
         }
         catch (Exception ex)
@@ -302,19 +297,27 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     // switching days costs nothing extra. Both callers await the same in-flight request.
     public Task<List<AvailabilityBlockResponse>> EnsureWindowBlocksAsync(bool refresh = false)
     {
-        if (!refresh && _windowBlocksTask is not null)
+        try
+        {
+            if (!refresh && _windowBlocksTask is not null)
+                return _windowBlocksTask;
+
+            var today = LocalTime.Now.Date;
+
+            _windowBlocksTask = _operatorNames.Count == 0
+                ? Task.FromResult(new List<AvailabilityBlockResponse>())
+                : _operatorService.GetAvailabilityBlocksAsync(
+                    _operatorNames.Keys.ToList(),
+                    AgendaConstants.Midnight(today),
+                    AgendaConstants.Midnight(today.AddDays(AgendaConstants.DayStripLength)));
+
             return _windowBlocksTask;
-
-        var today = LocalTime.Now.Date;
-
-        _windowBlocksTask = _operatorNames.Count == 0
-            ? Task.FromResult(new List<AvailabilityBlockResponse>())
-            : _operatorService.GetAvailabilityBlocksAsync(
-                _operatorNames.Keys.ToList(),
-                AgendaConstants.Midnight(today),
-                AgendaConstants.Midnight(today.AddDays(AgendaConstants.DayStripLength)));
-
-        return _windowBlocksTask;
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+            return Task.FromResult(new List<AvailabilityBlockResponse>());
+        }
     }
 
     public async Task LoadRequestsAsync()
@@ -343,7 +346,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
             {
                 var age = DateTimeOffset.UtcNow - pending.Min(b => b.CreatedAt);
                 IsRequestsUrgent = age > TimeSpan.FromMinutes(AgendaConstants.RequestUrgentMinutes);
-                RequestsAgeText = $"oldest asked {DescribeAge(age)} ago";
+                RequestsAgeText = $"oldest asked {BookingAgendaHelper.DescribeAge(age)} ago";
             }
             else
             {
@@ -743,10 +746,17 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     [RelayCommand]
     public async Task OpenRequestAsync(BookingRequestItem? item)
     {
-        if (item is null || item.IsBusy)
-            return;
+        try
+        {
+            if (item is null || item.IsBusy)
+                return;
 
-        await OpenBookingActionsAsync(item.Booking);
+            await OpenBookingActionsAsync(item.Booking);
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     [RelayCommand]
@@ -952,18 +962,25 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     // customer would have seen for a cancellation — only the wording differs.
     public async Task ConfirmDeclineAsync(AgendaBookingResponse booking)
     {
-        var reason = await _popupService.ShowPromptAsync(
-            "Decline request",
-            $"Why can't {booking.CustomerName}'s {booking.TimeRangeDisplay} booking happen? They will see this.",
-            accept: "Decline",
-            cancel: "Keep it",
-            placeholder: "Fully booked, closed that day…");
+        try
+        {
+            var reason = await _popupService.ShowPromptAsync(
+                "Decline request",
+                $"Why can't {booking.CustomerName}'s {booking.TimeRangeDisplay} booking happen? They will see this.",
+                accept: "Decline",
+                cancel: "Keep it",
+                placeholder: "Fully booked, closed that day…");
 
-        if (reason is null)
-            return;
+            if (reason is null)
+                return;
 
-        await CancelWithReasonAsync(booking, reason);
-        await RefreshAsync();
+            await CancelWithReasonAsync(booking, reason);
+            await RefreshAsync();
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     public async Task ConfirmCancelAsync(AgendaBookingResponse booking)
@@ -991,11 +1008,18 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
 
     public async Task CancelWithReasonAsync(AgendaBookingResponse booking, string? reason)
     {
-        if (!string.IsNullOrWhiteSpace(reason))
-            await _bookingService.SetCancellationReasonAsync(
-                booking.Id, BookingDetails.WithCancellationReason(booking.Details, reason));
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(reason))
+                await _bookingService.SetCancellationReasonAsync(
+                    booking.Id, BookingDetails.WithCancellationReason(booking.Details, reason));
 
-        await _bookingService.CancelBookingAsync(booking.Id);
+            await _bookingService.CancelBookingAsync(booking.Id);
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
     }
 
     public async Task OpenMoveBookingAsync(AgendaBookingResponse booking)
@@ -1067,18 +1091,6 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         {
             await HandleExceptionAsync(ex);
         }
-    }
-
-    public static string DescribeAge(TimeSpan age)
-    {
-        if (age.TotalMinutes < 60)
-            return $"{Math.Max(1, (int)age.TotalMinutes)} min";
-
-        if (age.TotalHours < 24)
-            return (int)age.TotalHours == 1 ? "1 hr" : $"{(int)age.TotalHours} hrs";
-
-        var days = (int)age.TotalDays;
-        return days == 1 ? "1 day" : $"{days} days";
     }
 
     // Called from inside every catch block on this page, so it is the one method that must never

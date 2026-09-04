@@ -6,7 +6,6 @@
              x:Name="Root"
              x:Class="QueueApp.Features.Flow.Helpers.Intake.IntakeSingleSelectFieldView">
 
-    <!-- One answer, so the rows carry the same radio the service step uses for the same job. -->
     <VerticalStackLayout Spacing="8"
                          BindableLayout.ItemsSource="{Binding Options, Source={x:Reference Root}}">
         <BindableLayout.ItemTemplate>

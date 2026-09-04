@@ -47,29 +47,24 @@ public static class ThemePalette
 
     public static Brush Brush(string token) => new SolidColorBrush(Get(token));
 
-    // Neutrals
     public static Color Bg => Get("Bg");
     public static Color Surface => Get("Surface");
     public static Color Raised => Get("Raised");
     public static Color Border => Get("Border");
 
-    // Text
     public static Color TextInk => Get("TextInk");
     public static Color TextMuted => Get("TextMuted");
     public static Color TextDim => Get("TextDim");
     public static Color TextOnAccent => Get("TextOnAccent");
 
-    // Accent fills — the brand, identical in both themes
     public static Color Accent => Get("Accent");
     public static Color Purple => Get("Purple");
     public static Color Danger => Get("Danger");
 
-    // Accent text and thin strokes — deepened on light
     public static Color AccentText => Get("AccentText");
     public static Color PurpleText => Get("PurpleText");
     public static Color DangerText => Get("DangerText");
 
-    // Tints and tint borders — solid, never alpha
     public static Color AccentTint => Get("AccentTint");
     public static Color PurpleTint => Get("PurpleTint");
     public static Color DangerTint => Get("DangerTint");

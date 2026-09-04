@@ -1,9 +1,10 @@
 using QueueApp.Framework.Base;
+using QueueApp.Services.Api;
 using QueueApp.Services.Api.Booking.Models;
+using QueueApp.Shared.Domain;
 
 namespace QueueApp.Services.Api.Booking;
 
-// Hides PostgREST filter syntax (e.g. "eq.<guid>") from callers.
 public class BookingService : BaseService, IBookingService
 {
     private readonly IBookingApi _api;
@@ -18,7 +19,7 @@ public class BookingService : BaseService, IBookingService
         {
             OperatorId = operatorId,
             ServiceId = serviceId,
-            Date = date.ToString("yyyy-MM-dd"),
+            Date = PostgrestFilter.Date(date),
         }));
 
     public Task<List<SlotResponse>> GetAvailableSlotsAnyAsync(Guid businessId, Guid serviceId, DateTime date) =>
@@ -26,7 +27,7 @@ public class BookingService : BaseService, IBookingService
         {
             BusinessId = businessId,
             ServiceId = serviceId,
-            Date = date.ToString("yyyy-MM-dd"),
+            Date = PostgrestFilter.Date(date),
         }));
 
     public Task<BookingResponse> CreateBookingAsync(CreateBookingRequest request) =>
@@ -62,20 +63,20 @@ public class BookingService : BaseService, IBookingService
         });
 
     public Task<List<MyBookingSummaryResponse>> GetMyBookingsAsync(Guid businessId, Guid customerId) =>
-        ExecuteApiCallAsync(_api.GetMyBookingsAsync($"eq.{businessId}", $"eq.{customerId}"));
+        ExecuteApiCallAsync(_api.GetMyBookingsAsync(PostgrestFilter.Eq(businessId), PostgrestFilter.Eq(customerId)));
 
     public Task<List<AgendaBookingResponse>> GetAgendaBookingsAsync(Guid businessId, DateTime date)
     {
-        var dayStart = new DateTimeOffset(date.Date, SastOffset);
+        var dayStart = new DateTimeOffset(date.Date, LocalTime.Offset);
         return ExecuteApiCallAsync(
-            _api.GetAgendaBookingsAsync($"eq.{businessId}", StartsWithinFilter(dayStart, dayStart.AddDays(1))));
+            _api.GetAgendaBookingsAsync(PostgrestFilter.Eq(businessId), PostgrestFilter.StartsWithin(dayStart, dayStart.AddDays(1))));
     }
 
     public Task<List<AgendaBookingResponse>> GetPendingRequestsAsync(Guid businessId, DateTime fromDate, int days)
     {
-        var from = new DateTimeOffset(fromDate.Date, SastOffset);
+        var from = new DateTimeOffset(fromDate.Date, LocalTime.Offset);
         return ExecuteApiCallAsync(
-            _api.GetPendingRequestsAsync($"eq.{businessId}", StartsWithinFilter(from, from.AddDays(days))));
+            _api.GetPendingRequestsAsync(PostgrestFilter.Eq(businessId), PostgrestFilter.StartsWithin(from, from.AddDays(days))));
     }
 
     // Same projection as the agenda, over an arbitrary span — what "blocking this range will strand
@@ -84,7 +85,7 @@ public class BookingService : BaseService, IBookingService
     // yet, and PostgREST rejects the whole query for an enum label it can't parse.
     public Task<List<AgendaBookingResponse>> GetBookingsInRangeAsync(
         Guid businessId, DateTimeOffset from, DateTimeOffset until) =>
-        ExecuteApiCallAsync(_api.GetAgendaBookingsAsync($"eq.{businessId}", StartsWithinFilter(from, until)));
+        ExecuteApiCallAsync(_api.GetAgendaBookingsAsync(PostgrestFilter.Eq(businessId), PostgrestFilter.StartsWithin(from, until)));
 
     public Task<AgendaBookingResponse?> MarkBookingNoShowAsync(Guid bookingId) =>
         PatchAsync(bookingId, new UpdateBookingRequest { Status = BookingStatuses.NoShow });
@@ -111,7 +112,7 @@ public class BookingService : BaseService, IBookingService
             Details = new BookingDetails
             {
                 CustomerName = customerName.Trim(),
-                CreatedBy = "customer",
+                CreatedBy = BookingCreators.Customer,
             },
         });
 
@@ -124,36 +125,20 @@ public class BookingService : BaseService, IBookingService
             EndsAt = endsAt,
         });
 
-    public async Task<AgendaBookingResponse?> CreateOperatorBookingAsync(CreateOperatorBookingRequest request)
-    {
-        var rows = await ExecuteApiCallAsync(_api.CreateBookingRowAsync(request));
-        return rows.FirstOrDefault();
-    }
+    public Task<AgendaBookingResponse?> CreateOperatorBookingAsync(CreateOperatorBookingRequest request) =>
+        ExecuteSingleAsync(_api.CreateBookingRowAsync(request));
 
-    private async Task<AgendaBookingResponse?> PatchAsync(Guid bookingId, UpdateBookingRequest request)
-    {
-        var rows = await ExecuteApiCallAsync(_api.UpdateBookingAsync($"eq.{bookingId}", request));
-        return rows.FirstOrDefault();
-    }
-
-    // PostgREST needs both halves of a range in one `and=(…)` group — two separate starts_at query
-    // parameters would collide rather than intersect.
-    private static string StartsWithinFilter(DateTimeOffset from, DateTimeOffset until) =>
-        $"(starts_at.gte.{from:yyyy-MM-ddTHH:mm:sszzz},starts_at.lt.{until:yyyy-MM-ddTHH:mm:sszzz})";
-
-    private static readonly TimeSpan SastOffset = TimeSpan.FromHours(2);
+    private Task<AgendaBookingResponse?> PatchAsync(Guid bookingId, UpdateBookingRequest request) =>
+        ExecuteSingleAsync(_api.UpdateBookingAsync(PostgrestFilter.Eq(bookingId), request));
 
     public Task<List<UpcomingBookingResponse>> GetMyUpcomingBookingsAsync(Guid customerId) =>
-        ExecuteApiCallAsync(_api.GetMyUpcomingBookingsAsync($"eq.{customerId}"));
+        ExecuteApiCallAsync(_api.GetMyUpcomingBookingsAsync(PostgrestFilter.Eq(customerId)));
 
     public Task<List<UpcomingBookingResponse>> GetMyBookingHistoryAsync(Guid customerId) =>
-        ExecuteApiCallAsync(_api.GetMyBookingHistoryAsync($"eq.{customerId}"));
+        ExecuteApiCallAsync(_api.GetMyBookingHistoryAsync(PostgrestFilter.Eq(customerId)));
 
-    public async Task<UpcomingBookingResponse?> GetBookingAsync(Guid bookingId)
-    {
-        var rows = await ExecuteApiCallAsync(_api.GetBookingAsync($"eq.{bookingId}"));
-        return rows.FirstOrDefault();
-    }
+    public Task<UpcomingBookingResponse?> GetBookingAsync(Guid bookingId) =>
+        ExecuteSingleAsync(_api.GetBookingAsync(PostgrestFilter.Eq(bookingId)));
 
     public Task<AgendaBookingResponse?> MarkCancelledByCustomerAsync(Guid bookingId, BookingDetails? existing) =>
         PatchAsync(bookingId, new UpdateBookingRequest { Details = BookingDetails.CancelledByCustomer(existing) });

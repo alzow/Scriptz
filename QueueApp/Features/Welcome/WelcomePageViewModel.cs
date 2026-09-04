@@ -12,7 +12,6 @@ namespace QueueApp.Features.Welcome;
 
 public partial class WelcomePageViewModel : BaseViewModel
 {
-    #region Constants
     private const string Brand = "Queue";
 
     private const string PrimaryCta = "Create an account";
@@ -42,9 +41,7 @@ public partial class WelcomePageViewModel : BaseViewModel
     private const string LeaveArt = "art_welcome_leave.png";
 
     private const double AutoAdvanceSeconds = 5;
-    #endregion
 
-    #region Properties
     public ObservableCollection<WelcomePanel> Panels { get; } = new();
 
     public string BrandText => Brand;
@@ -59,20 +56,14 @@ public partial class WelcomePageViewModel : BaseViewModel
     public string FootnoteText => Footnote;
 
     public int Position { get; set; }
-    #endregion
 
-    #region Fields
     private IDispatcherTimer? _autoAdvanceTimer;
     private bool _isSelfAdvancing;
     private bool _isAutoAdvanceRetired;
-    #endregion
 
-    #region Services
     private readonly IFirstRunService _firstRunService;
     private readonly IMotionPreferenceService _motionPreferenceService;
-    #endregion
 
-    #region Constructor
     public WelcomePageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
@@ -85,9 +76,7 @@ public partial class WelcomePageViewModel : BaseViewModel
 
         BuildPanels();
     }
-    #endregion
 
-    #region Lifecycle
     public override Task OnAppearingAsync()
     {
         try
@@ -116,43 +105,49 @@ public partial class WelcomePageViewModel : BaseViewModel
 
         return Task.CompletedTask;
     }
-    #endregion
 
     public void BuildPanels()
     {
-        Panels.Add(new WelcomePanel
+        try
         {
-            NumberText = DiscoverNumber,
-            HeadlineText = DiscoverHeadline,
-            BodyText = DiscoverBody,
-            IllustrationSource = DiscoverArt,
-        });
+            Panels.Add(new WelcomePanel
+            {
+                NumberText = DiscoverNumber,
+                HeadlineText = DiscoverHeadline,
+                BodyText = DiscoverBody,
+                IllustrationSource = DiscoverArt,
+            });
 
-        Panels.Add(new WelcomePanel
+            Panels.Add(new WelcomePanel
+            {
+                NumberText = JoinNumber,
+                HeadlineText = JoinHeadline,
+                BodyText = JoinBody,
+                IllustrationSource = JoinArt,
+            });
+
+            Panels.Add(new WelcomePanel
+            {
+                NumberText = BookNumber,
+                HeadlineText = BookHeadline,
+                BodyText = BookBody,
+                IllustrationSource = BookArt,
+            });
+
+            Panels.Add(new WelcomePanel
+            {
+                NumberText = LeaveNumber,
+                HeadlineText = LeaveHeadline,
+                BodyText = LeaveBody,
+                IllustrationSource = LeaveArt,
+            });
+
+            SyncActivePanel();
+        }
+        catch (Exception exception)
         {
-            NumberText = JoinNumber,
-            HeadlineText = JoinHeadline,
-            BodyText = JoinBody,
-            IllustrationSource = JoinArt,
-        });
-
-        Panels.Add(new WelcomePanel
-        {
-            NumberText = BookNumber,
-            HeadlineText = BookHeadline,
-            BodyText = BookBody,
-            IllustrationSource = BookArt,
-        });
-
-        Panels.Add(new WelcomePanel
-        {
-            NumberText = LeaveNumber,
-            HeadlineText = LeaveHeadline,
-            BodyText = LeaveBody,
-            IllustrationSource = LeaveArt,
-        });
-
-        SyncActivePanel();
+            _ = HandleExceptionAsync(exception);
+        }
     }
 
     public void OnPositionChanged()
@@ -178,31 +173,45 @@ public partial class WelcomePageViewModel : BaseViewModel
 
     public void StartAutoAdvance()
     {
-        if (_isAutoAdvanceRetired || _autoAdvanceTimer is not null)
-            return;
+        try
+        {
+            if (_isAutoAdvanceRetired || _autoAdvanceTimer is not null)
+                return;
 
-        if (_motionPreferenceService.PrefersReducedMotion)
-            return;
+            if (_motionPreferenceService.PrefersReducedMotion)
+                return;
 
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher is null)
-            return;
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null)
+                return;
 
-        _autoAdvanceTimer = dispatcher.CreateTimer();
-        _autoAdvanceTimer.Interval = TimeSpan.FromSeconds(AutoAdvanceSeconds);
-        _autoAdvanceTimer.IsRepeating = true;
-        _autoAdvanceTimer.Tick += OnAutoAdvanceTick;
-        _autoAdvanceTimer.Start();
+            _autoAdvanceTimer = dispatcher.CreateTimer();
+            _autoAdvanceTimer.Interval = TimeSpan.FromSeconds(AutoAdvanceSeconds);
+            _autoAdvanceTimer.IsRepeating = true;
+            _autoAdvanceTimer.Tick += OnAutoAdvanceTick;
+            _autoAdvanceTimer.Start();
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
     }
 
     public void StopAutoAdvance()
     {
-        if (_autoAdvanceTimer is null)
-            return;
+        try
+        {
+            if (_autoAdvanceTimer is null)
+                return;
 
-        _autoAdvanceTimer.Tick -= OnAutoAdvanceTick;
-        _autoAdvanceTimer.Stop();
-        _autoAdvanceTimer = null;
+            _autoAdvanceTimer.Tick -= OnAutoAdvanceTick;
+            _autoAdvanceTimer.Stop();
+            _autoAdvanceTimer = null;
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
     }
 
     public void RetireAutoAdvance()

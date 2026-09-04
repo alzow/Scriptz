@@ -1,10 +1,10 @@
 using QueueApp.Framework.Base;
+using QueueApp.Services.Api;
 using QueueApp.Services.Api.Intake.Models;
 using QueueApp.Services.Api.Queue.Models;
 
 namespace QueueApp.Services.Api.Queue;
 
-// Hides PostgREST filter syntax (e.g. "eq.<guid>") from callers.
 public class QueueService : BaseService, IQueueService
 {
     private readonly IQueueApi _api;
@@ -15,7 +15,7 @@ public class QueueService : BaseService, IQueueService
     }
 
     public Task<List<QueueEntryResponse>> GetActiveEntriesAsync(Guid businessId) =>
-        ExecuteApiCallAsync(_api.GetActiveEntriesAsync($"eq.{businessId}"));
+        ExecuteApiCallAsync(_api.GetActiveEntriesAsync(PostgrestFilter.Eq(businessId)));
 
     public Task AddWalkInAsync(Guid businessId, Guid? operatorId, string? name, Guid serviceId) =>
         ExecuteApiCallAsync(_api.JoinQueueAsync(new JoinQueueRequest
@@ -33,7 +33,7 @@ public class QueueService : BaseService, IQueueService
         ExecuteApiCallAsync(_api.CompleteEntryAsync(new EntryIdRequest { EntryId = entryId }));
 
     public Task MarkAwaitingCollectionAsync(Guid entryId) =>
-        ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
+        ExecuteApiCallAsync(_api.UpdateEntryAsync(PostgrestFilter.Eq(entryId),
             new Dictionary<string, object?>
             {
                 ["status"] = QueueEntryStatuses.AwaitingCollection,
@@ -46,7 +46,7 @@ public class QueueService : BaseService, IQueueService
     public Task MarkCollectedAsync(Guid entryId)
     {
         var now = DateTime.UtcNow;
-        return ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
+        return ExecuteApiCallAsync(_api.UpdateEntryAsync(PostgrestFilter.Eq(entryId),
             new Dictionary<string, object?>
             {
                 ["status"] = QueueEntryStatuses.Done,
@@ -76,17 +76,11 @@ public class QueueService : BaseService, IQueueService
     public Task<QueueEntryResponse> CancelEntryAsync(Guid entryId) =>
         ExecuteApiCallAsync(_api.CancelEntryAsync(new EntryIdRequest { EntryId = entryId }));
 
-    public async Task<MyQueueStatusResponse?> GetMyQueueStatusAsync(Guid businessId)
-    {
-        var results = await ExecuteApiCallAsync(_api.GetMyQueueStatusAsync(new BusinessIdRequest { BusinessId = businessId }));
-        return results.FirstOrDefault();
-    }
+    public Task<MyQueueStatusResponse?> GetMyQueueStatusAsync(Guid businessId) =>
+        ExecuteSingleAsync(_api.GetMyQueueStatusAsync(new BusinessIdRequest { BusinessId = businessId }));
 
-    public async Task<MyActiveQueueEntryResponse?> GetMyActiveEntryAsync()
-    {
-        var results = await ExecuteApiCallAsync(_api.GetMyActiveEntryAsync());
-        return results.FirstOrDefault();
-    }
+    public Task<MyActiveQueueEntryResponse?> GetMyActiveEntryAsync() =>
+        ExecuteSingleAsync(_api.GetMyActiveEntryAsync());
 
     public Task<decimal?> GetEntryWaitMinutesAsync(Guid entryId) =>
         ExecuteApiCallAsync(_api.GetEntryWaitMinutesAsync(new QueueEntryIdRequest { EntryId = entryId }));
@@ -95,13 +89,10 @@ public class QueueService : BaseService, IQueueService
         ExecuteApiCallAsync(_api.SetQueueProgressAsync(new SetProgressRequest { EntryId = entryId, Status = status }));
 
     public Task<List<MyQueueEntryResponse>> GetMyEntriesAsync(Guid customerId) =>
-        ExecuteApiCallAsync(_api.GetMyEntriesAsync($"eq.{customerId}"));
+        ExecuteApiCallAsync(_api.GetMyEntriesAsync(PostgrestFilter.Eq(customerId)));
 
-    public async Task<MyQueueEntryResponse?> GetEntryAsync(Guid entryId)
-    {
-        var rows = await ExecuteApiCallAsync(_api.GetEntryAsync($"eq.{entryId}"));
-        return rows.FirstOrDefault();
-    }
+    public Task<MyQueueEntryResponse?> GetEntryAsync(Guid entryId) =>
+        ExecuteSingleAsync(_api.GetEntryAsync(PostgrestFilter.Eq(entryId)));
 
     // The "owner or self manage" update policy already covers the customer writing to their own
     // row, so attributing a cancellation needs no new SQL.
@@ -111,28 +102,28 @@ public class QueueService : BaseService, IQueueService
     // the way out of the queue would be silent, and only visible much later as a row the board
     // thinks somebody hand-picked.
     public Task StampEntryCancelledByCustomerAsync(Guid entryId, QueueEntryDetails? existing) =>
-        ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
+        ExecuteApiCallAsync(_api.UpdateEntryAsync(PostgrestFilter.Eq(entryId),
             new Dictionary<string, object?> { ["details"] = QueueEntryDetails.CancelledByCustomer(existing) }));
 
     public Task AssignEntryAsync(Guid entryId, Guid? operatorId) =>
-        ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
+        ExecuteApiCallAsync(_api.UpdateEntryAsync(PostgrestFilter.Eq(entryId),
             new Dictionary<string, object?> { ["operator_id"] = operatorId }));
 
     // Position within a queue is joined_at order, so "move to end" is a re-stamp rather than a
     // separate ordering column. UTC because joined_at is timestamptz.
     public Task MoveEntryToEndAsync(Guid entryId) =>
-        ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
+        ExecuteApiCallAsync(_api.UpdateEntryAsync(PostgrestFilter.Eq(entryId),
             new Dictionary<string, object?> { ["joined_at"] = DateTime.UtcNow }));
 
     public Task ChangeEntryServiceAsync(Guid entryId, Guid serviceId) =>
-        ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
+        ExecuteApiCallAsync(_api.UpdateEntryAsync(PostgrestFilter.Eq(entryId),
             new Dictionary<string, object?> { ["service_id"] = serviceId }));
 
     // set_queue_progress raises "entry not currently being served" on anything but a serving row,
     // so a note for someone still in the line goes through the same owner-update policy the other
     // board writes use. Same column, so the customer reads it as the one "latest update" either way.
     public Task SetEntryNoteAsync(Guid entryId, string? note) =>
-        ExecuteApiCallAsync(_api.UpdateEntryAsync($"eq.{entryId}",
+        ExecuteApiCallAsync(_api.UpdateEntryAsync(PostgrestFilter.Eq(entryId),
             new Dictionary<string, object?> { ["progress_status"] = note }));
 
     // "Today" is the device's local day boundary — the shop reads these tiles standing in its own
@@ -141,6 +132,6 @@ public class QueueService : BaseService, IQueueService
     {
         var since = DateTime.SpecifyKind(DateTime.Today, DateTimeKind.Local).ToUniversalTime();
         return ExecuteApiCallAsync(_api.GetCompletedSinceAsync(
-            $"eq.{businessId}", $"gte.{since:yyyy-MM-ddTHH:mm:ssZ}"));
+            PostgrestFilter.Eq(businessId), PostgrestFilter.GteUtc(since)));
     }
 }

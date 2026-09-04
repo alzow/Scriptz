@@ -51,7 +51,6 @@
                         </Grid>
                     </Border>
 
-                    <!-- "or choose" separates the pinned any-available row from named operators -->
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="0,4,0,12"
                           IsVisible="{Binding IsAnyAvailable}">
                         <Label Grid.Column="0" Text="OR CHOOSE" Style="{StaticResource lbl11_Mono_TextFaint}"

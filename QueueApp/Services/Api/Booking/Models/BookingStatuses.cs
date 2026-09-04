@@ -27,3 +27,10 @@ public static class BookingStatuses
     public static bool OccupiesTheDiary(string status) =>
         status is not (Cancelled or NoShow);
 }
+
+// bookings.details.created_by — which side of the counter put the row there.
+public static class BookingCreators
+{
+    public const string Customer = "customer";
+    public const string Operator = "operator";
+}

@@ -1,6 +1,6 @@
 using System.Windows.Input;
 
-namespace QueueApp.Shared.Templates.QueueLoadingButton;
+namespace QueueApp.Shared.Templates.AlzowLoadingButton;
 
 public partial class AlzowLoadingButton : ContentView
 {

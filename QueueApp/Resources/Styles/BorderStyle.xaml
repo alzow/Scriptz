@@ -744,6 +744,19 @@
     </Style>
 
     <!--
+        AlzowEditor's field. The entry shell without its fixed height, so multi-line input grows
+        while still reading as the same control family.
+    -->
+    <Style x:Key="brd16_Editor" TargetType="Border" BasedOn="{StaticResource brd16_Entry}">
+        <Setter Property="HeightRequest" Value="-1"/>
+        <Setter Property="MinimumHeightRequest" Value="96"/>
+    </Style>
+
+    <Style x:Key="brd16_Editor_Focused" TargetType="Border" BasedOn="{StaticResource brd16_Editor}">
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightPurpleText}, Dark={StaticResource DarkPurpleText}}"/>
+    </Style>
+
+    <!--
         ================================================================================
         VisitPage. Solid tint tokens throughout — the hero, the two note rules and the danger
         reason block are fills, never alpha over whatever happens to be underneath.

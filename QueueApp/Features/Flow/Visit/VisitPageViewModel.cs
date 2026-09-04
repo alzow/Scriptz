@@ -5,6 +5,7 @@ using Microsoft.Maui.ApplicationModel.DataTransfer;
 using MPowerKit;
 using MPowerKit.Navigation;
 using QueueApp.Constants;
+using QueueApp.Features.Flow.Visit.Helpers;
 using QueueApp.Features.Flow.Visit.Models;
 using QueueApp.Framework.Base;
 using QueueApp.Framework.Navigation;
@@ -430,9 +431,9 @@ public partial class VisitPageViewModel : BaseViewModel
             if (record.IsAwaitingCollection)
             {
                 HeroCaption = "READY FOR COLLECTION";
-                HeroTime = record.FinishedAt is { } finished ? FormatTime(finished) : "--:--";
+                HeroTime = record.FinishedAt is { } finished ? VisitHelper.FormatTime(finished) : VisitHelper.NoTime;
                 HeroRelative = "come by whenever you're ready";
-                HeroDetail = WithWhom(record);
+                HeroDetail = VisitHelper.WithWhom(record);
                 return;
             }
 
@@ -454,15 +455,15 @@ public partial class VisitPageViewModel : BaseViewModel
             if (record.IsBeingServed)
             {
                 HeroCaption = "IN THE CHAIR SINCE";
-                HeroTime = FormatTime(record.StartedAt);
+                HeroTime = VisitHelper.FormatTime(record.StartedAt);
                 HeroRelative = record.StartedAt is { } started
-                    ? $"started {DescribeSpan(DateTimeOffset.UtcNow - started)} ago"
+                    ? $"started {VisitHelper.DescribeSpan(DateTimeOffset.UtcNow - started)} ago"
                     : string.Empty;
-                HeroDetail = WithWhom(record);
+                HeroDetail = VisitHelper.WithWhom(record);
                 return;
             }
 
-            var placeText = record.Position > 0 ? $"you're {OrdinalOf(record.Position)}" : string.Empty;
+            var placeText = record.Position > 0 ? $"you're {TextFormat.Ordinal(record.Position)}" : string.Empty;
 
             // No wait figure, which for an unassigned entry is the honest answer rather than a gap:
             // it belongs to no operator's line, so there is nothing to add up.
@@ -472,9 +473,9 @@ public partial class VisitPageViewModel : BaseViewModel
             if (wait is null)
             {
                 HeroCaption = "YOU'RE IN THE QUEUE";
-                HeroTime = record.Position > 0 ? OrdinalOf(record.Position) : "--";
+                HeroTime = record.Position > 0 ? TextFormat.Ordinal(record.Position) : "--";
                 HeroRelative = record.Position > 0 ? "in line" : string.Empty;
-                HeroDetail = WithWhom(record);
+                HeroDetail = VisitHelper.WithWhom(record);
                 return;
             }
 
@@ -485,17 +486,17 @@ public partial class VisitPageViewModel : BaseViewModel
             {
                 var leaveAt = turnAt.AddMinutes(-travelMinutes);
                 HeroCaption = "LEAVE AT";
-                HeroTime = FormatTime(leaveAt);
-                HeroRelative = $"in {DescribeSpan(leaveAt - DateTimeOffset.UtcNow)}";
-                HeroDetail = Join($"{travelMinutes} min to get there", placeText);
+                HeroTime = VisitHelper.FormatTime(leaveAt);
+                HeroRelative = $"in {VisitHelper.DescribeSpan(leaveAt - DateTimeOffset.UtcNow)}";
+                HeroDetail = TextFormat.Join($"{travelMinutes} min to get there", placeText);
                 return;
             }
 
             HeroCaption = travel is null ? "YOUR TURN, ABOUT" : "GO NOW";
-            HeroTime = FormatTime(turnAt);
-            HeroRelative = $"in {DescribeSpan(TimeSpan.FromMinutes(wait.Value))}";
+            HeroTime = VisitHelper.FormatTime(turnAt);
+            HeroRelative = $"in {VisitHelper.DescribeSpan(TimeSpan.FromMinutes(wait.Value))}";
             HeroDetail = travel is { } near
-                ? Join($"{near} min to get there", placeText)
+                ? TextFormat.Join($"{near} min to get there", placeText)
                 : placeText;
         }
         catch (Exception ex)
@@ -519,13 +520,13 @@ public partial class VisitPageViewModel : BaseViewModel
                 : LocalTime.Day(slot).ToUpperInvariant();
             HeroTime = LocalTime.Time(slot);
             HeroRelative = untilSlot > TimeSpan.Zero
-                ? $"in {DescribeSpan(untilSlot)}"
+                ? $"in {VisitHelper.DescribeSpan(untilSlot)}"
                 : "starting now";
 
             var travel = _distanceKm is { } km ? GeoDistance.TravelMinutes(km) : (int?)null;
             HeroDetail = travel is { } minutes
-                ? $"{minutes} min to get there · {WithWhom(record)}"
-                : WithWhom(record);
+                ? $"{minutes} min to get there · {VisitHelper.WithWhom(record)}"
+                : VisitHelper.WithWhom(record);
         }
         catch (Exception ex)
         {
@@ -593,26 +594,26 @@ public partial class VisitPageViewModel : BaseViewModel
             if (record.IsLive && record.IsQueue)
             {
                 if (record.Position > 0)
-                    Facts.Add(new VisitFactRow { Label = "Position", Value = OrdinalOf(record.Position) });
+                    Facts.Add(new VisitFactRow { Label = "Position", Value = TextFormat.Ordinal(record.Position) });
 
                 if (record.JoinedAt is not null)
-                    Facts.Add(new VisitFactRow { Label = "Joined", Value = FormatMoment(record.JoinedAt) });
+                    Facts.Add(new VisitFactRow { Label = "Joined", Value = VisitHelper.FormatMoment(record.JoinedAt) });
             }
             else if (record.IsLive && record.IsBooking)
             {
                 if (record.SlotStart is not null)
-                    Facts.Add(new VisitFactRow { Label = "Slot", Value = FormatSlot(record) });
+                    Facts.Add(new VisitFactRow { Label = "Slot", Value = VisitHelper.FormatSlot(record) });
             }
             else
             {
                 if (record.Waited is { } waited)
-                    Facts.Add(new VisitFactRow { Label = "Waited", Value = DescribeSpan(waited) });
+                    Facts.Add(new VisitFactRow { Label = "Waited", Value = VisitHelper.DescribeSpan(waited) });
 
                 if (record.Served is { } served)
-                    Facts.Add(new VisitFactRow { Label = "In the chair", Value = DescribeSpan(served) });
+                    Facts.Add(new VisitFactRow { Label = "In the chair", Value = VisitHelper.DescribeSpan(served) });
 
                 if (record.IsBooking && record.SlotStart is not null)
-                    Facts.Add(new VisitFactRow { Label = "Slot", Value = FormatSlot(record) });
+                    Facts.Add(new VisitFactRow { Label = "Slot", Value = VisitHelper.FormatSlot(record) });
             }
 
             if (record.HasPrice)
@@ -656,33 +657,33 @@ public partial class VisitPageViewModel : BaseViewModel
         try
         {
             if (record.JoinedAt is not null)
-                steps.Add(Step(record.JoinedAt, "You joined the queue", VisitStepState.Done));
+                steps.Add(VisitHelper.Step(record.JoinedAt, "You joined the queue", VisitStepState.Done));
 
             // Nobody to name while the entry is still unassigned, and "Next available starts" reads
             // like a person's name on a timeline of things that happened.
             if (record.StartedAt is not null)
-                steps.Add(Step(record.StartedAt,
+                steps.Add(VisitHelper.Step(record.StartedAt,
                     record.HasOperator ? $"{record.OperatorName} started" : "Started",
                     VisitStepState.Done));
             else if (record.IsLive)
-                steps.Add(Pending(record.HasOperator ? $"{record.OperatorName} starts" : "Your turn"));
+                steps.Add(VisitHelper.Pending(record.HasOperator ? $"{record.OperatorName} starts" : "Your turn"));
 
             if (record.AwaitingCollectionAt is not null)
             {
-                steps.Add(Step(record.AwaitingCollectionAt, "Finished — ready for collection", VisitStepState.Done));
+                steps.Add(VisitHelper.Step(record.AwaitingCollectionAt, "Finished — ready for collection", VisitStepState.Done));
                 AddCollectedStep(steps, record);
             }
             else if (record.FinishedAt is not null)
             {
-                steps.Add(Step(record.FinishedAt, "Finished", VisitStepState.Done));
+                steps.Add(VisitHelper.Step(record.FinishedAt, "Finished", VisitStepState.Done));
             }
             else if (record.IsLive)
             {
-                steps.Add(Pending("Finished"));
+                steps.Add(VisitHelper.Pending("Finished"));
             }
 
             if (record.WasCancelled && record.CancelledAt is not null)
-                steps.Add(Step(record.CancelledAt, record.CancelledByCustomer ? "You left the queue" : "The shop cancelled this", VisitStepState.Failed));
+                steps.Add(VisitHelper.Step(record.CancelledAt, record.CancelledByCustomer ? "You left the queue" : "The shop cancelled this", VisitStepState.Failed));
         }
         catch (Exception ex)
         {
@@ -701,28 +702,28 @@ public partial class VisitPageViewModel : BaseViewModel
         try
         {
             if (record.RequestedAt is not null)
-                steps.Add(Step(record.RequestedAt, "You requested this time", VisitStepState.Done));
+                steps.Add(VisitHelper.Step(record.RequestedAt, "You requested this time", VisitStepState.Done));
 
             if (record.SlotStart is { } slot)
-                steps.Add(Step(record.SlotStart, "Your slot",
+                steps.Add(VisitHelper.Step(record.SlotStart, "Your slot",
                     slot <= DateTimeOffset.UtcNow ? VisitStepState.Done : VisitStepState.Pending));
 
             // No pending variant: nothing in this app's operator flow marks a booking "started"
             // today (bookings.started_at exists on some schemas but nothing writes it yet), so a
             // step that can never resolve would be worse than one that only appears once it's true.
             if (record.StartedAt is not null)
-                steps.Add(Step(record.StartedAt,
+                steps.Add(VisitHelper.Step(record.StartedAt,
                     record.HasOperator ? $"{record.OperatorName} started" : "Started",
                     VisitStepState.Done));
 
             if (record.AwaitingCollectionAt is not null)
             {
-                steps.Add(Step(record.AwaitingCollectionAt, "Finished — ready for collection", VisitStepState.Done));
+                steps.Add(VisitHelper.Step(record.AwaitingCollectionAt, "Finished — ready for collection", VisitStepState.Done));
                 AddCollectedStep(steps, record);
             }
 
             if (record.CancelledAt is not null)
-                steps.Add(Step(record.CancelledAt, record.CancelledByCustomer ? "You cancelled" : "The shop cancelled this", VisitStepState.Failed));
+                steps.Add(VisitHelper.Step(record.CancelledAt, record.CancelledByCustomer ? "You cancelled" : "The shop cancelled this", VisitStepState.Failed));
         }
         catch (Exception ex)
         {
@@ -737,9 +738,9 @@ public partial class VisitPageViewModel : BaseViewModel
         try
         {
             if (record.CollectedAt is not null)
-                steps.Add(Step(record.CollectedAt, "Collected", VisitStepState.Done));
+                steps.Add(VisitHelper.Step(record.CollectedAt, "Collected", VisitStepState.Done));
             else if (record.IsLive)
-                steps.Add(Pending("Collected"));
+                steps.Add(VisitHelper.Pending("Collected"));
         }
         catch (Exception ex)
         {
@@ -916,13 +917,6 @@ public partial class VisitPageViewModel : BaseViewModel
         }
     }
 
-    // A queue entry only lacks an operator when the shop had nobody on shift to assign, and a
-    // booking only until the shop picks who is taking it. Neither is a person, so neither gets
-    // phrased as one.
-    public static string WithWhom(VisitRecord record) => record.HasOperator
-        ? $"with {record.OperatorName}"
-        : record.IsQueue ? "with whoever's free first" : "with whoever's free at that time";
-
     public async Task<string> DescribeLeavingCostAsync(VisitRecord record)
     {
         try
@@ -939,7 +933,7 @@ public partial class VisitPageViewModel : BaseViewModel
                 ? summary.FirstOrDefault(r => r.OperatorId == operatorId)
                 : summary.FastestOperator();
 
-            var place = $"You'd lose {OrdinalOf(record.Position)} place.";
+            var place = $"You'd lose {TextFormat.Ordinal(record.Position)} place.";
             return row is null
                 ? $"{place} Joining again puts you at the back."
                 : $"{place} Joining again puts you at the back — about {(int)Math.Round(row.NewJoinWaitMinutes)} minutes at the moment.";
@@ -1001,7 +995,7 @@ public partial class VisitPageViewModel : BaseViewModel
                 return;
 
             var path = Path.Combine(FileSystem.CacheDirectory, $"visit-{record.Id}.ics");
-            await File.WriteAllTextAsync(path, BuildCalendarEntry(record, Business?.Address));
+            await File.WriteAllTextAsync(path, VisitHelper.BuildCalendarEntry(record, Business?.Address));
             await Launcher.Default.OpenAsync(new OpenFileRequest(record.BusinessName, new ReadOnlyFile(path)));
         }
         catch (Exception ex)
@@ -1182,92 +1176,6 @@ public partial class VisitPageViewModel : BaseViewModel
             return string.Empty;
         }
     }
-
-    public static string BuildShareText(VisitRecord record)
-    {
-        if (record.IsQueue)
-            return record.Position > 0
-                ? $"I'm {OrdinalOf(record.Position)} in the queue at {record.BusinessName}."
-                : $"I'm in the queue at {record.BusinessName}.";
-
-        return record.SlotStart is { } slot
-            ? $"I'm booked at {record.BusinessName} on {LocalTime.Day(slot)} at {LocalTime.Time(slot)}."
-            : $"I'm booked at {record.BusinessName}.";
-    }
-
-    public static string BuildCalendarEntry(VisitRecord record, string? address)
-    {
-        var start = record.SlotStart?.UtcDateTime ?? DateTime.UtcNow;
-        var end = record.SlotEnd?.UtcDateTime ?? start.AddMinutes(30);
-
-        return string.Join("\r\n",
-            "BEGIN:VCALENDAR",
-            "VERSION:2.0",
-            "PRODID:-//Queue//EN",
-            "BEGIN:VEVENT",
-            $"UID:{record.Id}",
-            $"DTSTAMP:{DateTime.UtcNow:yyyyMMdd'T'HHmmss'Z'}",
-            $"DTSTART:{start:yyyyMMdd'T'HHmmss'Z'}",
-            $"DTEND:{end:yyyyMMdd'T'HHmmss'Z'}",
-            $"SUMMARY:{record.ServiceName} at {record.BusinessName}",
-            $"LOCATION:{address ?? record.BusinessName}",
-            "END:VEVENT",
-            "END:VCALENDAR");
-    }
-
-    public static VisitTimelineStep Step(DateTimeOffset? at, string text, VisitStepState state) => new()
-    {
-        MomentText = FormatMoment(at),
-        Text = text,
-        State = state,
-    };
-
-    public static VisitTimelineStep Pending(string text) => new()
-    {
-        MomentText = "Not yet",
-        Text = text,
-        State = VisitStepState.Pending,
-    };
-
-    public static string FormatMoment(DateTimeOffset? instant) =>
-        instant is { } value ? LocalTime.Moment(value) : "Not recorded";
-
-    public static string FormatTime(DateTimeOffset? instant) =>
-        instant is { } value ? LocalTime.Time(value) : "--:--";
-
-    public static string FormatSlot(VisitRecord record)
-    {
-        if (record.SlotStart is not { } start)
-            return string.Empty;
-
-        return LocalTime.Range(start, record.SlotEnd);
-    }
-
-    public static string DescribeSpan(TimeSpan span)
-    {
-        var minutes = (int)Math.Round(span.TotalMinutes);
-        if (minutes < 1)
-            return "under a minute";
-
-        if (minutes < 60)
-            return $"{minutes} min";
-
-        var hours = minutes / 60;
-        var rest = minutes % 60;
-        return rest == 0 ? $"{hours} hr" : $"{hours} hr {rest} min";
-    }
-
-    public static string Join(string first, string second) =>
-        second.Length == 0 ? first : $"{first} · {second}";
-
-    public static string OrdinalOf(int value) => value switch
-    {
-        11 or 12 or 13 => $"{value}th",
-        _ when value % 10 == 1 => $"{value}st",
-        _ when value % 10 == 2 => $"{value}nd",
-        _ when value % 10 == 3 => $"{value}rd",
-        _ => $"{value}th",
-    };
 
     protected override async Task HandleExceptionAsync(Exception exception)
     {

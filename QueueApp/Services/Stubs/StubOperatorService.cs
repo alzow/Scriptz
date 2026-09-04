@@ -1,5 +1,6 @@
 using QueueApp.Services.Api.Operator;
 using QueueApp.Services.Api.Operator.Models;
+using QueueApp.Shared.Domain;
 
 namespace QueueApp.Services.Stubs;
 
@@ -82,6 +83,15 @@ public class StubOperatorService : IOperatorService
             .Where(a => operatorIds.Contains(a.OperatorId))
             .OrderBy(a => a.DayOfWeek).ThenBy(a => a.StartTime)
             .ToList());
+
+    public async Task<BusinessHours> GetBusinessHoursAsync(IEnumerable<OperatorResponse> operators)
+    {
+        var activeIds = operators.Where(o => o.IsActive).Select(o => o.Id).ToList();
+        if (activeIds.Count == 0)
+            return BusinessHours.Unknown;
+
+        return BusinessHours.FromAvailability(await GetAvailabilityAsync(activeIds));
+    }
 
     public Task<List<OperatorAvailabilityResponse>> CreateAvailabilityAsync(CreateAvailabilityRequest request)
     {

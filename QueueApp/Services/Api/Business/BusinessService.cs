@@ -1,12 +1,16 @@
 using QueueApp.Framework.Base;
+using QueueApp.Services.Api;
 using QueueApp.Services.Api.Business.Models;
 using QueueApp.Services.Auth;
 
 namespace QueueApp.Services.Api.Business;
 
-// Hides PostgREST filter syntax (e.g. "eq.<guid>") from callers.
 public class BusinessService : BaseService, IBusinessService
 {
+    private const string NoAuthenticatedUserError =
+        "No authenticated user is available for queue ownership lookup.";
+    private const string NoOwnedBusinessError = "No business is associated with the current user.";
+
     private readonly IBusinessApi _api;
     private readonly IAuthService _authService;
 
@@ -20,24 +24,19 @@ public class BusinessService : BaseService, IBusinessService
     {
         var userId = await _authService.GetUserIdAsync();
         if (string.IsNullOrWhiteSpace(userId))
-            throw new InvalidOperationException("No authenticated user is available for queue ownership lookup.");
+            throw new InvalidOperationException(NoAuthenticatedUserError);
 
-        var businesses = await ExecuteApiCallAsync(_api.GetOwnedBusinessesAsync($"eq.{userId}", "id"));
-        var business = businesses.FirstOrDefault();
-        if (business is null)
-            throw new InvalidOperationException("No business is associated with the current user.");
+        var business = await ExecuteSingleAsync(_api.GetOwnedBusinessesAsync(PostgrestFilter.Eq(userId), "id"))
+            ?? throw new InvalidOperationException(NoOwnedBusinessError);
 
         return business.Id;
     }
 
-    public async Task<BusinessResponse?> GetBusinessAsync(Guid businessId)
-    {
-        var businesses = await ExecuteApiCallAsync(_api.GetBusinessesAsync($"eq.{businessId}"));
-        return businesses.FirstOrDefault();
-    }
+    public Task<BusinessResponse?> GetBusinessAsync(Guid businessId) =>
+        ExecuteSingleAsync(_api.GetBusinessesAsync(PostgrestFilter.Eq(businessId)));
 
     public Task<List<BusinessResponse>> GetBusinessesAsync(string category, string suburb = "Lenasia") =>
-        ExecuteApiCallAsync(_api.GetBusinessesByCategoryAsync($"eq.{category}", $"eq.{suburb}"));
+        ExecuteApiCallAsync(_api.GetBusinessesByCategoryAsync(PostgrestFilter.Eq(category), PostgrestFilter.Eq(suburb)));
 
     public Task<List<BrowseBusinessSummaryResponse>> GetBrowseBusinessesAsync(
         string? category, string suburb = "Lenasia", double? customerLatitude = null, double? customerLongitude = null) =>
@@ -50,10 +49,10 @@ public class BusinessService : BaseService, IBusinessService
         }));
 
     public Task HeartbeatAsync(Guid businessId) =>
-        ExecuteApiCallAsync(_api.HeartbeatAsync($"eq.{businessId}",
+        ExecuteApiCallAsync(_api.HeartbeatAsync(PostgrestFilter.Eq(businessId),
             new Dictionary<string, object> { ["last_seen_at"] = DateTime.UtcNow }));
 
     public Task UpdateLocationAsync(Guid businessId, double latitude, double longitude) =>
-        ExecuteApiCallAsync(_api.UpdateLocationAsync($"eq.{businessId}",
+        ExecuteApiCallAsync(_api.UpdateLocationAsync(PostgrestFilter.Eq(businessId),
             new Dictionary<string, object> { ["latitude"] = latitude, ["longitude"] = longitude }));
 }

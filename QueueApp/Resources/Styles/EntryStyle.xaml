@@ -49,6 +49,12 @@
         <Setter Property="AutoSize" Value="TextChanges"/>
     </Style>
 
+    <!-- AlzowEditor's inner control: transparent, because the shell around it carries the shape. -->
+    <Style x:Key="editor14_Alzow" TargetType="Editor" BasedOn="{StaticResource editor14_Sheet}">
+        <Setter Property="HeightRequest" Value="-1"/>
+        <Setter Property="MinimumHeightRequest" Value="84"/>
+    </Style>
+
     <!-- Settings pages put a picker straight onto the page rather than inside a sheet. -->
     <Style x:Key="picker14_Inline" TargetType="DatePicker">
         <Setter Property="BackgroundColor" Value="Transparent"/>

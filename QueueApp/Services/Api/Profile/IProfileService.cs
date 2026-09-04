@@ -9,4 +9,8 @@ public interface IProfileService
     Task<ProfileResponse?> GetMyProfileAsync(Guid userId);
 
     Task UpdateMyProfileAsync(Guid userId, string? displayName, string? phone);
+
+    // Drops the held profile so the next read goes to the server — for a sign-out, where the next
+    // signed-in user must not be handed the last one's row.
+    void InvalidateCache();
 }
