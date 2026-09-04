@@ -113,7 +113,7 @@ public sealed class VisitRecord
             HasOperator = entry.HasOperator,
             OperatorId = entry.OperatorId,
             Details = entry.Details,
-            IntakeAnswers = OrderAnswers(entry.IntakeResponses),
+            IntakeAnswers = IntakeAnswer.Ordered(entry.IntakeResponses),
             PriceText = MoneyFormat.Format(entry.PriceCents),
             ShopUpdate = entry.ProgressStatus,
             ShopNote = entry.Note,
@@ -146,7 +146,7 @@ public sealed class VisitRecord
             OperatorName = booking.OperatorName,
             HasOperator = booking.HasOperator,
             PriceText = booking.PriceText,
-            IntakeAnswers = OrderAnswers(booking.IntakeResponses),
+            IntakeAnswers = IntakeAnswer.Ordered(booking.IntakeResponses),
             ShopUpdate = booking.ProgressStatus,
             CustomerNote = booking.Note,
             CancellationReason = booking.CancellationReason,
@@ -161,13 +161,6 @@ public sealed class VisitRecord
             SlotEnd = booking.EndsAt,
         };
     }
-
-    // The jsonb is an object keyed by field id, so it comes back in whatever order it was stored
-    // in. sort_order is the order the shop chose, and it travelled with each answer for this.
-    public static IReadOnlyList<IntakeAnswer> OrderAnswers(Dictionary<string, IntakeAnswer>? responses) =>
-        responses is null or { Count: 0 }
-            ? Array.Empty<IntakeAnswer>()
-            : responses.Values.OrderBy(a => a.SortOrder).ToList();
 
     public static VisitLifecycle ResolveEntryLifecycle(MyQueueEntryResponse entry)
     {

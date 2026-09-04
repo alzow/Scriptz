@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:QueueApp.Features.IntakeAnswers"
+             xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
+             xmlns:intake="clr-namespace:QueueApp.Shared.Templates.IntakeAnswerList"
+             x:Class="QueueApp.Features.IntakeAnswers.IntakeAnswersPage"
+             x:DataType="vm:IntakeAnswersPageViewModel"
+             Title="{Binding PageTitle}"
+             Style="{StaticResource NavigationPageStyle}">
+
+    <Grid RowDefinitions="Auto,*">
+        <templates:AlzowSubPageHeader Grid.Row="0"
+                                      Title="{Binding CustomerName}"
+                                      Subtitle="{Binding SubtitleText}"
+                                      BackCommand="{Binding GoBackCommand}"/>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="20" Spacing="16">
+
+                <intake:IntakeAnswerListView IsVisible="{Binding HasAnswers}"
+                                             SectionTitle="{Binding SectionTitle}"
+                                             Answers="{Binding Answers}"
+                                             OpenFileCommand="{Binding OpenFileCommand}"/>
+
+                <Border Style="{StaticResource brd13_Ghost}"
+                        Padding="18,26"
+                        IsVisible="{Binding ShowEmpty}">
+                    <Label Text="{Binding EmptyText}"
+                           Style="{StaticResource lbl12_Regular_TextMuted}"
+                           HorizontalTextAlignment="Center"
+                           HorizontalOptions="Center"/>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <ActivityIndicator Grid.Row="1"
+                           IsRunning="{Binding IsOpeningFile}"
+                           IsVisible="{Binding IsOpeningFile}"
+                           Style="{StaticResource ai_Accent}"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"/>
+
+    </Grid>
+
+</ContentPage>

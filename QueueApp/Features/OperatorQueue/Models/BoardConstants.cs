@@ -11,6 +11,8 @@ public static class BoardConstants
 
     public const string EmDash = "—";
 
+    public const string NowServingText = "in the chair now";
+
     public static DateTime AsUtc(DateTime value) => value.Kind == DateTimeKind.Unspecified
         ? DateTime.SpecifyKind(value, DateTimeKind.Utc)
         : value.ToUniversalTime();

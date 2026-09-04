@@ -35,6 +35,11 @@ public static class NavigationKeys
     // TODO: set this from the deep-link/notification entry point once one exists.
     public const string BypassWelcome   = "bypassWelcome";
 
+    // An IntakeAnswerSnapshot handed from an operator board to the answers page. The answers are
+    // stored self-describing, so the board already holds everything the page renders and the page
+    // costs no round trip.
+    public const string IntakeAnswers   = "intakeAnswers";
+
     // A BusinessSnapshot handed from the business landing to the flow it opens, so the flow can skip
     // re-fetching what the page behind it already has. Optional: absent when the flow is opened from
     // anywhere else, and the flow fetches for itself then.

@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
+using QueueApp.Services.Api.Intake.Models;
 
 namespace QueueApp.Services.Api.Queue.Models;
 
@@ -28,7 +29,13 @@ public partial class QueueEntryResponse : ObservableObject
     // own rules put this person in this chair or the customer asked for it by name.
     [JsonPropertyName("details")] public QueueEntryDetails? Details { get; set; }
 
+    // What the customer answered before the entry existed. Selected by `*` like everything else on
+    // this read, and self-describing — each answer carries its own label, type and order — so the
+    // board renders it without ever touching service_intake_fields.
+    [JsonPropertyName("intake_responses")] public Dictionary<string, IntakeAnswer>? IntakeResponses { get; set; }
+
     [JsonIgnore] public bool HasProgress => !string.IsNullOrWhiteSpace(ProgressStatus);
+    [JsonIgnore] public bool HasIntakeAnswers => IntakeResponses is { Count: > 0 };
     [JsonIgnore] public bool WasAutoAssigned => Details?.WasAutoAssigned == true;
     [JsonIgnore] public bool IsAwaitingCollection => Status == QueueEntryStatuses.AwaitingCollection;
 

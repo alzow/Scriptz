@@ -615,6 +615,14 @@
         <Setter Property="StrokeThickness" Value="0"/>
     </Style>
 
+    <Style x:Key="brd10_Surface_Flat" TargetType="Border" BasedOn="{StaticResource brd_Surface_Flat}">
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="10"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="brd_Raised_Flat" TargetType="Border">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
         <Setter Property="Stroke" Value="Transparent"/>

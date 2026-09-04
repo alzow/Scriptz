@@ -12,4 +12,5 @@ public enum BookingAction
     MarkNoShow,
     Cancel,
     SaveProgress,
+    ViewAnswers,
 }

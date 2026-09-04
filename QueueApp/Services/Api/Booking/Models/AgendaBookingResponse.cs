@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using QueueApp.Framework.Extensions;
+using QueueApp.Services.Api.Intake.Models;
 using QueueApp.Shared.Domain;
 
 namespace QueueApp.Services.Api.Booking.Models;
@@ -131,6 +132,11 @@ public partial class AgendaBookingResponse : ObservableObject
 
     [JsonPropertyName("awaiting_collection_at")] public DateTimeOffset? AwaitingCollectionAt { get; set; }
 
+    // What the customer answered when they made the booking. The agenda read selects `*`, so this
+    // arrives with no query change; each answer carries its own label, type and order, so the
+    // agenda renders it without reading service_intake_fields.
+    [JsonPropertyName("intake_responses")] public Dictionary<string, IntakeAnswer>? IntakeResponses { get; set; }
+
     [JsonIgnore] public bool IsConfirming { get; set; }
     [JsonIgnore] public bool IsCompleting { get; set; }
     [JsonIgnore] public bool IsCancelling { get; set; }
@@ -139,6 +145,7 @@ public partial class AgendaBookingResponse : ObservableObject
 
     [JsonIgnore] public bool HasProgress => !string.IsNullOrWhiteSpace(ProgressStatus);
     [JsonIgnore] public bool HasNote => !string.IsNullOrWhiteSpace(Note);
+    [JsonIgnore] public bool HasIntakeAnswers => IntakeResponses is { Count: > 0 };
     [JsonIgnore] public string? CancellationReason => Details?.CancellationReason;
     [JsonIgnore] public bool HasCancellationReason => !string.IsNullOrWhiteSpace(CancellationReason);
 

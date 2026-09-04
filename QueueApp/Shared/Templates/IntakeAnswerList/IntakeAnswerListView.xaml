@@ -3,13 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:QueueApp.Services.Api.Intake.Models"
              x:Name="Root"
-             x:Class="QueueApp.Features.Flow.Visit.Helpers.VisitIntakeSectionView">
+             x:Class="QueueApp.Shared.Templates.IntakeAnswerList.IntakeAnswerListView">
 
     <!--
-        The questions this visit was asked, and what was said back — in the order they were asked,
-        with the question as it was worded at the time. Answers carry their own label, so nothing
-        here reads the current field definitions and nothing here changes if the shop later edits
-        them.
+        The questions a visit was asked and what was said back, in the order they were asked, with
+        each question as it was worded at the time. Answers carry their own label, so nothing here
+        reads the current field definitions and nothing here changes if the shop later edits them.
+        Shared: the customer reads it on their visit, the shop reads the same list off either
+        operator board, and only the file-open command differs between them.
     -->
     <VerticalStackLayout Spacing="10">
         <Label Text="{Binding SectionTitle, Source={x:Reference Root}}"

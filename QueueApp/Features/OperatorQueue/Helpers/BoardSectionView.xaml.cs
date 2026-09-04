@@ -16,6 +16,9 @@ public partial class BoardSectionView : ContentView
     public static readonly BindableProperty OpenRowActionsCommandProperty = BindableProperty.Create(
         nameof(OpenRowActionsCommand), typeof(ICommand), typeof(BoardSectionView));
 
+    public static readonly BindableProperty ViewAnswersCommandProperty = BindableProperty.Create(
+        nameof(ViewAnswersCommand), typeof(ICommand), typeof(BoardSectionView));
+
     public static readonly BindableProperty AddWalkInCommandProperty = BindableProperty.Create(
         nameof(AddWalkInCommand), typeof(ICommand), typeof(BoardSectionView));
 
@@ -44,6 +47,12 @@ public partial class BoardSectionView : ContentView
     {
         get => (ICommand?)GetValue(OpenRowActionsCommandProperty);
         set => SetValue(OpenRowActionsCommandProperty, value);
+    }
+
+    public ICommand? ViewAnswersCommand
+    {
+        get => (ICommand?)GetValue(ViewAnswersCommandProperty);
+        set => SetValue(ViewAnswersCommandProperty, value);
     }
 
     public ICommand? AddWalkInCommand
