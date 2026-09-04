@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
+using QueueApp.Shared.Domain;
 using MPowerKit.Navigation;
 using QueueApp.Constants;
 using QueueApp.Features.OperatorQueue.Models;
@@ -291,7 +292,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
             {
                 OperatorId = op.Id,
                 Name = op.DisplayName,
-                Initials = InitialsOf(op.DisplayName),
+                Initials = TextFormat.Initials(op.DisplayName),
                 SortOrder = op.SortOrder,
                 IsOnShift = onShift,
                 IsExpanded = expanded,
@@ -309,7 +310,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                     OperatorId = entry.OperatorId,
                     ServiceId = entry.ServiceId,
                     CustomerName = DisplayNameOf(entry),
-                    Initials = InitialsOf(DisplayNameOf(entry)),
+                    Initials = TextFormat.Initials(DisplayNameOf(entry)),
                     ServiceName = ServiceNameOf(entry.ServiceId),
                     JoinedAt = entry.JoinedAt,
                     JoinedAtText = BoardConstants.AsUtc(entry.JoinedAt).ToLocalTime().ToString("HH:mm"),
@@ -387,7 +388,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                     OperatorId = null,
                     ServiceId = entry.ServiceId,
                     CustomerName = DisplayNameOf(entry),
-                    Initials = InitialsOf(DisplayNameOf(entry)),
+                    Initials = TextFormat.Initials(DisplayNameOf(entry)),
                     ServiceName = ServiceNameOf(entry.ServiceId),
                     JoinedAt = entry.JoinedAt,
                     JoinedAtText = BoardConstants.AsUtc(entry.JoinedAt).ToLocalTime().ToString("HH:mm"),
@@ -440,7 +441,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                     OperatorId = entry.OperatorId,
                     ServiceId = entry.ServiceId,
                     CustomerName = DisplayNameOf(entry),
-                    Initials = InitialsOf(DisplayNameOf(entry)),
+                    Initials = TextFormat.Initials(DisplayNameOf(entry)),
                     ServiceName = ServiceNameOf(entry.ServiceId),
                     JoinedAt = entry.JoinedAt,
                     ShowPosition = false,
@@ -1082,7 +1083,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                 {
                     OperatorId = op.Id,
                     Name = op.DisplayName,
-                    Initials = InitialsOf(op.DisplayName),
+                    Initials = TextFormat.Initials(op.DisplayName),
                     SubLabel = !op.IsAvailable
                         ? "Off shift"
                         : wait <= 0
@@ -1206,24 +1207,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
     }
 
-    public string InitialsOf(string name)
-    {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                return "?";
-
-            var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            return parts.Length == 1
-                ? parts[0][..Math.Min(2, parts[0].Length)].ToUpperInvariant()
-                : $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
-        }
-        catch (Exception ex)
-        {
-            _ = HandleExceptionAsync(ex);
-            return "?";
-        }
-    }
 
     protected override Task HandleExceptionAsync(Exception exception)
     {

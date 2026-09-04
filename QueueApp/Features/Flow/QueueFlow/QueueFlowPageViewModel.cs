@@ -1,16 +1,6 @@
-using CommunityToolkit.Mvvm.Messaging;
 using MPowerKit;
 using MPowerKit.Navigation;
-using QueueApp.Constants;
-using QueueApp.Services.Api.Booking;
-using QueueApp.Services.Api.Business;
-using QueueApp.Services.Api.Intake;
-using QueueApp.Services.Api.Operator;
-using QueueApp.Services.Api.Profile;
-using QueueApp.Services.Api.Queue;
-using QueueApp.Services.Api.ServiceOfferings;
-using QueueApp.Services.Auth;
-using QueueApp.Services.Popup;
+using QueueApp.Features.Flow.Helpers;
 using QueueApp.Services.Storage;
 
 namespace QueueApp.Features.Flow.QueueFlow;
@@ -22,20 +12,8 @@ public partial class QueueFlowPageViewModel : FlowPageViewModelBase
     public QueueFlowPageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
-        IBusinessService businessService,
-        IQueueService queueService,
-        IOperatorService operatorService,
-        IServiceOfferingsService serviceOfferingsService,
-        IBookingService bookingService,
-        IAuthService authService,
-        IQueuePopupService popupService,
-        IProfileService profileService,
-        IIntakeFieldsService intakeFieldsService,
-        IIntakeFileService intakeFileService,
-        IMessenger messenger)
-        : base(navigationService, secureStorageService, businessService, queueService,
-            operatorService, serviceOfferingsService, bookingService, authService,
-            popupService, profileService, intakeFieldsService, intakeFileService, messenger)
+        FlowServices services)
+        : base(navigationService, secureStorageService, services)
     {
     }
 
@@ -45,9 +23,9 @@ public partial class QueueFlowPageViewModel : FlowPageViewModelBase
         {
             await GoToVisitAsync();
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            await HandleExceptionAsync(ex);
+            await HandleExceptionAsync(exception);
         }
     }
 }

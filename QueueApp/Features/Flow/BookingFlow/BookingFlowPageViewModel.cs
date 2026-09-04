@@ -1,41 +1,20 @@
-using CommunityToolkit.Mvvm.Messaging;
 using MPowerKit;
 using MPowerKit.Navigation;
 using QueueApp.Constants;
-using QueueApp.Services.Api.Booking;
-using QueueApp.Services.Api.Business;
-using QueueApp.Services.Api.Intake;
-using QueueApp.Services.Api.Operator;
-using QueueApp.Services.Api.Profile;
-using QueueApp.Services.Api.Queue;
-using QueueApp.Services.Api.ServiceOfferings;
-using QueueApp.Services.Auth;
-using QueueApp.Services.Popup;
+using QueueApp.Features.Flow.Helpers;
 using QueueApp.Services.Storage;
 
 namespace QueueApp.Features.Flow.BookingFlow;
 
-// Operator, service, day, time, review. Everything but the step list and where it lands
-// afterwards is the queue flow too, so it all lives on the base.
+// Operator, service, day, time, review. Everything but the step list and where it lands afterwards
+// is the queue flow too, so it all lives on the base.
 public partial class BookingFlowPageViewModel : FlowPageViewModelBase
 {
     public BookingFlowPageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
-        IBusinessService businessService,
-        IQueueService queueService,
-        IOperatorService operatorService,
-        IServiceOfferingsService serviceOfferingsService,
-        IBookingService bookingService,
-        IAuthService authService,
-        IQueuePopupService popupService,
-        IProfileService profileService,
-        IIntakeFieldsService intakeFieldsService,
-        IIntakeFileService intakeFileService,
-        IMessenger messenger)
-        : base(navigationService, secureStorageService, businessService, queueService,
-            operatorService, serviceOfferingsService, bookingService, authService,
-            popupService, profileService, intakeFieldsService, intakeFileService, messenger)
+        FlowServices services)
+        : base(navigationService, secureStorageService, services)
     {
     }
 
@@ -50,9 +29,9 @@ public partial class BookingFlowPageViewModel : FlowPageViewModelBase
             else
                 await GoToVisitAsync();
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            await HandleExceptionAsync(ex);
+            await HandleExceptionAsync(exception);
         }
     }
 }

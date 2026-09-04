@@ -88,10 +88,16 @@ calls. A method used by one caller sits under that caller.
 | XAML page | it passes ~150 lines, or a block repeats |
 | Service | it has two reasons to change |
 
-Split a view model by **extracting a collaborator**, not by adding a partial file. A collaborator
-owns its own state and has a name for what it does — `FlowScheduleLoader` owns the slot cache and
-the debounce; `FlowIntakeCoordinator` owns the answer list. The view model composes them and stays
-readable end to end.
+Split a view model by **extracting a collaborator first**. A collaborator owns its own state and
+has a name for what it does — `FlowScheduleLoader` owns the slot cache and the debounce,
+`FlowIntakeCoordinator` owns the answer list, `FlowStepPresenter` computes the chrome and footer,
+`FlowSubmissionCoordinator` owns the three ways a flow commits. The view model composes them.
+
+Only once the logic is out may a view model that drives one screen's whole bound surface be spread
+across partial files, named `<Type>.<Concern>.cs` (`FlowPageViewModelBase.Steps.cs`,
+`.Schedule.cs`, `.Selection.cs`, `.Submit.cs`). That keeps the bound property names flat, so the
+XAML does not change, while each file stays under a couple of hundred lines. A partial file that
+is just a bag of leftovers is a region by another name — do not add one.
 
 Split XAML by **extracting a `ContentView` with bindable properties only**. A helper view never
 binds to a view model type and never reaches a parent `BindingContext`: everything it needs arrives

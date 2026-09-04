@@ -439,7 +439,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
 
                 TeamMembers.Add(new TeamMemberItem
                 {
-                    Initials = Initials(op.DisplayName),
+                    Initials = TextFormat.Initials(op.DisplayName),
                     Name = op.DisplayName,
                     SubLabel = subLabel,
                     ShowSubLabel = !IsBookingMode,
@@ -732,23 +732,5 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             await HandleExceptionAsync(ex);
         }
     }
-    public static string Initials(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return "?";
-
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return parts.Length == 1
-            ? parts[0][..Math.Min(2, parts[0].Length)].ToUpperInvariant()
-            : $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
-    }
-    public static string Ordinal(int value) => value switch
-    {
-        11 or 12 or 13 => $"{value}th",
-        _ when value % 10 == 1 => $"{value}st",
-        _ when value % 10 == 2 => $"{value}nd",
-        _ when value % 10 == 3 => $"{value}rd",
-        _ => $"{value}th",
-    };
     #endregion
 }

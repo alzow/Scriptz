@@ -462,7 +462,7 @@ public partial class VisitPageViewModel : BaseViewModel
                 return;
             }
 
-            var placeText = record.Position > 0 ? $"you're {OrdinalOf(record.Position)}" : string.Empty;
+            var placeText = record.Position > 0 ? $"you're {TextFormat.Ordinal(record.Position)}" : string.Empty;
 
             // No wait figure, which for an unassigned entry is the honest answer rather than a gap:
             // it belongs to no operator's line, so there is nothing to add up.
@@ -472,7 +472,7 @@ public partial class VisitPageViewModel : BaseViewModel
             if (wait is null)
             {
                 HeroCaption = "YOU'RE IN THE QUEUE";
-                HeroTime = record.Position > 0 ? OrdinalOf(record.Position) : "--";
+                HeroTime = record.Position > 0 ? TextFormat.Ordinal(record.Position) : "--";
                 HeroRelative = record.Position > 0 ? "in line" : string.Empty;
                 HeroDetail = WithWhom(record);
                 return;
@@ -487,7 +487,7 @@ public partial class VisitPageViewModel : BaseViewModel
                 HeroCaption = "LEAVE AT";
                 HeroTime = FormatTime(leaveAt);
                 HeroRelative = $"in {DescribeSpan(leaveAt - DateTimeOffset.UtcNow)}";
-                HeroDetail = Join($"{travelMinutes} min to get there", placeText);
+                HeroDetail = TextFormat.Join($"{travelMinutes} min to get there", placeText);
                 return;
             }
 
@@ -495,7 +495,7 @@ public partial class VisitPageViewModel : BaseViewModel
             HeroTime = FormatTime(turnAt);
             HeroRelative = $"in {DescribeSpan(TimeSpan.FromMinutes(wait.Value))}";
             HeroDetail = travel is { } near
-                ? Join($"{near} min to get there", placeText)
+                ? TextFormat.Join($"{near} min to get there", placeText)
                 : placeText;
         }
         catch (Exception ex)
@@ -593,7 +593,7 @@ public partial class VisitPageViewModel : BaseViewModel
             if (record.IsLive && record.IsQueue)
             {
                 if (record.Position > 0)
-                    Facts.Add(new VisitFactRow { Label = "Position", Value = OrdinalOf(record.Position) });
+                    Facts.Add(new VisitFactRow { Label = "Position", Value = TextFormat.Ordinal(record.Position) });
 
                 if (record.JoinedAt is not null)
                     Facts.Add(new VisitFactRow { Label = "Joined", Value = FormatMoment(record.JoinedAt) });
@@ -939,7 +939,7 @@ public partial class VisitPageViewModel : BaseViewModel
                 ? summary.FirstOrDefault(r => r.OperatorId == operatorId)
                 : summary.FastestOperator();
 
-            var place = $"You'd lose {OrdinalOf(record.Position)} place.";
+            var place = $"You'd lose {TextFormat.Ordinal(record.Position)} place.";
             return row is null
                 ? $"{place} Joining again puts you at the back."
                 : $"{place} Joining again puts you at the back — about {(int)Math.Round(row.NewJoinWaitMinutes)} minutes at the moment.";
@@ -1187,7 +1187,7 @@ public partial class VisitPageViewModel : BaseViewModel
     {
         if (record.IsQueue)
             return record.Position > 0
-                ? $"I'm {OrdinalOf(record.Position)} in the queue at {record.BusinessName}."
+                ? $"I'm {TextFormat.Ordinal(record.Position)} in the queue at {record.BusinessName}."
                 : $"I'm in the queue at {record.BusinessName}.";
 
         return record.SlotStart is { } slot
@@ -1256,18 +1256,6 @@ public partial class VisitPageViewModel : BaseViewModel
         var rest = minutes % 60;
         return rest == 0 ? $"{hours} hr" : $"{hours} hr {rest} min";
     }
-
-    public static string Join(string first, string second) =>
-        second.Length == 0 ? first : $"{first} · {second}";
-
-    public static string OrdinalOf(int value) => value switch
-    {
-        11 or 12 or 13 => $"{value}th",
-        _ when value % 10 == 1 => $"{value}st",
-        _ when value % 10 == 2 => $"{value}nd",
-        _ when value % 10 == 3 => $"{value}rd",
-        _ => $"{value}th",
-    };
 
     protected override async Task HandleExceptionAsync(Exception exception)
     {

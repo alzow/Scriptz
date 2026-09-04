@@ -28,4 +28,7 @@ public sealed class SlotPeriod
 
     public bool HasSlots => Slots.Count > 0;
     public bool IsEmpty => Slots.Count == 0;
+
+    public static SlotPeriod Empty(string title, string emptyNote = "none") =>
+        new(title, Array.Empty<SlotChoiceItem>(), emptyNote);
 }

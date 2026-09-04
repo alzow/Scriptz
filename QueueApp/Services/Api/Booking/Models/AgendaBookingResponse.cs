@@ -160,7 +160,7 @@ public partial class AgendaBookingResponse : ObservableObject
     [JsonIgnore] public string TimeRangeDisplay => $"{LocalStart:HH:mm} – {LocalEnd:HH:mm}";
     [JsonIgnore] public string DayAndRangeDisplay => $"{LocalStart:ddd d} · {TimeRangeDisplay}";
 
-    [JsonIgnore] public string Initials => BuildInitials(CustomerName);
+    [JsonIgnore] public string Initials => TextFormat.Initials(CustomerName);
 
     [JsonIgnore] public bool IsPending => Status == BookingStatuses.Pending;
     [JsonIgnore] public bool IsConfirmed => Status == BookingStatuses.Confirmed;
@@ -211,13 +211,5 @@ public partial class AgendaBookingResponse : ObservableObject
         var hours = minutes / 60;
         var rest = minutes % 60;
         return rest == 0 ? $"{hours}h" : $"{hours}h {rest}m";
-    }
-
-    private static string BuildInitials(string name)
-    {
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length == 0) return "?";
-        if (parts.Length == 1) return parts[0][..Math.Min(2, parts[0].Length)].ToUpperInvariant();
-        return $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
     }
 }

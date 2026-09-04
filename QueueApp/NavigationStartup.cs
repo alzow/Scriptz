@@ -2,6 +2,7 @@ using System.Reflection;
 using MPowerKit.Navigation;
 using MPowerKit.Navigation.Utilities;
 using QueueApp.Constants;
+using QueueApp.Features.Flow.Helpers;
 using QueueApp.Services.Api;
 using QueueApp.Services.Api.Booking;
 using QueueApp.Services.Api.Business;
@@ -91,6 +92,11 @@ internal static class NavigationStartup
         // USE_STUBS builds for the same reason location does. The upload half is stubbed in the
         // implementation itself, and stays stubbed in every build until the bucket exists.
         services.AddSingleton<IIntakeFileService, IntakeFileService>();
+
+        // The flow's whole dependency surface behind one type, so the queue and booking view models
+        // take three constructor parameters instead of thirteen. Transient because the flow builds
+        // per-instance caches off it.
+        services.AddTransient<FlowServices>();
     }
 
     private static void RegisterApiServices(IServiceCollection services)

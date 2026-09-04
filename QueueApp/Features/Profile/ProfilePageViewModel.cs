@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.Input;
 using MPowerKit.Navigation.Interfaces;
+using QueueApp.Shared.Domain;
 using QueueApp.Constants;
 using QueueApp.Features.Profile.Sheets;
 using QueueApp.Framework.Base;
@@ -106,7 +107,7 @@ public partial class ProfilePageViewModel : BaseViewModel
 
             var profile = await _profileService.GetMyProfileAsync(userId);
             DisplayName = string.IsNullOrWhiteSpace(profile?.DisplayName) ? "Customer" : profile!.DisplayName!;
-            Initials = InitialsOf(DisplayName);
+            Initials = TextFormat.Initials(DisplayName);
 
             _phone = profile?.Phone ?? "";
             DetailsRowDetail = string.IsNullOrWhiteSpace(_phone) ? DisplayName : $"{DisplayName} · {_phone}";
@@ -188,17 +189,6 @@ public partial class ProfilePageViewModel : BaseViewModel
             ThemeChoice.Dark => "Always dark",
             _ => "Follow system",
         };
-
-    public static string InitialsOf(string name)
-    {
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length == 0)
-            return "?";
-
-        return parts.Length == 1
-            ? parts[0][..1].ToUpperInvariant()
-            : $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
-    }
 
     [RelayCommand]
     public async Task OpenDetailsAsync()
