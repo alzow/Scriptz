@@ -103,6 +103,19 @@ public partial class AgendaBookingResponse : ObservableObject
 
     [JsonPropertyName("customer_name")] public string? CustomerNameColumn { get; set; }
     [JsonPropertyName("customer_phone")] public string? CustomerPhoneColumn { get; set; }
+
+    // What the booking was settled as, and at what price. The day's revenue is summed off this, so
+    // reading it live meant a price change today silently rewrote what yesterday earned. A booking
+    // still pending or confirmed carries no snapshot and reads live — it counts towards today's
+    // revenue at today's price, which is the figure the shop is actually expecting. Selected via
+    // `*`, so they stay null and harmless until the columns exist.
+    // TODO: stub — bookings.service_name / service_price_cents / service_est_minutes /
+    // operator_name; see Documentation/historic-snapshot-backend-requirements.md.
+    [JsonPropertyName("service_name")] public string? ServiceNameColumn { get; set; }
+    [JsonPropertyName("service_price_cents")] public int? ServicePriceCentsColumn { get; set; }
+    [JsonPropertyName("service_est_minutes")] public int? ServiceEstMinutesColumn { get; set; }
+    [JsonPropertyName("operator_name")] public string? OperatorNameColumn { get; set; }
+
     [JsonPropertyName("details")] public BookingDetails? Details { get; set; }
     [JsonPropertyName("progress_status")] public string? ProgressStatus { get; set; }
 
@@ -136,10 +149,20 @@ public partial class AgendaBookingResponse : ObservableObject
     [JsonIgnore] public string? CancellationReason => Details?.CancellationReason;
     [JsonIgnore] public bool HasCancellationReason => !string.IsNullOrWhiteSpace(CancellationReason);
 
-    [JsonIgnore] public string OperatorName => Operator?.DisplayName ?? "Any available";
-    [JsonIgnore] public string ServiceName => Service?.Name ?? "";
-    [JsonIgnore] public int ServiceMinutes => Service?.EstMinutes ?? (int)(EndsAt - StartsAt).TotalMinutes;
-    [JsonIgnore] public int? PriceCents => Service?.PriceCents;
+    [JsonIgnore]
+    public string OperatorName =>
+        TextFormat.FirstNonBlank(OperatorNameColumn, Operator?.DisplayName)
+        ?? VisitSnapshotDefaults.BookingOperatorName;
+
+    [JsonIgnore]
+    public string ServiceName =>
+        TextFormat.FirstNonBlank(ServiceNameColumn, Service?.Name) ?? "";
+
+    [JsonIgnore]
+    public int ServiceMinutes =>
+        ServiceEstMinutesColumn ?? Service?.EstMinutes ?? (int)(EndsAt - StartsAt).TotalMinutes;
+
+    [JsonIgnore] public int? PriceCents => ServicePriceCentsColumn ?? Service?.PriceCents;
     [JsonIgnore] public string PriceText => MoneyFormat.Format(PriceCents);
 
     [JsonIgnore]

@@ -32,7 +32,10 @@ public interface IBookingApi
     [Post("/rpc/set_booking_progress")]
     Task<BookingResponse> SetBookingProgressAsync([Body] SetBookingProgressRequest request);
 
-    [Get("/bookings?select=id,starts_at,ends_at,status,operator:operators(display_name),service:services(name,price_cents),progress_status&order=created_at.desc&limit=5")]
+    // `*` rather than a column list, same reasoning as GetAgendaBookingsAsync below: the historic
+    // snapshot columns aren't on every schema this runs against yet, and naming a column PostgREST
+    // can't find fails the whole query with a 400.
+    [Get("/bookings?select=*,operator:operators(display_name),service:services(name,price_cents)&order=created_at.desc&limit=5")]
     Task<List<MyBookingSummaryResponse>> GetMyBookingsAsync(
         [AliasAs("business_id")] string businessId,
         [AliasAs("customer_id")] string customerId);
@@ -66,10 +69,13 @@ public interface IBookingApi
     [Post("/bookings")]
     Task<List<AgendaBookingResponse>> CreateBookingRowAsync([Body] CreateOperatorBookingRequest request);
 
-    [Get("/bookings?select=id,starts_at,ends_at,status,created_at,awaiting_collection_at,collected_at,business:businesses(id,name,category,allow_operator_choice),operator:operators(display_name),service:services(name,price_cents),progress_status,note,details&status=in.(pending,confirmed,awaiting_collection)&order=starts_at.asc")]
+    // Both were explicit column lists until the historic snapshot landed. `*` for the same reason
+    // the agenda reads use it — a snapshot column PostgREST can't find fails the whole query with a
+    // 400 — and it means History picks the columns up by itself the moment the migration runs.
+    [Get("/bookings?select=*,business:businesses(id,name,category,allow_operator_choice),operator:operators(display_name),service:services(name,price_cents)&status=in.(pending,confirmed,awaiting_collection)&order=starts_at.asc")]
     Task<List<UpcomingBookingResponse>> GetMyUpcomingBookingsAsync([AliasAs("customer_id")] string customerId);
 
-    [Get("/bookings?select=id,starts_at,ends_at,status,created_at,business:businesses(id,name,category,allow_operator_choice),operator:operators(display_name),service:services(name,price_cents),note,details&order=starts_at.desc")]
+    [Get("/bookings?select=*,business:businesses(id,name,category,allow_operator_choice),operator:operators(display_name),service:services(name,price_cents)&order=starts_at.desc")]
     Task<List<UpcomingBookingResponse>> GetMyBookingHistoryAsync([AliasAs("customer_id")] string customerId);
 
     // `*` rather than a column list on purpose, same reasoning as GetAgendaBookingsAsync above:

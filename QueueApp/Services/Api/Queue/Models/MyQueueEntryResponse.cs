@@ -31,6 +31,19 @@ public class MyQueueEntryResponse
     // Documentation/service-intake-fields-backend-requirements.md.
     [JsonPropertyName("intake_responses")] public Dictionary<string, IntakeAnswer>? IntakeResponses { get; set; }
 
+    // What the service and the operator were called, and what the service cost, stamped onto the
+    // row when it reached a state it can never leave — done, cancelled or no-show. An entry still
+    // waiting or serving carries none of this and resolves live off the embeds below, which is
+    // right: current configuration genuinely applies to a visit that hasn't happened yet. So the
+    // null-coalescing chain below is the whole rule — snapshot if the row is settled, live if it
+    // isn't. Selected via `*`, so they stay null and harmless until the columns exist.
+    // TODO: stub — queue_entries.service_name / service_price_cents / operator_name; see
+    // Documentation/historic-snapshot-backend-requirements.md. service_est_minutes is written by
+    // the same trigger but nothing customer-facing shows an estimate, so it isn't bound here.
+    [JsonPropertyName("service_name")] public string? ServiceNameColumn { get; set; }
+    [JsonPropertyName("service_price_cents")] public int? ServicePriceCentsColumn { get; set; }
+    [JsonPropertyName("operator_name")] public string? OperatorNameColumn { get; set; }
+
     [JsonPropertyName("business")] public VisitBusinessRef? Business { get; set; }
     [JsonPropertyName("operator")] public VisitOperatorRef? Operator { get; set; }
     [JsonPropertyName("service")] public VisitServiceRef? Service { get; set; }
@@ -40,11 +53,21 @@ public class MyQueueEntryResponse
     [JsonIgnore] public string Category => Business?.Category ?? "other";
     // "Any available" was the wording of a choice the customer made. join_queue assigns at join
     // time now, so a queue entry with no operator isn't a preference — it's a shop that had nobody
-    // on shift when this person walked in.
-    [JsonIgnore] public bool HasOperator => OperatorId is not null;
-    [JsonIgnore] public string OperatorName => Operator?.DisplayName ?? "Next available";
-    [JsonIgnore] public string ServiceName => Service?.Name ?? string.Empty;
-    [JsonIgnore] public int? PriceCents => Service?.PriceCents;
+    // on shift when this person walked in. A deleted operator nulls the FK but leaves the snapshot,
+    // and that entry did have somebody.
+    [JsonIgnore]
+    public bool HasOperator => OperatorId is not null || !string.IsNullOrWhiteSpace(OperatorNameColumn);
+
+    [JsonIgnore]
+    public string OperatorName =>
+        TextFormat.FirstNonBlank(OperatorNameColumn, Operator?.DisplayName)
+        ?? VisitSnapshotDefaults.QueueOperatorName;
+
+    [JsonIgnore]
+    public string ServiceName =>
+        TextFormat.FirstNonBlank(ServiceNameColumn, Service?.Name) ?? string.Empty;
+
+    [JsonIgnore] public int? PriceCents => ServicePriceCentsColumn ?? Service?.PriceCents;
 
     [JsonIgnore] public bool IsWaiting => Status == QueueEntryStatuses.Waiting;
     [JsonIgnore] public bool IsBeingServed => Status == QueueEntryStatuses.Serving;
