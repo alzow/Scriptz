@@ -10,18 +10,13 @@ namespace QueueApp.Features.QueueSplash;
 
 public class QueueSplashPageViewModel : BaseViewModel
 {
-    #region Properties
     public bool BypassWelcome { get; set; }
-    #endregion
 
-    #region Services
     private readonly INavigationService _navigationService;
     private readonly IAuthService _authService;
     private readonly IBusinessService _businessService;
     private readonly IFirstRunService _firstRunService;
-    #endregion
 
-    #region Constructor
     public QueueSplashPageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
@@ -35,9 +30,7 @@ public class QueueSplashPageViewModel : BaseViewModel
         _businessService = businessService;
         _firstRunService = firstRunService;
     }
-    #endregion
 
-    #region Lifecycle
     public override void Initialize(INavigationParameters parameters)
     {
         base.Initialize(parameters);
@@ -52,7 +45,6 @@ public class QueueSplashPageViewModel : BaseViewModel
         await base.OnAppearingAsync();
         await SplashOrchestration();
     }
-    #endregion
 
     public async Task SplashOrchestration()
     {

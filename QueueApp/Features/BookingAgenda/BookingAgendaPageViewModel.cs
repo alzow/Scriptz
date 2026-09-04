@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using MPowerKit;
 using MPowerKit.Navigation;
 using QueueApp.Constants;
+using QueueApp.Features.BookingAgenda.Helpers;
 using QueueApp.Features.BookingAgenda.Models;
 using QueueApp.Features.BookingAgenda.Sheets;
 using QueueApp.Shared.Domain;
@@ -337,7 +338,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
             {
                 var age = DateTimeOffset.UtcNow - pending.Min(b => b.CreatedAt);
                 IsRequestsUrgent = age > TimeSpan.FromMinutes(AgendaConstants.RequestUrgentMinutes);
-                RequestsAgeText = $"oldest asked {DescribeAge(age)} ago";
+                RequestsAgeText = $"oldest asked {BookingAgendaHelper.DescribeAge(age)} ago";
             }
             else
             {
@@ -1061,18 +1062,6 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
         {
             await HandleExceptionAsync(ex);
         }
-    }
-
-    public static string DescribeAge(TimeSpan age)
-    {
-        if (age.TotalMinutes < 60)
-            return $"{Math.Max(1, (int)age.TotalMinutes)} min";
-
-        if (age.TotalHours < 24)
-            return (int)age.TotalHours == 1 ? "1 hr" : $"{(int)age.TotalHours} hrs";
-
-        var days = (int)age.TotalDays;
-        return days == 1 ? "1 day" : $"{days} days";
     }
 
     // Called from inside every catch block on this page, so it is the one method that must never

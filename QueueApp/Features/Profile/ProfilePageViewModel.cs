@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.Input;
 using MPowerKit.Navigation.Interfaces;
+using QueueApp.Features.Profile.Helpers;
 using QueueApp.Shared.Domain;
 using QueueApp.Constants;
 using QueueApp.Features.Profile.Sheets;
@@ -141,8 +142,8 @@ public partial class ProfilePageViewModel : BaseViewModel
             OwnsBusiness = true;
             BusinessName = business.Name;
             BusinessDetail = string.IsNullOrWhiteSpace(business.Suburb)
-                ? CategoryLabel(business.Category)
-                : $"{CategoryLabel(business.Category)} · {business.Suburb}";
+                ? ProfileHelper.CategoryLabel(business.Category)
+                : $"{ProfileHelper.CategoryLabel(business.Category)} · {business.Suburb}";
         }
         catch (Exception)
         {
@@ -307,9 +308,4 @@ public partial class ProfilePageViewModel : BaseViewModel
             await HandleExceptionAsync(ex);
         }
     }
-
-    public static string CategoryLabel(string category) =>
-        string.IsNullOrWhiteSpace(category)
-            ? "Business"
-            : char.ToUpperInvariant(category[0]) + category[1..];
 }

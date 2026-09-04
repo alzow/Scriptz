@@ -26,7 +26,6 @@ public abstract class BaseViewModel : ObservableObject,
         SecureStorageService = secureStorageService;
     }
 
-    #region INavigationAware
     public virtual void OnNavigatedTo(INavigationParameters parameters)
     {
     }
@@ -34,29 +33,21 @@ public abstract class BaseViewModel : ObservableObject,
     public virtual void OnNavigatedFrom(INavigationParameters parameters)
     {
     }
-    #endregion
 
-    #region IInitializeAware
     public virtual void Initialize(INavigationParameters parameters)
     {
     }
-    #endregion
 
-    #region IInitializeAsyncAware
     public virtual Task InitializeAsync(INavigationParameters parameters)
     {
         return Task.CompletedTask;
     }
-    #endregion
 
-    #region ILoadedAsyncAware
     public virtual Task OnLoadedAsync(INavigationParameters parameters)
     {
         return Task.CompletedTask;
     }
-    #endregion
 
-    #region IPageLifecycleAware
     public void OnAppearing()
     {
         _ = SafeFireAndForgetAsync(OnAppearingAsync);
@@ -85,7 +76,6 @@ public abstract class BaseViewModel : ObservableObject,
             await HandleExceptionAsync(ex);
         }
     }
-    #endregion
 
     protected virtual Task HandleExceptionAsync(Exception exception)
     {

@@ -12,7 +12,6 @@ namespace QueueApp.Features.Welcome;
 
 public partial class WelcomePageViewModel : BaseViewModel
 {
-    #region Constants
     private const string Brand = "Queue";
 
     private const string PrimaryCta = "Create an account";
@@ -42,9 +41,7 @@ public partial class WelcomePageViewModel : BaseViewModel
     private const string LeaveArt = "art_welcome_leave.png";
 
     private const double AutoAdvanceSeconds = 5;
-    #endregion
 
-    #region Properties
     public ObservableCollection<WelcomePanel> Panels { get; } = new();
 
     public string BrandText => Brand;
@@ -59,20 +56,14 @@ public partial class WelcomePageViewModel : BaseViewModel
     public string FootnoteText => Footnote;
 
     public int Position { get; set; }
-    #endregion
 
-    #region Fields
     private IDispatcherTimer? _autoAdvanceTimer;
     private bool _isSelfAdvancing;
     private bool _isAutoAdvanceRetired;
-    #endregion
 
-    #region Services
     private readonly IFirstRunService _firstRunService;
     private readonly IMotionPreferenceService _motionPreferenceService;
-    #endregion
 
-    #region Constructor
     public WelcomePageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
@@ -85,9 +76,7 @@ public partial class WelcomePageViewModel : BaseViewModel
 
         BuildPanels();
     }
-    #endregion
 
-    #region Lifecycle
     public override Task OnAppearingAsync()
     {
         try
@@ -116,7 +105,6 @@ public partial class WelcomePageViewModel : BaseViewModel
 
         return Task.CompletedTask;
     }
-    #endregion
 
     public void BuildPanels()
     {

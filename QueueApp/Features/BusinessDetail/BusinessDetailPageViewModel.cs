@@ -30,7 +30,6 @@ namespace QueueApp.Features.BusinessDetail;
 
 public partial class BusinessDetailPageViewModel : BaseViewModel
 {
-    #region Properties and fields
     private readonly SemaphoreSlim _loadLock = new(1, 1);
     private Guid _businessId;
     private bool _openedFromTabs;
@@ -129,8 +128,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             WaitMinutes = MyWaitMinutes,
             ProgressStatus = MyStatus.ProgressStatus,
         };
-    #endregion
-    #region Services
     private readonly IBusinessService _businessService;
     private readonly IQueueService _queueService;
     private readonly IOperatorService _operatorService;
@@ -141,8 +138,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     private readonly IQueueRealtimeService _realtimeService;
     private readonly IQueuePopupService _popupService;
     private readonly ILocationService _locationService;
-    #endregion
-    #region Constructor
     public BusinessDetailPageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
@@ -169,8 +164,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         _popupService = popupService;
         _locationService = locationService;
     }
-    #endregion
-    #region Lifecycle
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
         try
@@ -306,9 +299,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         }
     }
 
-    #endregion
-    #region Rest of functions
-
     [RelayCommand]
     public async Task StartFlowAsync()
     {
@@ -357,7 +347,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             await HandleExceptionAsync(ex);
         }
     }
-
 
     // Base HandleExceptionAsync only logs — surface real failures to the customer instead, most
     // notably a pooled join/booking race ("all resources are currently busy", "that time was
@@ -725,5 +714,4 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             await HandleExceptionAsync(ex);
         }
     }
-    #endregion
 }

@@ -27,6 +27,9 @@ public static class TextFormat
         _ => $"{value}th",
     };
 
+    public static string Plural(int count, string noun) =>
+        $"{count} {noun}{(count == 1 ? string.Empty : "s")}";
+
     public static string Join(string first, string second) =>
         second.Length == 0 ? first : $"{first} · {second}";
 }

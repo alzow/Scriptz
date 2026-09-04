@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.Input;
 using QueueApp.Constants;
+using QueueApp.Features.Auth.Constants;
+using QueueApp.Features.Auth.Helpers;
 using QueueApp.Framework.Base;
 using QueueApp.Framework.Navigation;
 using QueueApp.Services.Api.Business;
@@ -13,27 +15,15 @@ namespace QueueApp.Features.Auth;
 
 public partial class LoginPageViewModel : BaseViewModel
 {
-    #region Constants
-    private const string InvalidCredentialsMessage = "That email and password don't match an account.";
-    private const string EmailNotConfirmedMessage = "Confirm your email address first — check your inbox for the link.";
-    private const string RateLimitedMessage = "Too many attempts. Wait a minute and try again.";
-    private const string OfflineMessage = "No connection. Check your internet and try again.";
-    private const string GenericFailureMessage = "Couldn't sign you in. Please try again.";
-
-    private const string Heading = "Welcome back";
-    private const string Lead = "Pick up where you left off.";
-    #endregion
-
-    #region Properties
-    public string HeadingText => Heading;
-    public string LeadText => Lead;
+    public string HeadingText => AuthConstants.SignInHeading;
+    public string LeadText => AuthConstants.SignInLead;
 
     public bool CanGoBack { get; set; }
 
     public ISharedStateManager FormStateManager { get; } = new FormValidators.SharedStateManager();
 
-    public IValidator EmailValidator { get; } = new FormValidators.EmailValidator("Enter a valid email address.");
-    public IValidator PasswordValidator { get; } = new FormValidators.RequiredValidator("Enter your password.");
+    public IValidator EmailValidator { get; } = new FormValidators.EmailValidator(AuthConstants.InvalidEmailValidation);
+    public IValidator PasswordValidator { get; } = new FormValidators.RequiredValidator(AuthConstants.MissingPasswordValidation);
 
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
@@ -43,14 +33,10 @@ public partial class LoginPageViewModel : BaseViewModel
     public bool IsSigningIn { get; set; }
 
     public bool CanSubmit => IsFormValid;
-    #endregion
 
-    #region Services
     private readonly IAuthService _authService;
     private readonly IBusinessService _businessService;
-    #endregion
 
-    #region Constructor
     public LoginPageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
@@ -64,9 +50,7 @@ public partial class LoginPageViewModel : BaseViewModel
         FormStateManager.ValidationStateChanged += OnFormValidationStateChanged;
         IsFormValid = FormStateManager.IsValid;
     }
-    #endregion
 
-    #region Lifecycle
     public override void Initialize(INavigationParameters parameters)
     {
         base.Initialize(parameters);
@@ -75,7 +59,6 @@ public partial class LoginPageViewModel : BaseViewModel
             && parameters.TryGetValue(NavigationKeys.CanGoBack, out var canGoBack)
             && canGoBack is true;
     }
-    #endregion
 
     public void OnFormValidationStateChanged(bool isValid) => IsFormValid = isValid;
 
@@ -118,15 +101,15 @@ public partial class LoginPageViewModel : BaseViewModel
         }
         catch (ApiException exception)
         {
-            ErrorMessage = TranslateSignInError(exception);
+            ErrorMessage = AuthHelper.TranslateSignInError(exception);
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
         {
-            ErrorMessage = OfflineMessage;
+            ErrorMessage = AuthConstants.OfflineMessage;
         }
         catch (Exception exception)
         {
-            ErrorMessage = GenericFailureMessage;
+            ErrorMessage = AuthConstants.SignInFailureMessage;
             await HandleExceptionAsync(exception);
         }
         finally
@@ -146,25 +129,5 @@ public partial class LoginPageViewModel : BaseViewModel
         {
             await HandleExceptionAsync(exception);
         }
-    }
-
-    public static string TranslateSignInError(ApiException exception)
-    {
-        var body = exception.Content ?? string.Empty;
-
-        if (body.Contains("Email not confirmed", StringComparison.OrdinalIgnoreCase)
-            || body.Contains("email_not_confirmed", StringComparison.OrdinalIgnoreCase))
-            return EmailNotConfirmedMessage;
-
-        if (body.Contains("Invalid login credentials", StringComparison.OrdinalIgnoreCase)
-            || body.Contains("invalid_credentials", StringComparison.OrdinalIgnoreCase)
-            || exception.StatusCode == System.Net.HttpStatusCode.BadRequest)
-            return InvalidCredentialsMessage;
-
-        if (body.Contains("rate limit", StringComparison.OrdinalIgnoreCase)
-            || exception.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-            return RateLimitedMessage;
-
-        return GenericFailureMessage;
     }
 }

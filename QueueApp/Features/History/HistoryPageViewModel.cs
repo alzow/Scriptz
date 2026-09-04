@@ -8,6 +8,7 @@ using MPowerKit.Navigation.Interfaces;
 using QueueApp.Constants;
 using QueueApp.Framework.Base;
 using QueueApp.Framework.Messages;
+using QueueApp.Features.History.Helpers;
 using QueueApp.Features.History.Models;
 using QueueApp.Services.Api.Booking;
 using QueueApp.Services.Api.Booking.Models;
@@ -155,7 +156,7 @@ public partial class HistoryPageViewModel : BaseViewModel
             Groups.Clear();
             if (upcoming.Count > 0)
                 Groups.Add(new HistoryGroup("UPCOMING", upcoming));
-            foreach (var group in BucketByDate(past))
+            foreach (var group in HistoryHelper.BucketByDate(past))
                 Groups.Add(group);
 
             OnPropertyChanged(nameof(IsEmpty));
@@ -164,24 +165,6 @@ public partial class HistoryPageViewModel : BaseViewModel
         {
             _ = HandleExceptionAsync(ex);
         }
-    }
-
-    public static IEnumerable<HistoryGroup> BucketByDate(List<HistoryRow> rows)
-    {
-        var today = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(2)).Date;
-        var weekStart = today.AddDays(-6);
-
-        return rows
-            .GroupBy(r => BucketKey(r.OccurredAt.ToOffset(TimeSpan.FromHours(2)).Date, today, weekStart))
-            .Select(g => new HistoryGroup(g.Key, g));
-    }
-
-    public static string BucketKey(DateTime date, DateTime today, DateTime weekStart)
-    {
-        if (date == today) return "TODAY";
-        if (date == today.AddDays(-1)) return "YESTERDAY";
-        if (date >= weekStart) return "THIS WEEK";
-        return date.ToString("MMMM").ToUpperInvariant();
     }
 
     [RelayCommand]
