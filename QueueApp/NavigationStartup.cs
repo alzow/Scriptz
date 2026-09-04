@@ -56,7 +56,6 @@ internal static class NavigationStartup
 
         foreach (var pageType in pageTypes)
         {
-            // Try exact match first (PageViewModel), then strip "Page" suffix (ViewModel)
             var viewModelType =
                 assembly.GetType($"{pageType.FullName}ViewModel") ??
                 assembly.GetType($"{pageType.FullName!.Replace("Page", "")}ViewModel");

@@ -5,7 +5,6 @@ namespace QueueApp.Services.Api.Queue;
 
 public interface IQueueApi
 {
-    // Engine RPC calls
     [Post("/rpc/join_queue")]
     Task<QueueEntryResponse> JoinQueueAsync([Body] JoinQueueRequest request);
 
@@ -35,7 +34,6 @@ public interface IQueueApi
     [Post("/rpc/set_queue_progress")]
     Task<QueueEntryResponse> SetQueueProgressAsync([Body] SetProgressRequest request);
 
-    // Reads (PostgREST filter syntax, e.g. "eq.<guid>")
     [Get("/queue_entries")]
     Task<List<QueueEntryResponse>> GetActiveEntriesAsync(
         [AliasAs("business_id")] string businessIdEq,

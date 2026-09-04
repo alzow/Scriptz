@@ -29,7 +29,6 @@
             <Label Grid.Column="1" Text="{Binding RailCountText, Source={x:Reference Root}}" Style="{StaticResource lbl11_Mono_TextFaint}"/>
         </Grid>
 
-        <!-- Crumbs: completed steps, tappable to jump back -->
         <CollectionView ItemsSource="{Binding Crumbs, Source={x:Reference Root}}" HeightRequest="40"
                         IsVisible="{Binding HasCrumbs, Source={x:Reference Root}}" Margin="20,10,20,0">
             <CollectionView.ItemsLayout>

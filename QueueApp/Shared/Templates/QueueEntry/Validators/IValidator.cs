@@ -19,6 +19,5 @@ public interface IValidator
 
     void SetErrorState(bool isValid, string errorMessage)
     {
-        //default implementation
     }
 }

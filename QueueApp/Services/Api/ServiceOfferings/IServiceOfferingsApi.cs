@@ -5,7 +5,6 @@ namespace QueueApp.Services.Api.ServiceOfferings;
 
 public interface IServiceOfferingsApi
 {
-    // Reads (PostgREST filter syntax, e.g. "eq.<guid>")
     [Get("/services?select=*&order=sort_order.asc")]
     Task<List<ServiceResponse>> GetServicesAsync([AliasAs("business_id")] string businessIdEq);
 

@@ -5,7 +5,6 @@ namespace QueueApp.Services.Api.Operator;
 
 public interface IOperatorApi
 {
-    // Reads (PostgREST filter syntax, e.g. "eq.<guid>")
     // Filtered to active operators only — deactivated staff must not appear as a chair on the live queue.
     [Get("/operators")]
     Task<List<OperatorResponse>> GetOperatorsAsync(

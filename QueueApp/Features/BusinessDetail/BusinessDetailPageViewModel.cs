@@ -54,7 +54,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     public bool HasSomethingActive => IsInQueue || _activeBooking is not null;
     public string ActiveStripText => IsInQueue ? "You're in the queue" : "Your booking is with the shop";
 
-    // Landing — header
     public string BusinessName => Business?.Name ?? string.Empty;
     public string AddressLine => Business?.Address ?? Business?.Suburb ?? string.Empty;
     public bool IsOpen { get; set; }
@@ -72,7 +71,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         }
     }
 
-    // Landing — live card
     public string PrimaryStatValue { get; set; } = "—";
     public string PrimaryStatLabel { get; set; } = "Now serving";
     public string SecondaryStatValue { get; set; } = "—";
@@ -86,7 +84,6 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     public string CtaText { get; set; } = string.Empty;
     public bool IsCtaEnabled { get; set; }
 
-    // Landing — services, team, getting there
     public ObservableCollection<ServiceChoiceItem> ServiceRows { get; } = new();
     public bool HasServices => ServiceRows.Count > 0;
     public string ServicesCountText => ServiceRows.Count > 0 ? $"All {ServiceRows.Count}" : string.Empty;
@@ -102,10 +99,8 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     public string DistanceText { get; set; } = string.Empty;
     public bool HasDistance => !string.IsNullOrEmpty(DistanceText);
 
-    // Flow chrome
     public ObservableCollection<QueueSummaryRow> QueueSummary { get; } = new();
 
-    // Queue confirmation
     public MyQueueStatusResponse? MyStatus { get; set; }
     public decimal? MyWaitMinutes { get; set; }
     public bool IsInQueue => MyStatus is not null;
