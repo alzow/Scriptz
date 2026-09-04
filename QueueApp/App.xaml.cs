@@ -2,6 +2,7 @@ using QueueApp.Constants;
 using QueueApp.Features.Auth;
 using QueueApp.Features.QueueSplash;
 using QueueApp.Features.Welcome;
+using QueueApp.Framework.Base;
 using QueueApp.Framework.Theming;
 using QueueApp.Services.Auth;
 
@@ -71,15 +72,55 @@ public partial class App : Application
         });
     }
 
+    // A background/foreground cycle never raises native Page.Appearing/Disappearing — the page
+    // that was on screen when the OS suspended the app is still "appeared" the whole time it was
+    // away, so nothing re-subscribes realtime or reloads what changed while it wasn't looking.
+    // Driving the same OnDisappearing/OnAppearing pair every screen already uses for a tab switch
+    // or a modal push closes that gap: the visible screen tears its feed down going to sleep and
+    // reloads coming back, exactly as if it had been navigated away from and back.
+    protected override void OnSleep()
+    {
+        base.OnSleep();
+
+        if (CurrentPage()?.BindingContext is BaseViewModel viewModel)
+            viewModel.OnDisappearing();
+    }
+
+    protected override void OnResume()
+    {
+        System.Diagnostics.Debug.WriteLine("[App] OnResume called");
+        base.OnResume();
+
+        if (CurrentPage()?.BindingContext is BaseViewModel viewModel)
+            viewModel.OnAppearing();
+    }
+
     private static Page? CurrentPage()
     {
-        var root = Current?.Windows.FirstOrDefault()?.Page;
+        var window = Current?.Windows.FirstOrDefault();
+        if (window is null)
+            return null;
 
-        return root switch
+        var page = window.Navigation.ModalStack.Count > 0
+            ? window.Navigation.ModalStack[^1]
+            : window.Page;
+
+        while (page is not null)
         {
-            NavigationPage navigation => navigation.CurrentPage ?? navigation,
-            TabbedPage tabbed => tabbed.CurrentPage ?? tabbed,
-            _ => root
-        };
+            var inner = page switch
+            {
+                NavigationPage navigation => navigation.CurrentPage,
+                TabbedPage tabbed => tabbed.CurrentPage,
+                Shell shell => shell.CurrentPage,
+                _ => null
+            };
+
+            if (inner is null || ReferenceEquals(inner, page))
+                break;
+
+            page = inner;
+        }
+
+        return page;
     }
 }
