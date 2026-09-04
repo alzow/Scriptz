@@ -15,17 +15,33 @@ public readonly record struct FlowCopyContext(
 
 public static class FlowCopy
 {
-    public static string FlowTitle(bool isOperatorFlow, bool isBookingMode) => isOperatorFlow
-        ? FlowConstants.OperatorFlowTitle
-        : isBookingMode ? FlowConstants.BookingFlowTitle : FlowConstants.QueueFlowTitle;
+    public static string FlowTitle(bool isOperatorFlow, bool isBookingMode) => (isOperatorFlow, isBookingMode) switch
+    {
+        (true, true) => FlowConstants.OperatorBookingFlowTitle,
+        (true, false) => FlowConstants.OperatorQueueFlowTitle,
+        (false, true) => FlowConstants.BookingFlowTitle,
+        (false, false) => FlowConstants.QueueFlowTitle,
+    };
 
     public static string NoteLabel(bool isOperatorFlow) => isOperatorFlow
         ? FlowConstants.OperatorNoteLabel
         : FlowConstants.CustomerNoteLabel;
 
-    public static string SubmitCta(bool isOperatorFlow, bool isBookingMode) => isOperatorFlow
-        ? FlowConstants.OperatorSubmitCta
-        : isBookingMode ? FlowConstants.BookingSubmitCta : FlowConstants.QueueSubmitCta;
+    public static string SubmitCta(bool isOperatorFlow, bool isBookingMode) => (isOperatorFlow, isBookingMode) switch
+    {
+        (true, true) => FlowConstants.OperatorBookingSubmitCta,
+        (true, false) => FlowConstants.OperatorQueueSubmitCta,
+        (false, true) => FlowConstants.BookingSubmitCta,
+        (false, false) => FlowConstants.QueueSubmitCta,
+    };
+
+    public static string ReviewPositionLabel(bool isOperatorFlow) => isOperatorFlow
+        ? FlowConstants.OperatorPositionLabel
+        : FlowConstants.CustomerPositionLabel;
+
+    public static string ReviewTurnLabel(bool isOperatorFlow) => isOperatorFlow
+        ? FlowConstants.OperatorTurnLabel
+        : FlowConstants.CustomerTurnLabel;
 
     public static string StepHeading(FlowStep step, in FlowCopyContext context) => step switch
     {
@@ -141,7 +157,11 @@ public static class FlowCopy
     private static string ReviewSubheading(in FlowCopyContext context)
     {
         if (context.IsOperatorFlow)
-            return "Added by you, so it's confirmed straight away. No account means no reminder — take a number if you want to call them.";
+        {
+            return context.IsBookingMode
+                ? "Added by you, so it's confirmed straight away. No account means no reminder — take a number if you want to call them."
+                : "Added by you, so they're in the line straight away. A name is optional — without one the board shows a walk-in.";
+        }
 
         return context.IsBookingMode
             ? $"{context.Labels.VenueCapitalised} confirms this before it's final. You can cancel any time."

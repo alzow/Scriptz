@@ -72,6 +72,23 @@ public sealed class FlowSubmissionCoordinator
         return new FlowSubmissionResult(booking?.Id ?? Guid.Empty, IsBooking: true);
     }
 
+    // The shop's own queue entry goes through join_queue exactly as a customer's does, so it picks
+    // up the duplicate guard, the pooled resolution of a null operator id and the intake validation
+    // rather than a second insert path that would have to be kept level with all three. What it
+    // leaves out is p_customer_id: there is no account behind the person at the counter, and the
+    // name is optional — an unnamed entry reads as a walk-in on the board.
+    public async Task<FlowSubmissionResult> SubmitOperatorJoinAsync(FlowSubmissionRequest request)
+    {
+        var entry = await _queueService.JoinQueueAsOperatorAsync(
+            request.BusinessId,
+            request.OperatorId,
+            string.IsNullOrWhiteSpace(request.CustomerName) ? null : request.CustomerName.Trim(),
+            request.ServiceId,
+            request.IntakeResponses);
+
+        return new FlowSubmissionResult(entry.Id, IsBooking: false);
+    }
+
     public async Task<FlowSubmissionResult> SubmitBookingAsync(FlowSubmissionRequest request)
     {
         var customerId = await RequireUserIdAsync();

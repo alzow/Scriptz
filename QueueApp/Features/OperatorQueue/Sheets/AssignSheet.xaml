@@ -84,14 +84,6 @@
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
 
-                <BoxView HeightRequest="1" Style="{StaticResource bx_Divider}" Margin="0,16,0,4"
-                         IsVisible="{Binding ShowNoShow, Source={x:Reference Root}}"/>
-
-                <Button Text="Mark no-show" Margin="0,9,0,0"
-                        Style="{StaticResource btn15_Regular_SheetBad}"
-                        IsVisible="{Binding ShowNoShow, Source={x:Reference Root}}"
-                        Clicked="OnNoShowClicked"/>
-
             </VerticalStackLayout>
         </ScrollView>
     </Border>

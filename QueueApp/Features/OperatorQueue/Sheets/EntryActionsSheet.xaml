@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <bottomsheet:BottomSheetPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                         xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                        xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
+                        xmlns:entry="clr-namespace:QueueApp.Shared.Templates.QueueEntry"
                         xmlns:sheets="clr-namespace:QueueApp.Features.OperatorQueue.Sheets"
                         xmlns:bottomsheet="clr-namespace:QueueApp.Shared.Templates.BottomSheet"
                         x:Name="Root"
@@ -35,23 +37,44 @@
 
             <BoxView HeightRequest="1" Style="{StaticResource bx_Divider}" Margin="0,0,0,14"/>
 
-            <!-- Above the actions on purpose: leaving word for someone who is still waiting is the
-                 quiet thing the shop reaches for most, and every row below it moves them somewhere. -->
+            <!-- Content, not an action: opening the answers changes nothing about the entry, so it
+                 sits above the stack that does and says what is there rather than naming a verb.
+                 Absent when the service asked nothing, which is most of them. -->
+            <Border Style="{StaticResource brd14_PurpleTint}"
+                    Padding="13,11" Margin="0,0,0,14" MinimumHeightRequest="58"
+                    IsVisible="{Binding HasAnswers, Source={x:Reference Root}}">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                    <tpl:ThemedIcon Grid.Column="0" Icon="ic_eye" WidthRequest="16" HeightRequest="16"
+                                    VerticalOptions="Center"/>
+                    <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                        <Label Text="{Binding AnswersSummaryText, Source={x:Reference Root}}"
+                               Style="{StaticResource lbl15_Bold_Purple}"/>
+                        <Label Text="Tap to view"
+                               Style="{StaticResource lbl12_Regular_TextLight}"/>
+                    </VerticalStackLayout>
+                    <tpl:ThemedIcon Grid.Column="2" Icon="ic_chevron_right"
+                                    WidthRequest="16" HeightRequest="16" Opacity="0.65"
+                                    VerticalOptions="Center"/>
+                </Grid>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnViewAnswersTapped"/>
+                </Border.GestureRecognizers>
+            </Border>
+
+            <!-- Also content: leaving word for someone is about the entry rather than a move on it,
+                 and it is the quiet thing the shop reaches for most while the line is long. -->
             <VerticalStackLayout Spacing="0" Margin="0,0,0,4">
                 <Label Text="{Binding NoteHeaderText, Source={x:Reference Root}}"
                        Style="{StaticResource lbl11_Mono_TextMuted}"
                        Margin="0,0,0,8"/>
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                    <Border Grid.Column="0"
-                            Style="{StaticResource brd12_Cream}"
-                            Padding="4,0">
-                        <Entry Text="{Binding NoteText, Source={x:Reference Root}}"
-                               Placeholder="Running 10 min late (optional)"
-                               Style="{StaticResource entry14_Sheet}"/>
-                    </Border>
+                    <entry:QueueEntry Grid.Column="0"
+                                      Text="{Binding NoteText, Source={x:Reference Root}}"
+                                      Placeholder="Running 10 min late (optional)"/>
                     <Button Grid.Column="1"
                             Text="Save"
-                            HeightRequest="52"
+                            HeightRequest="50"
+                            VerticalOptions="Start"
                             Style="{StaticResource btn14_Bold_Neutral}"
                             Clicked="OnSaveNoteClicked"/>
                 </Grid>
@@ -59,20 +82,21 @@
 
             <BoxView HeightRequest="1" Style="{StaticResource bx_Divider}" Margin="0,16,0,4"/>
 
-            <!-- The questions this shop's own service asked. Shown only when the entry carries
-                 answers: most do not — a walk-in added at the counter never has any — and a row
-                 that leads nowhere is worse than no row. -->
-            <Button Text="View answers" Margin="0,9,0,0"
-                    Style="{StaticResource btn15_Regular_SheetRow}"
-                    IsVisible="{Binding HasIntakeAnswers, Source={x:Reference Root}}"
-                    Clicked="OnViewAnswersClicked"/>
-
-            <Button Text="Serve now" Margin="0,9,0,0"
+            <!-- The one thing this entry is for. A waiting entry is never offered the finish: it
+                 would complete with no time served against it. It is not offered the start either
+                 while the resource still has someone in the chair — the move to make there is on
+                 that entry, not this one. -->
+            <Button Text="{Binding PrimaryActionText, Source={x:Reference Root}}" Margin="0,9,0,0"
                     Style="{StaticResource btn15_Bold_SheetGo}"
-                    IsVisible="{Binding CanServe, Source={x:Reference Root}}"
-                    Clicked="OnServeClicked"/>
+                    IsVisible="{Binding CanPrimary, Source={x:Reference Root}}"
+                    Clicked="OnPrimaryClicked"/>
 
-            <Button Text="Move to another barber" Margin="0,9,0,0"
+            <Label Text="Already serving someone — finish that job first."
+                   Style="{StaticResource lbl12_Regular_TextLight}"
+                   Margin="4,12,4,4"
+                   IsVisible="{Binding ShowBusyNote, Source={x:Reference Root}}"/>
+
+            <Button Text="{Binding MoveActionText, Source={x:Reference Root}}" Margin="0,9,0,0"
                     Style="{StaticResource btn15_Regular_SheetRow}"
                     Clicked="OnMoveOperatorClicked"/>
 

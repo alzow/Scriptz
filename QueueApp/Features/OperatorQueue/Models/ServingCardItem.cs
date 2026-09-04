@@ -18,16 +18,13 @@ public sealed class ServingCardItem : ObservableObject
     public string NoteText { get; set; } = string.Empty;
     public bool HasNote { get; set; }
 
-    // The answers the customer gave on the way in, carried onto the row so the operator can open
-    // them without a round trip. Empty whenever the service asked nothing, and for every walk-in
-    // added at the counter — that sheet does not ask the service's questions.
+    // The answers the customer gave on the way in, carried onto the card so the sheet can open them
+    // without a round trip. Empty whenever the service asked nothing.
     public IReadOnlyList<IntakeAnswer> IntakeAnswers { get; init; } = Array.Empty<IntakeAnswer>();
     public bool HasIntakeAnswers => IntakeAnswers.Count > 0;
+    public string IntakeAnswerCountText => IntakeAnswers.Count.ToString();
 
     public string ElapsedText { get; set; } = "00:00";
-
-    public bool IsBusy { get; set; }
-    public bool IsEnabled => !IsBusy;
 
     public void RefreshElapsed()
     {

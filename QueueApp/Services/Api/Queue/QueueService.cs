@@ -17,13 +17,15 @@ public class QueueService : BaseService, IQueueService
     public Task<List<QueueEntryResponse>> GetActiveEntriesAsync(Guid businessId) =>
         ExecuteApiCallAsync(_api.GetActiveEntriesAsync(PostgrestFilter.Eq(businessId)));
 
-    public Task AddWalkInAsync(Guid businessId, Guid? operatorId, string? name, Guid serviceId) =>
+    public Task JoinQueueAsOperatorAsync(Guid businessId, Guid? operatorId, string? customerName, Guid serviceId,
+        Dictionary<string, IntakeAnswer>? intakeResponses = null) =>
         ExecuteApiCallAsync(_api.JoinQueueAsync(new JoinQueueRequest
         {
             BusinessId = businessId,
             OperatorId = operatorId,
-            CustomerName = name,
+            CustomerName = customerName,
             ServiceId = serviceId,
+            IntakeResponses = intakeResponses,
         }));
 
     public Task StartServingAsync(Guid entryId) =>

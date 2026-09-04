@@ -22,6 +22,17 @@ public static class FlowStepEngine
             .OrderBy(o => o.SortOrder)
             .ToList();
 
+    // The board hands over the column that was tapped, which is the answer the Operator step exists
+    // to collect. Narrowing the list rather than dropping the step keeps one rule for when the step
+    // appears — there is more than one answer left to give — so nothing downstream has to learn a
+    // second reason a step can be missing.
+    public static List<OperatorResponse> NarrowToPreselected(
+        IReadOnlyList<OperatorResponse> selectable,
+        Guid? operatorId) =>
+        operatorId is { } wanted && selectable.Any(o => o.Id == wanted)
+            ? selectable.Where(o => o.Id == wanted).ToList()
+            : selectable.ToList();
+
     public static bool ShouldAskForOperator(
         BusinessResponse business,
         IReadOnlyList<OperatorResponse> selectable,
@@ -57,7 +68,9 @@ public static class FlowStepEngine
         if (hasIntakeFields)
             steps.Add(FlowStep.Intake);
 
-        if (business.Mode == BookingMode || isOperatorFlow)
+        // Slots are the business's mode, not the caller's: the shop adding a walk-in to the board
+        // is standing in a queue-mode shop, and there is no day or time to pick.
+        if (business.Mode == BookingMode)
         {
             steps.Add(FlowStep.Day);
             steps.Add(FlowStep.Time);

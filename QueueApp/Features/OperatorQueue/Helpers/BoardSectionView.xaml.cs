@@ -4,61 +4,34 @@ namespace QueueApp.Features.OperatorQueue.Helpers;
 
 public partial class BoardSectionView : ContentView
 {
-    public static readonly BindableProperty EditNoteCommandProperty = BindableProperty.Create(
-        nameof(EditNoteCommand), typeof(ICommand), typeof(BoardSectionView));
+    public static readonly BindableProperty OpenRowSheetCommandProperty = BindableProperty.Create(
+        nameof(OpenRowSheetCommand), typeof(ICommand), typeof(BoardSectionView));
 
-    public static readonly BindableProperty DoneCommandProperty = BindableProperty.Create(
-        nameof(DoneCommand), typeof(ICommand), typeof(BoardSectionView));
+    public static readonly BindableProperty OpenServingSheetCommandProperty = BindableProperty.Create(
+        nameof(OpenServingSheetCommand), typeof(ICommand), typeof(BoardSectionView));
 
-    public static readonly BindableProperty ServeCommandProperty = BindableProperty.Create(
-        nameof(ServeCommand), typeof(ICommand), typeof(BoardSectionView));
-
-    public static readonly BindableProperty OpenRowActionsCommandProperty = BindableProperty.Create(
-        nameof(OpenRowActionsCommand), typeof(ICommand), typeof(BoardSectionView));
-
-    public static readonly BindableProperty ViewAnswersCommandProperty = BindableProperty.Create(
-        nameof(ViewAnswersCommand), typeof(ICommand), typeof(BoardSectionView));
-
-    public static readonly BindableProperty AddWalkInCommandProperty = BindableProperty.Create(
-        nameof(AddWalkInCommand), typeof(ICommand), typeof(BoardSectionView));
+    public static readonly BindableProperty AddToQueueCommandProperty = BindableProperty.Create(
+        nameof(AddToQueueCommand), typeof(ICommand), typeof(BoardSectionView));
 
     public static readonly BindableProperty ToggleShiftCommandProperty = BindableProperty.Create(
         nameof(ToggleShiftCommand), typeof(ICommand), typeof(BoardSectionView));
 
-    public ICommand? EditNoteCommand
+    public ICommand? OpenRowSheetCommand
     {
-        get => (ICommand?)GetValue(EditNoteCommandProperty);
-        set => SetValue(EditNoteCommandProperty, value);
+        get => (ICommand?)GetValue(OpenRowSheetCommandProperty);
+        set => SetValue(OpenRowSheetCommandProperty, value);
     }
 
-    public ICommand? DoneCommand
+    public ICommand? OpenServingSheetCommand
     {
-        get => (ICommand?)GetValue(DoneCommandProperty);
-        set => SetValue(DoneCommandProperty, value);
+        get => (ICommand?)GetValue(OpenServingSheetCommandProperty);
+        set => SetValue(OpenServingSheetCommandProperty, value);
     }
 
-    public ICommand? ServeCommand
+    public ICommand? AddToQueueCommand
     {
-        get => (ICommand?)GetValue(ServeCommandProperty);
-        set => SetValue(ServeCommandProperty, value);
-    }
-
-    public ICommand? OpenRowActionsCommand
-    {
-        get => (ICommand?)GetValue(OpenRowActionsCommandProperty);
-        set => SetValue(OpenRowActionsCommandProperty, value);
-    }
-
-    public ICommand? ViewAnswersCommand
-    {
-        get => (ICommand?)GetValue(ViewAnswersCommandProperty);
-        set => SetValue(ViewAnswersCommandProperty, value);
-    }
-
-    public ICommand? AddWalkInCommand
-    {
-        get => (ICommand?)GetValue(AddWalkInCommandProperty);
-        set => SetValue(AddWalkInCommandProperty, value);
+        get => (ICommand?)GetValue(AddToQueueCommandProperty);
+        set => SetValue(AddToQueueCommandProperty, value);
     }
 
     public ICommand? ToggleShiftCommand

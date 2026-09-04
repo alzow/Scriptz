@@ -26,12 +26,14 @@ public static class FlowConstants
     public const string AnyAvailableSubLabel = "Whoever's free at that time";
     public const string BookingOperatorSubLabel = "Tap to see their times";
 
-    public const string OperatorFlowTitle = "Add a booking";
+    public const string OperatorBookingFlowTitle = "Add a booking";
+    public const string OperatorQueueFlowTitle = "Add to the queue";
     public const string BookingFlowTitle = "Book a slot";
     public const string QueueFlowTitle = "Join the queue";
 
     public const string NextCta = "Next";
-    public const string OperatorSubmitCta = "Add booking";
+    public const string OperatorBookingSubmitCta = "Add booking";
+    public const string OperatorQueueSubmitCta = "Add to queue";
     public const string BookingSubmitCta = "Request booking";
     public const string QueueSubmitCta = "Join queue";
 
@@ -42,8 +44,16 @@ public static class FlowConstants
     public const string NothingSelectedValue = "Nothing yet";
     public const string NothingOutstandingLabel = "Nothing else needed";
     public const string NeedsNameLabel = "Needs a name";
+    // A queue entry with no name on it is a walk-in, which the board already knows how to show —
+    // so the footer names what will happen rather than asking for something optional.
+    public const string UnnamedWalkInLabel = "Adding a walk-in";
     public const string RequestingLabel = "Requesting";
     public const string JoiningLabel = "Joining as";
+
+    public const string CustomerPositionLabel = "You'll be";
+    public const string CustomerTurnLabel = "Your turn about";
+    public const string OperatorPositionLabel = "They'll be";
+    public const string OperatorTurnLabel = "Their turn about";
 
     public const string NoSlotsNote = "none";
     public const string NoSlotsLongEnoughNote = "none — nothing long enough left";

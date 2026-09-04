@@ -32,11 +32,8 @@ public partial class PoolBannerView : ContentView
     public static readonly BindableProperty TogglePoolCommandProperty = BindableProperty.Create(
         nameof(TogglePoolCommand), typeof(ICommand), typeof(PoolBannerView));
 
-    public static readonly BindableProperty AssignCommandProperty = BindableProperty.Create(
-        nameof(AssignCommand), typeof(ICommand), typeof(PoolBannerView));
-
-    public static readonly BindableProperty OpenRowActionsCommandProperty = BindableProperty.Create(
-        nameof(OpenRowActionsCommand), typeof(ICommand), typeof(PoolBannerView));
+    public static readonly BindableProperty OpenRowSheetCommandProperty = BindableProperty.Create(
+        nameof(OpenRowSheetCommand), typeof(ICommand), typeof(PoolBannerView));
 
     public Brush? PoolStroke
     {
@@ -92,16 +89,10 @@ public partial class PoolBannerView : ContentView
         set => SetValue(TogglePoolCommandProperty, value);
     }
 
-    public ICommand? AssignCommand
+    public ICommand? OpenRowSheetCommand
     {
-        get => (ICommand?)GetValue(AssignCommandProperty);
-        set => SetValue(AssignCommandProperty, value);
-    }
-
-    public ICommand? OpenRowActionsCommand
-    {
-        get => (ICommand?)GetValue(OpenRowActionsCommandProperty);
-        set => SetValue(OpenRowActionsCommandProperty, value);
+        get => (ICommand?)GetValue(OpenRowSheetCommandProperty);
+        set => SetValue(OpenRowSheetCommandProperty, value);
     }
 
     public PoolBannerView()

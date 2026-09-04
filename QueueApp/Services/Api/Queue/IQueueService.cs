@@ -6,7 +6,11 @@ namespace QueueApp.Services.Api.Queue;
 public interface IQueueService
 {
     Task<List<QueueEntryResponse>> GetActiveEntriesAsync(Guid businessId);
-    Task AddWalkInAsync(Guid businessId, Guid? operatorId, string? name, Guid serviceId);
+    // The shop writing an entry for someone with no account. Same RPC the customer's own join goes
+    // through — same duplicate guard, same pooled-resolution of a null operator id, same intake
+    // validation — with p_customer_id left off and the name typed in at the counter instead.
+    Task JoinQueueAsOperatorAsync(Guid businessId, Guid? operatorId, string? customerName, Guid serviceId,
+        Dictionary<string, IntakeAnswer>? intakeResponses = null);
     Task StartServingAsync(Guid entryId);
     Task CompleteAsync(Guid entryId);
 

@@ -16,13 +16,12 @@ public partial class AssignSheet : BottomSheetPage
     public string Initials { get; }
     public string SubText { get; }
     public string PromptText { get; }
-    public bool ShowNoShow { get; }
     public ObservableCollection<AssignTargetItem> Targets { get; } = new();
     public ICommand PickCommand { get; }
 
     public Task<AssignSheetResult> Completion => _completion.Task;
 
-    public AssignSheet() : this(null!, string.Empty, string.Empty, string.Empty, string.Empty, false, [])
+    public AssignSheet() : this(null!, string.Empty, string.Empty, string.Empty, string.Empty, [])
     {
     }
 
@@ -32,7 +31,6 @@ public partial class AssignSheet : BottomSheetPage
         string initials,
         string subText,
         string promptText,
-        bool showNoShow,
         IEnumerable<AssignTargetItem> targets)
     {
         _popups = popups;
@@ -40,7 +38,6 @@ public partial class AssignSheet : BottomSheetPage
         Initials = initials;
         SubText = subText;
         PromptText = promptText;
-        ShowNoShow = showNoShow;
 
         foreach (var target in targets)
             Targets.Add(target);
@@ -61,11 +58,8 @@ public partial class AssignSheet : BottomSheetPage
         if (target is null || !target.IsSelectable)
             return;
 
-        Close(new AssignSheetResult(true, target.OperatorId, false));
+        Close(new AssignSheetResult(true, target.OperatorId));
     }
-
-    private void OnNoShowClicked(object? sender, EventArgs e)
-        => Close(new AssignSheetResult(false, null, true));
 
     private void Close(AssignSheetResult result)
     {

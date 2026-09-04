@@ -4,6 +4,7 @@ using QueueApp.Shared.Domain;
 using MPowerKit;
 using MPowerKit.Navigation;
 using QueueApp.Constants;
+using QueueApp.Features.OperatorQueue.Helpers;
 using QueueApp.Features.OperatorQueue.Models;
 using QueueApp.Features.OperatorQueue.Sheets;
 using QueueApp.Framework.Base;
@@ -321,14 +322,12 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                     JoinedAtText = BoardConstants.AsUtc(entry.JoinedAt).ToLocalTime().ToString("HH:mm"),
                     PositionText = (i + 1).ToString(),
                     ShowPosition = true,
-                    ShowServe = i == 0,
                     SubText = QueueRowItem.BuildSubText(
                         ServiceNameOf(entry.ServiceId),
                         MinutesSince(entry.JoinedAt)),
                     NoteText = entry.ProgressStatus ?? string.Empty,
                     HasNote = !string.IsNullOrWhiteSpace(entry.ProgressStatus),
                     IntakeAnswers = IntakeAnswer.Ordered(entry.IntakeResponses),
-                    SectionIsServing = serving is not null,
                 });
             }
 
@@ -360,7 +359,7 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                 ServingAt = entry.ServingAt ?? entry.JoinedAt,
                 EstimateText = service is null ? string.Empty : $"of ~{service.EstMinutes}m",
                 HasEstimate = service is not null,
-                NoteText = string.IsNullOrWhiteSpace(entry.ProgressStatus) ? "Add a note" : entry.ProgressStatus!,
+                NoteText = entry.ProgressStatus ?? string.Empty,
                 HasNote = !string.IsNullOrWhiteSpace(entry.ProgressStatus),
                 IntakeAnswers = IntakeAnswer.Ordered(entry.IntakeResponses),
             };
@@ -400,7 +399,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                     JoinedAt = entry.JoinedAt,
                     JoinedAtText = BoardConstants.AsUtc(entry.JoinedAt).ToLocalTime().ToString("HH:mm"),
                     ShowPosition = false,
-                    ShowAssign = true,
                     SubText = QueueRowItem.BuildSubText(ServiceNameOf(entry.ServiceId), waited),
                     NoteText = entry.ProgressStatus ?? string.Empty,
                     HasNote = !string.IsNullOrWhiteSpace(entry.ProgressStatus),
@@ -453,7 +451,6 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
                     ServiceName = ServiceNameOf(entry.ServiceId),
                     JoinedAt = entry.JoinedAt,
                     ShowPosition = false,
-                    ShowMarkCollected = true,
                     SubText = QueueRowItem.BuildReadySubText(ServiceNameOf(entry.ServiceId), readyMinutes),
                     IntakeAnswers = IntakeAnswer.Ordered(entry.IntakeResponses),
                 });
@@ -610,36 +607,171 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
     }
 
+    // Every move on an entry arrives from the sheet, whichever list the entry was standing in. The
+    // row itself is only information — that is what stops a waiting entry being completed without
+    // ever having been served.
     [RelayCommand]
-    public async Task DoneAsync(ServingCardItem? card)
+    public async Task OpenRowSheetAsync(QueueRowItem? row)
     {
-        if (card is null || card.IsBusy)
-            return;
-
-        card.IsBusy = true;
         try
         {
-            if (RequiresCollection(card.ServiceId))
+            if (row is null)
+                return;
+
+            await OpenEntrySheetAsync(EntrySheetRequest.FromRow(row, CanStartServing(row.OperatorId)));
+        }
+        catch (Exception ex)
+        {
+            await ReloadAfterFailureAsync(ex);
+        }
+    }
+
+    // The person in the chair opens the same sheet as everyone still in the line, so the board has
+    // one interaction model rather than a card that behaves one way and rows that behave another.
+    [RelayCommand]
+    public async Task OpenServingSheetAsync(ServingCardItem? card)
+    {
+        try
+        {
+            if (card is null)
+                return;
+
+            var subText = string.IsNullOrWhiteSpace(card.ServiceText)
+                ? _labels.ServingNowText
+                : $"{card.ServiceText} · {_labels.ServingNowText}";
+
+            await OpenEntrySheetAsync(
+                EntrySheetRequest.FromServingCard(card, subText, _labels.ServingNowText));
+        }
+        catch (Exception ex)
+        {
+            await ReloadAfterFailureAsync(ex);
+        }
+    }
+
+    // A pooled entry is always startable — start_serving resolves the resource itself. An assigned
+    // one waits its turn behind whoever is in that chair.
+    public bool CanStartServing(Guid? operatorId)
+    {
+        try
+        {
+            return operatorId is not { } assigned
+                || !_entries.Any(e => e.OperatorId == assigned && e.Status == "serving");
+        }
+        catch (Exception ex)
+        {
+            _ = HandleExceptionAsync(ex);
+            return false;
+        }
+    }
+
+    public async Task OpenEntrySheetAsync(EntrySheetRequest request)
+    {
+        try
+        {
+            var sheet = new EntryActionsSheet(
+                _popupService,
+                request,
+                RequiresCollection(request.ServiceId),
+                _labels.Noun);
+
+            await _popupService.ShowSheetAsync(sheet);
+            var result = await sheet.Completion;
+
+            switch (result.Action)
             {
-                ApplyLocally(card.EntryId, e => e.Status = QueueEntryStatuses.AwaitingCollection);
-                await _queueService.MarkAwaitingCollectionAsync(card.EntryId);
-            }
-            else
-            {
-                ApplyLocally(card.EntryId, e => e.Status = QueueEntryStatuses.Done);
-                await _queueService.CompleteAsync(card.EntryId);
+                case EntryAction.ServeNow:
+                    await StartServingAsync(request);
+                    break;
+
+                case EntryAction.MarkDone:
+                    await CompleteEntryAsync(request);
+                    break;
+
+                case EntryAction.MoveToAnotherOperator:
+                    await MoveEntryAsync(request);
+                    break;
+
+                case EntryAction.MoveToEndOfQueue:
+                    await MoveToEndAsync(request);
+                    break;
+
+                case EntryAction.ChangeService:
+                    await ChangeServiceAsync(request);
+                    break;
+
+                case EntryAction.SaveNote:
+                    await SaveNoteAsync(request, result.Note);
+                    break;
+
+                case EntryAction.MarkNoShow:
+                    await ConfirmNoShowAsync(request.EntryId, request.CustomerName);
+                    break;
+
+                case EntryAction.RemoveFromQueue:
+                    await ConfirmRemoveAsync(request.EntryId, request.CustomerName);
+                    break;
+
+                case EntryAction.ViewAnswers:
+                    await OpenIntakeAnswersAsync(
+                        request.CustomerName, request.ServiceName, request.WhenText, request.Answers);
+                    break;
             }
         }
         catch (Exception ex)
         {
             await ReloadAfterFailureAsync(ex);
         }
-        finally
+    }
+
+    // On a pooled board this is also the assignment: start_serving picks a free resource itself and
+    // refuses when there is none, which is the shop being busy rather than the app failing — so it
+    // says so under its own title instead of the general "couldn't do that".
+    public async Task StartServingAsync(EntrySheetRequest request)
+    {
+        try
         {
-            card.IsBusy = false;
+            ApplyLocally(request.EntryId, e =>
+            {
+                e.Status = "serving";
+                e.ServingAt = DateTime.UtcNow;
+            });
+            await _queueService.StartServingAsync(request.EntryId);
+        }
+        catch (Refit.ApiException ex)
+        {
+            await LoadQueueAsync();
+            await _popupService.ShowAlertAsync(BoardConstants.CantStartTitle, GetFriendlyErrorMessage(ex));
+        }
+        catch (Exception ex)
+        {
+            await ReloadAfterFailureAsync(ex);
         }
     }
 
+    public async Task CompleteEntryAsync(EntrySheetRequest request)
+    {
+        try
+        {
+            if (RequiresCollection(request.ServiceId))
+            {
+                ApplyLocally(request.EntryId, e => e.Status = QueueEntryStatuses.AwaitingCollection);
+                await _queueService.MarkAwaitingCollectionAsync(request.EntryId);
+            }
+            else
+            {
+                ApplyLocally(request.EntryId, e => e.Status = QueueEntryStatuses.Done);
+                await _queueService.CompleteAsync(request.EntryId);
+            }
+        }
+        catch (Exception ex)
+        {
+            await ReloadAfterFailureAsync(ex);
+        }
+    }
+
+    // The last inline action left on the board. Collection is a single terminal step with nothing
+    // to choose, so a sheet in front of it would only be a tap in the way.
     [RelayCommand]
     public async Task MarkCollectedAsync(QueueRowItem? row)
     {
@@ -675,179 +807,16 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
     }
 
-    [RelayCommand]
-    public async Task ServeAsync(QueueRowItem? row)
+    public async Task AssignEntryAsync(Guid entryId, Guid? operatorId)
     {
-        if (row is null || row.IsBusy)
-            return;
-
-        row.IsBusy = true;
         try
         {
-            ApplyLocally(row.EntryId, e =>
-            {
-                e.Status = "serving";
-                e.ServingAt = DateTime.UtcNow;
-            });
-            await _queueService.StartServingAsync(row.EntryId);
+            ApplyLocally(entryId, e => e.OperatorId = operatorId);
+            await _queueService.AssignEntryAsync(entryId, operatorId);
         }
         catch (Exception ex)
         {
             await ReloadAfterFailureAsync(ex);
-        }
-        finally
-        {
-            row.IsBusy = false;
-        }
-    }
-
-    [RelayCommand]
-    public async Task AssignAsync(QueueRowItem? row)
-    {
-        try
-        {
-            if (row is null || row.IsBusy)
-                return;
-
-            if (_entries.All(e => e.Id != row.EntryId))
-                return;
-
-            var sheet = new AssignSheet(
-                _popupService,
-                row.CustomerName,
-                row.Initials,
-                $"{row.ServiceName} · any available · waiting {row.WaitedMinutes}m",
-                "WHO'S TAKING THIS ONE?",
-                showNoShow: true,
-                BuildAssignTargets(excludeOperatorId: null, includePoolOption: false));
-
-            await _popupService.ShowSheetAsync(sheet);
-            var result = await sheet.Completion;
-
-            if (result.MarkNoShow)
-            {
-                await ConfirmNoShowAsync(row.EntryId, row.CustomerName);
-                return;
-            }
-
-            if (!result.Assigned)
-                return;
-
-            await AssignEntryAsync(row, result.OperatorId);
-        }
-        catch (Exception ex)
-        {
-            await ReloadAfterFailureAsync(ex);
-        }
-    }
-
-    public async Task AssignEntryAsync(QueueRowItem row, Guid? operatorId)
-    {
-        row.IsBusy = true;
-        try
-        {
-            ApplyLocally(row.EntryId, e => e.OperatorId = operatorId);
-            await _queueService.AssignEntryAsync(row.EntryId, operatorId);
-        }
-        catch (Exception ex)
-        {
-            await ReloadAfterFailureAsync(ex);
-        }
-        finally
-        {
-            row.IsBusy = false;
-        }
-    }
-
-    [RelayCommand]
-    public async Task OpenRowActionsAsync(QueueRowItem? row)
-    {
-        try
-        {
-            if (row is null)
-                return;
-
-            var sectionIsServing = row.OperatorId is { } opId
-                && _entries.Any(e => e.OperatorId == opId && e.Status == "serving");
-
-            var sheet = new EntryActionsSheet(
-                _popupService,
-                row.CustomerName,
-                row.Initials,
-                $"{row.ServiceName} · joined {row.JoinedAtText} · waiting {row.WaitedMinutes}m",
-                canServe: row.OperatorId is not null && !sectionIsServing,
-                canReorder: true,
-                note: row.HasNote ? row.NoteText : null,
-                hasIntakeAnswers: row.HasIntakeAnswers);
-
-            await _popupService.ShowSheetAsync(sheet);
-            var result = await sheet.Completion;
-
-            switch (result.Action)
-            {
-                case EntryAction.ServeNow:
-                    await ServeAsync(row);
-                    break;
-
-                case EntryAction.MoveToAnotherOperator:
-                    await MoveToAnotherOperatorAsync(row);
-                    break;
-
-                case EntryAction.MoveToEndOfQueue:
-                    await MoveToEndAsync(row);
-                    break;
-
-                case EntryAction.ChangeService:
-                    await ChangeServiceAsync(row);
-                    break;
-
-                case EntryAction.SaveNote:
-                    await SaveRowNoteAsync(row, result.Note);
-                    break;
-
-                case EntryAction.MarkNoShow:
-                    await ConfirmNoShowAsync(row.EntryId, row.CustomerName);
-                    break;
-
-                case EntryAction.RemoveFromQueue:
-                    await ConfirmRemoveAsync(row.EntryId, row.CustomerName);
-                    break;
-
-                case EntryAction.ViewAnswers:
-                    await OpenIntakeAnswersAsync(
-                        row.CustomerName,
-                        row.ServiceName,
-                        QueueRowItem.BuildJoinedText(row.JoinedAtText),
-                        row.IntakeAnswers);
-                    break;
-            }
-        }
-        catch (Exception ex)
-        {
-            await ReloadAfterFailureAsync(ex);
-        }
-    }
-
-    // Straight off the card the operator is already looking at: the entry read selects every
-    // column, and a stored answer carries its own label, type and order, so the page it opens needs
-    // nothing fetched.
-    [RelayCommand]
-    public async Task ViewServingAnswersAsync(ServingCardItem? card)
-    {
-        try
-        {
-            if (card is null)
-                return;
-
-            await OpenIntakeAnswersAsync(
-                card.CustomerName,
-                card.ServiceText,
-                _labels.ServingNowText,
-                card.IntakeAnswers);
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
         }
     }
 
@@ -877,24 +846,25 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
     }
 
-    public async Task MoveToAnotherOperatorAsync(QueueRowItem row)
+    // Assignment and reassignment are the same move: a pooled entry has nowhere to go back to, an
+    // assigned one does, and the sheet's own header says which of the two the operator is doing.
+    public async Task MoveEntryAsync(EntrySheetRequest request)
     {
         try
         {
             var sheet = new AssignSheet(
                 _popupService,
-                row.CustomerName,
-                row.Initials,
-                $"{row.ServiceName} · waiting {row.WaitedMinutes}m",
-                "MOVE TO",
-                showNoShow: false,
-                BuildAssignTargets(row.OperatorId, includePoolOption: row.OperatorId is not null));
+                request.CustomerName,
+                request.Initials,
+                request.SubText,
+                OperatorQueueHelper.AssignHeaderText(request.IsInPool),
+                BuildAssignTargets(request.OperatorId, includePoolOption: !request.IsInPool));
 
             await _popupService.ShowSheetAsync(sheet);
             var result = await sheet.Completion;
 
             if (result.Assigned)
-                await AssignEntryAsync(row, result.OperatorId);
+                await AssignEntryAsync(request.EntryId, result.OperatorId);
         }
         catch (Exception ex)
         {
@@ -902,41 +872,36 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
     }
 
-    public async Task MoveToEndAsync(QueueRowItem row)
+    public async Task MoveToEndAsync(EntrySheetRequest request)
     {
-        row.IsBusy = true;
         try
         {
-            ApplyLocally(row.EntryId, e => e.JoinedAt = DateTime.UtcNow);
-            await _queueService.MoveEntryToEndAsync(row.EntryId);
+            ApplyLocally(request.EntryId, e => e.JoinedAt = DateTime.UtcNow);
+            await _queueService.MoveEntryToEndAsync(request.EntryId);
         }
         catch (Exception ex)
         {
             await ReloadAfterFailureAsync(ex);
         }
-        finally
-        {
-            row.IsBusy = false;
-        }
     }
 
-    public async Task ChangeServiceAsync(QueueRowItem row)
+    public async Task ChangeServiceAsync(EntrySheetRequest request)
     {
         try
         {
             var sheet = new ChangeServiceSheet(
                 _popupService,
-                $"Change service for {row.CustomerName}",
-                BuildServiceRows(row.ServiceId));
+                $"Change service for {request.CustomerName}",
+                BuildServiceRows(request.ServiceId));
 
             await _popupService.ShowSheetAsync(sheet);
             var serviceId = await sheet.Completion;
 
-            if (serviceId is not { } chosen || chosen == row.ServiceId)
+            if (serviceId is not { } chosen || chosen == request.ServiceId)
                 return;
 
-            ApplyLocally(row.EntryId, e => e.ServiceId = chosen);
-            await _queueService.ChangeEntryServiceAsync(row.EntryId, chosen);
+            ApplyLocally(request.EntryId, e => e.ServiceId = chosen);
+            await _queueService.ChangeEntryServiceAsync(request.EntryId, chosen);
         }
         catch (Exception ex)
         {
@@ -948,7 +913,8 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     {
         try
         {
-            var confirmed = await _popupService.ShowConfirmAsync("No-show", $"Mark {customerName} as a no-show?");
+            var confirmed = await _popupService.ShowConfirmAsync(
+                BoardConstants.NoShowTitle, $"Mark {customerName} as a no-show?");
             if (!confirmed)
                 return;
 
@@ -966,7 +932,8 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         try
         {
             var confirmed = await _popupService.ShowConfirmAsync(
-                "Remove from queue", $"Take {customerName} out of the queue?", "Remove", "Keep");
+                BoardConstants.RemoveTitle, $"Take {customerName} out of the queue?",
+                BoardConstants.RemoveConfirm, BoardConstants.RemoveCancel);
             if (!confirmed)
                 return;
 
@@ -979,29 +946,19 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
     }
 
-    [RelayCommand]
-    public async Task EditNoteAsync(ServingCardItem? card)
+    // The same progress_status column either way, so the customer reads one "latest update"
+    // wherever the entry is. Not the same write: set_queue_progress refuses an entry that is not
+    // being served, and someone still in the line is exactly who "running late" is worth saying to.
+    public async Task SaveNoteAsync(EntrySheetRequest request, string? note)
     {
         try
         {
-            if (card is null)
-                return;
+            ApplyLocally(request.EntryId, e => e.ProgressStatus = note);
 
-            var current = card.HasNote ? card.NoteText : string.Empty;
-            var note = await _popupService.ShowPromptAsync(
-                "Note", $"What's happening with {card.CustomerName}?", current,
-                placeholder: "Colour treatment — running long");
-
-            if (note is null)
-                return;
-
-            var trimmed = string.IsNullOrWhiteSpace(note) ? null : note.Trim();
-
-            card.HasNote = trimmed is not null;
-            card.NoteText = trimmed ?? "Add a note";
-
-            ApplyLocally(card.EntryId, e => e.ProgressStatus = trimmed);
-            await _queueService.SetQueueProgressAsync(card.EntryId, trimmed);
+            if (request.IsWaiting)
+                await _queueService.SetEntryNoteAsync(request.EntryId, note);
+            else
+                await _queueService.SetQueueProgressAsync(request.EntryId, note);
         }
         catch (Exception ex)
         {
@@ -1009,34 +966,12 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
         }
     }
 
-    // The waiting-side twin of EditNoteAsync. Same column, same customer-facing "latest update" —
-    // the entry just hasn't reached the chair yet, which is exactly when "running late" is worth
-    // saying. Not the same write: set_queue_progress rejects an entry that isn't being served, so
-    // this one goes through SetEntryNoteAsync. The sheet has already trimmed the text and turned an
-    // emptied field into null.
-    public async Task SaveRowNoteAsync(QueueRowItem? row, string? note)
-    {
-        if (row is null || row.IsBusy)
-            return;
-
-        row.IsBusy = true;
-        try
-        {
-            ApplyLocally(row.EntryId, e => e.ProgressStatus = note);
-            await _queueService.SetEntryNoteAsync(row.EntryId, note);
-        }
-        catch (Exception ex)
-        {
-            await ReloadAfterFailureAsync(ex);
-        }
-        finally
-        {
-            row.IsBusy = false;
-        }
-    }
-
+    // The queue flow, in operator mode, with the tapped column already answered for. A sheet here
+    // would have meant a second service picker and no intake step at all — and join_queue rejects
+    // an entry whose service left a required question unanswered, so a walk-in added without one
+    // would simply stop being addable.
     [RelayCommand]
-    public async Task AddWalkInAsync(BoardSection? section)
+    public async Task AddToQueueAsync(BoardSection? section)
     {
         try
         {
@@ -1046,29 +981,23 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
             if (_services.Count == 0)
             {
                 await _popupService.ShowAlertAsync(
-                    "No services yet", "Add a service under Settings before adding a walk-in.");
+                    BoardConstants.NoServicesTitle, BoardConstants.NoServicesMessage);
                 return;
             }
 
-            var summary = _summary.FirstOrDefault(r => r.OperatorId == section.OperatorId);
-            var ahead = section.Waiting.Count + (section.HasServing ? 1 : 0);
+            var parameters = new NavigationParameters
+            {
+                { NavigationKeys.BusinessId, _businessId },
+                { NavigationKeys.OperatorId, section.OperatorId },
+                { NavigationKeys.IsOperatorFlow, true },
+            };
 
-            var sheet = new AddWalkInSheet(
-                _popupService,
-                $"Add to {section.Name}'s queue",
-                section.OperatorId,
-                ahead,
-                summary?.NewJoinWaitMinutes ?? 0,
-                BuildServiceRows(null));
-
-            await _popupService.ShowSheetAsync(sheet);
-            var request = await sheet.Completion;
-
-            if (request is null)
-                return;
-
-            await _queueService.AddWalkInAsync(_businessId, request.OperatorId, request.Name, request.ServiceId);
-            await LoadQueueAsync();
+            // The board is a tab, so a plain push would bury the flow inside the tab's own stack
+            // with the tab bar still on screen. Modally it gets the whole window, and comes back by
+            // dismissing onto the board it left — still standing, because a modal does not replace it.
+            await NavigationService.NavigateAsync(
+                $"NavigationPage/{NavigationPaths.QueueFlowPage}", parameters,
+                modal: true, animated: false);
         }
         catch (Exception ex)
         {
@@ -1239,12 +1168,14 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     {
         try
         {
-            return string.IsNullOrWhiteSpace(entry.CustomerName) ? "Walk-in" : entry.CustomerName!;
+            return string.IsNullOrWhiteSpace(entry.CustomerName)
+                ? BoardConstants.WalkInName
+                : entry.CustomerName!;
         }
         catch (Exception ex)
         {
             _ = HandleExceptionAsync(ex);
-            return "Walk-in";
+            return BoardConstants.WalkInName;
         }
     }
 

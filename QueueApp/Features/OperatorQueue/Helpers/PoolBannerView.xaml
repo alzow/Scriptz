@@ -57,12 +57,17 @@
                                     <Label Text="{Binding CustomerName}" Style="{StaticResource lbl14_Bold_TextDark}"/>
                                     <Label Text="{Binding SubText}" Style="{StaticResource lbl12_Regular_TextLight}"/>
                                 </VerticalStackLayout>
-                                <Button Grid.Column="1" Text="Assign" HeightRequest="46"
-                                        Style="{StaticResource btn14_Bold_PurpleOutline}"
-                                        VerticalOptions="Center"
-                                        IsEnabled="{Binding IsEnabled}"
-                                        Command="{Binding AssignCommand, Source={x:Reference Root}}"
-                                        CommandParameter="{Binding .}"/>
+                                <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
+                                    <Border Style="{StaticResource brd6_PurpleTag}"
+                                            Padding="8,4" VerticalOptions="Center"
+                                            IsVisible="{Binding HasIntakeAnswers}">
+                                        <Label Text="{Binding IntakeAnswerCountText}"
+                                               Style="{StaticResource lbl11_Mono_Purple}"/>
+                                    </Border>
+                                    <tpl:ThemedIcon Icon="ic_chevron_right"
+                                                    WidthRequest="16" HeightRequest="16" Opacity="0.5"
+                                                    VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
                             </Grid>
 
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="7"
@@ -78,7 +83,7 @@
 
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer
-                                    Command="{Binding OpenRowActionsCommand, Source={x:Reference Root}}"
+                                    Command="{Binding OpenRowSheetCommand, Source={x:Reference Root}}"
                                     CommandParameter="{Binding .}"/>
                             </Border.GestureRecognizers>
                         </Border>

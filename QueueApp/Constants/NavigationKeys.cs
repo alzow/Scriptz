@@ -3,6 +3,8 @@ namespace QueueApp.Constants;
 public static class NavigationKeys
 {
     public const string BusinessId      = "businessId";
+    // Also the flow's pre-selected resource: the queue board hands over the column that was tapped,
+    // which answers the Operator step before it is ever asked.
     public const string OperatorId      = "operatorId";
     public const string OperatorName    = "operatorName";
     public const string ServiceId       = "serviceId";

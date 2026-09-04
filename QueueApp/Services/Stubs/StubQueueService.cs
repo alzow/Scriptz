@@ -18,7 +18,8 @@ public class StubQueueService : IQueueService
 
     // Goes through join_queue for real, so a counter add with nobody named resolves the same way
     // a customer's join does.
-    public Task AddWalkInAsync(Guid businessId, Guid? operatorId, string? name, Guid serviceId)
+    public Task JoinQueueAsOperatorAsync(Guid businessId, Guid? operatorId, string? customerName, Guid serviceId,
+        Dictionary<string, IntakeAnswer>? intakeResponses = null)
     {
         _entries.Add(new QueueEntryResponse
         {
@@ -26,7 +27,8 @@ public class StubQueueService : IQueueService
             BusinessId = businessId,
             OperatorId = operatorId ?? PickFastestOperator(businessId),
             ServiceId = serviceId,
-            CustomerName = name,
+            CustomerName = customerName,
+            IntakeResponses = intakeResponses,
             Status = "waiting",
             JoinedAt = DateTime.UtcNow,
         });
