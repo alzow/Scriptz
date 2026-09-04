@@ -1,7 +1,8 @@
 using System.Collections.ObjectModel;
+using System.Net;
 using CommunityToolkit.Mvvm.Input;
 using MPowerKit;
-using MPowerKit.Navigation;
+using Refit;
 using QueueApp.Constants;
 using QueueApp.Features.Flow.Constants;
 using QueueApp.Features.Flow.Helpers;
@@ -9,6 +10,7 @@ using QueueApp.Framework.Base;
 using QueueApp.Framework.Navigation;
 using QueueApp.Shared.Domain;
 using QueueApp.Shared.Domain.Models;
+using QueueApp.Services.Api.Booking.Models;
 using QueueApp.Services.Api.Business.Models;
 using QueueApp.Services.Api.Operator.Models;
 using QueueApp.Services.Api.Queue.Models;
@@ -461,6 +463,586 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
             await HandleExceptionAsync(exception);
         }
     }
+
+    public FlowStep CurrentStep => _steps.Count > 0
+        ? _steps[Math.Clamp(CurrentStepIndex, 0, _steps.Count - 1)]
+        : FlowStep.Service;
+
+    public FlowCopyContext CopyContext => new(
+        IsOperatorFlow,
+        IsBookingMode,
+        IsSlotFlow,
+        _labels,
+        SelectedServiceRow,
+        SelectedOperatorChoice);
+
+    public FlowStepContext StepContext => new(
+        CopyContext,
+        SelectedDay,
+        SelectedSlot,
+        _intake.OutstandingCount,
+        _intake.HasFields,
+        CustomerName,
+        ReviewPositionText);
+
+    public void ApplyStep()
+    {
+        try
+        {
+            var step = CurrentStep;
+
+            ShowOperatorStep = step == FlowStep.Operator;
+            ShowServiceStep = step == FlowStep.Service;
+            ShowDayStep = step == FlowStep.Day;
+            ShowTimeStep = step == FlowStep.Time;
+            ShowIntakeStep = step == FlowStep.Intake;
+            ShowReviewStep = step == FlowStep.Review;
+
+            // The review step's footer quotes the position this computes, so it has to run first.
+            if (step == FlowStep.Review)
+                RefreshReview();
+
+            ApplyChrome();
+            RefreshFooter();
+
+            if (step == FlowStep.Day)
+                _ = LoadDayCountsAsync();
+            else if (step == FlowStep.Time)
+                _ = LoadSlotsAsync();
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
+    }
+
+    public void ApplyChrome()
+    {
+        try
+        {
+            var chrome = FlowStepPresenter.BuildChrome(_steps, CurrentStepIndex, StepContext);
+
+            RailStepLabel = chrome.RailStepLabel;
+            RailCountText = chrome.RailCountText;
+            StepHeading = chrome.Heading;
+            StepSubheading = chrome.Subheading;
+
+            RailSegments.Clear();
+            foreach (var segment in chrome.Segments)
+                RailSegments.Add(segment);
+
+            Crumbs.Clear();
+            foreach (var crumb in chrome.Crumbs)
+                Crumbs.Add(crumb);
+
+            OnPropertyChanged(nameof(HasCrumbs));
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
+    }
+
+    public void RefreshFooter()
+    {
+        try
+        {
+            var footer = FlowStepPresenter.BuildFooter(_steps, CurrentStepIndex, StepContext);
+
+            FooterLabel = footer.Label;
+            FooterValue = footer.Value;
+            FooterCtaText = footer.CtaText;
+            IsFooterCtaEnabled = footer.IsCtaEnabled;
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
+    }
+
+    // A service that asks nothing rebuilds the list it already had, SequenceEqual says so, and not
+    // a single step moves. Intake goes in after Service, so the step being stood on keeps its
+    // index: the customer doesn't move, the rail gains or loses a segment ahead of them.
+    public void RebuildSteps()
+    {
+        try
+        {
+            if (Business is null)
+                return;
+
+            var rebuilt = FlowStepEngine.BuildSteps(
+                Business, _selectableOperators, IsOperatorFlow, HasIntakeFields);
+
+            if (rebuilt.SequenceEqual(_steps))
+                return;
+
+            _steps = rebuilt;
+            ApplyStep();
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
+    }
+
+    public void BuildOperatorChoices()
+    {
+        try
+        {
+            var choices = FlowChoiceBuilder.BuildOperatorChoices(
+                _selectableOperators, QueueSummary, IsQueueMode, IsBookingMode, IsOperatorFlow);
+
+            OperatorChoices.Clear();
+            foreach (var choice in choices)
+                OperatorChoices.Add(choice);
+
+            SelectedOperatorChoice = OperatorChoices.FirstOrDefault(c => c.IsSelected);
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
+    }
+
+    public void RefreshReview()
+    {
+        try
+        {
+            if (SelectedServiceRow is null)
+                return;
+
+            var review = FlowChoiceBuilder.BuildReview(
+                SelectedServiceRow, SelectedOperatorChoice, SelectedSlot, QueueSummary, IsSlotFlow);
+
+            ReviewOperatorText = review.OperatorText;
+            ReviewServiceText = review.ServiceText;
+            ReviewPriceText = review.PriceText;
+            ReviewWhenText = review.WhenText;
+
+            if (!IsSlotFlow)
+            {
+                ReviewPositionText = review.PositionText;
+                ReviewTurnText = review.TurnText;
+            }
+
+            OnPropertyChanged(nameof(ReviewOperatorLabel));
+            OnPropertyChanged(nameof(ShowReviewWhen));
+            OnPropertyChanged(nameof(ShowReviewQueueLines));
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
+    }
+
+    // Every downstream clear happens here. Nothing else sets a selection back to null.
+    public void InvalidateAfter(FlowStep changed)
+    {
+        try
+        {
+            switch (changed)
+            {
+                // Availability is per operator; services are per business, so they survive. The
+                // schedule cache is keyed by both, so nothing has to be thrown away to change either.
+                case FlowStep.Operator:
+                case FlowStep.Service:
+                    SelectedDay = null;
+                    foreach (var day in DayChoices)
+                        day.IsSelected = false;
+
+                    ClearSlots();
+                    break;
+
+                case FlowStep.Day:
+                    ClearSlots();
+                    break;
+            }
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
+    }
+
+    public void ClearSlots()
+    {
+        try
+        {
+            SelectedSlot = null;
+            Morning = SlotPeriodFor(FlowConstants.MorningTitle, FlowConstants.MorningFromHour);
+            Afternoon = SlotPeriodFor(FlowConstants.AfternoonTitle, FlowConstants.AfternoonFromHour);
+            Evening = SlotPeriodFor(FlowConstants.EveningTitle, FlowConstants.EveningFromHour);
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
+    }
+
+    [RelayCommand]
+    public void SelectOperator(OperatorChoiceItem? item)
+    {
+        try
+        {
+            if (item is null || ReferenceEquals(item, SelectedOperatorChoice))
+                return;
+
+            foreach (var choice in OperatorChoices)
+                choice.IsSelected = ReferenceEquals(choice, item);
+
+            SelectedOperatorChoice = item;
+            InvalidateAfter(FlowStep.Operator);
+            RefreshFooter();
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
+    }
+
+    [RelayCommand]
+    public void SelectService(ServiceChoiceItem? item)
+    {
+        try
+        {
+            if (item is null || ReferenceEquals(item, SelectedServiceRow))
+                return;
+
+            foreach (var row in ServiceRows)
+                row.IsSelected = ReferenceEquals(row, item);
+
+            SelectedServiceRow = item;
+            InvalidateAfter(FlowStep.Service);
+
+            _intake.BuildFor(item.Service.Id);
+            OnPropertyChanged(nameof(HasIntakeFields));
+
+            RebuildSteps();
+            RefreshFooter();
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
+    }
+
+    [RelayCommand]
+    public void SelectDay(DayChoiceItem? item)
+    {
+        try
+        {
+            if (item is null || !item.IsSelectable || ReferenceEquals(item, SelectedDay))
+                return;
+
+            foreach (var day in DayChoices)
+                day.IsSelected = ReferenceEquals(day, item);
+
+            SelectedDay = item;
+            InvalidateAfter(FlowStep.Day);
+            RefreshFooter();
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
+    }
+
+    [RelayCommand]
+    public void SelectSlot(SlotChoiceItem? item)
+    {
+        try
+        {
+            if (item is null)
+                return;
+
+            foreach (var slot in Morning.Slots.Concat(Afternoon.Slots).Concat(Evening.Slots))
+                slot.IsSelected = ReferenceEquals(slot, item);
+
+            SelectedSlot = item;
+            RefreshFooter();
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
+    }
+
+    [RelayCommand]
+    public void SelectIntakeOption(IntakeOptionItem? option)
+    {
+        try
+        {
+            _intake.SelectOption(option);
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
+    }
+
+    [RelayCommand]
+    public async Task PickIntakeFileAsync(IntakeFieldItem? field)
+    {
+        try
+        {
+            if (SelectedServiceRow is null)
+                return;
+
+            await _intake.PickFileAsync(field, SelectedServiceRow.Service.Id);
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
+    }
+
+    [RelayCommand]
+    public void ClearIntakeFile(IntakeFieldItem? field)
+    {
+        try
+        {
+            _intake.ClearFile(field);
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
+    }
+
+    // Typing into a short or long text field is the one answer nothing else routes through a
+    // command, and the footer's CTA turns on the moment the last required one is filled.
+    public void RefreshFooterForIntake(object? sender, EventArgs e)
+    {
+        if (ShowIntakeStep)
+            RefreshFooter();
+    }
+
+    // PropertyChanged.Fody calls this off the woven setter, so the footer keeps up with the name
+    // being typed on the review step.
+    public void OnCustomerNameChanged() => RefreshFooter();
+
+    public FlowScheduleKey? ScheduleKey => SelectedServiceRow is null || SelectedOperatorChoice is null
+        ? null
+        : new FlowScheduleKey(
+            _businessId,
+            SelectedOperatorChoice.OperatorId,
+            SelectedServiceRow.Service.Id,
+            SelectedOperatorChoice.IsAnyAvailable);
+
+    public async Task LoadDayCountsAsync()
+    {
+        try
+        {
+            if (ScheduleKey is not { } key)
+                return;
+
+            EnsureDayStrip();
+            DayFineprint = FlowCopy.DayFineprint(CopyContext);
+
+            if (_schedule.TryGetDayCounts(key, out var cached))
+            {
+                ApplyDayCounts(cached);
+                return;
+            }
+
+            IsLoadingDays = true;
+            try
+            {
+                var dates = DayChoices.Select(d => d.Date).ToList();
+                ApplyDayCounts(await _schedule.LoadDayCountsAsync(key, dates));
+            }
+            finally
+            {
+                IsLoadingDays = false;
+            }
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
+    }
+
+    public void EnsureDayStrip()
+    {
+        if (DayChoices.Count > 0)
+            return;
+
+        foreach (var day in FlowHelper.BuildDayStrip(FlowConstants.DayStripLength))
+            DayChoices.Add(day);
+
+        // The agenda hands over the day it was showing, so the shop doesn't re-pick it.
+        if (_preferredDate is { } wanted)
+        {
+            SelectDay(DayChoices.FirstOrDefault(d => d.Date == wanted));
+            _preferredDate = null;
+        }
+    }
+
+    public void ApplyDayCounts(IReadOnlyDictionary<DateTime, int> counts)
+    {
+        try
+        {
+            var operatorName = SelectedOperatorChoice?.Name ?? string.Empty;
+
+            foreach (var day in DayChoices)
+            {
+                var count = counts.TryGetValue(day.Date, out var value) ? value : 0;
+                day.IsFull = count == 0;
+                day.FreeText = FlowCopy.DayFreeText(count, operatorName);
+            }
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
+    }
+
+    public async Task LoadSlotsAsync()
+    {
+        try
+        {
+            if (ScheduleKey is not { } key || SelectedDay is null)
+                return;
+
+            var date = SelectedDay.Date;
+
+            if (_schedule.TryGetSlots(key, date, out var cached))
+            {
+                ApplySlots(cached);
+                return;
+            }
+
+            IsLoadingSlots = true;
+
+            var slots = await _schedule.LoadSlotsAsync(key, date);
+
+            // Null is a newer day selection having superseded this one. It owns the spinner from
+            // here — turning it off would blank it while that newer load is still running.
+            if (slots is null)
+                return;
+
+            ApplySlots(slots);
+            IsLoadingSlots = false;
+        }
+        catch (Exception exception)
+        {
+            IsLoadingSlots = false;
+            await HandleExceptionAsync(exception);
+        }
+    }
+
+    public void ApplySlots(IReadOnlyList<SlotResponse> slots)
+    {
+        try
+        {
+            var items = slots
+                .OrderBy(s => s.SlotStart)
+                .Select(s => new SlotChoiceItem
+                {
+                    Slot = s,
+                    TimeText = LocalTime.ToLocal(s.SlotStart).ToString("HH:mm"),
+                })
+                .ToList();
+
+            Morning = SlotPeriodFor(
+                FlowConstants.MorningTitle, FlowConstants.MorningFromHour, FlowConstants.MorningToHour, items);
+            Afternoon = SlotPeriodFor(
+                FlowConstants.AfternoonTitle, FlowConstants.AfternoonFromHour, FlowConstants.AfternoonToHour, items);
+            Evening = SlotPeriodFor(
+                FlowConstants.EveningTitle, FlowConstants.EveningFromHour, FlowConstants.EveningToHour, items);
+
+            SelectedSlot = null;
+
+            // A tapped gap on the agenda names an exact start. It only survives until it matches
+            // once: changing the resource or the service can move every boundary on the day.
+            if (_preferredStart is { } wanted)
+            {
+                SelectSlot(items.FirstOrDefault(i => i.Slot.SlotStart == wanted));
+                _preferredStart = null;
+            }
+
+            RefreshFooter();
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
+    }
+
+    public SlotPeriod SlotPeriodFor(string title, int fromHour) =>
+        SlotPeriod.Empty(title, FlowCopy.EmptyPeriodNote(_hours, SelectedDay?.Date, fromHour, _labels));
+
+    public SlotPeriod SlotPeriodFor(
+        string title,
+        int fromHour,
+        int toHour,
+        IReadOnlyList<SlotChoiceItem> items) =>
+        new(title,
+            FlowHelper.SlotsInPeriod(items, fromHour, toHour),
+            FlowCopy.EmptyPeriodNote(_hours, SelectedDay?.Date, fromHour, _labels));
+
+    public async Task SubmitAsync()
+    {
+        if (SelectedServiceRow is null)
+            return;
+
+        if (IsSlotFlow && SelectedSlot is null)
+            return;
+
+        IsSubmitting = true;
+        try
+        {
+            var request = BuildSubmissionRequest();
+
+            var result = IsOperatorFlow
+                ? await _submission.SubmitOperatorBookingAsync(request)
+                : IsBookingMode
+                    ? await _submission.SubmitBookingAsync(request)
+                    : await _submission.SubmitJoinAsync(request);
+
+            _submittedRecordId = result.RecordId;
+            _submittedIsBooking = result.IsBooking;
+
+            ResetFlowState();
+            await OnSubmittedAsync();
+        }
+        catch (ApiException exception) when (exception.StatusCode == HttpStatusCode.Conflict)
+        {
+            // bookings_no_overlap caught a race — someone took this exact slot between the list
+            // loading and the confirm tap.
+            await HandleExceptionAsync(new InvalidOperationException(IsOperatorFlow
+                ? FlowConstants.SlotTakenByShopError
+                : FlowConstants.SlotTakenByCustomerError));
+
+            _schedule.InvalidateSlots();
+            await LoadSlotsAsync();
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
+        finally
+        {
+            IsSubmitting = false;
+        }
+    }
+
+    public FlowSubmissionRequest BuildSubmissionRequest() => new()
+    {
+        BusinessId = _businessId,
+        ServiceId = SelectedServiceRow!.Service.Id,
+        OperatorId = SelectedOperatorChoice?.OperatorId,
+        IsAnyAvailable = SelectedOperatorChoice?.IsAnyAvailable ?? false,
+        StartsAt = SelectedSlot?.Slot.SlotStart ?? default,
+        EndsAt = SelectedSlot?.Slot.SlotEnd ?? default,
+        Note = TrimmedBookingNote(),
+        CustomerName = CustomerName,
+        CustomerPhone = CustomerPhone,
+        IntakeResponses = _intake.BuildResponses(),
+    };
+
+    public string? TrimmedBookingNote() =>
+        string.IsNullOrWhiteSpace(BookingNote) ? null : BookingNote.Trim();
 
     // Called from inside every catch block on this page, so it is the one method that must never
     // throw: an exception escaping here escapes the catch that was handling the first one, and
