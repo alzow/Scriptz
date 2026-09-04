@@ -98,7 +98,7 @@ public partial class LoginPageViewModel : BaseViewModel
 
             if (string.IsNullOrEmpty(response.AccessToken))
             {
-                ErrorMessage = InvalidCredentialsMessage;
+                ErrorMessage = AuthConstants.InvalidCredentialsMessage;
                 return;
             }
 
