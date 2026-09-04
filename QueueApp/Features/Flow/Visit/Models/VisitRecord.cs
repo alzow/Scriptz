@@ -28,6 +28,7 @@ public sealed class VisitRecord
     public required Guid Id { get; init; }
     public required Guid BusinessId { get; init; }
     public required string BusinessName { get; init; }
+    public required string Category { get; init; }
     public required VisitLifecycle Lifecycle { get; init; }
     public required string StatusText { get; init; }
     public required string ServiceName { get; init; }
@@ -70,6 +71,8 @@ public sealed class VisitRecord
     public int Position { get; set; }
     public decimal? WaitMinutes { get; set; }
 
+    public CategoryLabelSet Labels => CategoryLabels.Resolve(Category);
+
     public bool IsQueue => Kind == VisitKind.Queue;
     public bool IsBooking => Kind == VisitKind.Booking;
 
@@ -98,6 +101,7 @@ public sealed class VisitRecord
     public static VisitRecord FromEntry(MyQueueEntryResponse entry)
     {
         var lifecycle = ResolveEntryLifecycle(entry);
+        var labels = CategoryLabels.Resolve(entry.Category);
 
         return new VisitRecord
         {
@@ -105,8 +109,9 @@ public sealed class VisitRecord
             Id = entry.Id,
             BusinessId = entry.BusinessId,
             BusinessName = entry.BusinessName,
+            Category = entry.Category,
             Lifecycle = lifecycle,
-            StatusText = EntryStatusText(entry, lifecycle),
+            StatusText = EntryStatusText(entry, lifecycle, labels),
             ServiceName = string.IsNullOrWhiteSpace(entry.ServiceName)
                 ? VisitHelper.NotRecorded
                 : entry.ServiceName,
@@ -139,6 +144,7 @@ public sealed class VisitRecord
             Id = booking.Id,
             BusinessId = booking.BusinessId,
             BusinessName = booking.BusinessName,
+            Category = booking.Category,
             Lifecycle = lifecycle,
             StatusText = BookingStatusText(booking, lifecycle),
             ServiceName = string.IsNullOrWhiteSpace(booking.ServiceName)
@@ -197,14 +203,14 @@ public sealed class VisitRecord
         return VisitLifecycle.Settled;
     }
 
-    public static string EntryStatusText(MyQueueEntryResponse entry, VisitLifecycle lifecycle) => lifecycle switch
+    public static string EntryStatusText(MyQueueEntryResponse entry, VisitLifecycle lifecycle, CategoryLabelSet labels) => lifecycle switch
     {
         VisitLifecycle.NoShow => "NO-SHOW",
         VisitLifecycle.Cancelled => entry.Details?.CancelledBy == CancelledByValues.Customer
             ? "YOU LEFT"
             : "CANCELLED",
         VisitLifecycle.AwaitingCollection => "READY FOR COLLECTION",
-        VisitLifecycle.Live => entry.IsBeingServed ? "IN THE CHAIR" : "IN THE QUEUE",
+        VisitLifecycle.Live => entry.IsBeingServed ? labels.ServingStatus : "IN THE QUEUE",
         _ => "SERVED",
     };
 

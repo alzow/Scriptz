@@ -13,8 +13,8 @@
         <VerticalStackLayout Spacing="0">
 
             <!-- Kicker row -->
-            <Grid ColumnDefinitions="*,Auto" Padding="16,13,16,0">
-                <HorizontalStackLayout Grid.Column="0" Spacing="7">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="7" Padding="16,13,16,0">
+                <HorizontalStackLayout Grid.Column="0" Spacing="7" VerticalOptions="Start">
                     <Ellipse Style="{StaticResource ell_AccentDot}" WidthRequest="6" HeightRequest="6" VerticalOptions="Center">
                         <Ellipse.Triggers>
                             <DataTrigger TargetType="Ellipse"
@@ -43,7 +43,10 @@
                 <Label Grid.Column="1"
                        Text="{Binding ActiveEntry.BusinessName, Source={x:Reference Root}}"
                        Style="{StaticResource lbl12_Bold_TextMid}"
-                       VerticalOptions="Center"/>
+                       VerticalOptions="Start"
+                       HorizontalTextAlignment="End"
+                       LineBreakMode="WordWrap"
+                       MaxLines="2"/>
             </Grid>
 
             <!-- Ring + copy -->

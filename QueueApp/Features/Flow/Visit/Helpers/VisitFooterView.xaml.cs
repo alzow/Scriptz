@@ -28,6 +28,9 @@ public partial class VisitFooterView : ContentView
     public static readonly BindableProperty ShowPaymentLineProperty = BindableProperty.Create(
         nameof(ShowPaymentLine), typeof(bool), typeof(VisitFooterView), false);
 
+    public static readonly BindableProperty PaymentLineTextProperty = BindableProperty.Create(
+        nameof(PaymentLineText), typeof(string), typeof(VisitFooterView), string.Empty);
+
     public string PrimaryActionText
     {
         get => (string)GetValue(PrimaryActionTextProperty);
@@ -74,6 +77,12 @@ public partial class VisitFooterView : ContentView
     {
         get => (bool)GetValue(ShowPaymentLineProperty);
         set => SetValue(ShowPaymentLineProperty, value);
+    }
+
+    public string PaymentLineText
+    {
+        get => (string)GetValue(PaymentLineTextProperty);
+        set => SetValue(PaymentLineTextProperty, value);
     }
 
     public VisitFooterView()

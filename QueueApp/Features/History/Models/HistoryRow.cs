@@ -29,6 +29,10 @@ public sealed class HistoryRow
     public required double StatusStrokeThickness { get; init; }
     public required bool ShowWarningIcon { get; init; }
 
+    // The status text is the business's own vocabulary now, so "is this still to come?" cannot be
+    // read back off it — the mapping that produced the text says so instead.
+    public required bool IsUpcoming { get; init; }
+
     private static string IconFor(string category) =>
         CategoryCatalog.All.FirstOrDefault(c => c.Key == category)?.IconSource ?? "ic_other";
 
@@ -40,7 +44,7 @@ public sealed class HistoryRow
 
         var occurredAt = entry.DoneAtUtc ?? entry.JoinedAtUtc;
 
-        var (statusText, fill, ink, outline, warn) = ResolveEntryStatus(entry);
+        var (statusText, fill, ink, outline, warn, upcoming) = ResolveEntryStatus(entry, CategoryLabels.Resolve(entry.Category));
 
         return new HistoryRow
         {
@@ -58,6 +62,7 @@ public sealed class HistoryRow
             StatusStroke = outline ? HistoryStatusPalette.OutlineStroke : Colors.Transparent,
             StatusStrokeThickness = outline ? 1 : 0,
             ShowWarningIcon = warn,
+            IsUpcoming = upcoming,
         };
     }
 
@@ -70,17 +75,17 @@ public sealed class HistoryRow
         if (booking.HasCancellationReason)
             meta = $"{meta} · {booking.CancellationReason}";
 
-        var (statusText, fill, ink, outline, warn) = booking.EffectiveStatus switch
+        var (statusText, fill, ink, outline, warn, upcoming) = booking.EffectiveStatus switch
         {
-            "confirmed" => ("CONFIRMED", HistoryStatusPalette.LiveFill, HistoryStatusPalette.LiveInk, false, false),
-            "pending" => ("PENDING", HistoryStatusPalette.InfoFill, HistoryStatusPalette.InfoInk, false, false),
+            "confirmed" => ("CONFIRMED", HistoryStatusPalette.LiveFill, HistoryStatusPalette.LiveInk, false, false, true),
+            "pending" => ("PENDING", HistoryStatusPalette.InfoFill, HistoryStatusPalette.InfoInk, false, false, true),
             "cancelled" => (booking.WasCancelledByCustomer ? "YOU CANCELLED" : "CANCELLED",
-                Colors.Transparent, HistoryStatusPalette.DimInk, true, false),
-            "completed" or "done" => ("COMPLETED", HistoryStatusPalette.RaisedFill, HistoryStatusPalette.MutedInk, false, false),
-            "expired" => ("EXPIRED", Colors.Transparent, HistoryStatusPalette.DimInk, true, true),
-            "no_show" => ("NO-SHOW", HistoryStatusPalette.BadFill, HistoryStatusPalette.BadInk, false, false),
-            "awaiting_collection" => ("READY FOR COLLECTION", HistoryStatusPalette.InfoFill, HistoryStatusPalette.InfoInk, false, false),
-            _ => (booking.Status.ToUpperInvariant(), HistoryStatusPalette.RaisedFill, HistoryStatusPalette.MutedInk, false, false),
+                Colors.Transparent, HistoryStatusPalette.DimInk, true, false, false),
+            "completed" or "done" => ("COMPLETED", HistoryStatusPalette.RaisedFill, HistoryStatusPalette.MutedInk, false, false, false),
+            "expired" => ("EXPIRED", Colors.Transparent, HistoryStatusPalette.DimInk, true, true, false),
+            "no_show" => ("NO-SHOW", HistoryStatusPalette.BadFill, HistoryStatusPalette.BadInk, false, false, false),
+            "awaiting_collection" => ("READY FOR COLLECTION", HistoryStatusPalette.InfoFill, HistoryStatusPalette.InfoInk, false, false, true),
+            _ => (booking.Status.ToUpperInvariant(), HistoryStatusPalette.RaisedFill, HistoryStatusPalette.MutedInk, false, false, false),
         };
 
         return new HistoryRow
@@ -99,27 +104,30 @@ public sealed class HistoryRow
             StatusStroke = outline ? HistoryStatusPalette.OutlineStroke : Colors.Transparent,
             StatusStrokeThickness = outline ? 1 : 0,
             ShowWarningIcon = warn,
+            IsUpcoming = upcoming,
         };
     }
 
-    private static (string Text, Color Fill, Color Ink, bool Outline, bool Warn) ResolveEntryStatus(MyQueueEntryResponse entry)
+    private static (string Text, Color Fill, Color Ink, bool Outline, bool Warn, bool Upcoming) ResolveEntryStatus(
+        MyQueueEntryResponse entry,
+        CategoryLabelSet labels)
     {
         if (entry.IsNoShow)
-            return ("NO-SHOW", HistoryStatusPalette.BadFill, HistoryStatusPalette.BadInk, false, false);
+            return ("NO-SHOW", HistoryStatusPalette.BadFill, HistoryStatusPalette.BadInk, false, false, false);
 
         if (entry.IsCancelled)
             return (entry.Details?.CancelledBy == CancelledByValues.Customer ? "YOU LEFT" : "CANCELLED",
-                Colors.Transparent, HistoryStatusPalette.DimInk, true, false);
+                Colors.Transparent, HistoryStatusPalette.DimInk, true, false, false);
 
         if (entry.IsAwaitingCollection)
-            return ("READY FOR COLLECTION", HistoryStatusPalette.InfoFill, HistoryStatusPalette.InfoInk, false, false);
+            return ("READY FOR COLLECTION", HistoryStatusPalette.InfoFill, HistoryStatusPalette.InfoInk, false, false, true);
 
         if (entry.IsFinished)
-            return ("SERVED", HistoryStatusPalette.RaisedFill, HistoryStatusPalette.MutedInk, false, false);
+            return ("SERVED", HistoryStatusPalette.RaisedFill, HistoryStatusPalette.MutedInk, false, false, false);
 
         return entry.IsBeingServed
-            ? ("IN THE CHAIR", HistoryStatusPalette.LiveFill, HistoryStatusPalette.LiveInk, false, false)
-            : ("IN THE QUEUE", HistoryStatusPalette.LiveFill, HistoryStatusPalette.LiveInk, false, false);
+            ? (labels.ServingStatus, HistoryStatusPalette.LiveFill, HistoryStatusPalette.LiveInk, false, false, true)
+            : ("IN THE QUEUE", HistoryStatusPalette.LiveFill, HistoryStatusPalette.LiveInk, false, false, true);
     }
 
     private static string FormatTime(DateTimeOffset value)

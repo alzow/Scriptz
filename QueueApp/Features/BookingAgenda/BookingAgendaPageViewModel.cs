@@ -409,7 +409,7 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
                 FreeSlots = freeSlots,
                 OperatorNames = _operatorNames,
                 ActiveOperatorCount = _filterOperatorId is null ? _operators.Count : 1,
-                ResourcePluralNoun = _labels.PluralNoun,
+                Labels = _labels,
                 ShortestServiceMinutes = ShortestServiceMinutes(),
                 Now = LocalTime.ToLocal(DateTimeOffset.UtcNow),
             };

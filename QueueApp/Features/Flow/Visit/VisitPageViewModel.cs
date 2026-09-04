@@ -43,6 +43,10 @@ public partial class VisitPageViewModel : BaseViewModel
     public bool IsSettled => Record is not null && !Record.IsLive;
 
     public string BusinessName => Record?.BusinessName ?? Business?.Name ?? string.Empty;
+
+    // The record carries the category it was taken at, so the page speaks the right trade before
+    // the business read comes back — and still does when it never does.
+    public CategoryLabelSet Labels => Record?.Labels ?? CategoryLabels.Resolve(Business?.Category);
     public string StatusText => Record?.StatusText ?? string.Empty;
 
     // The tones the shared business header knows: accent while it is live, a plain outline once it
@@ -103,6 +107,7 @@ public partial class VisitPageViewModel : BaseViewModel
     public string ReasonQuote { get; set; } = string.Empty;
 
     public bool ShowPaymentLine => IsSettled && Record?.HasPrice == true;
+    public string PaymentLineText => $"Queue doesn't handle payment — that was settled at {Labels.Venue}.";
     public string PrimaryActionText { get; set; } = string.Empty;
 
     private Guid _recordId;
@@ -378,6 +383,7 @@ public partial class VisitPageViewModel : BaseViewModel
             OnPropertyChanged(nameof(ShopNoteText));
             OnPropertyChanged(nameof(ShowReasonBlock));
             OnPropertyChanged(nameof(ShowPaymentLine));
+            OnPropertyChanged(nameof(PaymentLineText));
             OnPropertyChanged(nameof(LocationAddress));
             OnPropertyChanged(nameof(HasDistance));
             OnPropertyChanged(nameof(HasLocation));
@@ -426,7 +432,7 @@ public partial class VisitPageViewModel : BaseViewModel
 
             JustJoinedText = record.IsQueue
                 ? "You're in. We'll keep this page up to date."
-                : "Request sent. You'll hear back from the shop.";
+                : $"Request sent. You'll hear back from {Labels.Venue}.";
 
             if (record.IsAwaitingCollection)
             {
@@ -454,7 +460,7 @@ public partial class VisitPageViewModel : BaseViewModel
         {
             if (record.IsBeingServed)
             {
-                HeroCaption = "IN THE CHAIR SINCE";
+                HeroCaption = Labels.ServingSinceCaption;
                 HeroTime = VisitHelper.FormatTime(record.StartedAt);
                 HeroRelative = record.StartedAt is { } started
                     ? $"started {VisitHelper.DescribeSpan(DateTimeOffset.UtcNow - started)} ago"
@@ -610,7 +616,7 @@ public partial class VisitPageViewModel : BaseViewModel
                     Facts.Add(new VisitFactRow { Label = "Waited", Value = VisitHelper.DescribeSpan(waited) });
 
                 if (record.Served is { } served)
-                    Facts.Add(new VisitFactRow { Label = "In the chair", Value = VisitHelper.DescribeSpan(served) });
+                    Facts.Add(new VisitFactRow { Label = Labels.ServingLabel, Value = VisitHelper.DescribeSpan(served) });
 
                 if (record.IsBooking && record.SlotStart is not null)
                     Facts.Add(new VisitFactRow { Label = "Slot", Value = VisitHelper.FormatSlot(record) });
@@ -683,7 +689,7 @@ public partial class VisitPageViewModel : BaseViewModel
             }
 
             if (record.WasCancelled && record.CancelledAt is not null)
-                steps.Add(VisitHelper.Step(record.CancelledAt, record.CancelledByCustomer ? "You left the queue" : "The shop cancelled this", VisitStepState.Failed));
+                steps.Add(VisitHelper.Step(record.CancelledAt, record.CancelledByCustomer ? "You left the queue" : $"{Labels.VenueCapitalised} cancelled this", VisitStepState.Failed));
         }
         catch (Exception ex)
         {
@@ -723,7 +729,7 @@ public partial class VisitPageViewModel : BaseViewModel
             }
 
             if (record.CancelledAt is not null)
-                steps.Add(VisitHelper.Step(record.CancelledAt, record.CancelledByCustomer ? "You cancelled" : "The shop cancelled this", VisitStepState.Failed));
+                steps.Add(VisitHelper.Step(record.CancelledAt, record.CancelledByCustomer ? "You cancelled" : $"{Labels.VenueCapitalised} cancelled this", VisitStepState.Failed));
         }
         catch (Exception ex)
         {
@@ -1162,13 +1168,15 @@ public partial class VisitPageViewModel : BaseViewModel
     {
         try
         {
+            var seenStraightAway = $"{Labels.VenueCapitalised} will see this straight away.";
+
             if (record.SlotStart is not { } slot)
-                return "The shop will see this straight away.";
+                return seenStraightAway;
 
             var notice = slot - DateTimeOffset.UtcNow;
             return notice < TimeSpan.FromHours(NoticeWindowHours) && notice > TimeSpan.Zero
-                ? $"That's less than {NoticeWindowHours} hours before your slot — the shop may not be able to fill it. Give them a call if you can."
-                : "The shop will see this straight away.";
+                ? $"That's less than {NoticeWindowHours} hours before your slot — {Labels.Venue} may not be able to fill it. Give them a call if you can."
+                : seenStraightAway;
         }
         catch (Exception ex)
         {
