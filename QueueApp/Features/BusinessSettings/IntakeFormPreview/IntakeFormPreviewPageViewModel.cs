@@ -119,7 +119,7 @@ public partial class IntakeFormPreviewPageViewModel : BaseViewModel
     {
         try
         {
-            await RunNavigationAsync(() => NavigationService.GoBackAsync());
+            await NavigationService.GoBackAsync();
         }
         catch (Exception exception)
         {

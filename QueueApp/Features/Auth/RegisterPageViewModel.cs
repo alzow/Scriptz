@@ -90,13 +90,13 @@ public partial class RegisterPageViewModel : BaseViewModel
 
             if (!string.IsNullOrEmpty(response.AccessToken))
             {
-                await RunNavigationAsync(() => NavigationService.NavigateAsync(
-                    MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: false)));
+                await NavigationService.NavigateAsync(
+                    MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: false));
                 return;
             }
 
             await _popupService.ShowAlertAsync("Almost there", AuthConstants.ConfirmEmailMessage);
-            await RunNavigationAsync(() => NavigationService.NavigateAsync(NavigationPaths.Login));
+            await NavigationService.NavigateAsync(NavigationPaths.Login);
         }
         catch (ApiException exception)
         {
@@ -122,7 +122,7 @@ public partial class RegisterPageViewModel : BaseViewModel
     {
         try
         {
-            await RunNavigationAsync(() => NavigationService.GoBackAsync());
+            await NavigationService.GoBackAsync();
         }
         catch (Exception exception)
         {

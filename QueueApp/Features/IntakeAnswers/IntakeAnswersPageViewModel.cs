@@ -124,7 +124,7 @@ public partial class IntakeAnswersPageViewModel : BaseViewModel
     {
         try
         {
-            await RunNavigationAsync(() => NavigationService.GoBackAsync());
+            await NavigationService.GoBackAsync();
         }
         catch (Exception ex)
         {

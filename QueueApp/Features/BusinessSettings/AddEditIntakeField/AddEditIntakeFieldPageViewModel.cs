@@ -298,7 +298,7 @@ public partial class AddEditIntakeFieldPageViewModel : BaseViewModel
             }
 
             await PersistAsync();
-            await RunNavigationAsync(() => NavigationService.GoBackAsync());
+            await NavigationService.GoBackAsync();
         }
         catch (Exception exception)
         {
@@ -356,7 +356,7 @@ public partial class AddEditIntakeFieldPageViewModel : BaseViewModel
                 return;
 
             await _intakeFieldsService.DeleteFieldAsync(_editingFieldId.Value);
-            await RunNavigationAsync(() => NavigationService.GoBackAsync());
+            await NavigationService.GoBackAsync();
         }
         catch (Exception exception)
         {
@@ -395,7 +395,7 @@ public partial class AddEditIntakeFieldPageViewModel : BaseViewModel
     {
         try
         {
-            await RunNavigationAsync(() => NavigationService.GoBackAsync());
+            await NavigationService.GoBackAsync();
         }
         catch (Exception exception)
         {

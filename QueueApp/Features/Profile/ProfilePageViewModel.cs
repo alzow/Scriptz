@@ -233,8 +233,8 @@ public partial class ProfilePageViewModel : BaseViewModel
     {
         try
         {
-            await RunNavigationAsync(() => NavigationService.NavigateAsync(
-                $"NavigationPage/{NavigationPaths.ProfileNotificationsPage}", modal: true, animated: false));
+            await NavigationService.NavigateAsync(
+                $"NavigationPage/{NavigationPaths.ProfileNotificationsPage}", modal: true, animated: false);
         }
         catch (Exception ex)
         {
@@ -263,8 +263,8 @@ public partial class ProfilePageViewModel : BaseViewModel
     {
         try
         {
-            await RunNavigationAsync(() => NavigationService.NavigateAsync(
-                $"NavigationPage/{NavigationPaths.ProfileAccountPage}", modal: true, animated: false));
+            await NavigationService.NavigateAsync(
+                $"NavigationPage/{NavigationPaths.ProfileAccountPage}", modal: true, animated: false);
         }
         catch (Exception ex)
         {
@@ -277,8 +277,8 @@ public partial class ProfilePageViewModel : BaseViewModel
     {
         try
         {
-            await RunNavigationAsync(() => NavigationService.NavigateAsync(
-                $"NavigationPage/{NavigationPaths.BusinessSettingsPage}", modal: true, animated: false));
+            await NavigationService.NavigateAsync(
+                $"NavigationPage/{NavigationPaths.BusinessSettingsPage}", modal: true, animated: false);
         }
         catch (Exception ex)
         {
@@ -315,7 +315,7 @@ public partial class ProfilePageViewModel : BaseViewModel
 
             await _authService.SignOutAsync();
             _profileService.InvalidateCache();
-            await RunNavigationAsync(() => NavigationService.NavigateAsync(NavigationPaths.Login));
+            await NavigationService.NavigateAsync(NavigationPaths.Login);
         }
         catch (Exception ex)
         {

@@ -311,14 +311,14 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             if (Business is null || !IsCtaEnabled)
                 return;
 
-            await RunNavigationAsync(() => NavigationService.NavigateAsync(
+            await NavigationService.NavigateAsync(
                 IsBookingMode ? NavigationPaths.BookingFlowPage : NavigationPaths.QueueFlowPage,
                 new NavigationParameters
                 {
                     { NavigationKeys.BusinessId, _businessId },
                     { NavigationKeys.BusinessSnapshot,
                         new BusinessSnapshot(Business, _allOperators, _services, _hours) },
-                }));
+                });
         }
         catch (Exception ex)
         {
@@ -335,16 +335,16 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         {
             if (MyStatus is { } status)
             {
-                await RunNavigationAsync(() => NavigationService.NavigateAsync(
+                await NavigationService.NavigateAsync(
                     NavigationPaths.VisitPage,
-                    new NavigationParameters { { NavigationKeys.EntryId, status.EntryId } }));
+                    new NavigationParameters { { NavigationKeys.EntryId, status.EntryId } });
                 return;
             }
 
             if (_activeBooking is { } booking)
-                await RunNavigationAsync(() => NavigationService.NavigateAsync(
+                await NavigationService.NavigateAsync(
                     NavigationPaths.VisitPage,
-                    new NavigationParameters { { NavigationKeys.BookingId, booking.Id } }));
+                    new NavigationParameters { { NavigationKeys.BookingId, booking.Id } });
         }
         catch (Exception ex)
         {
@@ -718,7 +718,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
             if (_openedFromTabs)
                 await MainTabbedNavigation.ReturnToTabsAsync(NavigationService, _businessService);
             else
-                await RunNavigationAsync(() => NavigationService.GoBackAsync());
+                await NavigationService.GoBackAsync();
         }
         catch (Exception ex)
         {

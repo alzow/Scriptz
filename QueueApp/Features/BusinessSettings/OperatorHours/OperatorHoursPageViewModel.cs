@@ -42,8 +42,8 @@ public partial class OperatorHoursPageViewModel : BaseViewModel
 
             if (operators.Count == 1)
             {
-                await RunNavigationAsync(() => NavigationService.NavigateAsync(NavigationPaths.WeeklyHoursPage,
-                    new NavigationParameters { [NavigationKeys.OperatorId] = operators[0].Id, [NavigationKeys.OperatorName] = operators[0].DisplayName }));
+                await NavigationService.NavigateAsync(NavigationPaths.WeeklyHoursPage,
+                    new NavigationParameters { [NavigationKeys.OperatorId] = operators[0].Id, [NavigationKeys.OperatorName] = operators[0].DisplayName });
                 return;
             }
 
@@ -64,8 +64,8 @@ public partial class OperatorHoursPageViewModel : BaseViewModel
     {
         try
         {
-            await RunNavigationAsync(() => NavigationService.NavigateAsync(NavigationPaths.WeeklyHoursPage,
-                new NavigationParameters { [NavigationKeys.OperatorId] = op.Id, [NavigationKeys.OperatorName] = op.DisplayName }));
+            await NavigationService.NavigateAsync(NavigationPaths.WeeklyHoursPage,
+                new NavigationParameters { [NavigationKeys.OperatorId] = op.Id, [NavigationKeys.OperatorName] = op.DisplayName });
         }
         catch (Exception exception)
         {
@@ -78,7 +78,7 @@ public partial class OperatorHoursPageViewModel : BaseViewModel
     {
         try
         {
-            await RunNavigationAsync(() => NavigationService.GoBackAsync());
+            await NavigationService.GoBackAsync();
         }
         catch (Exception ex)
         {

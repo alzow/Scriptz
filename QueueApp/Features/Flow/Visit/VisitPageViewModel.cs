@@ -1017,9 +1017,9 @@ public partial class VisitPageViewModel : BaseViewModel
             if (Record is not { } record)
                 return;
 
-            await RunNavigationAsync(() => NavigationService.NavigateAsync(
+            await NavigationService.NavigateAsync(
                 record.IsBooking ? NavigationPaths.BookingFlowPage : NavigationPaths.QueueFlowPage,
-                new NavigationParameters { { NavigationKeys.BusinessId, record.BusinessId } }));
+                new NavigationParameters { { NavigationKeys.BusinessId, record.BusinessId } });
         }
         catch (Exception ex)
         {

@@ -51,7 +51,7 @@ public partial class AddAvailabilityWindowPageViewModel : BaseViewModel
     {
         try
         {
-            await RunNavigationAsync(() => NavigationService.GoBackAsync());
+            await NavigationService.GoBackAsync();
         }
         catch (Exception ex)
         {
@@ -78,7 +78,7 @@ public partial class AddAvailabilityWindowPageViewModel : BaseViewModel
                 StartTime = StartTime,
                 EndTime = EndTime
             });
-            await RunNavigationAsync(() => NavigationService.GoBackAsync());
+            await NavigationService.GoBackAsync();
         }
         catch (Exception ex)
         {

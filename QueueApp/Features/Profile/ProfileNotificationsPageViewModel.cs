@@ -148,7 +148,7 @@ public partial class ProfileNotificationsPageViewModel : BaseViewModel
         try
         {
             SavePreferences();
-            await RunNavigationAsync(() => NavigationService.GoBackAsync());
+            await NavigationService.GoBackAsync();
         }
         catch (Exception ex)
         {

@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using MPowerKit.Navigation;
 using MPowerKit.Navigation.Interfaces;
-using QueueApp.Framework.Navigation;
 using QueueApp.Services.Storage;
 
 namespace QueueApp.Framework.Base;
@@ -72,7 +71,7 @@ public abstract class BaseViewModel : ObservableObject,
     // sitting on a stack that has something under it.
     public virtual bool TryHandleSystemBack() => false;
 
-    protected async Task SafeFireAndForgetAsync(Func<Task> work)
+    private async Task SafeFireAndForgetAsync(Func<Task> work)
     {
         try
         {
@@ -83,11 +82,6 @@ public abstract class BaseViewModel : ObservableObject,
             await HandleExceptionAsync(ex);
         }
     }
-
-    // Every transition a view model makes goes through here rather than straight at
-    // NavigationService, so a second tap arriving while the first is still moving is dropped
-    // instead of popping a page MPowerKit has already accounted for. See NavigationGate.
-    protected static Task RunNavigationAsync(Func<Task> navigation) => NavigationGate.RunAsync(navigation);
 
     protected virtual Task HandleExceptionAsync(Exception exception)
     {

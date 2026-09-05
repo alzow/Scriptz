@@ -91,8 +91,8 @@ public partial class BlockedDatesPageViewModel : BaseViewModel
     {
         try
         {
-            await RunNavigationAsync(() => NavigationService.NavigateAsync(NavigationPaths.AddAvailabilityBlockPage,
-                new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId }));
+            await NavigationService.NavigateAsync(NavigationPaths.AddAvailabilityBlockPage,
+                new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId });
         }
         catch (Exception exception)
         {
@@ -124,7 +124,7 @@ public partial class BlockedDatesPageViewModel : BaseViewModel
     {
         try
         {
-            await RunNavigationAsync(() => NavigationService.GoBackAsync());
+            await NavigationService.GoBackAsync();
         }
         catch (Exception ex)
         {

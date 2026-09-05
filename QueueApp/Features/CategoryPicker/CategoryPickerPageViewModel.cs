@@ -542,9 +542,9 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
             };
             // Modal, so the tabbed page and every tab's feed stay standing underneath and the way
             // back is a dismissal rather than a shell rebuilt from scratch.
-            await RunNavigationAsync(() => NavigationService.NavigateAsync(
+            await NavigationService.NavigateAsync(
                 $"NavigationPage/{NavigationPaths.BusinessDetailPage}", navParams,
-                modal: true, animated: false));
+                modal: true, animated: false);
         }
         catch (Exception ex)
         {
@@ -564,9 +564,9 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
                 [NavigationKeys.EntryId] = ActiveEntry.EntryId,
                 [NavigationKeys.OpenedFromTabs] = true,
             };
-            await RunNavigationAsync(() => NavigationService.NavigateAsync(
+            await NavigationService.NavigateAsync(
                 $"NavigationPage/{NavigationPaths.VisitPage}", navParams,
-                modal: true, animated: false));
+                modal: true, animated: false);
         }
         catch (Exception ex)
         {
@@ -586,9 +586,9 @@ public partial class CategoryPickerPageViewModel : BaseViewModel
                 [NavigationKeys.BookingId] = booking.Id,
                 [NavigationKeys.OpenedFromTabs] = true,
             };
-            await RunNavigationAsync(() => NavigationService.NavigateAsync(
+            await NavigationService.NavigateAsync(
                 $"NavigationPage/{NavigationPaths.VisitPage}", navParams,
-                modal: true, animated: false));
+                modal: true, animated: false);
         }
         catch (Exception ex)
         {
