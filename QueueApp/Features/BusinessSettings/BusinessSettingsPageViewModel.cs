@@ -19,7 +19,7 @@ public partial class BusinessSettingsPageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.NavigateAsync(NavigationPaths.ServicesManagementPage);
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(NavigationPaths.ServicesManagementPage));
         }
         catch (Exception exception)
         {
@@ -32,7 +32,7 @@ public partial class BusinessSettingsPageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.NavigateAsync(NavigationPaths.StaffManagementPage);
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(NavigationPaths.StaffManagementPage));
         }
         catch (Exception exception)
         {
@@ -45,7 +45,7 @@ public partial class BusinessSettingsPageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.NavigateAsync(NavigationPaths.OperatorHoursPage);
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(NavigationPaths.OperatorHoursPage));
         }
         catch (Exception exception)
         {
@@ -58,7 +58,7 @@ public partial class BusinessSettingsPageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.NavigateAsync(NavigationPaths.BusinessLocationPage);
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(NavigationPaths.BusinessLocationPage));
         }
         catch (Exception exception)
         {
@@ -71,7 +71,7 @@ public partial class BusinessSettingsPageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.GoBackAsync();
+            await RunNavigationAsync(() => NavigationService.GoBackAsync());
         }
         catch (Exception ex)
         {

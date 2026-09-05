@@ -100,7 +100,7 @@ public partial class BusinessLocationPageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.GoBackAsync();
+            await RunNavigationAsync(() => NavigationService.GoBackAsync());
         }
         catch (Exception ex)
         {

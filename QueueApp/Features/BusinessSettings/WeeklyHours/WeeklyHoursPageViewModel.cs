@@ -105,8 +105,8 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.NavigateAsync(NavigationPaths.AddAvailabilityWindowPage,
-                new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId, [NavigationKeys.DayOfWeek] = dayOfWeek });
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(NavigationPaths.AddAvailabilityWindowPage,
+                new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId, [NavigationKeys.DayOfWeek] = dayOfWeek }));
         }
         catch (Exception exception)
         {
@@ -138,8 +138,8 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.NavigateAsync(NavigationPaths.BlockedDatesPage,
-                new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId, [NavigationKeys.OperatorName] = OperatorName });
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(NavigationPaths.BlockedDatesPage,
+                new NavigationParameters { [NavigationKeys.OperatorId] = _operatorId, [NavigationKeys.OperatorName] = OperatorName }));
         }
         catch (Exception exception)
         {
@@ -152,7 +152,7 @@ public partial class WeeklyHoursPageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.GoBackAsync();
+            await RunNavigationAsync(() => NavigationService.GoBackAsync());
         }
         catch (Exception ex)
         {

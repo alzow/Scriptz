@@ -54,7 +54,7 @@ public partial class AddAvailabilityBlockPageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.GoBackAsync();
+            await RunNavigationAsync(() => NavigationService.GoBackAsync());
         }
         catch (Exception ex)
         {
@@ -94,7 +94,7 @@ public partial class AddAvailabilityBlockPageViewModel : BaseViewModel
                 EndsAt = endsAt,
                 Reason = string.IsNullOrWhiteSpace(Reason) ? null : Reason
             });
-            await NavigationService.GoBackAsync();
+            await RunNavigationAsync(() => NavigationService.GoBackAsync());
         }
         catch (Exception ex)
         {

@@ -404,10 +404,13 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
         {
             ResetFlowState();
 
-            if (IsOperatorFlow)
-                _ = ReturnToTabsAsync(OperatorHomeTab);
-            else
-                _ = NavigationService.GoBackAsync();
+            // Fire-and-forget by necessity: this is reached from the synchronous step-back command
+            // and from Android's hardware back, neither of which can await. Through the gate so a
+            // second press cannot pop a second page, and through SafeFireAndForgetAsync so a failure
+            // inside the pop is handled here rather than left unobserved on a task nobody awaits.
+            _ = SafeFireAndForgetAsync(() => IsOperatorFlow
+                ? ReturnToTabsAsync(OperatorHomeTab)
+                : RunNavigationAsync(() => NavigationService.GoBackAsync()));
         }
         catch (Exception exception)
         {
@@ -455,13 +458,13 @@ public abstract partial class FlowPageViewModelBase : BaseViewModel
 
             var key = _submittedIsBooking ? NavigationKeys.BookingId : NavigationKeys.EntryId;
 
-            await NavigationService.NavigateAsync(
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(
                 NavigationPaths.VisitPage,
                 new NavigationParameters
                 {
                     { key, _submittedRecordId },
                     { NavigationKeys.JustJoined, true },
-                });
+                }));
         }
         catch (Exception exception)
         {

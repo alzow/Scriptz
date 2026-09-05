@@ -68,7 +68,7 @@ public class QueueSplashPageViewModel : BaseViewModel
 
             if (!isValid)
             {
-                await _navigationService.NavigateAsync(SignedOutDestination());
+                await RunNavigationAsync(() => _navigationService.NavigateAsync(SignedOutDestination()));
                 return;
             }
 
@@ -78,12 +78,12 @@ public class QueueSplashPageViewModel : BaseViewModel
 
             var (ownsBusiness, mode) = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
             var uri = MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: ownsBusiness, manageMode: mode);
-            await _navigationService.NavigateAsync(uri);
+            await RunNavigationAsync(() => _navigationService.NavigateAsync(uri));
         }
         catch (Exception ex)
         {
             await HandleExceptionAsync(ex);
-            await _navigationService.NavigateAsync($"/{NavigationPaths.Login}");
+            await RunNavigationAsync(() => _navigationService.NavigateAsync($"/{NavigationPaths.Login}"));
         }
     }
 

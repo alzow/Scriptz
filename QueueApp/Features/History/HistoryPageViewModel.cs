@@ -208,9 +208,9 @@ public partial class HistoryPageViewModel : BaseViewModel
                 [NavigationKeys.OpenedFromTabs] = true,
             };
 
-            await NavigationService.NavigateAsync(
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(
                 $"NavigationPage/{NavigationPaths.VisitPage}", navParams,
-                modal: true, animated: false);
+                modal: true, animated: false));
         }
         catch (Exception ex)
         {

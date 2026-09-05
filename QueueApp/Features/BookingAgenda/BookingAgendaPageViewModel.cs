@@ -886,9 +886,9 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
     {
         try
         {
-             await NavigationService.NavigateAsync(
+             await RunNavigationAsync(() => NavigationService.NavigateAsync(
                 $"NavigationPage/{NavigationPaths.BusinessSettingsPage}",
-                modal: true, animated: false);
+                modal: true, animated: false));
         }
         catch (Exception ex)
         {
@@ -982,9 +982,9 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
 
             // The agenda is a tab, so a plain push would bury the page inside the tab's own stack
             // with the tab bar still on screen — the same reason the booking flow opens modally.
-            await NavigationService.NavigateAsync(
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(
                 $"NavigationPage/{NavigationPaths.IntakeAnswersPage}", parameters,
-                modal: true, animated: false);
+                modal: true, animated: false));
         }
         catch (Exception ex)
         {
@@ -1117,9 +1117,9 @@ public partial class BookingAgendaPageViewModel : BaseViewModel
             // The agenda is a tab, so a plain push would bury the flow inside the tab's own stack
             // with the tab bar still on screen. Modally it gets the whole window, and comes back by
             // dismissing onto the agenda it left — still standing, because a modal does not replace it.
-            await NavigationService.NavigateAsync(
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(
                 $"NavigationPage/{NavigationPaths.BookingFlowPage}", parameters,
-                modal: true, animated: false);
+                modal: true, animated: false));
         }
         catch (Exception ex)
         {

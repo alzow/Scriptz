@@ -76,7 +76,7 @@ public partial class AddEditOperatorPageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.GoBackAsync();
+            await RunNavigationAsync(() => NavigationService.GoBackAsync());
         }
         catch (Exception ex)
         {
@@ -115,7 +115,7 @@ public partial class AddEditOperatorPageViewModel : BaseViewModel
                 });
             }
 
-            await NavigationService.GoBackAsync();
+            await RunNavigationAsync(() => NavigationService.GoBackAsync());
         }
         catch (Exception ex)
         {

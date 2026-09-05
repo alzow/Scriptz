@@ -249,7 +249,7 @@ public partial class WelcomePageViewModel : BaseViewModel
         try
         {
             RetireAutoAdvance();
-            await NavigationService.NavigateAsync(NavigationPaths.RegisterPage);
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(NavigationPaths.RegisterPage));
         }
         catch (Exception exception)
         {
@@ -263,9 +263,9 @@ public partial class WelcomePageViewModel : BaseViewModel
         try
         {
             RetireAutoAdvance();
-            await NavigationService.NavigateAsync(
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(
                 NavigationPaths.LoginPage,
-                new NavigationParameters { { NavigationKeys.CanGoBack, true } });
+                new NavigationParameters { { NavigationKeys.CanGoBack, true } }));
         }
         catch (Exception exception)
         {

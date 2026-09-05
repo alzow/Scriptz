@@ -164,7 +164,7 @@ public partial class AddEditServicePageViewModel : BaseViewModel
         try
         {
             if (await PersistAsync())
-                await NavigationService.GoBackAsync();
+                await RunNavigationAsync(() => NavigationService.GoBackAsync());
         }
         catch (Exception exception)
         {
@@ -249,8 +249,8 @@ public partial class AddEditServicePageViewModel : BaseViewModel
             if (_editingServiceId is null)
                 return;
 
-            await NavigationService.NavigateAsync(NavigationPaths.AddEditIntakeFieldPage,
-                new NavigationParameters { [NavigationKeys.ServiceId] = _editingServiceId.Value });
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(NavigationPaths.AddEditIntakeFieldPage,
+                new NavigationParameters { [NavigationKeys.ServiceId] = _editingServiceId.Value }));
         }
         catch (Exception exception)
         {
@@ -266,12 +266,12 @@ public partial class AddEditServicePageViewModel : BaseViewModel
             if (row is null || _editingServiceId is null)
                 return;
 
-            await NavigationService.NavigateAsync(NavigationPaths.AddEditIntakeFieldPage,
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(NavigationPaths.AddEditIntakeFieldPage,
                 new NavigationParameters
                 {
                     [NavigationKeys.ServiceId] = _editingServiceId.Value,
                     [NavigationKeys.IntakeFieldId] = row.Id,
-                });
+                }));
         }
         catch (Exception exception)
         {
@@ -310,8 +310,8 @@ public partial class AddEditServicePageViewModel : BaseViewModel
             if (_editingServiceId is null)
                 return;
 
-            await NavigationService.NavigateAsync(NavigationPaths.IntakeFormPreviewPage,
-                new NavigationParameters { [NavigationKeys.ServiceId] = _editingServiceId.Value });
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(NavigationPaths.IntakeFormPreviewPage,
+                new NavigationParameters { [NavigationKeys.ServiceId] = _editingServiceId.Value }));
         }
         catch (Exception exception)
         {
@@ -359,7 +359,7 @@ public partial class AddEditServicePageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.GoBackAsync();
+            await RunNavigationAsync(() => NavigationService.GoBackAsync());
         }
         catch (Exception exception)
         {

@@ -3,6 +3,7 @@ using QueueApp.Features.Auth;
 using QueueApp.Features.QueueSplash;
 using QueueApp.Features.Welcome;
 using QueueApp.Framework.Base;
+using QueueApp.Framework.Navigation;
 using QueueApp.Framework.Theming;
 using QueueApp.Services.Auth;
 
@@ -51,15 +52,14 @@ public partial class App : Application
 
                 // Resolved here rather than injected: navigation is only usable once the app's first
                 // page is up, which is well after this class is constructed.
-                var navigationService = _services.GetService<INavigationService>();
-                if (navigationService is null)
+                if (_services.GetService<INavigationService>() is not { } navigationService)
                 {
                     System.Diagnostics.Debug.WriteLine("[Auth] session expired, but there is no navigation service to leave with");
                     return;
                 }
 
                 System.Diagnostics.Debug.WriteLine("[Auth] session expired — returning to login");
-                await navigationService.NavigateAsync(NavigationPaths.Login);
+                await NavigationGate.RunAsync(() => navigationService.NavigateAsync(NavigationPaths.Login));
             }
             catch (Exception ex)
             {

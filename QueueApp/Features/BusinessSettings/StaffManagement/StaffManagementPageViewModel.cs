@@ -90,8 +90,8 @@ public partial class StaffManagementPageViewModel : BaseViewModel
         IsAddingOperator = true;
         try
         {
-            await NavigationService.NavigateAsync(NavigationPaths.AddEditOperatorPage,
-                new NavigationParameters { [NavigationKeys.BusinessId] = _businessId });
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(NavigationPaths.AddEditOperatorPage,
+                new NavigationParameters { [NavigationKeys.BusinessId] = _businessId }));
         }
         catch (Exception ex)
         {
@@ -108,8 +108,8 @@ public partial class StaffManagementPageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.NavigateAsync(NavigationPaths.AddEditOperatorPage,
-                new NavigationParameters { [NavigationKeys.BusinessId] = _businessId, [NavigationKeys.OperatorId] = op.Id });
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(NavigationPaths.AddEditOperatorPage,
+                new NavigationParameters { [NavigationKeys.BusinessId] = _businessId, [NavigationKeys.OperatorId] = op.Id }));
         }
         catch (Exception exception)
         {
@@ -141,7 +141,7 @@ public partial class StaffManagementPageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.GoBackAsync();
+            await RunNavigationAsync(() => NavigationService.GoBackAsync());
         }
         catch (Exception ex)
         {

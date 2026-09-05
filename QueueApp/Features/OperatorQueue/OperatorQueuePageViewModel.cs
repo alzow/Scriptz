@@ -583,9 +583,9 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.NavigateAsync(
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(
                 $"NavigationPage/{NavigationPaths.BusinessSettingsPage}",
-                modal: true, animated: false);
+                modal: true, animated: false));
         }
         catch (Exception ex)
         {
@@ -836,9 +836,9 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
 
             // The board is a tab, so a plain push would bury the page inside the tab's own stack
             // with the tab bar still on screen — the same reason the flow opens modally from here.
-            await NavigationService.NavigateAsync(
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(
                 $"NavigationPage/{NavigationPaths.IntakeAnswersPage}", parameters,
-                modal: true, animated: false);
+                modal: true, animated: false));
         }
         catch (Exception ex)
         {
@@ -995,9 +995,9 @@ public partial class OperatorQueuePageViewModel : BaseViewModel
             // The board is a tab, so a plain push would bury the flow inside the tab's own stack
             // with the tab bar still on screen. Modally it gets the whole window, and comes back by
             // dismissing onto the board it left — still standing, because a modal does not replace it.
-            await NavigationService.NavigateAsync(
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(
                 $"NavigationPage/{NavigationPaths.QueueFlowPage}", parameters,
-                modal: true, animated: false);
+                modal: true, animated: false));
         }
         catch (Exception ex)
         {

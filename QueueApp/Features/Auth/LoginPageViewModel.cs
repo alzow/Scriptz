@@ -74,7 +74,7 @@ public partial class LoginPageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.GoBackAsync();
+            await RunNavigationAsync(() => NavigationService.GoBackAsync());
         }
         catch (Exception exception)
         {
@@ -104,7 +104,7 @@ public partial class LoginPageViewModel : BaseViewModel
 
             var (ownsBusiness, mode) = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
             var uri = MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: ownsBusiness, manageMode: mode);
-            await NavigationService.NavigateAsync(uri);
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(uri));
         }
         catch (ApiException exception)
         {
@@ -130,7 +130,7 @@ public partial class LoginPageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.NavigateAsync(NavigationPaths.RegisterPage);
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(NavigationPaths.RegisterPage));
         }
         catch (Exception exception)
         {

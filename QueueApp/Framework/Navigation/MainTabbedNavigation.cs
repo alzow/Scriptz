@@ -54,7 +54,8 @@ public static class MainTabbedNavigation
         return uri;
     }
 
-    // True while a page sits over the tabs rather than in place of them.
+    // True while a page sits over the tabs rather than in place of them. Read inside the gate, so
+    // it cannot be answered against a modal stack another transition is halfway through changing.
     private static bool TabsAreStillBehindUs =>
         Application.Current?.Windows.FirstOrDefault()?.Navigation.ModalStack.Count > 0;
 
@@ -69,19 +70,35 @@ public static class MainTabbedNavigation
         IMessenger? messenger = null,
         string? selectTab = null)
     {
-        if (TabsAreStillBehindUs)
+        await NavigationGate.RunAsync(async () =>
         {
-            // Sent before the dismissal, not after: the tabbed page can switch tabs while it is
-            // still covered, so the tab change happens behind the modal instead of flashing once
-            // it has gone.
-            if (selectTab is not null && messenger is not null)
-                messenger.Send(new SelectTabMessage(selectTab));
+            if (TabsAreStillBehindUs)
+            {
+                // Sent before the dismissal, not after: the tabbed page can switch tabs while it is
+                // still covered, so the tab change happens behind the modal instead of flashing once
+                // it has gone.
+                if (selectTab is not null && messenger is not null)
+                    messenger.Send(new SelectTabMessage(selectTab));
 
-            await navigationService.GoBackAsync(modal: true, animated: false);
-            return;
-        }
+                try
+                {
+                    await navigationService.GoBackAsync(modal: true, animated: false);
+                    return;
+                }
+                catch (Exception exception)
+                {
+                    // A dismissal that fails strands the user on a page whose back has just stopped
+                    // working, which is worse than the cost of the rebuild below — so it falls
+                    // through to it rather than passing the failure up. Logged because dismissal is
+                    // meant to be the cheap path, and one that throws means the library's record of
+                    // the stack and MAUI's have disagreed somewhere upstream.
+                    System.Diagnostics.Debug.WriteLine(
+                        $"[Navigation] modal dismissal failed, rebuilding the tabs: {exception.Message}");
+                }
+            }
 
-        var (ownsBusiness, mode) = await TryGetOwnedBusinessAsync(businessService);
-        await navigationService.NavigateAsync(BuildMainTabbedUri(ownsBusiness, mode, selectTab));
+            var (ownsBusiness, mode) = await TryGetOwnedBusinessAsync(businessService);
+            await navigationService.NavigateAsync(BuildMainTabbedUri(ownsBusiness, mode, selectTab));
+        });
     }
 }

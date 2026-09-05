@@ -121,8 +121,8 @@ public partial class ServicesManagementPageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.NavigateAsync(NavigationPaths.AddEditServicePage,
-                new NavigationParameters { [NavigationKeys.BusinessId] = _businessId });
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(NavigationPaths.AddEditServicePage,
+                new NavigationParameters { [NavigationKeys.BusinessId] = _businessId }));
         }
         catch (Exception exception)
         {
@@ -138,12 +138,12 @@ public partial class ServicesManagementPageViewModel : BaseViewModel
             if (service is null)
                 return;
 
-            await NavigationService.NavigateAsync(NavigationPaths.AddEditServicePage,
+            await RunNavigationAsync(() => NavigationService.NavigateAsync(NavigationPaths.AddEditServicePage,
                 new NavigationParameters
                 {
                     [NavigationKeys.BusinessId] = _businessId,
                     [NavigationKeys.ServiceId] = service.Id,
-                });
+                }));
         }
         catch (Exception exception)
         {
@@ -169,7 +169,7 @@ public partial class ServicesManagementPageViewModel : BaseViewModel
     {
         try
         {
-            await NavigationService.GoBackAsync();
+            await RunNavigationAsync(() => NavigationService.GoBackAsync());
         }
         catch (Exception exception)
         {
