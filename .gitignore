@@ -28,3 +28,5 @@ DerivedData/
 
 # Logs
 *.log
+
+*firebase-adminsdk*.json
