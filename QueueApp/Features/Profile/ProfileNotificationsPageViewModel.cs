@@ -136,6 +136,12 @@ public partial class ProfileNotificationsPageViewModel : BaseViewModel
         }
     }
 
+    public override bool TryHandleSystemBack()
+    {
+        GoBackCommand.Execute(null);
+        return true;
+    }
+
     [RelayCommand]
     public async Task GoBackAsync()
     {

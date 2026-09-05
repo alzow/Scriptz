@@ -66,6 +66,12 @@ public partial class BusinessSettingsPageViewModel : BaseViewModel
         }
     }
 
+    public override bool TryHandleSystemBack()
+    {
+        GoBackCommand.Execute(null);
+        return true;
+    }
+
     [RelayCommand]
     public async Task GoBackAsync()
     {

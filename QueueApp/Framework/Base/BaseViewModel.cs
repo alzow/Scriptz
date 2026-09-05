@@ -66,6 +66,12 @@ public abstract class BaseViewModel : ObservableObject,
     public virtual Task OnAppearingAsync() => Task.CompletedTask;
     public virtual Task OnDisappearingAsync() => Task.CompletedTask;
 
+    // Answered by the view models whose page is the root of its own modal NavigationPage, where the
+    // framework's pop has nowhere to land and the back that page means is a dismissal. See
+    // SystemBackHandler. The default leaves the press to the framework, which is right for a page
+    // sitting on a stack that has something under it.
+    public virtual bool TryHandleSystemBack() => false;
+
     protected async Task SafeFireAndForgetAsync(Func<Task> work)
     {
         try
