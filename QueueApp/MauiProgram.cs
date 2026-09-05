@@ -3,6 +3,7 @@ using CommunityToolkit.Maui;
 using Microsoft.Maui.Handlers;
 using MPowerKit.Navigation;
 using MPowerKit.Popups;
+using QueueApp.Framework.Navigation;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 #if ANDROID
 using Android.Graphics.Drawables;
@@ -53,6 +54,8 @@ public static class MauiProgram
 #endif
                 });
             });
+
+        IosBackSwipe.Disable();
 
 #if DEBUG
         builder.Logging.AddDebug();
