@@ -114,6 +114,7 @@ public partial class VisitPageViewModel : BaseViewModel
     private VisitKind _kind;
     private bool _isVisible;
     private bool _isSubscribed;
+    private bool _hasAppeared;
     private double? _distanceKm;
     private IDispatcherTimer? _timer;
 
@@ -180,9 +181,25 @@ public partial class VisitPageViewModel : BaseViewModel
         try
         {
             await base.OnAppearingAsync();
+
             _isVisible = true;
+
+            // Coming back to a screen that already loaded — a page popped off the top, or the app
+            // returning from the background. The feed was released while the visit was away, so any
+            // change the record took meanwhile landed on a socket nobody was holding: resubscribing
+            // only covers what happens from here on, so the record has to be re-read as well.
+            if (_hasAppeared)
+            {
+                await RefreshAsync();
+                RefreshView();
+            }
+            else
+            {
+                await SubscribeRealtimeAsync();
+            }
+
             StartTimer();
-            await SubscribeRealtimeAsync();
+            _hasAppeared = true;
         }
         catch (Exception ex)
         {
