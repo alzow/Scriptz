@@ -15,22 +15,30 @@ public static class IntakeFieldTypes
     {
         ShortText,
         LongText,
-        File,
         SingleSelect,
         MultiSelect,
+        File,
     };
 
     // options is only meaningful for these two — the editor hides the options list for the rest.
     public static bool HasOptions(string? fieldType) =>
         fieldType is SingleSelect or MultiSelect;
 
+    // What the owner is asked for, not what the column stores.
     public static string DisplayName(string? fieldType) => fieldType switch
     {
         ShortText => "Short text",
         LongText => "Long text",
         File => "File upload",
-        SingleSelect => "Single select",
-        MultiSelect => "Multi select",
+        SingleSelect => "Choose one",
+        MultiSelect => "Choose several",
         _ => "Unknown",
+    };
+
+    // The same thing, short enough for a 44pt chip.
+    public static string ChipName(string? fieldType) => fieldType switch
+    {
+        File => "File",
+        _ => DisplayName(fieldType),
     };
 }

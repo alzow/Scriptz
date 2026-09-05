@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
+             x:Name="Root"
+             x:Class="QueueApp.Features.BusinessSettings.Helpers.ServiceRowView">
+
+    <Border Style="{StaticResource brd14_Row}" Padding="14,12" Margin="0,0,0,8"
+            MinimumHeightRequest="66">
+        <Border.GestureRecognizers>
+            <TapGestureRecognizer Command="{Binding TapCommand, Source={x:Reference Root}}"
+                                  CommandParameter="{Binding TapCommandParameter, Source={x:Reference Root}}"/>
+        </Border.GestureRecognizers>
+
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+            <VerticalStackLayout Grid.Column="0" Spacing="4" VerticalOptions="Center">
+                <Label Text="{Binding ServiceName, Source={x:Reference Root}}"
+                       Style="{StaticResource lbl15_Bold_TextDark}"/>
+                <Label Text="{Binding DetailText, Source={x:Reference Root}}"
+                       Style="{StaticResource lbl12_Regular_TextMuted}"/>
+
+                <HorizontalStackLayout Spacing="6" Margin="0,4,0,0">
+                    <Border Style="{StaticResource brd6_PurpleTag_Bordered}" Padding="7,4"
+                            IsVisible="{Binding HasQuestions, Source={x:Reference Root}}">
+                        <Label Text="{Binding QuestionChipText, Source={x:Reference Root}}"
+                               Style="{StaticResource lbl10_Mono_PurpleTag}"/>
+                    </Border>
+                    <Border Style="{StaticResource brd6_AccentTag_Bordered}" Padding="7,4"
+                            IsVisible="{Binding RequiresCollection, Source={x:Reference Root}}">
+                        <Label Text="COLLECTION" Style="{StaticResource lbl10_Mono_AccentTag}"/>
+                    </Border>
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+
+            <tpl:ThemedIcon Grid.Column="1" Icon="ic_chevron_right"
+                            WidthRequest="18" HeightRequest="18"
+                            Opacity="0.5" VerticalOptions="Center"/>
+        </Grid>
+    </Border>
+
+</ContentView>

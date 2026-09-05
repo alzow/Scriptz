@@ -821,4 +821,83 @@
         </Style.Triggers>
     </Style>
 
+
+    <!--
+        ================================================================================
+        Service offerings: list chips, the ghost add row, and the rule builder.
+        ================================================================================
+    -->
+
+    <!--
+        The add row at the end of a list. Dashed because it is an invitation rather than a card,
+        rounded because everything else in these lists is. The loudest element on a settings screen
+        should not be its rarest action.
+    -->
+    <Style x:Key="brd14_Ghost_Dashed" TargetType="Border" BasedOn="{StaticResource brd_Ghost_Dashed}">
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="14"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- What a service row carries: COLLECTION in green, N QUESTIONS in purple. -->
+    <Style x:Key="brd6_AccentTag_Bordered" TargetType="Border" BasedOn="{StaticResource brd6_AccentTag}">
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccentBorder}, Dark={StaticResource DarkAccentBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+    </Style>
+
+    <Style x:Key="brd6_PurpleTag_Bordered" TargetType="Border" BasedOn="{StaticResource brd6_PurpleTag}">
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightPurpleBorder}, Dark={StaticResource DarkPurpleBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+    </Style>
+
+    <!-- One half of "[ Medical aid or cash ] is [ Medical aid ]". -->
+    <Style x:Key="brd11_Rule_Chip" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightSurface}, Dark={StaticResource DarkSurface}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccentBorder}, Dark={StaticResource DarkAccentBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="11"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- A step in the Waiting > Being done > Ready > Collected diagram. -->
+    <Style x:Key="brd6_FlowStep" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
+        <Setter Property="Stroke" Value="Transparent"/>
+        <Setter Property="StrokeThickness" Value="0"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="6"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd6_FlowStep_Added" TargetType="Border" BasedOn="{StaticResource brd6_AccentTag_Bordered}"/>
+
+
+    <!--
+        A choice a page picks between, where the options are the page's own state rather than rows
+        in a list: Always vs Only when an earlier answer matches. The selected style is swapped in
+        by the view, because a helper view's selection lives on the view, not on a data context.
+    -->
+    <Style x:Key="brd12_Choice" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightRaised}, Dark={StaticResource DarkRaised}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightBorder}, Dark={StaticResource DarkBorder}}"/>
+        <Setter Property="StrokeThickness" Value="1"/>
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="12"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="brd12_Choice_Selected" TargetType="Border" BasedOn="{StaticResource brd12_Choice}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightAccentTint}, Dark={StaticResource DarkAccentTint}}"/>
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource LightAccent}, Dark={StaticResource DarkAccent}}"/>
+    </Style>
+
 </ResourceDictionary>

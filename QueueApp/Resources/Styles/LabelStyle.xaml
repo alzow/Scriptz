@@ -686,4 +686,22 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightTextMuted}, Dark={StaticResource DarkTextMuted}}"/>
     </Style>
 
+
+    <!-- The 8-9px letterspaced tags on a service row, and the flow diagram's step labels. -->
+    <Style x:Key="lbl10_Mono_AccentTag" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_Green}">
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="CharacterSpacing" Value="1.2"/>
+    </Style>
+
+    <Style x:Key="lbl10_Mono_PurpleTag" TargetType="Label" BasedOn="{StaticResource lbl11_Mono_Purple}">
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="CharacterSpacing" Value="1.2"/>
+    </Style>
+
+    <!-- The condition, read back as a sentence under the question it belongs to. -->
+    <Style x:Key="lbl11_Regular_Purple" TargetType="Label">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource LightPurpleText}, Dark={StaticResource DarkPurpleText}}"/>
+    </Style>
+
 </ResourceDictionary>

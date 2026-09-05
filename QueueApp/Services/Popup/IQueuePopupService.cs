@@ -8,6 +8,10 @@ public interface IQueuePopupService
     Task<bool> ShowConfirmAsync(string title, string message, string accept = "Yes", string cancel = "No");
     Task<string?> ShowPromptAsync(string title, string message, string? initialValue = null,
         string accept = "Save", string cancel = "Cancel", string placeholder = "");
+    // Null when dismissed. Used where a choice is one of a known list and a whole sheet would be
+    // heavier than the decision — picking which earlier question a rule points at, for instance.
+    Task<string?> ShowActionSheetAsync(string title, string cancel, params string[] options);
+
     Task ShowLoadingAsync(string message = "Loading...");
     Task HideLoadingAsync();
 

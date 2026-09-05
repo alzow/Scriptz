@@ -30,6 +30,14 @@ public class QueuePopupService : IQueuePopupService
             title, message, accept, cancel, placeholder, initialValue: initialValue ?? string.Empty);
     }
 
+    // DisplayActionSheet answers with the cancel text itself when dismissed on some platforms and
+    // with null on others; both mean "no choice", so both come back as null.
+    public async Task<string?> ShowActionSheetAsync(string title, string cancel, params string[] options)
+    {
+        var chosen = await Application.Current!.MainPage!.DisplayActionSheet(title, cancel, null, options);
+        return string.IsNullOrEmpty(chosen) || chosen == cancel ? null : chosen;
+    }
+
     public Task ShowLoadingAsync(string message = "Loading...")
     {
         return Task.CompletedTask;

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:QueueApp.Features.BusinessSettings.IntakeFormPreview"
+             xmlns:consts="clr-namespace:QueueApp.Features.BusinessSettings.Constants"
+             xmlns:intake="clr-namespace:QueueApp.Features.Flow.Helpers.Intake"
+             xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
+             x:Name="Root"
+             x:Class="QueueApp.Features.BusinessSettings.IntakeFormPreview.IntakeFormPreviewPage"
+             x:DataType="vm:IntakeFormPreviewPageViewModel"
+             Title="{Binding Title}"
+             Style="{StaticResource NavigationPageStyle}">
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <templates:AlzowSubPageHeader Grid.Row="0"
+                                      Title="{Binding Title}"
+                                      BackCommand="{Binding GoBackCommand}"/>
+
+        <VerticalStackLayout Grid.Row="1" Padding="20,8,20,16" Spacing="7">
+            <Label Text="{x:Static consts:BusinessSettingsConstants.PreviewLead}"
+                   Style="{StaticResource lbl15_Bold_TextDark}"/>
+            <Label Text="{Binding SummaryLine}" Style="{StaticResource lbl12_Regular_TextMuted}"/>
+            <Label Text="{Binding CostLine}" Style="{StaticResource lbl12_Regular_TextMuted}"/>
+            <Label Text="{x:Static consts:BusinessSettingsConstants.PreviewConditionalNote}"
+                   IsVisible="{Binding HasConditional}"
+                   Style="{StaticResource lbl11_Regular_Purple}"/>
+        </VerticalStackLayout>
+
+        <!-- The customer's own step view, so the preview cannot drift from what it previews. -->
+        <intake:IntakeStepView Grid.Row="2"
+                               ShowIntakeStep="{Binding HasFields}"
+                               IntakeFields="{Binding Fields}"
+                               SelectOptionCommand="{Binding SelectOptionCommand}"/>
+    </Grid>
+</ContentPage>

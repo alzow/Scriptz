@@ -10,9 +10,11 @@ public class UpdateIntakeFieldRequest
     [JsonPropertyName("label")] public string Label { get; set; } = string.Empty;
     [JsonPropertyName("is_required")] public bool IsRequired { get; set; }
 
+    // Written even when null: clearing the hint has to reach the row, and this is a full-field
+    // update for the same reason UpdateServiceRequest is.
+    [JsonPropertyName("hint")] public string? Hint { get; set; }
+
     [JsonPropertyName("options")] public List<string>? Options { get; set; }
 
-    [JsonPropertyName("visibility_rule")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public IntakeVisibilityRule? VisibilityRule { get; set; }
+    [JsonPropertyName("visibility_rule")] public IntakeVisibilityRule? VisibilityRule { get; set; }
 }

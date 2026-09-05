@@ -50,6 +50,7 @@ public class StubIntakeFieldsService : IIntakeFieldsService
             ServiceId = request.ServiceId,
             FieldType = request.FieldType,
             Label = request.Label,
+            Hint = request.Hint,
             IsRequired = request.IsRequired,
             SortOrder = request.SortOrder,
             Options = request.Options,
@@ -67,6 +68,7 @@ public class StubIntakeFieldsService : IIntakeFieldsService
         {
             field.FieldType = request.FieldType;
             field.Label = request.Label;
+            field.Hint = request.Hint;
             field.IsRequired = request.IsRequired;
             field.Options = request.Options;
             field.VisibilityRule = request.VisibilityRule;

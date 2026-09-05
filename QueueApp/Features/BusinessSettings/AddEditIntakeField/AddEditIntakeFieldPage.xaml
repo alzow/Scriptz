@@ -3,6 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.BusinessSettings.AddEditIntakeField"
              xmlns:models="clr-namespace:QueueApp.Shared.Domain.Models"
+             xmlns:helpers="clr-namespace:QueueApp.Features.BusinessSettings.Helpers"
+             xmlns:consts="clr-namespace:QueueApp.Features.BusinessSettings.Constants"
              xmlns:entry="clr-namespace:QueueApp.Shared.Templates.QueueEntry"
              xmlns:controls="clr-namespace:QueueApp.Shared.Templates.AlzowLoadingButton"
              xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
@@ -19,57 +21,82 @@
                                       BackCommand="{Binding GoBackCommand}"/>
 
         <ScrollView Grid.Row="1">
-            <VerticalStackLayout Padding="20" Spacing="16">
+            <VerticalStackLayout Padding="18,10,18,30" Spacing="18">
 
-                <Label Text="What kind of answer?" Style="{StaticResource lbl15_Bold_TextDark}"/>
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{x:Static consts:IntakeQuestionConstants.PromptLabel}"
+                           Style="{StaticResource lbl11_Bold_GroupHeader}"/>
+                    <entry:QueueEntry
+                        Placeholder="{x:Static consts:IntakeQuestionConstants.PromptPlaceholder}"
+                        Text="{Binding Label}"
+                        Validator="{Binding LabelValidator}"
+                        ValidateOnTextChanged="True"/>
+                    <Label Text="{x:Static consts:IntakeQuestionConstants.PromptHint}"
+                           Style="{StaticResource lbl11_Regular_TextMuted}"/>
+                </VerticalStackLayout>
 
-                <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
-                    <HorizontalStackLayout Spacing="8"
-                                           BindableLayout.ItemsSource="{Binding TypeOptions}">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="models:IntakeTypeOption">
-                                <Border Style="{StaticResource brd11_Chip_Selectable}"
-                                        MinimumHeightRequest="42" Padding="14,0">
-                                    <Label Text="{Binding Name}" VerticalOptions="Center"
-                                           Style="{StaticResource lbl13_Regular_TextMid_Selectable}"/>
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer
-                                            Command="{Binding BindingContext.SelectTypeCommand, Source={x:Reference Root}}"
-                                            CommandParameter="{Binding .}"/>
-                                    </Border.GestureRecognizers>
-                                </Border>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
+                <!-- An example under a registration field prevents most of the bad answers a shop
+                     would otherwise have to phone about. -->
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{x:Static consts:IntakeQuestionConstants.HintLabel}"
+                           Style="{StaticResource lbl11_Bold_GroupHeader}"/>
+                    <entry:QueueEntry
+                        Placeholder="{x:Static consts:IntakeQuestionConstants.HintPlaceholder}"
+                        Text="{Binding Hint}"/>
+                    <Label Text="{x:Static consts:IntakeQuestionConstants.HintExplainer}"
+                           Style="{StaticResource lbl11_Regular_TextMuted}"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="9">
+                    <Label Text="{x:Static consts:IntakeQuestionConstants.KindLabel}"
+                           Style="{StaticResource lbl11_Bold_GroupHeader}"/>
+                    <helpers:IntakeKindChipsView
+                        Options="{Binding TypeOptions}"
+                        SelectCommand="{Binding SelectTypeCommand}"/>
+                </VerticalStackLayout>
+
+                <Border Style="{StaticResource brd14_PurpleTint}" Padding="13"
+                        IsVisible="{Binding ShowFileWarning}">
+                    <HorizontalStackLayout Spacing="10">
+                        <tpl:ThemedIcon Icon="ic_lock" WidthRequest="16" HeightRequest="16"
+                                        VerticalOptions="Start" Margin="0,2,0,0"/>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{x:Static consts:IntakeQuestionConstants.FileWarningTitle}"
+                                   Style="{StaticResource lbl12_Bold_TextDark}"/>
+                            <Label Text="{x:Static consts:IntakeQuestionConstants.FileWarningBody}"
+                                   Style="{StaticResource lbl11_Regular_TextMuted}"/>
+                        </VerticalStackLayout>
                     </HorizontalStackLayout>
-                </ScrollView>
+                </Border>
 
-                <entry:QueueEntry
-                    Placeholder="The question, as the customer sees it"
-                    Text="{Binding Label}"
-                    Validator="{Binding LabelValidator}"
-                    ValidateOnTextChanged="True"/>
+                <Border Style="{StaticResource brd16_Surface}" Padding="14">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4" VerticalOptions="Center">
+                            <Label Text="{x:Static consts:IntakeQuestionConstants.RequiredToggleTitle}"
+                                   Style="{StaticResource lbl14_Bold_TextDark}"/>
+                            <Label Text="{x:Static consts:IntakeQuestionConstants.RequiredToggleSubtitle}"
+                                   Style="{StaticResource lbl12_Regular_TextMuted}"/>
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1" IsToggled="{Binding IsRequired}" VerticalOptions="Center"/>
+                    </Grid>
+                </Border>
 
-                <HorizontalStackLayout Spacing="10">
-                    <Switch IsToggled="{Binding IsRequired}"/>
-                    <Label Text="Must be answered" Style="{StaticResource lbl15_Bold_TextDark}"
-                           VerticalOptions="Center"/>
-                </HorizontalStackLayout>
+                <!-- Only the select types have anything to choose from. -->
+                <VerticalStackLayout Spacing="10" IsVisible="{Binding ShowOptions}">
 
-                <!-- Only the two select types have anything to choose from. -->
-                <VerticalStackLayout Spacing="12" IsVisible="{Binding ShowOptions}">
+                    <Label Text="{x:Static consts:IntakeQuestionConstants.OptionsLabel}"
+                           Style="{StaticResource lbl11_Bold_GroupHeader}"/>
 
-                    <Label Text="Choices" Style="{StaticResource lbl15_Bold_TextDark}"/>
-
-                    <VerticalStackLayout Spacing="8"
-                                         BindableLayout.ItemsSource="{Binding Options}">
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Options}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="models:IntakeOptionRow">
-                                <Border Padding="12" Style="{StaticResource brd14_Row}">
+                                <Border Style="{StaticResource brd13_Raised_Lined}" Padding="12,0"
+                                        MinimumHeightRequest="54" Margin="0,0,0,8">
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                                         <Label Grid.Column="0" Text="{Binding Text}"
                                                VerticalOptions="Center"
                                                Style="{StaticResource lbl14_Regular_TextDark}"/>
-                                        <Border Grid.Column="1" WidthRequest="30" HeightRequest="30"
+                                        <Border Grid.Column="1" WidthRequest="32" HeightRequest="32"
                                                 Style="{StaticResource brd26_GhostCircle}"
                                                 VerticalOptions="Center">
                                             <Border.GestureRecognizers>
@@ -86,103 +113,65 @@
                         </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
 
-                    <Label Text="Add at least two choices." Style="{StaticResource lbl12_Regular_TextMuted}"
+                    <Label Text="{x:Static consts:IntakeQuestionConstants.OptionsTooFew}"
+                           Style="{StaticResource lbl12_Regular_TextMuted}"
                            IsVisible="{Binding NeedsMoreOptions}"/>
 
                     <entry:QueueEntry
-                        Placeholder="Add a choice"
+                        Placeholder="{x:Static consts:IntakeQuestionConstants.NewOptionPlaceholder}"
                         Text="{Binding NewOptionText}"/>
 
-                    <controls:AlzowLoadingButton
-                        Text="+ Add choice"
-                        BypassIsLoading="True"
-                        Margin="0" HeightRequest="48"
-                        Command="{Binding AddOptionCommand}"
-                        ButtonStyle="{StaticResource SecondaryButtonStyle}"/>
+                    <helpers:GhostAddRowView
+                        Text="{x:Static consts:IntakeQuestionConstants.AddOptionText}"
+                        Command="{Binding AddOptionCommand}"/>
 
                 </VerticalStackLayout>
 
                 <!-- Only offered once an earlier single/multi-select question exists to hang this
                      one off. -->
-                <VerticalStackLayout Spacing="12" IsVisible="{Binding ShowConditionSection}">
+                <VerticalStackLayout Spacing="9" IsVisible="{Binding Rule.HasCandidates}">
 
-                    <HorizontalStackLayout Spacing="10">
-                        <Switch IsToggled="{Binding HasCondition}"/>
-                        <Label Text="Only ask this when an earlier answer matches"
-                               Style="{StaticResource lbl15_Bold_TextDark}"
-                               VerticalOptions="Center"/>
-                    </HorizontalStackLayout>
+                    <Label Text="{x:Static consts:IntakeQuestionConstants.WhenToAskLabel}"
+                           Style="{StaticResource lbl11_Bold_GroupHeader}"/>
 
-                    <VerticalStackLayout Spacing="12" IsVisible="{Binding HasCondition}">
+                    <helpers:ChoiceRowView
+                        Text="{x:Static consts:IntakeQuestionConstants.AlwaysText}"
+                        IsSelected="{Binding Rule.IsAlways}"
+                        Command="{Binding ChooseAlwaysCommand}"/>
 
-                        <Label Text="Which question?" Style="{StaticResource lbl13_Regular_TextMid}"/>
-                        <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
-                            <HorizontalStackLayout Spacing="8"
-                                                   BindableLayout.ItemsSource="{Binding TriggerFieldOptions}">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="models:IntakeTriggerFieldOption">
-                                        <Border Style="{StaticResource brd11_Chip_Selectable}"
-                                                MinimumHeightRequest="42" Padding="14,0">
-                                            <Label Text="{Binding Label}" VerticalOptions="Center"
-                                                   Style="{StaticResource lbl13_Regular_TextMid_Selectable}"/>
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer
-                                                    Command="{Binding BindingContext.SelectTriggerFieldCommand, Source={x:Reference Root}}"
-                                                    CommandParameter="{Binding .}"/>
-                                            </Border.GestureRecognizers>
-                                        </Border>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </HorizontalStackLayout>
-                        </ScrollView>
+                    <helpers:ChoiceRowView
+                        Text="{x:Static consts:IntakeQuestionConstants.ConditionalText}"
+                        IsSelected="{Binding Rule.HasCondition}"
+                        Command="{Binding ChooseConditionalCommand}"/>
 
-                        <VerticalStackLayout Spacing="8" IsVisible="{Binding ShowTriggerValues}"
-                                             BindableLayout.ItemsSource="{Binding TriggerValueOptions}">
-                            <BindableLayout.ItemTemplate>
-                                <DataTemplate x:DataType="models:IntakeOptionItem">
-                                    <Border Padding="12" Style="{StaticResource brd15_Row_Selectable}">
-                                        <Border.GestureRecognizers>
-                                            <TapGestureRecognizer
-                                                Command="{Binding BindingContext.SelectTriggerValueCommand, Source={x:Reference Root}}"
-                                                CommandParameter="{Binding .}"/>
-                                        </Border.GestureRecognizers>
-
-                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                                            <Border Grid.Column="0" WidthRequest="22" HeightRequest="22"
-                                                    Style="{StaticResource brd6_Outline}"
-                                                    VerticalOptions="Center">
-                                                <tpl:ThemedIcon Icon="ic_check" WidthRequest="12" HeightRequest="12"
-                                                                HorizontalOptions="Center" VerticalOptions="Center"
-                                                                IsVisible="{Binding IsSelected}"/>
-                                            </Border>
-                                            <Label Grid.Column="1" Text="{Binding Text}" VerticalOptions="Center"
-                                                   Style="{StaticResource lbl14_Regular_TextDark}"/>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </BindableLayout.ItemTemplate>
-                        </VerticalStackLayout>
-
-                    </VerticalStackLayout>
+                    <helpers:IntakeRuleBuilderView
+                        IsVisible="{Binding Rule.HasCondition}"
+                        QuestionText="{Binding Rule.QuestionText}"
+                        ValueText="{Binding Rule.ValueText}"
+                        PickQuestionCommand="{Binding PickRuleQuestionCommand}"
+                        PickValueCommand="{Binding PickRuleValueCommand}"/>
 
                 </VerticalStackLayout>
 
                 <controls:AlzowLoadingButton
-                    Text="Save"
-                    LoadingText="Saving…"
+                    Text="{x:Static consts:IntakeQuestionConstants.SaveText}"
+                    LoadingText="{x:Static consts:IntakeQuestionConstants.SavingText}"
                     BypassIsLoading="True"
-                    Margin="0,8,0,0" HeightRequest="54"
+                    Margin="0,4,0,0" HeightRequest="56"
                     Command="{Binding SaveCommand}"
                     IsLoading="{Binding IsSaving}"
                     ButtonStyle="{StaticResource PrimaryButtonStyle}"/>
 
-                <!-- Deleting a question never touches answers already given to it: those carry the
-                     question they were asked. -->
+                <!-- Everything destructive lives below this line. Deleting a question never touches
+                     answers already given to it: those carry the question they were asked. -->
+                <BoxView HeightRequest="1" Style="{StaticResource bx_Divider}"
+                         IsVisible="{Binding IsEditing}"/>
+
                 <controls:AlzowLoadingButton
-                    Text="Delete question"
-                    LoadingText="Deleting…"
+                    Text="{x:Static consts:IntakeQuestionConstants.DeleteText}"
+                    LoadingText="{x:Static consts:IntakeQuestionConstants.DeletingText}"
                     BypassIsLoading="True"
-                    Margin="0" HeightRequest="48"
+                    Margin="0" HeightRequest="56"
                     IsVisible="{Binding IsEditing}"
                     Command="{Binding DeleteCommand}"
                     IsLoading="{Binding IsDeleting}"

@@ -28,6 +28,11 @@ public sealed class IntakeFieldItem : ObservableObject
     public bool IsRequired => Field.IsRequired;
     public string RequirementText => IsRequired ? "REQUIRED" : "OPTIONAL";
 
+    // The example the shop wrote under the question. Empty for every question defined before hints
+    // existed, and for every one that doesn't need one.
+    public string Hint => Field.Hint ?? string.Empty;
+    public bool HasHint => Field.HasHint;
+
     // True for every field with no VisibilityRule. The coordinator is what flips this for a
     // conditional one, once it can see every field's current answer.
     private bool _isVisible = true;

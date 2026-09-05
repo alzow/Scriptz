@@ -1,53 +1,74 @@
-using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using MPowerKit;
 using MPowerKit.Navigation.Interfaces;
 using QueueApp.Constants;
+using QueueApp.Features.BusinessSettings.Constants;
+using QueueApp.Features.BusinessSettings.Helpers;
+using QueueApp.Features.BusinessSettings.Models;
 using QueueApp.Framework.Base;
 using QueueApp.Services.Api.Intake;
-using QueueApp.Services.Api.Intake.Models;
 using QueueApp.Services.Api.ServiceOfferings;
 using QueueApp.Services.Api.ServiceOfferings.Models;
+using QueueApp.Services.Popup;
 using QueueApp.Services.Storage;
 using QueueApp.Shared.Templates.QueueEntry.Validators;
 
 namespace QueueApp.Features.BusinessSettings.AddEditService;
 
+// One service, down one page: what it is called and costs, how it runs, and what it asks before
+// someone joins. The three panels are the three things a service now is.
 public partial class AddEditServicePageViewModel : BaseViewModel
 {
-    private readonly IServiceOfferingsService _serviceOfferingsService;
-    private readonly IIntakeFieldsService _intakeFieldsService;
+    private const string NameRequiredError = "Service name is required.";
+
+    public IValidator NameValidator { get; } = new RequiredValidator(NameRequiredError);
+
+    public ServiceDurationEditor Duration { get; }
+    public ServiceQuestionsEditor Questions { get; }
+
+    public string Name { get; set; } = "";
+    public string PriceRandText { get; set; } = "";
+    public bool RequiresCollection { get; set; }
+    public bool IsActive { get; set; } = true;
+
+    public bool IsSaving { get; set; }
+    public bool IsDeactivating { get; set; }
+    public string PageTitle { get; set; } = BusinessSettingsConstants.AddServiceTitle;
+
+    // A question hangs off a service id. Rather than telling the owner to save and come back, the
+    // questions panel saves for them — see §4 of the spec.
+    public bool IsExistingService => _editingServiceId is not null;
+    public bool QuestionsTouched { get; set; }
+
+    public string SaveText => QuestionsTouched && !IsExistingService
+        ? BusinessSettingsConstants.SaveAndAddQuestionsText
+        : BusinessSettingsConstants.SaveText;
+
+    public string DeactivateText => IsActive
+        ? BusinessSettingsConstants.DeactivateText
+        : BusinessSettingsConstants.ReactivateText;
+
     private Guid _businessId;
     private Guid? _editingServiceId;
+    private bool _loaded;
+
+    private readonly IServiceOfferingsService _serviceOfferingsService;
+    private readonly IQueuePopupService _popupService;
 
     public AddEditServicePageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
         IServiceOfferingsService serviceOfferingsService,
-        IIntakeFieldsService intakeFieldsService)
+        IIntakeFieldsService intakeFieldsService,
+        IQueuePopupService popupService)
         : base(navigationService, secureStorageService)
     {
         _serviceOfferingsService = serviceOfferingsService;
-        _intakeFieldsService = intakeFieldsService;
+        _popupService = popupService;
+
+        Duration = new ServiceDurationEditor();
+        Questions = new ServiceQuestionsEditor(intakeFieldsService);
     }
-
-    public IValidator NameValidator { get; } = new RequiredValidator("Service name is required.");
-    public IValidator DurationValidator { get; } = new RequiredValidator("Duration is required.");
-
-    public string Name { get; set; } = "";
-    public string DurationMinutesText { get; set; } = "";
-    public string PriceRandText { get; set; } = "";
-    public bool IsSaving { get; set; }
-    public string PageTitle { get; set; } = "Add Service";
-
-    // What this service asks before someone can join or book it. Empty for every service that was
-    // here before this existed, and for every one that simply doesn't need to ask anything.
-    public ObservableCollection<IntakeFieldResponse> IntakeFields { get; } = new();
-    public bool HasNoIntakeFields => IntakeFields.Count == 0;
-
-    // A question hangs off a service id, and a service being created doesn't have one yet.
-    public bool IsEditingService => _editingServiceId is not null;
-    public bool IsNewService => _editingServiceId is null;
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
@@ -55,37 +76,19 @@ public partial class AddEditServicePageViewModel : BaseViewModel
         {
             await base.OnLoadedAsync(parameters);
 
-            _businessId = parameters is not null && parameters.TryGetValue(NavigationKeys.BusinessId, out var bizObj)
-                ? (Guid)bizObj
+            _businessId = parameters is not null && parameters.TryGetValue(NavigationKeys.BusinessId, out var businessObj)
+                ? (Guid)businessObj
                 : throw new InvalidOperationException("AddEditServicePage requires a businessId.");
 
-            if (parameters is not null && parameters.TryGetValue(NavigationKeys.ServiceId, out var svcObj))
-            {
-                _editingServiceId = (Guid)svcObj;
-                PageTitle = "Edit Service";
-                OnPropertyChanged(nameof(IsEditingService));
-                OnPropertyChanged(nameof(IsNewService));
-                await LoadExistingAsync(_editingServiceId.Value);
-                await LoadIntakeFieldsAsync();
-            }
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
-        }
-    }
+            if (parameters is null || !parameters.TryGetValue(NavigationKeys.ServiceId, out var serviceObj))
+                return;
 
-    public async Task LoadExistingAsync(Guid serviceId)
-    {
-        try
-        {
-            var services = await _serviceOfferingsService.GetServicesAsync(_businessId);
-            var existing = services.FirstOrDefault(s => s.Id == serviceId);
-            if (existing is null) return;
+            _editingServiceId = (Guid)serviceObj;
+            OnPropertyChanged(nameof(IsExistingService));
+            OnPropertyChanged(nameof(SaveText));
 
-            Name = existing.Name;
-            DurationMinutesText = existing.EstMinutes.ToString();
-            PriceRandText = existing.PriceCents.HasValue ? (existing.PriceCents.Value / 100m).ToString("0.##") : "";
+            await LoadExistingAsync(_editingServiceId.Value);
+            _loaded = true;
         }
         catch (Exception exception)
         {
@@ -93,7 +96,7 @@ public partial class AddEditServicePageViewModel : BaseViewModel
         }
     }
 
-    // Coming back from the question editor is the only way this list changes, so it reloads here
+    // Coming back from the question editor is the only way the list changes, so it reloads here
     // rather than being handed a result.
     public override async Task OnAppearingAsync()
     {
@@ -101,8 +104,8 @@ public partial class AddEditServicePageViewModel : BaseViewModel
         {
             await base.OnAppearingAsync();
 
-            if (_editingServiceId is not null)
-                await LoadIntakeFieldsAsync();
+            if (_loaded && _editingServiceId is not null)
+                await Questions.LoadAsync(_editingServiceId.Value);
         }
         catch (Exception exception)
         {
@@ -110,109 +113,244 @@ public partial class AddEditServicePageViewModel : BaseViewModel
         }
     }
 
-    public async Task LoadIntakeFieldsAsync()
+    public async Task LoadExistingAsync(Guid serviceId)
     {
         try
         {
-            if (_editingServiceId is null)
+            var servicesTask = _serviceOfferingsService.GetServicesAsync(_businessId);
+            var questionsTask = Questions.LoadAsync(serviceId);
+            await Task.WhenAll(servicesTask, questionsTask);
+
+            var existing = (await servicesTask).FirstOrDefault(s => s.Id == serviceId);
+            if (existing is null)
                 return;
 
-            var fields = await _intakeFieldsService.GetFieldsForServiceAsync(_editingServiceId.Value);
+            PageTitle = existing.Name;
+            Name = existing.Name;
+            PriceRandText = existing.PriceCents.HasValue
+                ? (existing.PriceCents.Value / 100m).ToString("0.##")
+                : "";
+            RequiresCollection = existing.RequiresCollection;
+            IsActive = existing.IsActive;
+            Duration.Load(existing.EstMinutes);
 
-            IntakeFields.Clear();
-            foreach (var field in fields.OrderBy(f => f.SortOrder))
-                IntakeFields.Add(field);
-
-            OnPropertyChanged(nameof(HasNoIntakeFields));
+            OnPropertyChanged(nameof(DeactivateText));
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            await HandleExceptionAsync(ex);
+            await HandleExceptionAsync(exception);
         }
     }
 
     [RelayCommand]
-    public async Task AddFieldAsync()
+    public void SelectDuration(DurationChoice? choice)
     {
         try
         {
+            Duration.Select(choice);
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
+    }
+
+    [RelayCommand]
+    public async Task SaveAsync()
+    {
+        // The button forces its bound loading flag true on tap, before this runs — every exit,
+        // a validation failure included, has to pass through the same finally or it stays stuck.
+        IsSaving = true;
+        try
+        {
+            if (await PersistAsync())
+                await NavigationService.GoBackAsync();
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
+    public async Task<bool> PersistAsync()
+    {
+        try
+        {
+            if (!NameValidator.Validate(Name))
+                return false;
+
+            var minutes = Duration.ResolveMinutes();
+            if (minutes is null)
+            {
+                await _popupService.ShowAlertAsync(
+                    BusinessSettingsConstants.DurationInvalidTitle,
+                    BusinessSettingsConstants.DurationInvalidMessage);
+                return false;
+            }
+
+            int? priceCents = null;
+            if (!string.IsNullOrWhiteSpace(PriceRandText) && decimal.TryParse(PriceRandText, out var rand))
+                priceCents = (int)Math.Round(rand * 100);
+
+            if (_editingServiceId is null)
+            {
+                var created = await _serviceOfferingsService.CreateServiceAsync(new CreateServiceRequest
+                {
+                    BusinessId = _businessId,
+                    Name = Name.Trim(),
+                    EstMinutes = minutes.Value,
+                    PriceCents = priceCents,
+                    RequiresCollection = RequiresCollection,
+                });
+
+                _editingServiceId = created.FirstOrDefault()?.Id;
+                _loaded = true;
+                PageTitle = Name.Trim();
+                OnPropertyChanged(nameof(IsExistingService));
+                OnPropertyChanged(nameof(SaveText));
+                OnPropertyChanged(nameof(DeactivateText));
+                return true;
+            }
+
+            await _serviceOfferingsService.UpdateServiceAsync(_editingServiceId.Value, new UpdateServiceRequest
+            {
+                Name = Name.Trim(),
+                EstMinutes = minutes.Value,
+                PriceCents = priceCents,
+                RequiresCollection = RequiresCollection,
+            });
+
+            return true;
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+            return false;
+        }
+    }
+
+    // The create screen used to say "save this service first" on the one screen where someone is
+    // most likely to want a question. It saves for them instead.
+    [RelayCommand]
+    public async Task AddQuestionAsync()
+    {
+        try
+        {
+            QuestionsTouched = true;
+            OnPropertyChanged(nameof(SaveText));
+
+            if (_editingServiceId is null && !await PersistAsync())
+                return;
+
             if (_editingServiceId is null)
                 return;
 
             await NavigationService.NavigateAsync(NavigationPaths.AddEditIntakeFieldPage,
                 new NavigationParameters { [NavigationKeys.ServiceId] = _editingServiceId.Value });
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            await HandleExceptionAsync(ex);
+            await HandleExceptionAsync(exception);
         }
     }
 
     [RelayCommand]
-    public async Task EditFieldAsync(IntakeFieldResponse? field)
+    public async Task EditQuestionAsync(IntakeQuestionRow? row)
     {
         try
         {
-            if (field is null || _editingServiceId is null)
+            if (row is null || _editingServiceId is null)
                 return;
 
             await NavigationService.NavigateAsync(NavigationPaths.AddEditIntakeFieldPage,
                 new NavigationParameters
                 {
                     [NavigationKeys.ServiceId] = _editingServiceId.Value,
-                    [NavigationKeys.IntakeFieldId] = field.Id,
+                    [NavigationKeys.IntakeFieldId] = row.Id,
                 });
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            await HandleExceptionAsync(ex);
+            await HandleExceptionAsync(exception);
         }
     }
 
     [RelayCommand]
-    public Task MoveFieldUpAsync(IntakeFieldResponse? field) => MoveFieldAsync(field, -1);
+    public Task MoveQuestionUpAsync(IntakeQuestionRow? row) => MoveQuestionAsync(row, -1);
 
     [RelayCommand]
-    public Task MoveFieldDownAsync(IntakeFieldResponse? field) => MoveFieldAsync(field, 1);
+    public Task MoveQuestionDownAsync(IntakeQuestionRow? row) => MoveQuestionAsync(row, 1);
 
-    // Order is what the customer sees, so it is stored rather than implied: the two rows swap
-    // sort_order and both are written.
-    public async Task MoveFieldAsync(IntakeFieldResponse? field, int direction)
+    // A move that would put a question above the answer it depends on is refused, and the refusal
+    // says which two questions and why.
+    public async Task MoveQuestionAsync(IntakeQuestionRow? row, int direction)
     {
         try
         {
-            if (field is null)
+            var refusal = await Questions.MoveAsync(row, direction);
+
+            if (refusal is not null)
+                await _popupService.ShowAlertAsync(IntakeQuestionConstants.ReorderBlockedTitle, refusal);
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
+    }
+
+    [RelayCommand]
+    public async Task PreviewFormAsync()
+    {
+        try
+        {
+            if (_editingServiceId is null)
                 return;
 
-            var index = IntakeFields.IndexOf(field);
-            var target = index + direction;
+            await NavigationService.NavigateAsync(NavigationPaths.IntakeFormPreviewPage,
+                new NavigationParameters { [NavigationKeys.ServiceId] = _editingServiceId.Value });
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
+    }
 
-            if (index < 0 || target < 0 || target >= IntakeFields.Count)
+    [RelayCommand]
+    public async Task ToggleActiveAsync()
+    {
+        IsDeactivating = true;
+        try
+        {
+            if (_editingServiceId is null)
                 return;
 
-            var other = IntakeFields[target];
-            var fieldOrder = field.SortOrder;
-            var otherOrder = other.SortOrder;
-
-            // Rows written by an older build can share a sort_order; renumbering from the list's
-            // own order is the only way a swap means anything then.
-            if (fieldOrder == otherOrder)
+            if (IsActive)
             {
-                fieldOrder = index;
-                otherOrder = target;
+                var confirmed = await _popupService.ShowConfirmAsync(
+                    BusinessSettingsConstants.DeactivateConfirmTitle,
+                    BusinessSettingsConstants.DeactivateConfirmMessage,
+                    BusinessSettingsConstants.DeactivateConfirmAccept,
+                    BusinessSettingsConstants.DeactivateConfirmCancel);
+
+                if (!confirmed)
+                    return;
             }
 
-            await _intakeFieldsService.SetFieldOrderAsync(field.Id, otherOrder);
-            await _intakeFieldsService.SetFieldOrderAsync(other.Id, fieldOrder);
-
-            field.SortOrder = otherOrder;
-            other.SortOrder = fieldOrder;
-
-            IntakeFields.Move(index, target);
+            await _serviceOfferingsService.SetServiceActiveAsync(_editingServiceId.Value, !IsActive);
+            IsActive = !IsActive;
+            OnPropertyChanged(nameof(DeactivateText));
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            await HandleExceptionAsync(ex);
+            await HandleExceptionAsync(exception);
+        }
+        finally
+        {
+            IsDeactivating = false;
         }
     }
 
@@ -223,60 +361,9 @@ public partial class AddEditServicePageViewModel : BaseViewModel
         {
             await NavigationService.GoBackAsync();
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            await HandleExceptionAsync(ex);
-        }
-    }
-
-    [RelayCommand]
-    public async Task SaveAsync()
-    {
-        // The button already forces its bound loading flag true on tap, before this ever runs —
-        // every exit, including a validation failure, has to go through the same finally or it
-        // stays stuck until the page is left and reopened.
-        IsSaving = true;
-        try
-        {
-            if (!NameValidator.Validate(Name) || !DurationValidator.Validate(DurationMinutesText))
-                return;
-
-            if (!int.TryParse(DurationMinutesText, out var duration) || duration <= 0)
-                throw new InvalidOperationException("Duration must be a whole number of minutes.");
-
-            int? priceCents = null;
-            if (!string.IsNullOrWhiteSpace(PriceRandText) && decimal.TryParse(PriceRandText, out var rand))
-                priceCents = (int)Math.Round(rand * 100);
-
-            if (_editingServiceId is null)
-            {
-                await _serviceOfferingsService.CreateServiceAsync(new CreateServiceRequest
-                {
-                    BusinessId = _businessId,
-                    Name = Name,
-                    EstMinutes = duration,
-                    PriceCents = priceCents
-                });
-            }
-            else
-            {
-                await _serviceOfferingsService.UpdateServiceAsync(_editingServiceId.Value, new UpdateServiceRequest
-                {
-                    Name = Name,
-                    EstMinutes = duration,
-                    PriceCents = priceCents
-                });
-            }
-
-            await NavigationService.GoBackAsync();
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
-        }
-        finally
-        {
-            IsSaving = false;
+            await HandleExceptionAsync(exception);
         }
     }
 }

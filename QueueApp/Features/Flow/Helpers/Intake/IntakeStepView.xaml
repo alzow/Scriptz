@@ -50,6 +50,9 @@
                                 PickCommand="{Binding PickFileCommand, Source={x:Reference Root}}"
                                 ClearCommand="{Binding ClearFileCommand, Source={x:Reference Root}}"/>
 
+                        <Label Text="{Binding Hint}" IsVisible="{Binding HasHint}"
+                               Style="{StaticResource lbl11_Regular_TextMuted}"/>
+
                     </VerticalStackLayout>
                 </DataTemplate>
             </BindableLayout.ItemTemplate>
