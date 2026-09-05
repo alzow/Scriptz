@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:QueueApp.Shared.Domain.Models"
+             x:Name="Root"
+             x:Class="QueueApp.Features.BusinessSettings.Helpers.IntakeKindChipsView">
+
+    <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+        <HorizontalStackLayout Spacing="7" BindableLayout.ItemsSource="{Binding Options, Source={x:Reference Root}}">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate x:DataType="models:IntakeTypeOption">
+                    <Border Style="{StaticResource brd11_Chip_Selectable}"
+                            MinimumHeightRequest="44" Padding="13,0">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding SelectCommand, Source={x:Reference Root}}"
+                                CommandParameter="{Binding .}"/>
+                        </Border.GestureRecognizers>
+                        <Label Text="{Binding ChipName}" VerticalOptions="Center"
+                               Style="{StaticResource lbl13_Regular_TextMid_Selectable}"/>
+                    </Border>
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </HorizontalStackLayout>
+    </ScrollView>
+
+</ContentView>

@@ -23,6 +23,11 @@ public class IntakeFieldResponse
     [JsonPropertyName("service_id")] public Guid ServiceId { get; set; }
     [JsonPropertyName("field_type")] public string FieldType { get; set; } = IntakeFieldTypes.ShortText;
     [JsonPropertyName("label")] public string Label { get; set; } = string.Empty;
+
+    // Shown under the field on the intake step. A registration number the shop can read back is
+    // worth more than a phone call, and an example is what gets one.
+    [JsonPropertyName("hint")] public string? Hint { get; set; }
+
     [JsonPropertyName("is_required")] public bool IsRequired { get; set; }
     [JsonPropertyName("sort_order")] public int SortOrder { get; set; }
 
@@ -34,13 +39,13 @@ public class IntakeFieldResponse
     [JsonPropertyName("visibility_rule")] public IntakeVisibilityRule? VisibilityRule { get; set; }
 
     [JsonIgnore] public bool HasOptions => IntakeFieldTypes.HasOptions(FieldType);
+    [JsonIgnore] public bool HasHint => !string.IsNullOrWhiteSpace(Hint);
     [JsonIgnore] public string TypeDisplay => IntakeFieldTypes.DisplayName(FieldType);
 
-    // What the settings list shows under the label: the type, whether it blocks joining, and
-    // whether it only shows up conditionally.
+    // What the settings list shows under the prompt. The condition is not in here: it reads as a
+    // sentence naming the question it points at, which needs the rest of the list to resolve.
     [JsonIgnore] public string SummaryText =>
-        (IsRequired ? $"{TypeDisplay} · Required" : $"{TypeDisplay} · Optional") +
-        (VisibilityRule is not null ? " · Conditional" : string.Empty);
+        IsRequired ? $"{TypeDisplay} · Required" : $"{TypeDisplay} · Optional";
 
     [JsonIgnore] public string OptionsText => Options is { Count: > 0 }
         ? string.Join(", ", Options)

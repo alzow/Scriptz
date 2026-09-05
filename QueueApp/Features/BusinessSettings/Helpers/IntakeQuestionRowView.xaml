@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
+             x:Name="Root"
+             x:Class="QueueApp.Features.BusinessSettings.Helpers.IntakeQuestionRowView">
+
+    <Border Style="{StaticResource brd14_Row}" Padding="10,12,14,12" Margin="0,0,0,8"
+            MinimumHeightRequest="66">
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+
+            <!-- Reordering is what a rule depends on, so the controls that do it sit on the row
+                 rather than behind an edit mode. -->
+            <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center" WidthRequest="44">
+                <Border Style="{StaticResource brd11_Chip}"
+                        WidthRequest="44" HeightRequest="32">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding MoveUpCommand, Source={x:Reference Root}}"
+                                              CommandParameter="{Binding CommandParameter, Source={x:Reference Root}}"/>
+                    </Border.GestureRecognizers>
+                    <tpl:ThemedIcon Icon="ic_chevron_up" WidthRequest="13" HeightRequest="13"
+                                    HorizontalOptions="Center" VerticalOptions="Center"/>
+                </Border>
+                <Border Style="{StaticResource brd11_Chip}"
+                        WidthRequest="44" HeightRequest="32">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding MoveDownCommand, Source={x:Reference Root}}"
+                                              CommandParameter="{Binding CommandParameter, Source={x:Reference Root}}"/>
+                    </Border.GestureRecognizers>
+                    <tpl:ThemedIcon Icon="ic_chevron_down" WidthRequest="13" HeightRequest="13"
+                                    HorizontalOptions="Center" VerticalOptions="Center"/>
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Grid.Column="1" Spacing="5" VerticalOptions="Center">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding EditCommand, Source={x:Reference Root}}"
+                                          CommandParameter="{Binding CommandParameter, Source={x:Reference Root}}"/>
+                </VerticalStackLayout.GestureRecognizers>
+
+                <Label Text="{Binding Prompt, Source={x:Reference Root}}"
+                       Style="{StaticResource lbl14_Bold_TextDark}"/>
+                <Label Text="{Binding SummaryText, Source={x:Reference Root}}"
+                       Style="{StaticResource lbl11_Mono_TextMuted}"/>
+
+                <!-- The rule, on the row, so the list explains itself without opening anything. -->
+                <Border Style="{StaticResource brd6_PurpleTag_Bordered}" Padding="8,4"
+                        HorizontalOptions="Start"
+                        IsVisible="{Binding HasCondition, Source={x:Reference Root}}">
+                    <Label Text="{Binding ConditionText, Source={x:Reference Root}}"
+                           Style="{StaticResource lbl11_Regular_Purple}"/>
+                </Border>
+            </VerticalStackLayout>
+
+            <tpl:ThemedIcon Grid.Column="2" Icon="ic_chevron_right"
+                            WidthRequest="18" HeightRequest="18"
+                            Opacity="0.5" VerticalOptions="Center">
+                <tpl:ThemedIcon.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding EditCommand, Source={x:Reference Root}}"
+                                          CommandParameter="{Binding CommandParameter, Source={x:Reference Root}}"/>
+                </tpl:ThemedIcon.GestureRecognizers>
+            </tpl:ThemedIcon>
+
+        </Grid>
+    </Border>
+
+</ContentView>

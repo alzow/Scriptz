@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
+             xmlns:consts="clr-namespace:QueueApp.Features.BusinessSettings.Constants"
+             x:Name="Root"
+             x:Class="QueueApp.Features.BusinessSettings.Helpers.IntakeRuleBuilderView">
+
+    <!-- The rule reads as one sentence rather than a switch, a heading and a checkbox list: an
+         owner has to be able to read back what they built. -->
+    <Border Style="{StaticResource brd13_Raised}" Padding="14">
+        <VerticalStackLayout Spacing="10">
+
+            <Label Text="{x:Static consts:IntakeQuestionConstants.RuleLead}"
+                   Style="{StaticResource lbl12_Regular_TextMuted}"/>
+
+            <FlexLayout Wrap="Wrap" AlignItems="Center" Direction="Row">
+
+                <Border Style="{StaticResource brd11_Rule_Chip}" Padding="12,0"
+                        MinimumHeightRequest="44" Margin="0,0,9,7">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding PickQuestionCommand, Source={x:Reference Root}}"/>
+                    </Border.GestureRecognizers>
+                    <HorizontalStackLayout Spacing="7" VerticalOptions="Center">
+                        <Label Text="{Binding QuestionText, Source={x:Reference Root}}"
+                               Style="{StaticResource lbl13_Bold_Green}" VerticalOptions="Center"/>
+                        <tpl:ThemedIcon Icon="ic_chevron_down" WidthRequest="14" HeightRequest="14"
+                                        VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                </Border>
+
+                <Label Text="{x:Static consts:IntakeQuestionConstants.RuleJoiner}"
+                       Style="{StaticResource lbl13_Regular_TextMid}"
+                       VerticalOptions="Center" Margin="0,0,9,7"/>
+
+                <Border Style="{StaticResource brd11_Rule_Chip}" Padding="12,0"
+                        MinimumHeightRequest="44" Margin="0,0,0,7">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding PickValueCommand, Source={x:Reference Root}}"/>
+                    </Border.GestureRecognizers>
+                    <HorizontalStackLayout Spacing="7" VerticalOptions="Center">
+                        <Label Text="{Binding ValueText, Source={x:Reference Root}}"
+                               Style="{StaticResource lbl13_Bold_Green}" VerticalOptions="Center"/>
+                        <tpl:ThemedIcon Icon="ic_chevron_down" WidthRequest="14" HeightRequest="14"
+                                        VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                </Border>
+
+            </FlexLayout>
+
+            <Label Text="{x:Static consts:IntakeQuestionConstants.RuleOrderNote}"
+                   Style="{StaticResource lbl11_Regular_TextMuted}"/>
+
+        </VerticalStackLayout>
+    </Border>
+
+</ContentView>

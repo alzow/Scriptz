@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
+             x:Name="Root"
+             x:Class="QueueApp.Features.BusinessSettings.Helpers.ChoiceRowView">
+
+    <Border Style="{StaticResource brd12_Choice}" Padding="14,0"
+            MinimumHeightRequest="56" Margin="0,0,0,8">
+        <Border.GestureRecognizers>
+            <TapGestureRecognizer Command="{Binding Command, Source={x:Reference Root}}"/>
+        </Border.GestureRecognizers>
+        <Border.Triggers>
+            <DataTrigger TargetType="Border"
+                         Binding="{Binding IsSelected, Source={x:Reference Root}}" Value="True">
+                <Setter Property="Style" Value="{StaticResource brd12_Choice_Selected}"/>
+            </DataTrigger>
+        </Border.Triggers>
+
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+            <Label Grid.Column="0" Text="{Binding Text, Source={x:Reference Root}}"
+                   Style="{StaticResource lbl14_Bold_TextDark}"
+                   VerticalOptions="Center"/>
+            <tpl:ThemedIcon Grid.Column="1" Icon="ic_check"
+                            WidthRequest="16" HeightRequest="16" VerticalOptions="Center"
+                            IsVisible="{Binding IsSelected, Source={x:Reference Root}}"/>
+        </Grid>
+    </Border>
+
+</ContentView>

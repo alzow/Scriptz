@@ -10,6 +10,10 @@ public class CreateIntakeFieldRequest
     [JsonPropertyName("is_required")] public bool IsRequired { get; set; }
     [JsonPropertyName("sort_order")] public int SortOrder { get; set; }
 
+    [JsonPropertyName("hint")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Hint { get; set; }
+
     [JsonPropertyName("options")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<string>? Options { get; set; }

@@ -55,6 +55,7 @@ public class StubServiceOfferingsService : IServiceOfferingsService
             EstMinutes = request.EstMinutes,
             IsActive = true,
             SortOrder = _services.Count,
+            RequiresCollection = request.RequiresCollection,
         };
         _services.Add(service);
         return Task.FromResult(new List<ServiceResponse> { service });
@@ -68,6 +69,7 @@ public class StubServiceOfferingsService : IServiceOfferingsService
             service.Name = request.Name;
             service.PriceCents = request.PriceCents;
             service.EstMinutes = request.EstMinutes;
+            service.RequiresCollection = request.RequiresCollection;
         }
         return Task.CompletedTask;
     }

@@ -2,6 +2,8 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using MPowerKit.Navigation.Interfaces;
 using QueueApp.Constants;
+using QueueApp.Features.BusinessSettings.Constants;
+using QueueApp.Features.BusinessSettings.Helpers;
 using QueueApp.Framework.Base;
 using QueueApp.Services.Api.Intake;
 using QueueApp.Services.Api.Intake.Models;
@@ -12,15 +14,43 @@ using QueueApp.Shared.Templates.QueueEntry.Validators;
 
 namespace QueueApp.Features.BusinessSettings.AddEditIntakeField;
 
-// One question on one service: what kind of answer it takes, how it's worded, whether it blocks
-// joining, and — for the two select types — what there is to choose from.
+// One question on one service: what it asks, the example under it, what kind of answer it takes,
+// whether it blocks joining, and when it is asked at all.
 public partial class AddEditIntakeFieldPageViewModel : BaseViewModel
 {
-    private readonly IIntakeFieldsService _intakeFieldsService;
-    private readonly IQueuePopupService _popupService;
+    public IValidator LabelValidator { get; } = new RequiredValidator(IntakeQuestionConstants.PromptRequiredError);
+
+    public ObservableCollection<IntakeTypeOption> TypeOptions { get; } = new();
+    public ObservableCollection<IntakeOptionRow> Options { get; } = new();
+
+    public IntakeRuleEditor Rule { get; } = new();
+
+    public string SelectedType { get; set; } = IntakeFieldTypes.ShortText;
+    public string Label { get; set; } = "";
+    public string Hint { get; set; } = "";
+    public bool IsRequired { get; set; }
+    public string NewOptionText { get; set; } = "";
+
+    public bool IsSaving { get; set; }
+    public bool IsDeleting { get; set; }
+
+    public bool IsEditing => _editingFieldId is not null;
+    public bool ShowOptions => IntakeFieldTypes.HasOptions(SelectedType);
+    public bool NeedsMoreOptions => ShowOptions && Options.Count < 2;
+
+    // Files are the one kind with a consequence outside the app — see §5 of the spec and the
+    // retention rules in Documentation/service-intake-fields-backend-requirements.md.
+    public bool ShowFileWarning => SelectedType == IntakeFieldTypes.File;
+
+    public string PageTitle { get; set; } = IntakeQuestionConstants.AddTitle;
+
     private Guid _serviceId;
     private Guid? _editingFieldId;
     private int _sortOrder;
+    private List<IntakeFieldResponse> _existingFields = new();
+
+    private readonly IIntakeFieldsService _intakeFieldsService;
+    private readonly IQueuePopupService _popupService;
 
     public AddEditIntakeFieldPageViewModel(
         INavigationService navigationService,
@@ -35,36 +65,8 @@ public partial class AddEditIntakeFieldPageViewModel : BaseViewModel
         foreach (var fieldType in IntakeFieldTypes.All)
             TypeOptions.Add(IntakeTypeOption.From(fieldType));
 
-        TypeOptions[0].IsSelected = true;
-        SelectedType = IntakeFieldTypes.ShortText;
+        SelectType(TypeOptions[0]);
     }
-
-    public IValidator LabelValidator { get; } = new RequiredValidator("The question is required.");
-
-    public ObservableCollection<IntakeTypeOption> TypeOptions { get; } = new();
-    public ObservableCollection<IntakeOptionRow> Options { get; } = new();
-
-    // Earlier single/multi-select questions this one could be conditional on, and — once one is
-    // picked — the answers on it that would make this question show up.
-    public ObservableCollection<IntakeTriggerFieldOption> TriggerFieldOptions { get; } = new();
-    public ObservableCollection<IntakeOptionItem> TriggerValueOptions { get; } = new();
-
-    public string SelectedType { get; set; } = IntakeFieldTypes.ShortText;
-    public string Label { get; set; } = "";
-    public bool IsRequired { get; set; }
-    public string NewOptionText { get; set; } = "";
-    public bool HasCondition { get; set; }
-    public bool IsSaving { get; set; }
-    public bool IsDeleting { get; set; }
-
-    public bool IsEditing => _editingFieldId is not null;
-    public bool ShowOptions => IntakeFieldTypes.HasOptions(SelectedType);
-    public bool NeedsMoreOptions => ShowOptions && Options.Count < 2;
-
-    // Nothing to be conditional on until an earlier single/multi-select question exists.
-    public bool ShowConditionSection => TriggerFieldOptions.Count > 0;
-    public bool ShowTriggerValues => TriggerValueOptions.Count > 0;
-    public string PageTitle { get; set; } = "Add question";
 
     public override async Task OnLoadedAsync(INavigationParameters? parameters)
     {
@@ -76,46 +78,30 @@ public partial class AddEditIntakeFieldPageViewModel : BaseViewModel
                 ? (Guid)serviceObj
                 : throw new InvalidOperationException("AddEditIntakeFieldPage requires a serviceId.");
 
-            var existingFields = await _intakeFieldsService.GetFieldsForServiceAsync(_serviceId);
+            _existingFields = (await _intakeFieldsService.GetFieldsForServiceAsync(_serviceId))
+                .OrderBy(f => f.SortOrder)
+                .ToList();
 
             if (parameters is not null && parameters.TryGetValue(NavigationKeys.IntakeFieldId, out var fieldObj))
             {
                 _editingFieldId = (Guid)fieldObj;
-                PageTitle = "Edit question";
+                PageTitle = IntakeQuestionConstants.EditTitle;
                 OnPropertyChanged(nameof(IsEditing));
-                var field = existingFields.FirstOrDefault(f => f.Id == _editingFieldId);
-                BuildTriggerCandidates(existingFields, field?.SortOrder ?? 0, _editingFieldId);
+
+                var field = _existingFields.FirstOrDefault(f => f.Id == _editingFieldId);
+                Rule.Build(_existingFields, field?.SortOrder ?? 0, _editingFieldId);
                 Apply(field);
                 return;
             }
 
             // A new question goes on the end of whatever is already there.
-            _sortOrder = existingFields.Count == 0 ? 0 : existingFields.Max(f => f.SortOrder) + 1;
-            BuildTriggerCandidates(existingFields, _sortOrder, null);
+            _sortOrder = _existingFields.Count == 0 ? 0 : _existingFields.Max(f => f.SortOrder) + 1;
+            Rule.Build(_existingFields, _sortOrder, null);
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            await HandleExceptionAsync(ex);
+            await HandleExceptionAsync(exception);
         }
-    }
-
-    // A rule can only point at an earlier single/multi-select question in the same service: earlier
-    // so the answer already exists by the time this one would show, and single/multi-select because
-    // those are the only types with a fixed set of values to match against.
-    private void BuildTriggerCandidates(List<IntakeFieldResponse> existingFields, int currentSortOrder, Guid? excludingId)
-    {
-        TriggerFieldOptions.Clear();
-
-        var candidates = existingFields
-            .Where(f => f.Id != excludingId)
-            .Where(f => f.SortOrder < currentSortOrder)
-            .Where(f => IntakeFieldTypes.HasOptions(f.FieldType))
-            .OrderBy(f => f.SortOrder);
-
-        foreach (var candidate in candidates)
-            TriggerFieldOptions.Add(new IntakeTriggerFieldOption { Field = candidate });
-
-        OnPropertyChanged(nameof(ShowConditionSection));
     }
 
     public void Apply(IntakeFieldResponse? field)
@@ -127,6 +113,7 @@ public partial class AddEditIntakeFieldPageViewModel : BaseViewModel
 
             _sortOrder = field.SortOrder;
             Label = field.Label;
+            Hint = field.Hint ?? "";
             IsRequired = field.IsRequired;
             SelectType(TypeOptions.FirstOrDefault(t => t.FieldType == field.FieldType));
 
@@ -135,14 +122,7 @@ public partial class AddEditIntakeFieldPageViewModel : BaseViewModel
                 Options.Add(new IntakeOptionRow { Text = option });
 
             RaiseOptionState();
-
-            HasCondition = field.VisibilityRule is not null;
-            if (field.VisibilityRule is { } rule)
-            {
-                SelectTriggerField(TriggerFieldOptions.FirstOrDefault(t => t.FieldId == rule.FieldId));
-                foreach (var value in TriggerValueOptions.Where(o => rule.Values.Contains(o.Text)))
-                    value.IsSelected = true;
-            }
+            Rule.Load(field.VisibilityRule);
         }
         catch (Exception exception)
         {
@@ -163,11 +143,72 @@ public partial class AddEditIntakeFieldPageViewModel : BaseViewModel
 
             SelectedType = option.FieldType;
             OnPropertyChanged(nameof(ShowOptions));
+            OnPropertyChanged(nameof(ShowFileWarning));
             RaiseOptionState();
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            _ = HandleExceptionAsync(ex);
+            _ = HandleExceptionAsync(exception);
+        }
+    }
+
+    [RelayCommand]
+    public void ChooseAlways() => SetConditional(false);
+
+    [RelayCommand]
+    public void ChooseConditional() => SetConditional(true);
+
+    public void SetConditional(bool conditional)
+    {
+        try
+        {
+            Rule.SetConditional(conditional);
+        }
+        catch (Exception exception)
+        {
+            _ = HandleExceptionAsync(exception);
+        }
+    }
+
+    [RelayCommand]
+    public async Task PickRuleQuestionAsync()
+    {
+        try
+        {
+            var labels = Rule.QuestionLabels;
+            if (labels.Length == 0)
+                return;
+
+            var chosen = await _popupService.ShowActionSheetAsync(
+                IntakeQuestionConstants.RuleLead, IntakeQuestionConstants.DeleteConfirmCancel, labels);
+
+            if (chosen is not null)
+                Rule.SelectQuestion(chosen);
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
+        }
+    }
+
+    [RelayCommand]
+    public async Task PickRuleValueAsync()
+    {
+        try
+        {
+            var values = Rule.ValueOptions;
+            if (values.Length == 0)
+                return;
+
+            var chosen = await _popupService.ShowActionSheetAsync(
+                Rule.SelectedQuestionLabel, IntakeQuestionConstants.DeleteConfirmCancel, values);
+
+            if (chosen is not null)
+                Rule.SelectValue(chosen);
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
         }
     }
 
@@ -184,86 +225,55 @@ public partial class AddEditIntakeFieldPageViewModel : BaseViewModel
             NewOptionText = "";
             RaiseOptionState();
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            _ = HandleExceptionAsync(ex);
+            _ = HandleExceptionAsync(exception);
         }
     }
 
+    // Removing an option silently is how a conditional question quietly starts asking everyone for
+    // a medical aid card. The warning names what breaks before it happens.
     [RelayCommand]
-    public void RemoveOption(IntakeOptionRow? option)
+    public async Task RemoveOptionAsync(IntakeOptionRow? option)
     {
         try
         {
             if (option is null)
+                return;
+
+            if (!await ConfirmOptionRemovalAsync(option.Text))
                 return;
 
             Options.Remove(option);
             RaiseOptionState();
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            _ = HandleExceptionAsync(ex);
+            await HandleExceptionAsync(exception);
         }
     }
 
-    [RelayCommand]
-    public void SelectTriggerField(IntakeTriggerFieldOption? option)
+    public async Task<bool> ConfirmOptionRemovalAsync(string option)
     {
-        try
-        {
-            foreach (var candidate in TriggerFieldOptions)
-                candidate.IsSelected = ReferenceEquals(candidate, option);
+        if (_editingFieldId is not { } fieldId)
+            return true;
 
-            TriggerValueOptions.Clear();
-            foreach (var value in option?.Field.Options ?? new List<string>())
-                TriggerValueOptions.Add(new IntakeOptionItem { Text = value });
+        var dependants = IntakeQuestionHelper.DependantsOnOption(fieldId, option, _existingFields);
+        if (dependants.Count == 0)
+            return true;
 
-            OnPropertyChanged(nameof(ShowTriggerValues));
-        }
-        catch (Exception ex)
-        {
-            _ = HandleExceptionAsync(ex);
-        }
-    }
-
-    // Which of the trigger question's answers should reveal this one — always a multi-pick, even
-    // when the trigger itself only takes one answer at a time.
-    [RelayCommand]
-    public void SelectTriggerValue(IntakeOptionItem? option)
-    {
-        try
-        {
-            if (option is null)
-                return;
-
-            option.IsSelected = !option.IsSelected;
-        }
-        catch (Exception ex)
-        {
-            _ = HandleExceptionAsync(ex);
-        }
-    }
-
-    [RelayCommand]
-    public async Task GoBackAsync()
-    {
-        try
-        {
-            await NavigationService.GoBackAsync();
-        }
-        catch (Exception ex)
-        {
-            await HandleExceptionAsync(ex);
-        }
+        return await _popupService.ShowConfirmAsync(
+            IntakeQuestionConstants.OptionDependantsTitle,
+            IntakeQuestionHelper.OptionRemovalWarning(option, dependants),
+            IntakeQuestionConstants.OptionDependantsAccept,
+            IntakeQuestionConstants.OptionDependantsCancel);
     }
 
     [RelayCommand]
     public async Task SaveAsync()
     {
-        // The button already forces its bound loading flag true on tap, before this ever runs —
-        // every exit, including a validation failure, has to go through the same finally or it
-        // stays stuck until the page is left and reopened.
+        // The button forces its bound loading flag true on tap, before this runs — every exit, a
+        // validation failure included, has to pass through the same finally or it stays stuck.
         IsSaving = true;
         try
         {
@@ -274,65 +284,61 @@ public partial class AddEditIntakeFieldPageViewModel : BaseViewModel
             if (ShowOptions && Options.Count < 2)
             {
                 await _popupService.ShowAlertAsync(
-                    "Needs choices",
-                    "A select question needs at least two choices for the customer to pick from.");
+                    IntakeQuestionConstants.OptionsNeededTitle,
+                    IntakeQuestionConstants.OptionsNeededMessage);
                 return;
             }
 
-            IntakeVisibilityRule? visibilityRule = null;
-            if (HasCondition)
+            if (Rule.IsIncomplete)
             {
-                var trigger = TriggerFieldOptions.FirstOrDefault(t => t.IsSelected);
-                var triggerValues = TriggerValueOptions.Where(o => o.IsSelected).Select(o => o.Text).ToList();
-
-                if (trigger is null || triggerValues.Count == 0)
-                {
-                    await _popupService.ShowAlertAsync(
-                        "Needs a condition",
-                        "Pick which earlier question, and which answer to it, should make this one show up.");
-                    return;
-                }
-
-                visibilityRule = new IntakeVisibilityRule { FieldId = trigger.FieldId, Values = triggerValues };
+                await _popupService.ShowAlertAsync(
+                    IntakeQuestionConstants.ConditionNeededTitle,
+                    IntakeQuestionConstants.ConditionNeededMessage);
+                return;
             }
 
-            var options = ShowOptions ? Options.Select(o => o.Text).ToList() : null;
-
-            if (_editingFieldId is null)
-            {
-                await _intakeFieldsService.CreateFieldAsync(new CreateIntakeFieldRequest
-                {
-                    ServiceId = _serviceId,
-                    FieldType = SelectedType,
-                    Label = Label.Trim(),
-                    IsRequired = IsRequired,
-                    SortOrder = _sortOrder,
-                    Options = options,
-                    VisibilityRule = visibilityRule,
-                });
-            }
-            else
-            {
-                await _intakeFieldsService.UpdateFieldAsync(_editingFieldId.Value, new UpdateIntakeFieldRequest
-                {
-                    FieldType = SelectedType,
-                    Label = Label.Trim(),
-                    IsRequired = IsRequired,
-                    Options = options,
-                    VisibilityRule = visibilityRule,
-                });
-            }
-
+            await PersistAsync();
             await NavigationService.GoBackAsync();
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            await HandleExceptionAsync(ex);
+            await HandleExceptionAsync(exception);
         }
         finally
         {
             IsSaving = false;
         }
+    }
+
+    public Task PersistAsync()
+    {
+        var options = ShowOptions ? Options.Select(o => o.Text).ToList() : null;
+        var hint = string.IsNullOrWhiteSpace(Hint) ? null : Hint.Trim();
+
+        if (_editingFieldId is null)
+        {
+            return _intakeFieldsService.CreateFieldAsync(new CreateIntakeFieldRequest
+            {
+                ServiceId = _serviceId,
+                FieldType = SelectedType,
+                Label = Label.Trim(),
+                Hint = hint,
+                IsRequired = IsRequired,
+                SortOrder = _sortOrder,
+                Options = options,
+                VisibilityRule = Rule.ToRule(),
+            });
+        }
+
+        return _intakeFieldsService.UpdateFieldAsync(_editingFieldId.Value, new UpdateIntakeFieldRequest
+        {
+            FieldType = SelectedType,
+            Label = Label.Trim(),
+            Hint = hint,
+            IsRequired = IsRequired,
+            Options = options,
+            VisibilityRule = Rule.ToRule(),
+        });
     }
 
     [RelayCommand]
@@ -346,25 +352,54 @@ public partial class AddEditIntakeFieldPageViewModel : BaseViewModel
             if (_editingFieldId is null)
                 return;
 
-            // Worth spelling out: the answers are safe, the question is not.
-            var confirmed = await _popupService.ShowConfirmAsync(
-                "Delete this question?",
-                "New customers won't be asked it. Answers already given stay on the visits that gave them.",
-                "Delete", "Keep it");
-
-            if (!confirmed)
+            if (!await ConfirmDeleteAsync(_editingFieldId.Value))
                 return;
 
             await _intakeFieldsService.DeleteFieldAsync(_editingFieldId.Value);
             await NavigationService.GoBackAsync();
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            await HandleExceptionAsync(ex);
+            await HandleExceptionAsync(exception);
         }
         finally
         {
             IsDeleting = false;
+        }
+    }
+
+    // A question with dependants cannot be deleted without naming them: the questions that pointed
+    // at it do not disappear, they start being asked of everyone.
+    public Task<bool> ConfirmDeleteAsync(Guid fieldId)
+    {
+        var dependants = IntakeQuestionHelper.Dependants(fieldId, _existingFields);
+
+        if (dependants.Count == 0)
+        {
+            return _popupService.ShowConfirmAsync(
+                IntakeQuestionConstants.DeleteConfirmTitle,
+                IntakeQuestionConstants.DeleteConfirmMessage,
+                IntakeQuestionConstants.DeleteConfirmAccept,
+                IntakeQuestionConstants.DeleteConfirmCancel);
+        }
+
+        return _popupService.ShowConfirmAsync(
+            IntakeQuestionConstants.DeleteDependantsTitle,
+            IntakeQuestionHelper.DeleteWarning(dependants),
+            IntakeQuestionConstants.DeleteDependantsAccept,
+            IntakeQuestionConstants.DeleteConfirmCancel);
+    }
+
+    [RelayCommand]
+    public async Task GoBackAsync()
+    {
+        try
+        {
+            await NavigationService.GoBackAsync();
+        }
+        catch (Exception exception)
+        {
+            await HandleExceptionAsync(exception);
         }
     }
 

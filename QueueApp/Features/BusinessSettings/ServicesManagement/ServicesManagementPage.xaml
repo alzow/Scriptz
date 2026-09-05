@@ -2,81 +2,104 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:QueueApp.Features.BusinessSettings.ServicesManagement"
-             xmlns:responses="clr-namespace:QueueApp.Services.Api.ServiceOfferings.Models"
-             xmlns:controls="clr-namespace:QueueApp.Shared.Templates.AlzowLoadingButton"
+             xmlns:models="clr-namespace:QueueApp.Features.BusinessSettings.Models"
+             xmlns:helpers="clr-namespace:QueueApp.Features.BusinessSettings.Helpers"
+             xmlns:consts="clr-namespace:QueueApp.Features.BusinessSettings.Constants"
+             xmlns:tpl="clr-namespace:QueueApp.Shared.Templates"
              xmlns:templates="clr-namespace:QueueApp.Shared.Templates.AlzowSubPageHeader"
              x:Name="Root"
              x:Class="QueueApp.Features.BusinessSettings.ServicesManagement.ServicesManagementPage"
              x:DataType="vm:ServicesManagementPageViewModel"
              Title="{Binding Title}"
              Style="{StaticResource NavigationPageStyle}">
-    <Grid RowDefinitions="Auto,Auto,*">
+
+    <Grid RowDefinitions="Auto,*">
         <templates:AlzowSubPageHeader Grid.Row="0"
-                                       Title="{Binding Title}"
-                                       BackCommand="{Binding GoBackCommand}"/>
+                                      Title="{Binding Title}"
+                                      BackCommand="{Binding GoBackCommand}"/>
 
-        <controls:AlzowLoadingButton Grid.Row="1" Text="+ Add service"
-                LoadingText="Adding…"
-                Margin="16" HeightRequest="56"
-                Command="{Binding AddServiceCommand}"
-                IsLoading="{Binding IsAddingService}">
-            <controls:AlzowLoadingButton.ButtonStyle>
-                <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
-                    <Setter Property="Padding" Value="0,16"/>
-                </Style>
-            </controls:AlzowLoadingButton.ButtonStyle>
-        </controls:AlzowLoadingButton>
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="18,4,18,28" Spacing="0">
 
-        <Grid Grid.Row="2">
-            <CollectionView ItemsSource="{Binding Services}"
-                             IsVisible="{Binding IsEmpty, Converter={StaticResource InvertedBoolConverter}}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="responses:ServiceResponse">
-                        <Border Style="{StaticResource brd16_White}"
-                                Padding="14" Margin="12,6"
-                                Opacity="{Binding IsActive, Converter={StaticResource BoolToOpacityConverter}}">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <VerticalStackLayout Grid.Column="0">
-                                    <VerticalStackLayout.GestureRecognizers>
-                                        <TapGestureRecognizer
-                                            Command="{Binding BindingContext.EditServiceCommand, Source={x:Reference Root}}"
-                                            CommandParameter="{Binding .}"/>
-                                    </VerticalStackLayout.GestureRecognizers>
-                                    <Label Text="{Binding Name}" Style="{StaticResource lbl15_Bold_TextDark}"/>
-                                    <Label FontSize="13" TextColor="Gray">
-                                        <Label.FormattedText>
-                                            <FormattedString>
-                                                <Span Text="{Binding EstMinutes}"/>
-                                                <Span Text=" min · "/>
-                                                <Span Text="{Binding PriceDisplay}"/>
-                                            </FormattedString>
-                                        </Label.FormattedText>
-                                    </Label>
-                                </VerticalStackLayout>
-                                <controls:AlzowLoadingButton Grid.Column="1"
-                                        Text="{Binding IsActive, Converter={StaticResource ActiveToLabelConverter}}"
-                                        LoadingText="Updating…"
-                                        Margin="0" HeightRequest="44"
-                                        Command="{Binding BindingContext.ToggleActiveCommand, Source={x:Reference Root}}"
-                                        CommandParameter="{Binding .}"
-                                        IsLoading="{Binding IsToggling}">
-                                    <controls:AlzowLoadingButton.ButtonStyle>
-                                        <Style TargetType="Button" BasedOn="{StaticResource ToggleButtonStyle}">
-                                            <Setter Property="Padding" Value="12,12"/>
-                                        </Style>
-                                    </controls:AlzowLoadingButton.ButtonStyle>
-                                </controls:AlzowLoadingButton>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-            <Label Text="No services yet — add your first one above." IsVisible="{Binding IsEmpty}"
-                   Style="{StaticResource lbl18_Bold_TextDark}"
-                   HorizontalOptions="Center" VerticalOptions="Center"/>
-            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
-                               Style="{StaticResource ai_Purple}"
-                               HorizontalOptions="Center" VerticalOptions="Center"/>
-        </Grid>
+                <HorizontalStackLayout Spacing="9" Margin="0,10,0,14">
+                    <tpl:ThemedIcon Icon="ic_info" WidthRequest="14" HeightRequest="14"
+                                    VerticalOptions="Start" Margin="0,2,0,0"/>
+                    <Label Text="{x:Static consts:BusinessSettingsConstants.ServicesHint}"
+                           Style="{StaticResource lbl12_Regular_TextMuted}"/>
+                </HorizontalStackLayout>
+
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Services}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:ServiceRow">
+                            <helpers:ServiceRowView
+                                ServiceName="{Binding Name}"
+                                DetailText="{Binding DetailText}"
+                                HasQuestions="{Binding HasQuestions}"
+                                QuestionChipText="{Binding QuestionChipText}"
+                                RequiresCollection="{Binding RequiresCollection}"
+                                TapCommand="{Binding BindingContext.EditServiceCommand, Source={x:Reference Root}}"
+                                TapCommandParameter="{Binding .}"/>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <Label Text="{x:Static consts:BusinessSettingsConstants.ServicesEmpty}"
+                       IsVisible="{Binding IsEmpty}"
+                       Style="{StaticResource lbl14_Regular_TextLight}"
+                       HorizontalOptions="Center" Margin="0,26"/>
+
+                <!-- The rarest action is a dashed invitation at the end of the list, not a filled
+                     bar above it. -->
+                <helpers:GhostAddRowView
+                    Text="{x:Static consts:BusinessSettingsConstants.AddServiceText}"
+                    Command="{Binding AddServiceCommand}"
+                    Margin="0,4,0,0"/>
+
+                <VerticalStackLayout Spacing="8" Margin="0,16,0,0" IsVisible="{Binding HasInactive}">
+
+                    <Border Style="{StaticResource brd14_Row}" Padding="14,0"
+                            MinimumHeightRequest="56">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ToggleInactiveCommand}"/>
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                            <tpl:ThemedIcon Grid.Column="0" Icon="ic_chevron_down"
+                                            WidthRequest="17" HeightRequest="17"
+                                            Opacity="0.6" VerticalOptions="Center"/>
+                            <Label Grid.Column="1"
+                                   Text="{x:Static consts:BusinessSettingsConstants.InactiveGroupTitle}"
+                                   Style="{StaticResource lbl13_Regular_TextMid}"
+                                   VerticalOptions="Center"/>
+                            <Label Grid.Column="2" Text="{Binding InactiveCountText}"
+                                   Style="{StaticResource lbl13_Mono_TextMuted}"
+                                   VerticalOptions="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <VerticalStackLayout IsVisible="{Binding IsInactiveExpanded}"
+                                         Opacity="0.55"
+                                         BindableLayout.ItemsSource="{Binding InactiveServices}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:ServiceRow">
+                                <helpers:ServiceRowView
+                                    ServiceName="{Binding Name}"
+                                    DetailText="{Binding DetailText}"
+                                    HasQuestions="{Binding HasQuestions}"
+                                    QuestionChipText="{Binding QuestionChipText}"
+                                    RequiresCollection="{Binding RequiresCollection}"
+                                    TapCommand="{Binding BindingContext.EditServiceCommand, Source={x:Reference Root}}"
+                                    TapCommandParameter="{Binding .}"/>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+
+                <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                                   Style="{StaticResource ai_Purple}"
+                                   HorizontalOptions="Center" Margin="0,24"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
     </Grid>
 </ContentPage>
