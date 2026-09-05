@@ -35,8 +35,8 @@
             </Border>
         </HorizontalStackLayout>
 
-        <Label Text="{x:Static consts:BusinessSettingsConstants.CollectionConsequence}"
-               Style="{StaticResource lbl12_Regular_TextMuted}"/>
+        <!-- <Label Text="{x:Static consts:BusinessSettingsConstants.CollectionConsequence}"
+               Style="{StaticResource lbl12_Regular_TextMuted}"/> -->
 
     </VerticalStackLayout>
 
