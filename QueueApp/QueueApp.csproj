@@ -81,4 +81,8 @@
 		<PackageReference Include="Supabase.Realtime" Version="7.4.0" />
 	</ItemGroup>
 
+	<ItemGroup Condition="$(TargetFramework.Contains('-android'))">
+	  <GoogleServicesJson Include="Platforms\Android\google-services.json" />
+	</ItemGroup>
+
 </Project>
