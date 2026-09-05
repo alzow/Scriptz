@@ -74,6 +74,7 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
 		<PackageReference Include="MPowerKit.Navigation" Version="1.6.0" />
 		<PackageReference Include="MPowerKit.Popups" Version="1.6.0" />
+		<PackageReference Include="Plugin.Firebase.CloudMessaging" Version="4.0.1" />
 		<PackageReference Include="PropertyChanged.Fody" Version="4.1.0" />
 		<PackageReference Include="Refit" Version="7.2.22" />
 		<PackageReference Include="Refit.HttpClientFactory" Version="7.2.22" />

@@ -25,6 +25,7 @@ public static class RefitConfiguration
         services.AddApiClient<IBusinessApi>(SupabaseConfig.RestUrl);
         services.AddApiClient<IOperatorApi>(SupabaseConfig.RestUrl);
         services.AddApiClient<IAuthApi>(SupabaseConfig.AuthUrl);
+        services.AddApiClient<IDeviceTokenApi>(SupabaseConfig.RestUrl);
         services.AddApiClient<IProfileApi>(SupabaseConfig.RestUrl);
         services.AddApiClient<IServiceOfferingsApi>(SupabaseConfig.RestUrl);
         services.AddApiClient<IBookingApi>(SupabaseConfig.RestUrl);

@@ -12,15 +12,18 @@ public class AuthService : IAuthService
     private readonly ISecureStorageService _secureStorage;
     private readonly IAuthApi _authApi;
     private readonly ISessionRefreshService _sessionRefresh;
+    private readonly IPushRegistrationService _pushRegistration;
 
     public AuthService(
         ISecureStorageService secureStorage,
         IAuthApi authApi,
-        ISessionRefreshService sessionRefresh)
+        ISessionRefreshService sessionRefresh,
+        IPushRegistrationService pushRegistration)
     {
         _secureStorage = secureStorage;
         _authApi = authApi;
         _sessionRefresh = sessionRefresh;
+        _pushRegistration = pushRegistration;
     }
 
     public event EventHandler? SessionExpired
@@ -105,7 +108,16 @@ public class AuthService : IAuthService
             return false;
 
         var token = await _sessionRefresh.GetValidAccessTokenAsync();
-        return !string.IsNullOrEmpty(token);
+        var isValid = !string.IsNullOrEmpty(token);
+
+        if (isValid)
+        {
+            // Fire and forget. Push registration must never block or slow the auth path,
+            // and RegisterAsync already swallows its own exceptions internally.
+            _ = _pushRegistration.RegisterAsync();
+        }
+
+        return isValid;
     }
 
     public Task SetSessionAsync(string accessToken, string? refreshToken, int expiresInSeconds)
@@ -113,6 +125,10 @@ public class AuthService : IAuthService
 
     public async Task ClearSessionAsync()
     {
+        // Must run before the session is cleared: remove_device_token uses auth.uid(), so after
+        // clearing this would silently delete nothing and leave a stale row on the wrong user.
+        await _pushRegistration.UnregisterAsync();
+
         await _sessionRefresh.ClearSessionAsync();
         await _secureStorage.RemoveAsync(SupabaseConfig.UserIdKey);
         await _secureStorage.RemoveAsync(SupabaseConfig.UserEmailKey);
@@ -137,5 +153,9 @@ public class AuthService : IAuthService
             if (!string.IsNullOrWhiteSpace(response.User.Email))
                 await _secureStorage.SetAsync(SupabaseConfig.UserEmailKey, response.User.Email);
         }
+
+        // Fire and forget. Push registration must never block or slow the auth path,
+        // and RegisterAsync already swallows its own exceptions internally.
+        _ = _pushRegistration.RegisterAsync();
     }
 }

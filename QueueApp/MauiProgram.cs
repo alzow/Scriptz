@@ -1,11 +1,12 @@
 using Microsoft.Extensions.Logging;
 using CommunityToolkit.Maui;
 using Microsoft.Maui.Handlers;
-using MPowerKit.Navigation;
+using Microsoft.Maui.LifecycleEvents;
 using MPowerKit.Popups;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 #if ANDROID
 using Android.Graphics.Drawables;
+using Plugin.Firebase.Core.Platforms.Android;
 #elif IOS
 using UIKit;
 #endif
@@ -24,6 +25,7 @@ public static class MauiProgram
             .UseMPowerKitNavigation(NavigationStartup.Configure)
             .UseMPowerKitPopups()
             .UseSkiaSharp()
+            .RegisterFirebaseServices()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -58,6 +60,28 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
-        return builder.Build();
+        var app = builder.Build();
+
+#if ANDROID
+        var pushRegistration = app.Services.GetRequiredService<Services.Auth.IPushRegistrationService>();
+        Plugin.Firebase.CloudMessaging.CrossFirebaseCloudMessaging.Current.TokenChanged += pushRegistration.OnTokenRefreshed;
+#endif
+
+        return app;
+    }
+
+    private static MauiAppBuilder RegisterFirebaseServices(this MauiAppBuilder builder)
+    {
+        builder.ConfigureLifecycleEvents(events =>
+        {
+#if ANDROID
+            events.AddAndroid(android => android.OnCreate((activity, _) =>
+                Plugin.Firebase.Core.Platforms.Android.CrossFirebase.Initialize(
+                    activity,
+                    () => Microsoft.Maui.ApplicationModel.Platform.CurrentActivity)));
+#endif
+        });
+
+        return builder;
     }
 }

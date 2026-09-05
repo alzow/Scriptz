@@ -68,6 +68,8 @@ internal static class NavigationStartup
     {
         services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
         services.AddSingleton<ISecureStorageService, SecureStorageService>();
+        services.AddSingleton<IDeviceIdentityService, DeviceIdentityService>();
+        services.AddSingleton<IPushRegistrationService, PushRegistrationService>();
         services.AddSingleton<IQueuePopupService, QueuePopupService>();
 
         // Always the real implementation, even in USE_STUBS builds — device GPS/geocoding are OS
