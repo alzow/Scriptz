@@ -34,8 +34,12 @@ even if the app is closed.
   (Supabase Realtime,                                          │
    see §2)                                                     ▼
                                             Plugin.Firebase.CloudMessaging
-                                            (background: system tray automatically;
-                                             foreground: no handler yet — see §8)
+                                            (background/killed: system tray automatically;
+                                             foreground: plugin raises a local notification)
+                                                                 │
+                                                                 ▼
+                                                    tap → PushNotificationRouter
+                                                    (Manage tab / VisitPage — see §5b)
 ```
 
 The database objects (`notifications`, `device_tokens`, `notification_deliveries`,
@@ -73,6 +77,9 @@ the app (open vs. closed/backgrounded).
 | Firebase init | [`QueueApp/MauiProgram.cs`](../QueueApp/MauiProgram.cs) | `CrossFirebase.Initialize`, `TokenChanged` wiring |
 | Notification channel | [`QueueApp/Platforms/Android/MainActivity.cs`](../QueueApp/Platforms/Android/MainActivity.cs), [`QueueApp/Constants/NotificationChannels.cs`](../QueueApp/Constants/NotificationChannels.cs) | Creates the `queue_updates` Android notification channel |
 | `google-services.json` | [`QueueApp/Platforms/Android/google-services.json`](../QueueApp/Platforms/Android/google-services.json) | Firebase Android app config |
+| `PushNotificationRoute` | [`QueueApp/Services/Notifications/PushNotificationRoute.cs`](../QueueApp/Services/Notifications/PushNotificationRoute.cs) | Turns an `action` + `action_params` payload into a destination |
+| `IPushNotificationRouter` / `PushNotificationRouter` | [`QueueApp/Services/Notifications/PushNotificationRouter.cs`](../QueueApp/Services/Notifications/PushNotificationRouter.cs) | Holds a tap until the tabs exist, then routes it |
+| Tap receivers | [`QueueApp/Features/Main/MainTabbedPageViewModel.cs`](../QueueApp/Features/Main/MainTabbedPageViewModel.cs) | Selects the Manage tab, or pushes `VisitPage` over the tabs |
 
 ## 4. Database layer
 
@@ -230,6 +237,98 @@ importance, public lockscreen visibility, vibration and badge enabled. Guarded b
 `Build.VERSION.SdkInt < BuildVersionCodes.O` since channels are an API 26+ concept. See §8 for why
 this exists and why it can't be changed later.
 
+## 5b. Tap routing
+
+Tapping a notification opens the screen the notification is about. This is client-only work — the
+Edge Function already forwards `action` and `action_params` untouched (§6), and nothing on the
+server needs to know that the client now acts on them.
+
+**What the payload has to carry.** The FCM `data` payload's `action` names the destination and
+`action_params` carries the record id as a JSON *string* (FCM data values are always strings):
+
+```jsonc
+{
+  "action": "queue_status",
+  "action_params": "{\"entry_id\":\"c43081e1-723c-4f5c-a7ab-55b90cf7e73d\",\"business_id\":\"...\",\"operator_id\":\"...\"}"
+}
+```
+
+| `action` | Opens | Needs |
+|---|---|---|
+| `operator_queue` | the Manage tab, on the queue board | nothing |
+| `operator_bookings` | the Manage tab, on the bookings agenda | nothing |
+| `queue_status` | `VisitPage` for that queue entry | `entry_id` |
+| `booking_detail` | `VisitPage` for that booking | `booking_id` |
+
+An unknown `action`, or a visit action with no usable id, routes nowhere — the app just opens
+where it would have anyway. The ids are read out of `action_params` first and off the top level of
+`data` as a fallback, so a trigger that flattens them instead of nesting them still works.
+
+The manage tab is picked from the `action` rather than from another read of the owned business: a
+shop only gets `operator_bookings` in booking mode and `operator_queue` in queue mode, so the
+action already says which board exists. `business_id` and `operator_id` are ignored — the Manage
+tab is the signed-in owner's own business either way.
+
+**The pieces.**
+
+- [`Constants/PushNotificationActions.cs`](../QueueApp/Constants/PushNotificationActions.cs) and
+  [`PushNotificationKeys.cs`](../QueueApp/Constants/PushNotificationKeys.cs) — the four action
+  strings and the payload keys. A value added here has to match what the trigger writes exactly.
+- [`Services/Notifications/PushNotificationRoute.cs`](../QueueApp/Services/Notifications/PushNotificationRoute.cs)
+  — `From(data)` turns the payload into a route, or `null`. All the parsing lives here; it takes no
+  platform types, so it is the piece worth testing.
+- [`Services/Notifications/PushNotificationRouter.cs`](../QueueApp/Services/Notifications/PushNotificationRouter.cs)
+  — a singleton that holds a tap until there is somewhere to put it, then sends a `SelectTabMessage`
+  or an `OpenVisitMessage`.
+- [`Features/Main/MainTabbedPageViewModel.cs`](../QueueApp/Features/Main/MainTabbedPageViewModel.cs)
+  — receives both messages. `VisitPage` is pushed modally over the tabs with the same parameters
+  the History row uses (`entryId`/`bookingId` + `openedFromTabs`), so the page behaves identically
+  however it was opened, back chevron included.
+
+**Why the router holds the tap.** On a cold start the tap is what launched the app, so it arrives
+while the splash is still checking the session. Routing it there would be pointless: the splash
+finishes with an *absolute* navigation that builds the tabs, and that replaces whatever was
+pushed. So `PushNotificationRouter` keeps the route and both
+[`QueueSplashPageViewModel`](../QueueApp/Features/QueueSplash/QueueSplashPageViewModel.cs) and
+[`LoginPageViewModel`](../QueueApp/Features/Auth/LoginPageViewModel.cs) call `NotifyTabsReady()`
+immediately after they land on the tabs. A tap arriving after that point is routed straight away.
+Login is in that list because a tap while signed out lands on sign-in first — the tap survives it
+and opens once there is a session. The splash also treats a held tap as a reason to skip the
+welcome carousel, for the same reason a deep link would.
+
+Anything sitting over the tabs is dismissed before the route is applied
+(`MainTabbedNavigation.DismissAnythingOverTheTabsAsync`). Without it a tap taken while a visit was
+already open would bury the one that was tapped under the one that was already there.
+
+**Android wiring.** Two calls in
+[`MainActivity`](../QueueApp/Platforms/Android/MainActivity.cs), both required — the plugin reads
+the tap off the launching intent and raises nothing without them:
+
+```csharp
+protected override void OnCreate(Bundle? savedInstanceState)      // app was killed
+    => FirebaseCloudMessagingImplementation.OnNewIntent(Intent);
+
+protected override void OnNewIntent(Intent? intent)               // app was backgrounded
+    => FirebaseCloudMessagingImplementation.OnNewIntent(intent);
+```
+
+`OnNewIntent` reaching the activity at all depends on `LaunchMode.SingleTop`, which the activity
+already declares. The plugin holds a tap that arrives before anything has subscribed and replays it
+to the first subscriber, so the `OnCreate` call landing before
+[`MauiProgram`](../QueueApp/MauiProgram.cs) subscribes is not a race.
+
+`MainActivity` also sets `FirebaseCloudMessagingImplementation.ChannelId` to the app's own channel
+id. That is what a *foreground* push needs: Android never shows one itself, the plugin raises a
+local notification instead, and left unset it builds that against a null channel and throws — which
+is what made foreground pushes silent (§8).
+
+**iOS.** The subscription in `MauiProgram` is deliberately `#if ANDROID || IOS`, not Android-only.
+The plugin raises the same `NotificationTapped` event with the same `FCMNotification.Data` on iOS
+(from `UNUserNotificationCenterDelegate.DidReceiveNotificationResponse`), and it replays a missed
+tap the same way — so none of the routing above is Android-specific and none of it needs changing
+for iOS. What iOS still needs is the Firebase/APNs setup and `FirebaseCloudMessagingImplementation.Initialize()`
+in the AppDelegate, all of it listed in §9.
+
 ## 6. Edge Function
 
 [`supabase/functions/send-push/index.ts`](../supabase/functions/send-push/index.ts).
@@ -296,10 +395,12 @@ left alone, on the basis that it might be a transient failure rather than proof 
    creating a notification rather than erroring.
 4. No client-side change is needed to *send* the notification — `send-push` is generic and reads
    `title`/`body`/`action`/`action_params` off whatever row triggers it.
-5. If the new `action` is meant to navigate somewhere on tap, the client needs code to read
-   `action` / `action_params` out of the FCM message's `data` payload and route accordingly.
-   **TODO: verify** — no such handler currently exists in this repo (see §8); this is greenfield
-   work, not an existing pattern to follow.
+5. If the new `action` is one of the four §5b already routes, there is nothing to do on the client
+   — send the matching `action_params` and the tap opens the right screen. A genuinely new
+   destination means a constant in
+   [`PushNotificationActions`](../QueueApp/Constants/PushNotificationActions.cs), an arm in
+   [`PushNotificationRoute.From`](../QueueApp/Services/Notifications/PushNotificationRoute.cs), and
+   whatever the router needs to send for it.
 6. Test by inserting a row into `notifications` directly (bypassing the trigger) or via
    `curl` against the deployed `send-push` function with a bare notification-shaped JSON body —
    the function accepts either a webhook envelope (`{ record: {...} }`) or a bare row
@@ -341,13 +442,14 @@ changing it later requires a new channel id, leaving the old one visible but orp
 user's settings.
 
 **Foreground vs. background.** Android's system tray auto-displays an FCM notification when the
-app is backgrounded or killed. When the app is in the **foreground**, the message instead goes to
-the app's own message handler and must be displayed by app code.
-**No foreground message handler exists in this repo** — confirmed by an exhaustive search for
-`OnMessageReceived`, `FirebaseMessagingService`, `WillPresentNotification`, and similar patterns
-across all of `QueueApp/`, none of which returned a match. This means: a push sent while the app is
-open and in the foreground currently produces no visible notification at all. Listed as an open
-item in §10 — do not assume this is handled.
+app is backgrounded or killed. When the app is in the **foreground** it does not: the message goes
+to the app instead. The plugin ships its own `FirebaseMessagingService`, so that message already
+reaches `CrossFirebaseCloudMessaging.Current.OnNotificationReceived`, which raises a *local*
+notification on `FirebaseCloudMessagingImplementation.ChannelId`. That static was never set, so the
+plugin was building a notification against a null channel, throwing, and swallowing it — which is
+why foreground pushes appeared to have no handler at all. `MainActivity.OnCreate` now sets it to
+the app's own `queue_updates` channel (§5b), so a foreground push shows and is tappable like any
+other. There is still no *in-app* banner or toast — the notification is a system one either way.
 
 **Refit route prefix.** The Refit client base address (`SupabaseConfig.RestUrl`) already includes
 `/rest/v1`. Route attributes must be relative to that (`[Post("/rpc/name")]`) — repeating the
@@ -400,8 +502,10 @@ and updating the manifest, and is only realistically possible before the app is 
 Blocked on an Apple Developer Program membership. The server side
 (`notifications`/`device_tokens`/`notification_deliveries`, the triggers, and `send-push`) is
 entirely platform-agnostic — one FCM call reaches both Android and iOS devices — so **no database
-or Edge Function change is needed for iOS**. The remaining work is entirely client config and
-Firebase/Apple console setup.
+or Edge Function change is needed for iOS**. Tap routing (§5b) is platform-agnostic for the same
+reason: it is subscribed under `#if ANDROID || IOS` and reads the same `FCMNotification.Data` the
+plugin raises on both platforms, so nothing in it needs writing again. The remaining work is
+entirely client config and Firebase/Apple console setup.
 
 **Apple Developer portal**
 1. Enrol in the Apple Developer Program.
@@ -460,9 +564,13 @@ iOS devices entirely. If iOS-specific delivery options are wanted later (badge c
   (`p_device_id`, `p_fcm_token`, `p_platform`) actually match the live RPC signatures. Exporting
   these definitions into `supabase/` (migrations or a `functions`-adjacent SQL folder, matching
   whatever the project settles on) is unresolved.
-- **No foreground FCM message handler exists.** A push arriving while the app is open and in the
-  foreground currently displays nothing. Whether that's acceptable long-term or needs a handler
-  that shows an in-app banner/toast is undecided.
+- **No *in-app* foreground presentation.** A push arriving while the app is open now shows as a
+  system notification (§8) and routes on tap like any other, but there is no in-app banner or toast
+  and no live badge. Whether that's worth building is undecided.
+- **Tap routing is untested on a device.** §5b is written and wired but has not been run against a
+  real push on real hardware, on either platform; nor has the foreground channel fix. The four
+  actions and their `action_params` shapes also still need confirming against what the live
+  triggers actually write (§4).
 - **Discrepancy — Android `SupportedOSPlatformVersion` is still 21.0**, not the 23 that Plugin.
   Firebase v4 requires. This was identified as a required fix during the build but has not been
   applied in the code as of this document.

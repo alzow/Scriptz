@@ -70,6 +70,10 @@ internal static class NavigationStartup
         services.AddSingleton<ISecureStorageService, SecureStorageService>();
         services.AddSingleton<IDeviceIdentityService, DeviceIdentityService>();
         services.AddSingleton<IPushRegistrationService, PushRegistrationService>();
+
+        // Singleton because it holds the tap that launched the app until the tabs exist to route
+        // it to — a transient would be handed the tap and then thrown away.
+        services.AddSingleton<IPushNotificationRouter, PushNotificationRouter>();
         services.AddSingleton<IQueuePopupService, QueuePopupService>();
 
         // Always the real implementation, even in USE_STUBS builds — device GPS/geocoding are OS

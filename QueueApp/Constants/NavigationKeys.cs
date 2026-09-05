@@ -31,10 +31,12 @@ public static class NavigationKeys
     // Absent when it is the navigation root, where a back chevron would have nowhere to go.
     public const string CanGoBack       = "canGoBack";
 
-    // Set by an entry point that is not a cold first run — a deep link or a notification open.
-    // The splash sends a signed-out customer to sign-in rather than the welcome carousel when it
-    // is present, because someone who tapped a link to a specific shop did not ask for the pitch.
-    // TODO: set this from the deep-link/notification entry point once one exists.
+    // Set by an entry point that is not a cold first run — a deep link. The splash sends a
+    // signed-out customer to sign-in rather than the welcome carousel when it is present, because
+    // someone who tapped a link to a specific shop did not ask for the pitch. A tapped push
+    // notification takes the same branch without this key: it reaches the splash through the push
+    // router rather than through navigation parameters.
+    // TODO: set this from the deep-link entry point once one exists.
     public const string BypassWelcome   = "bypassWelcome";
 
     // An IntakeAnswerSnapshot handed from an operator board to the answers page. The answers are

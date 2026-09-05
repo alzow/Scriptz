@@ -58,6 +58,22 @@ public static class MainTabbedNavigation
     private static bool TabsAreStillBehindUs =>
         Application.Current?.Windows.FirstOrDefault()?.Navigation.ModalStack.Count > 0;
 
+    // A tapped push notification can arrive while a visit, a flow or a settings page is already up
+    // over the tabs, and pushing onto that would stack a second visit on the first. Those pages sit
+    // on the window's modal stack and the page inside each one holds the only navigation service
+    // that can pop it, so the window's own navigation clears them here instead. The pop still
+    // raises Disappearing on the page inside, which is what tears down its realtime subscription
+    // and its timers.
+    public static async Task DismissAnythingOverTheTabsAsync()
+    {
+        var navigation = Application.Current?.Windows.FirstOrDefault()?.Navigation;
+        if (navigation is null)
+            return;
+
+        while (navigation.ModalStack.Count > 0)
+            await navigation.PopModalAsync(false);
+    }
+
     // The way home from any page a tab opened over the tabs. Those pages are pushed modally, so the
     // tabbed page is still standing behind them and dismissing the modal is the whole journey: no
     // owned-business lookup, no tabs to build, no feed to reload. The rebuild is kept only as the
