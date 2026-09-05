@@ -29,11 +29,16 @@
                 <Border Style="{StaticResource brd16_Surface}" Padding="14">
                     <VerticalStackLayout Spacing="16">
 
-                        <entry:QueueEntry
-                            Placeholder="{x:Static consts:BusinessSettingsConstants.NamePlaceholder}"
-                            Text="{Binding Name}"
-                            Validator="{Binding NameValidator}"
-                            ValidateOnTextChanged="True"/>
+                        <VerticalStackLayout Spacing="9">
+                            <Label Text="{x:Static consts:BusinessSettingsConstants.NameLabel}"
+                                   Style="{StaticResource lbl13_Regular_TextMid}"/>
+
+                            <entry:QueueEntry
+                                Placeholder="{x:Static consts:BusinessSettingsConstants.NamePlaceholder}"
+                                Text="{Binding Name}"
+                                Validator="{Binding NameValidator}"
+                                ValidateOnTextChanged="True"/>
+                        </VerticalStackLayout>
 
                         <VerticalStackLayout Spacing="9">
                             <Label Text="{x:Static consts:BusinessSettingsConstants.DurationLabel}"
@@ -55,10 +60,15 @@
                                    Style="{StaticResource lbl11_Regular_TextMuted}"/>
                         </VerticalStackLayout>
 
-                        <entry:QueueEntry
-                            Placeholder="{x:Static consts:BusinessSettingsConstants.PricePlaceholder}"
-                            Text="{Binding PriceRandText}"
-                            InputType="Numeric"/>
+                        <VerticalStackLayout Spacing="9">
+                            <Label Text="{x:Static consts:BusinessSettingsConstants.PriceLabel}"
+                                   Style="{StaticResource lbl13_Regular_TextMid}"/>
+
+                            <entry:QueueEntry
+                                Placeholder="{x:Static consts:BusinessSettingsConstants.PricePlaceholder}"
+                                Text="{Binding PriceRandText}"
+                                InputType="Numeric"/>
+                        </VerticalStackLayout>
 
                     </VerticalStackLayout>
                 </Border>

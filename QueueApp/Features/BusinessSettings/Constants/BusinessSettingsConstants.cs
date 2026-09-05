@@ -14,7 +14,9 @@ public static class BusinessSettingsConstants
     public const string WorkflowPanelTitle = "How this service runs";
     public const string QuestionsPanelTitle = "Before they join";
 
+    public const string NameLabel = "Service name";
     public const string NamePlaceholder = "Service name";
+    public const string PriceLabel = "Price";
     public const string PricePlaceholder = "Price in Rand (optional)";
     public const string CustomDurationPlaceholder = "Minutes";
 
