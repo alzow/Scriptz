@@ -34,6 +34,7 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
     private Guid _businessId;
     private bool _openedFromTabs;
     private bool _isVisible;
+    private bool _hasAppeared;
     private BusinessHours _hours = BusinessHours.Unknown;
     private CategoryLabelSet _labels = CategoryLabels.Resolve(null);
     private List<OperatorResponse> _allOperators = new();
@@ -260,8 +261,24 @@ public partial class BusinessDetailPageViewModel : BaseViewModel
         try
         {
             await base.OnAppearingAsync();
+
             _isVisible = true;
+
             await SubscribeRealtimeAsync();
+
+            // The feed only carries what changes from the resubscribe onwards. Everything the queue
+            // or the diary did while this page was away — behind a pushed page, or with the app in
+            // the background — was published on a channel nobody was holding, so the live state has
+            // to be re-read too. Same work the feed itself does on a change.
+            if (_hasAppeared && Business is not null)
+            {
+                await RefreshLiveStateAsync();
+
+                BuildTeam();
+                RefreshLandingCard();
+            }
+
+            _hasAppeared = true;
         }
         catch (Exception ex)
         {
