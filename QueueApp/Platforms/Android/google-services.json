@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "114925906746",
+    "project_id": "queue-prod-8578e",
+    "storage_bucket": "queue-prod-8578e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:114925906746:android:31319d203258897fdcbe03",
+        "android_client_info": {
+          "package_name": "za.co.alzow.alzowmauicomponents"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8aBRcLGi3CsgFQLXf3F56aGcziQdH75U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
