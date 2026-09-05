@@ -6,6 +6,7 @@ using QueueApp.Framework.Base;
 using QueueApp.Framework.Navigation;
 using QueueApp.Services.Api.Business;
 using QueueApp.Services.Auth;
+using QueueApp.Services.Notifications;
 using QueueApp.Services.Storage;
 using QueueApp.Shared.Templates.QueueEntry.Validators;
 using FormValidators = QueueApp.Shared.Templates.QueueEntry.Validators;
@@ -36,16 +37,19 @@ public partial class LoginPageViewModel : BaseViewModel
 
     private readonly IAuthService _authService;
     private readonly IBusinessService _businessService;
+    private readonly IPushNotificationRouter _pushNotificationRouter;
 
     public LoginPageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
         IAuthService authService,
-        IBusinessService businessService)
+        IBusinessService businessService,
+        IPushNotificationRouter pushNotificationRouter)
         : base(navigationService, secureStorageService)
     {
         _authService = authService;
         _businessService = businessService;
+        _pushNotificationRouter = pushNotificationRouter;
 
         FormStateManager.ValidationStateChanged += OnFormValidationStateChanged;
         IsFormValid = FormStateManager.IsValid;
@@ -105,6 +109,10 @@ public partial class LoginPageViewModel : BaseViewModel
             var (ownsBusiness, mode) = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
             var uri = MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: ownsBusiness, manageMode: mode);
             await NavigationService.NavigateAsync(uri);
+
+            // Someone who tapped a notification while signed out lands here first. The tap is still
+            // held, and this is the point it finally has somewhere to go.
+            _pushNotificationRouter.NotifyTabsReady();
         }
         catch (ApiException exception)
         {

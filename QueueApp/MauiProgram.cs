@@ -67,6 +67,16 @@ public static class MauiProgram
         Plugin.Firebase.CloudMessaging.CrossFirebaseCloudMessaging.Current.TokenChanged += pushRegistration.OnTokenRefreshed;
 #endif
 
+        // Deliberately not Android-only: the tap event and its payload are the same on both
+        // platforms, so this routes iOS taps unchanged the day the iOS Firebase setup lands.
+        // Subscribing here rather than in a page is what makes a cold start work — the plugin
+        // replays the tap that launched the app to the first subscriber it gets.
+#if ANDROID || IOS
+        var pushRouter = app.Services.GetRequiredService<Services.Notifications.IPushNotificationRouter>();
+        Plugin.Firebase.CloudMessaging.CrossFirebaseCloudMessaging.Current.NotificationTapped +=
+            (_, e) => pushRouter.OnNotificationTapped(e.Notification?.Data);
+#endif
+
         return app;
     }
 

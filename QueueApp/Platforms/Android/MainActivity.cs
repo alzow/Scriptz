@@ -1,6 +1,8 @@
 using Android.App;
+using Android.Content;
 using Android.Content.PM;
 using Android.OS;
+using Plugin.Firebase.CloudMessaging;
 using QueueApp.Constants;
 using QueueApp.Framework.Theming;
 
@@ -19,6 +21,33 @@ public class MainActivity : MauiAppCompatActivity
         PlatformChrome.Start();
 
         CreateNotificationChannels();
+
+        // A push that arrives while the app is in the foreground is never shown by the system —
+        // the plugin raises it as a local notification instead, on whatever channel it is told to
+        // use. Left unset it builds one against a null channel, throws, and the push is silent.
+        FirebaseCloudMessagingImplementation.ChannelId = NotificationChannels.QueueUpdatesId;
+
+        // A notification tapped while the app was killed is what launched this activity, so the
+        // intent that started it carries the payload. The plugin holds it until something
+        // subscribes to NotificationTapped, which is why handing it over this early is safe.
+        HandleNotificationIntent(this.Intent);
+    }
+
+    // Launch mode is SingleTop, so a tap that reaches an app already in the background arrives
+    // here rather than through OnCreate.
+    protected override void OnNewIntent(Intent? intent)
+    {
+        base.OnNewIntent(intent);
+
+        HandleNotificationIntent(intent);
+    }
+
+    private static void HandleNotificationIntent(Intent? intent)
+    {
+        if (intent is null)
+            return;
+
+        FirebaseCloudMessagingImplementation.OnNewIntent(intent);
     }
 
     // Idempotent and safe to call on every launch — it does not reset a user's own channel

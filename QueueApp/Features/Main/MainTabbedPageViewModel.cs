@@ -1,12 +1,16 @@
 using CommunityToolkit.Mvvm.Messaging;
+using MPowerKit;
 using MPowerKit.Navigation;
+using QueueApp.Constants;
 using QueueApp.Framework.Base;
 using QueueApp.Framework.Messages;
 using QueueApp.Services.Storage;
 
 namespace QueueApp.Features.Main;
 
-public partial class MainTabbedPageViewModel : BaseViewModel, IRecipient<SelectTabMessage>
+public partial class MainTabbedPageViewModel : BaseViewModel,
+    IRecipient<SelectTabMessage>,
+    IRecipient<OpenVisitMessage>
 {
     private readonly IMessenger _messenger;
 
@@ -23,6 +27,7 @@ public partial class MainTabbedPageViewModel : BaseViewModel, IRecipient<SelectT
         // to that would be gone for exactly the stretch the modal is up and needs to talk back.
         // WeakReferenceMessenger holds recipients weakly, so this goes when the page does.
         _messenger.Register<SelectTabMessage>(this);
+        _messenger.Register<OpenVisitMessage>(this);
     }
 
     // Selecting a tab is only ever the tabbed page's own navigation service's job, so a page on its
@@ -43,5 +48,34 @@ public partial class MainTabbedPageViewModel : BaseViewModel, IRecipient<SelectT
                 _ = HandleExceptionAsync(ex);
             }
         });
+    }
+
+    // A tapped push notification naming a queue entry or a booking, from wherever the app was.
+    public void Receive(OpenVisitMessage message)
+    {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            try
+            {
+                await OpenVisitAsync(message);
+            }
+            catch (Exception ex)
+            {
+                await HandleExceptionAsync(ex);
+            }
+        });
+    }
+
+    public async Task OpenVisitAsync(OpenVisitMessage message)
+    {
+        var navParams = new NavigationParameters
+        {
+            [message.IsBooking ? NavigationKeys.BookingId : NavigationKeys.EntryId] = message.RecordId,
+            [NavigationKeys.OpenedFromTabs] = true,
+        };
+
+        await NavigationService.NavigateAsync(
+            $"NavigationPage/{NavigationPaths.VisitPage}", navParams,
+            modal: true, animated: false);
     }
 }

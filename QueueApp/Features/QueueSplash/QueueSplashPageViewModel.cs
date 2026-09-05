@@ -3,6 +3,7 @@ using QueueApp.Framework.Base;
 using QueueApp.Framework.Navigation;
 using QueueApp.Services.Api.Business;
 using QueueApp.Services.Auth;
+using QueueApp.Services.Notifications;
 using QueueApp.Services.Onboarding;
 using QueueApp.Services.Storage;
 
@@ -16,19 +17,22 @@ public class QueueSplashPageViewModel : BaseViewModel
     private readonly IAuthService _authService;
     private readonly IBusinessService _businessService;
     private readonly IFirstRunService _firstRunService;
+    private readonly IPushNotificationRouter _pushNotificationRouter;
 
     public QueueSplashPageViewModel(
         INavigationService navigationService,
         ISecureStorageService secureStorageService,
         IAuthService authService,
         IBusinessService businessService,
-        IFirstRunService firstRunService)
+        IFirstRunService firstRunService,
+        IPushNotificationRouter pushNotificationRouter)
         : base(navigationService, secureStorageService)
     {
         _navigationService = navigationService;
         _authService = authService;
         _businessService = businessService;
         _firstRunService = firstRunService;
+        _pushNotificationRouter = pushNotificationRouter;
     }
 
     public override void Initialize(INavigationParameters parameters)
@@ -79,6 +83,10 @@ public class QueueSplashPageViewModel : BaseViewModel
             var (ownsBusiness, mode) = await MainTabbedNavigation.TryGetOwnedBusinessAsync(_businessService);
             var uri = MainTabbedNavigation.BuildMainTabbedUri(includeManageTab: ownsBusiness, manageMode: mode);
             await _navigationService.NavigateAsync(uri);
+
+            // The tabs are the first thing a routed notification can be shown over, so a tap held
+            // since launch is replayed here rather than the moment it arrived.
+            _pushNotificationRouter.NotifyTabsReady();
         }
         catch (Exception ex)
         {
@@ -88,9 +96,10 @@ public class QueueSplashPageViewModel : BaseViewModel
     }
 
     // The welcome screen is for someone who has never been in the app. Everyone else — a customer
-    // who signed out, a returning install, anyone arriving through a link — gets sign-in.
+    // who signed out, a returning install, anyone who tapped a notification — gets sign-in, because
+    // someone who tapped a notice about their own visit did not ask for the pitch.
     public string SignedOutDestination() =>
-        BypassWelcome || _firstRunService.HasSeenWelcome
+        BypassWelcome || _pushNotificationRouter.HasPendingTap || _firstRunService.HasSeenWelcome
             ? $"/{NavigationPaths.Login}"
             : $"/{NavigationPaths.Welcome}";
 }
